@@ -73,8 +73,9 @@ func test_snapshots_come_from_real_match_state() -> void:
 	eq(clients[1].actor, b_id, "client B bound to faction-1 leader")
 	var rebuilt: MatchState = MatchState.from_dict(clients[0].snapshot)
 	eq(rebuilt.seed, 1234, "snapshot rebuilds into MatchState with same seed")
-	eq(clients[0].snapshot, clients[1].snapshot, "both clients hold the same snapshot")
-	eq(clients[0].snapshot, st.to_dict(), "snapshot equals server MatchState.to_dict() (wire round trip is lossless)")
+	eq(clients[0].snapshot, SnapshotFilter.for_actor(st.to_dict(), a_id), "client A snapshot == server state filtered for A (wire round trip is lossless)")
+	eq(clients[1].snapshot, SnapshotFilter.for_actor(st.to_dict(), b_id), "client B snapshot == server state filtered for B")
+	check(clients[0].snapshot != clients[1].snapshot, "viewers get different (fog-filtered) snapshots")
 	# NOTE: MatchState.from_dict(to_dict()) is not bit-identical (e.g. energy 0.0 -> 0); it is idempotent after one pass.
 	var once: Dictionary = rebuilt.to_dict()
 	eq(MatchState.from_dict(once).to_dict(), once, "from_dict/to_dict is stable after one pass")
@@ -102,6 +103,7 @@ func test_peace_blocks_capture_and_attack_then_server_clock_opens_purge() -> voi
 	# put both leaders next to each other and A next to a rival holding (server-side test setup)
 	st.actors[a_id]["hex"] = target_h["hex"]
 	st.actors[b_id]["hex"] = target_h["hex"]
+	server.audit_forget()
 	var cap: int = clients[0].submit(&"capture", {"holding": target_h["id"]})
 	var atk: int = clients[0].submit(&"attack", {"target": b_id})
 	check(_until(func(): return clients[0].results.has(cap) and clients[0].results.has(atk)), "answered")
@@ -137,6 +139,7 @@ func test_simultaneous_captures_conserve_items_and_ownership() -> void:
 	h["garrison"] = 0
 	st.actors[a_id]["hex"] = h["hex"]
 	st.actors[b_id]["hex"] = h["hex"]
+	server.audit_forget()
 	_to_purge()
 	st.actors[a_id]["hex"] = h["hex"]
 	st.actors[b_id]["hex"] = h["hex"]
