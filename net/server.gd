@@ -51,6 +51,8 @@ var _addr_fails: Dictionary = {}          # address -> {n:int, since:float}
 var _audit: Dictionary = {}               # actor -> {hex:Variant, clock:float}
 var _walk_sec_per_hex: float = 0.0
 var _min_move_cost: float = 1.0
+var _bank_cap: float = 0.0
+var _allowed_cache: Array = []
 
 func start(p_port: int, p_state: Object, p_rules: Script = null, bind: String = "127.0.0.1", max_clients: int = 16) -> int:
 	state = p_state
@@ -85,6 +87,11 @@ func _init_audit() -> void:
 		if c > 0.0 and c < best:
 			best = c
 	_min_move_cost = best if best < 99.0 else 1.0
+	var mv: Script = ClassLink.script_for("Movement")
+	_bank_cap = 0.0
+	if mv != null:
+		var mc: Dictionary = mv.get_script_constant_map()
+		_bank_cap = float(mc.get("SYNC_MAX_BANK", 0.0)) + float(mc.get("SYNC_SLACK", 0.0))
 
 func stop() -> void:
 	if host != null:
@@ -214,13 +221,14 @@ func _expire_sessions() -> void:
 		if not _expired(s):
 			continue
 		if s["peer"] != null:
-			_kick(s["peer"], "token_expired")
-		_sessions.erase(key)
+			_kick(s["peer"], "token_expired")      # session record stays so the reason stays "token_expired"
 
-## Movement audit. Actor movement is only ever produced by the server's own Rules.tick (Sim walks one hex per
-## WALK_SEC_PER_HEX*terrain_cost seconds), so a client cannot teleport; this audit is the tripwire for a rules bug or a
-## memory-edited state: if a session actor ends up farther from its last audited hex than the fastest legal walker could
-## have gone since, the move is reverted, logged, and the session is flagged. Window: >=1s of server clock.
+## Movement audit (independent of Rules' own validation). Budget model: every session actor earns 1 budget-second per
+## server second (capped at `_bank_cap`, mirroring Rules' banked-time allowance for position sync) and each hex it
+## ends up displaced costs WALK_SEC_PER_HEX * cheapest terrain cost * the actor's fastest class multiplier. If the
+## displacement since the last audit costs more than budget + `audit_slack` hexes, the move is reverted, logged in
+## `audit_log`, and nothing else changes. It deliberately uses the CHEAPEST legal cost, so it never false-positives
+## on legal play; it only catches teleports / speed hacks / rules bugs that Rules' own checks missed.
 func _audit_movement(events: Array) -> void:
 	if _walk_sec_per_hex <= 0.0:
 		return
@@ -231,6 +239,7 @@ func _audit_movement(events: Array) -> void:
 	for e in events:
 		if e is Dictionary and audit_exempt_events.has(e.get("type", &"")) and _audit.has(int(e.get("actor", -1))):
 			_audit.erase(int(e["actor"]))
+	var cb: Script = ClassLink.script_for("Combat")
 	for s in _sessions.values():
 		var aid: int = int(s["actor"])
 		if not (acts as Dictionary).has(aid):
@@ -239,22 +248,28 @@ func _audit_movement(events: Array) -> void:
 		if not (a.get("hex") is Vector2i) or not a.get("alive", true):
 			continue
 		if not _audit.has(aid):
-			_audit[aid] = {"hex": a["hex"], "clock": clock}
+			_audit[aid] = {"hex": a["hex"], "clock": clock, "budget": 0.0}
 			continue
 		var w: Dictionary = _audit[aid]
-		var span: float = clock - float(w["clock"])
-		if span < 1.0:
-			continue
+		w["budget"] = minf(_bank_cap, float(w["budget"]) + (clock - float(w["clock"])))
+		w["clock"] = clock
 		var moved: int = int(hg.call("distance", w["hex"], a["hex"]))
-		var allowed: int = int(ceil(span / (_walk_sec_per_hex * _min_move_cost))) + audit_slack
-		if moved > allowed:
-			var msg := "speed actor=%d moved=%d allowed=%d span=%.1fs" % [aid, moved, allowed, span]
-			audit_log.append(msg)
-			log.append(msg)
-			a["hex"] = w["hex"]
-			a["move"] = {}
-			_dirty = true
-		_audit[aid] = {"hex": a["hex"], "clock": clock}
+		if moved > 0:
+			var mult: float = 1.0
+			if cb != null:
+				mult = minf(1.0, float(cb.call("class_mod", a, "walk_mult", 1.0))) * minf(1.0, float(cb.call("class_mod", a, "road_mult", 1.0)))
+			var per_hex: float = _walk_sec_per_hex * _min_move_cost * mult
+			var need: float = float(moved) * per_hex
+			if need > float(w["budget"]) + per_hex * float(audit_slack) + 1e-6:
+				var msg := "speed actor=%d moved=%d hexes cost=%.1fs budget=%.1fs" % [aid, moved, need, w["budget"]]
+				audit_log.append(msg)
+				log.append(msg)
+				a["hex"] = w["hex"]
+				a["move"] = {}
+				_dirty = true
+			else:
+				w["budget"] = maxf(0.0, float(w["budget"]) - need)
+				w["hex"] = a["hex"]
 
 # ------------------------------------------------------------------ internals
 func _send(peer: ENetPacketPeer, msg: Dictionary) -> void:
@@ -387,7 +402,6 @@ func _on_hello(peer: ENetPacketPeer, meta: Dictionary, msg: Dictionary) -> void:
 		return
 	var s: Dictionary = _sessions[key]
 	if _expired(s):
-		_sessions.erase(key)
 		_send(peer, {"t": "reject", "reason": "token_expired"})
 		_kick(peer, "token_expired")
 		return
@@ -421,7 +435,7 @@ func _on_cmd(peer: ENetPacketPeer, s: Dictionary, msg: Dictionary) -> void:
 	if not _take(s):
 		_send(peer, {"t": "result", "seq": seq, "ok": false, "error": "rate_limited", "retry": true})
 		return
-	var v: Dictionary = validate_cmd(raw, s["actor"])
+	var v: Dictionary = validate_cmd(raw, s["actor"], _allowed())
 	if not v["ok"]:
 		_send(peer, {"t": "result", "seq": seq, "ok": false, "error": v["error"]})
 		return
@@ -431,7 +445,8 @@ func _on_cmd(peer: ENetPacketPeer, s: Dictionary, msg: Dictionary) -> void:
 	if lock > 0.0:
 		_send(peer, {"t": "result", "seq": seq, "ok": false, "error": "purge_disconnect_lock", "locked_for": lock})
 		return
-	if cmd["type"] == &"move_intent" and not (cmd["args"] as Dictionary).get("stop", false) and not s["results"].has(seq):
+	var tname: String = String(cmd["type"])
+	if (tname.begins_with("move") or tname.contains("sync")) and not (cmd["args"] as Dictionary).get("stop", false) and not s["results"].has(seq):
 		if clock - float(s["last_move_at"]) < move_min_interval:
 			_send(peer, {"t": "result", "seq": seq, "ok": false, "error": "move_rate"})
 			return
@@ -475,8 +490,15 @@ func _after_events(events: Array) -> void:
 	if match_over:
 		_broadcast_snapshot()
 
+## Command types: whatever the loaded Rules module declares (COMMAND_TYPES), else the default list.
+func _allowed() -> Array:
+	if _allowed_cache.is_empty():
+		var c: Variant = rules.get_script_constant_map().get("COMMAND_TYPES")
+		_allowed_cache = c if (c is Array and not (c as Array).is_empty()) else ALLOWED_TYPES
+	return _allowed_cache
+
 ## Pure validation; exposed for tests. Never mutates anything.
-static func validate_cmd(raw: Variant, session_actor: int) -> Dictionary:
+static func validate_cmd(raw: Variant, session_actor: int, allowed: Array = ALLOWED_TYPES) -> Dictionary:
 	if not (raw is Dictionary):
 		return {"ok": false, "error": "bad_shape"}
 	var c: Dictionary = raw
@@ -484,7 +506,7 @@ static func validate_cmd(raw: Variant, session_actor: int) -> Dictionary:
 		if not (k is String or k is StringName) or not ["type", "actor", "seq", "args"].has(str(k)):
 			return {"ok": false, "error": "unknown_field"}
 	var ty: Variant = c.get("type")
-	if not (ty is String or ty is StringName) or not ALLOWED_TYPES.has(StringName(ty)):
+	if not (ty is String or ty is StringName) or not allowed.has(StringName(ty)):
 		return {"ok": false, "error": "bad_type"}
 	if typeof(c.get("seq")) != TYPE_INT or int(c["seq"]) <= 0:
 		return {"ok": false, "error": "bad_seq"}
