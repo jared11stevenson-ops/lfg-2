@@ -18,3 +18,7 @@ renderer/rendering_method.mobile="gl_compatibility"
 
 [input_devices]
 pointing/emulate_touch_from_mouse=true
+
+[autoload]
+
+Game="*res://main/game.gd"

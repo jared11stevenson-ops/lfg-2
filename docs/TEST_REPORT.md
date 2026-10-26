@@ -19,3 +19,8 @@ Run: `/tmp/claude-0/godot --headless --path . -s tests/run_all.gd [-- <path subs
 - Finding for Stream A: `MatchState.from_dict(to_dict())` is not bit-identical (e.g. `energy` 0.0 becomes 0); stable after one pass.
 - `net/server_main.gd` (dedicated entry point) is written but not exercised by any test.
 - tools/ci_export.sh: Linux export succeeded (binary ~70MB built with downloaded 4.4.1 templates); the binary was started headless once and failed to load res://main/main.tscn because that scene did not exist yet. Not run with a display.
+
+## Integrated run (lead, Godot 4.4.1 headless)
+24 suites, 187 tests, 12175 checks, 0 failures. Journey: `xvfb-run ... -- --journey` planted 4 plots via Rules, ran to Purge day 7 (software GL, not a perf benchmark).
+Not verified: human fun, Android/device, real online players, hosting. Only 5 of 14 classes have mechanics; 9 are data-only.
+Known gaps: player-to-rules movement is hex-step sync (rules actor lags visual player); AI factions abstract; net snapshots unfiltered.
