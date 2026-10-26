@@ -131,6 +131,38 @@ func blob(center: Vector3, radius: Vector3, seed_i: int, col: Color, col_top: Co
 		tri(pts[rings][i], pts[rings][j3], top, col_top, center)
 		tri(pts[0][i], pts[0][j3], bot, col, center)
 
+## Flat horizontal ring (annulus) with thickness, e.g. a halo.
+func ring(center: Vector3, r_in: float, r_out: float, thick: float, sides: int, col: Color) -> void:
+	for i in sides:
+		var a0: float = TAU * float(i) / float(sides)
+		var a1: float = TAU * float(i + 1) / float(sides)
+		var d0 := Vector3(cos(a0), 0, sin(a0))
+		var d1 := Vector3(cos(a1), 0, sin(a1))
+		var up := Vector3(0, thick * 0.5, 0)
+		var mid: Vector3 = center + (d0 + d1) * 0.5 * (r_in + r_out) * 0.5
+		quad(center + d0 * r_in + up, center + d1 * r_in + up, center + d1 * r_out + up, center + d0 * r_out + up, col, mid)
+		quad(center + d0 * r_in - up, center + d0 * r_out - up, center + d1 * r_out - up, center + d1 * r_in - up, col, mid)
+		quad(center + d0 * r_out - up, center + d0 * r_out + up, center + d1 * r_out + up, center + d1 * r_out - up, col, mid)
+		quad(center + d0 * r_in - up, center + d1 * r_in - up, center + d1 * r_in + up, center + d0 * r_in + up, col, mid)
+
+## Bounding box of all vertices (for scale/silhouette checks).
+func bounds() -> AABB:
+	if verts.size() == 0:
+		return AABB()
+	var lo: Vector3 = verts[0]
+	var hi: Vector3 = verts[0]
+	for v in verts:
+		lo = lo.min(v)
+		hi = hi.max(v)
+	return AABB(lo, hi - lo)
+
+## Append another kit translated by `offset` (merge small parts into one draw call).
+func append_kit(other: MeshKit, offset: Vector3 = Vector3.ZERO) -> void:
+	for i in other.verts.size():
+		verts.append(other.verts[i] + offset)
+		norms.append(other.norms[i])
+		cols.append(other.cols[i])
+
 func build() -> ArrayMesh:
 	var m := ArrayMesh.new()
 	if verts.size() == 0:

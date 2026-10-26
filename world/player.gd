@@ -22,6 +22,8 @@ var _arms: Array[Node3D] = []
 var _body: Node3D
 var _phase: float = 0.0
 var _mat: StandardMaterial3D
+var _rig: CharacterRig
+var class_id: String = ""
 
 func _init() -> void:
 	name = "Player"
@@ -40,6 +42,23 @@ func set_class_colors(tunic_c: Color, hat_c: Color) -> void:
 	_legs.clear()
 	_arms.clear()
 	_build_model()
+
+## Swap the default bean for the class's own character look (see CharacterKit.CLASS_LOOKS).
+func apply_class(cid: String) -> void:
+	class_id = cid
+	for ch in get_children():
+		ch.queue_free()
+	_legs.clear()
+	_arms.clear()
+	_rig = CharacterKit.build_class(cid)
+	add_child(_rig)
+
+func rig() -> CharacterRig:
+	return _rig
+
+func play_attack() -> void:
+	if _rig != null:
+		_rig.play(&"attack")
 
 func _mesh_node(k: MeshKit, parent: Node3D, pos: Vector3 = Vector3.ZERO) -> Node3D:
 	var n := Node3D.new()
@@ -126,6 +145,9 @@ func _process(dt: float) -> void:
 	_animate(dt)
 
 func _animate(dt: float) -> void:
+	if _rig != null:
+		_rig.speed01 = clampf(velocity_xz.length() / SPEED, 0.0, 1.0)
+		return
 	var speed01: float = clampf(velocity_xz.length() / SPEED, 0.0, 1.0)
 	_phase += dt * (6.0 + 6.0 * speed01) * speed01
 	var s: float = sin(_phase) * 0.8 * speed01
