@@ -1,0 +1,15 @@
+{"schema":1,"items":[
+{"id":"lfg:item/coin","name":"Coin","value":1},
+{"id":"lfg:item/glowfruit","name":"Glowfruit","value":2,"food":3},
+{"id":"lfg:item/sporebean","name":"Sporebean","value":1,"food":2},
+{"id":"lfg:item/saltroot","name":"Saltroot","value":3,"food":4},
+{"id":"lfg:item/ration","name":"Ration","value":5,"food":8,"ration":true},
+{"id":"lfg:item/glowfruit_seed","name":"Glowfruit Seed","value":1},
+{"id":"lfg:item/sporebean_seed","name":"Sporebean Seed","value":1},
+{"id":"lfg:item/saltroot_seed","name":"Saltroot Seed","value":2},
+{"id":"lfg:item/mushroom","name":"Wild Mushroom","value":2,"food":2},
+{"id":"lfg:item/tonic","name":"Tonic","value":8,"heal":25},
+{"id":"lfg:item/timber","name":"Timber","value":3},
+{"id":"lfg:item/stone","name":"Stone","value":3},
+{"id":"lfg:item/spore_sac","name":"Spore Sac","value":4}
+]}

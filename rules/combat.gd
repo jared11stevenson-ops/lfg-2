@@ -1,0 +1,127 @@
+class_name Combat
+extends RefCounted
+## Damage, effects, death. Enemy telegraph logic is in enemy_ai.gd.
+
+static func class_mod(a: Dictionary, key: String, default: Variant) -> Variant:
+	var cd: Dictionary = Content.class_def(String(a.get("class_id", "")))
+	if cd.is_empty():
+		return default
+	return cd.get("mods", {}).get(key, default)
+
+static func has_effect(state: MatchState, a: Dictionary, id: String) -> bool:
+	var now: float = float(state.clock["elapsed"])
+	for e in a["effects"]:
+		if e["id"] == id and float(e["until"]) > now:
+			return true
+	return false
+
+static func add_effect(a: Dictionary, id: String, until: float, extra: Dictionary = {}) -> void:
+	for e in a["effects"]:
+		if e["id"] == id:
+			e["until"] = until
+			e.merge(extra, true)
+			return
+	var e2: Dictionary = {"id": id, "until": until}
+	e2.merge(extra, true)
+	a["effects"].append(e2)
+
+static func hungry(state: MatchState, a: Dictionary) -> bool:
+	var f: Dictionary = state.factions.get(int(a["faction"]), {})
+	return int(f.get("hunger_days", 0)) >= 1 and a["kind"] != "enemy"
+
+static func atk_of(state: MatchState, a: Dictionary) -> float:
+	var v: float = float(a["atk"]) * float(class_mod(a, "atk_mult", 1.0))
+	if has_effect(state, a, "rage"):
+		v *= 1.5
+	if hungry(state, a):
+		v *= 0.8
+	return v
+
+static func def_of(state: MatchState, a: Dictionary) -> float:
+	var v: float = float(a["def"])
+	if has_effect(state, a, "rage"):
+		v *= 0.7
+	if hungry(state, a):
+		v *= 0.8
+	return v
+
+static func calc_damage(state: MatchState, attacker: Dictionary, target: Dictionary, base_atk_override: float = -1.0) -> int:
+	var atk: float = atk_of(state, attacker) if base_atk_override < 0.0 else base_atk_override
+	return maxi(1, int(round(atk - def_of(state, target))))
+
+static func ready(state: MatchState, a: Dictionary, key: String) -> bool:
+	return float(a["cd"].get(key, 0.0)) <= float(state.clock["elapsed"])
+
+static func set_cd(state: MatchState, a: Dictionary, key: String, secs: float) -> void:
+	a["cd"][key] = float(state.clock["elapsed"]) + secs
+
+static func living(a: Dictionary) -> bool:
+	return bool(a["alive"])
+
+## Applies final damage (guard halves). Handles death. Returns actual damage dealt.
+static func hurt(state: MatchState, target_id: int, amount: int, source_id: int, events: Array, tag: String = "") -> int:
+	var t: Dictionary = state.actors.get(target_id, {})
+	if t.is_empty() or not t["alive"] or amount <= 0:
+		return 0
+	var dmg: int = amount
+	if has_effect(state, t, "guard"):
+		dmg = maxi(1, dmg / 2)
+	dmg = mini(dmg, int(t["hp"]))
+	t["hp"] = int(t["hp"]) - dmg
+	events.append({"type": &"actor_damaged", "actor": target_id, "source": source_id, "amount": dmg, "hp": t["hp"], "tag": tag})
+	if int(t["hp"]) <= 0:
+		kill(state, target_id, source_id, events)
+	return dmg
+
+static func heal(a: Dictionary, amount: int) -> int:
+	var before: int = int(a["hp"])
+	a["hp"] = mini(int(a["max_hp"]), before + amount)
+	return int(a["hp"]) - before
+
+static func kill(state: MatchState, target_id: int, killer_id: int, events: Array) -> void:
+	var t: Dictionary = state.actors.get(target_id, {})
+	if t.is_empty() or not t["alive"]:
+		return
+	t["alive"] = false
+	t["hp"] = 0
+	t["move"] = {}
+	var carried: Dictionary = t["inv"].duplicate()
+	t["inv"] = {}
+	var loot: Dictionary = {}
+	if t["kind"] == "enemy":
+		loot = Content.enemy(String(t["archetype"])).get("loot", {}).duplicate()
+	var dropped_to: String = "none"
+	var all: Dictionary = carried.duplicate()
+	Inv.add_all(all, loot)
+	if not all.is_empty():
+		var killer: Dictionary = state.actors.get(killer_id, {})
+		if not killer.is_empty() and killer["alive"] and Inv.room_for(killer["inv"], all) and HexGrid.distance(killer["hex"], t["hex"]) <= 3:
+			Inv.add_all(killer["inv"], all)
+			dropped_to = "killer"
+		else:
+			var k: String = MatchState.plot_key(t["hex"])
+			var cur: Dictionary = state.drops.get(k, {})
+			Inv.add_all(cur, all)
+			state.drops[k] = cur
+			dropped_to = "ground"
+	events.append({"type": &"actor_died", "actor": target_id, "kind": t["kind"], "faction": t["faction"], "killer": killer_id, "hex": t["hex"], "items": all, "items_to": dropped_to})
+	if target_id == state.player_id:
+		end_match(state, "leader_died", events)
+	elif t["kind"] == "ai_leader":
+		eliminate_faction(state, int(t["faction"]), events)
+
+static func eliminate_faction(state: MatchState, fid: int, events: Array) -> void:
+	var f: Dictionary = state.factions.get(fid, {})
+	if f.is_empty() or not f["alive"]:
+		return
+	f["alive"] = false
+	for hid in state.holdings_of(fid):
+		state.holdings[hid]["owner"] = -1
+	events.append({"type": &"faction_eliminated", "faction": fid, "ai": bool(f["is_ai"])})
+
+static func end_match(state: MatchState, reason: String, events: Array) -> void:
+	if state.over:
+		return
+	state.over = true
+	state.result = {"reason": reason, "day": state.clock["day"]}
+	events.append({"type": &"match_over", "reason": reason, "day": state.clock["day"]})

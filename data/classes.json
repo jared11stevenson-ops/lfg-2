@@ -1,0 +1,440 @@
+{
+ "schema": 1,
+ "classes": [
+  {
+   "id": "lfg:class/judd",
+   "name": "Farmer/Monk",
+   "peace_perk": "Harvests yield +1 crop.",
+   "purge_kit": "Quarterstaff stance: halves damage taken for 12s.",
+   "weakness": "Poor striker: deals 60% damage.",
+   "stats": {
+    "hp": 90,
+    "atk": 3,
+    "def": 1,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": true,
+   "mods": {
+    "yield_bonus": 1,
+    "atk_mult": 0.6
+   },
+   "ability": {
+    "id": "lfg:ability/guard",
+    "name": "Staff Stance",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 12
+   }
+  },
+  {
+   "id": "lfg:class/mira",
+   "name": "Alchemist/Plaguebinder",
+   "peace_perk": "Can brew tonics (heal 25).",
+   "purge_kit": "Plague Cloud: poisons all hostiles within 2 hexes (3/s for 6s).",
+   "weakness": "Frail: 70% max health.",
+   "stats": {
+    "hp": 70,
+    "atk": 3,
+    "def": 0,
+    "energy": 120
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3,
+    "lfg:item/mushroom": 2
+   },
+   "implemented": true,
+   "mods": {
+    "max_hp_mult": 0.7,
+    "alchemist": 1
+   },
+   "ability": {
+    "id": "lfg:ability/plague_cloud",
+    "name": "Plague Cloud",
+    "energy": 30,
+    "cooldown": 20,
+    "duration": 6,
+    "radius": 2,
+    "dps": 3
+   }
+  },
+  {
+   "id": "lfg:class/bram",
+   "name": "Forager/Berserker",
+   "peace_perk": "Forage wild mushrooms/spore sacs from wild terrain (30s cooldown).",
+   "purge_kit": "Rage: +50% attack, -30% defense for 15s (costs 10 HP).",
+   "weakness": "Ravenous: eats 2 rations per day.",
+   "stats": {
+    "hp": 110,
+    "atk": 5,
+    "def": 1,
+    "energy": 80
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": true,
+   "mods": {
+    "ration_need": 2
+   },
+   "ability": {
+    "id": "lfg:ability/rage",
+    "name": "Rage",
+    "energy": 15,
+    "cooldown": 40,
+    "duration": 15,
+    "hp_cost": 10
+   },
+   "peace_ability": {
+    "id": "lfg:ability/forage",
+    "name": "Forage",
+    "energy": 5,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/vex",
+   "name": "Thief/Cutpurse",
+   "peace_perk": "Fence: sells goods for +20%.",
+   "purge_kit": "Pickpocket: steal an item from an adjacent actor; +35% to steal from stores.",
+   "weakness": "Brittle (75% HP); caught thieves take 5 damage.",
+   "stats": {
+    "hp": 65,
+    "atk": 3,
+    "def": 0,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": true,
+   "mods": {
+    "steal_bonus": 0.35,
+    "sell_mult": 1.2,
+    "max_hp_mult": 0.75
+   },
+   "ability": {
+    "id": "lfg:ability/pickpocket",
+    "name": "Pickpocket",
+    "energy": 20,
+    "cooldown": 12,
+    "duration": 0,
+    "fail_damage": 5
+   }
+  },
+  {
+   "id": "lfg:class/oren",
+   "name": "Cook/Medic",
+   "peace_perk": "Ration recipes yield +1 ration per batch.",
+   "purge_kit": "Field Dressing: heal self or adjacent ally 30 HP.",
+   "weakness": "Gentle: deals 50% damage.",
+   "stats": {
+    "hp": 85,
+    "atk": 3,
+    "def": 1,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3,
+    "lfg:item/glowfruit": 4
+   },
+   "implemented": true,
+   "mods": {
+    "ration_bonus": 1,
+    "atk_mult": 0.5
+   },
+   "ability": {
+    "id": "lfg:ability/field_dressing",
+    "name": "Field Dressing",
+    "energy": 20,
+    "cooldown": 8,
+    "duration": 0,
+    "heal": 30
+   }
+  },
+  {
+   "id": "lfg:class/tavi",
+   "name": "Miner/Sentinel",
+   "peace_perk": "Mines stone and timber faster.",
+   "purge_kit": "Sentinel Post: immobile turret.",
+   "weakness": "Slow walker.",
+   "stats": {
+    "hp": 100,
+    "atk": 4,
+    "def": 2,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_tavi",
+    "name": "Sentinel Post",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/pip",
+   "name": "Courier/Skirmisher",
+   "peace_perk": "Fast travel on roads.",
+   "purge_kit": "Hit and run dash.",
+   "weakness": "Carries little.",
+   "stats": {
+    "hp": 75,
+    "atk": 4,
+    "def": 0,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_pip",
+    "name": "Hit and run dash.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/sable",
+   "name": "Hunter/Trapper",
+   "peace_perk": "Tracks wild game.",
+   "purge_kit": "Snare traps.",
+   "weakness": "Noisy: drawn aggro.",
+   "stats": {
+    "hp": 85,
+    "atk": 4,
+    "def": 1,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_sable",
+    "name": "Snare traps.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/quill",
+   "name": "Scribe/Envoy",
+   "peace_perk": "Better trade prices.",
+   "purge_kit": "Envoy truce flag.",
+   "weakness": "Fragile.",
+   "stats": {
+    "hp": 65,
+    "atk": 2,
+    "def": 0,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_quill",
+    "name": "Envoy truce flag.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/forge",
+   "name": "Smith/Siegewright",
+   "peace_perk": "Cheaper buildings.",
+   "purge_kit": "Siege ram.",
+   "weakness": "Slow.",
+   "stats": {
+    "hp": 105,
+    "atk": 4,
+    "def": 2,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_forge",
+    "name": "Siege ram.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/nyx",
+   "name": "Fungal Shaman",
+   "peace_perk": "Grows crops in fungal groves faster.",
+   "purge_kit": "Spore swarm.",
+   "weakness": "Sickly outside groves.",
+   "stats": {
+    "hp": 80,
+    "atk": 3,
+    "def": 0,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_nyx",
+    "name": "Spore swarm.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/rook",
+   "name": "Banner/Warlord",
+   "peace_perk": "Garrison upkeep discount.",
+   "purge_kit": "Rally banner.",
+   "weakness": "Marked leader.",
+   "stats": {
+    "hp": 100,
+    "atk": 4,
+    "def": 2,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_rook",
+    "name": "Rally banner.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/dune",
+   "name": "Tinker/Smuggler",
+   "peace_perk": "Cheap gadgets.",
+   "purge_kit": "Smuggler cache.",
+   "weakness": "Weak armor.",
+   "stats": {
+    "hp": 80,
+    "atk": 3,
+    "def": 0,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_dune",
+    "name": "Smuggler cache.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  },
+  {
+   "id": "lfg:class/halo",
+   "name": "Pilgrim/Warden",
+   "peace_perk": "Blessed shrines.",
+   "purge_kit": "Warding aura.",
+   "weakness": "Pacifist.",
+   "stats": {
+    "hp": 95,
+    "atk": 2,
+    "def": 3,
+    "energy": 100
+   },
+   "start_kit": {
+    "lfg:item/coin": 20,
+    "lfg:item/ration": 6,
+    "lfg:item/glowfruit_seed": 6,
+    "lfg:item/sporebean_seed": 3,
+    "lfg:item/saltroot_seed": 3
+   },
+   "implemented": false,
+   "mods": {},
+   "ability": {
+    "id": "lfg:ability/todo_halo",
+    "name": "Warding aura.",
+    "energy": 25,
+    "cooldown": 30,
+    "duration": 0
+   }
+  }
+ ]
+}

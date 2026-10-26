@@ -1,0 +1,14 @@
+{"schema":1,"enemies":[
+{"id":"lfg:enemy/sporeling","name":"Sporeling","role":"swarm","hp":12,"def":0,"sec_per_hex":1.2,"aggro":7,"biomes":["fungal_grove","meadow"],"loot":{"lfg:item/mushroom":1},
+ "attacks":[{"id":"nip","windup":0.5,"hit":0.2,"recovery":0.6,"damage":3,"range":1,"radius":0,"shape":"single"}]},
+{"id":"lfg:enemy/rootbrute","name":"Root Brute","role":"heavy","hp":60,"def":2,"sec_per_hex":2.4,"aggro":6,"biomes":["meadow","highlands"],"loot":{"lfg:item/timber":2},
+ "attacks":[{"id":"slam","windup":1.4,"hit":0.3,"recovery":1.8,"damage":14,"range":1,"radius":1,"shape":"aoe"}]},
+{"id":"lfg:enemy/thorn_slinger","name":"Thorn Slinger","role":"ranged","hp":18,"def":0,"sec_per_hex":1.6,"aggro":9,"biomes":["salt_flats","ruins"],"loot":{"lfg:item/stone":1},
+ "attacks":[{"id":"volley","windup":1.0,"hit":0.2,"recovery":1.2,"damage":6,"range":5,"radius":0,"shape":"single"}]},
+{"id":"lfg:enemy/mire_leech","name":"Mire Leech","role":"dot","hp":24,"def":1,"sec_per_hex":1.8,"aggro":6,"biomes":["bog"],"loot":{"lfg:item/spore_sac":1},
+ "attacks":[{"id":"latch","windup":0.7,"hit":0.5,"recovery":1.0,"damage":4,"range":1,"radius":0,"shape":"single","poison_dps":1,"poison_secs":4}]},
+{"id":"lfg:enemy/gloomwing","name":"Gloomwing","role":"flanker","hp":14,"def":0,"sec_per_hex":0.6,"aggro":10,"biomes":["highlands","ruins"],"loot":{"lfg:item/spore_sac":1},
+ "attacks":[{"id":"dive","windup":0.4,"hit":0.15,"recovery":1.5,"damage":7,"range":2,"radius":0,"shape":"single"}]},
+{"id":"lfg:enemy/bulwark","name":"Ruin Bulwark","role":"tank","hp":90,"def":4,"sec_per_hex":3.0,"aggro":5,"biomes":["ruins","salt_flats"],"loot":{"lfg:item/stone":3},
+ "attacks":[{"id":"shockwave","windup":1.8,"hit":0.4,"recovery":2.5,"damage":10,"range":2,"radius":2,"shape":"self_aoe"}]}
+]}

@@ -1,0 +1,7 @@
+{"schema":1,"recipes":[
+{"id":"lfg:recipe/ration_glowfruit","name":"Glowfruit Ration","inputs":{"lfg:item/glowfruit":2},"outputs":{"lfg:item/ration":1},"tags":["ration"]},
+{"id":"lfg:recipe/ration_sporebean","name":"Sporebean Ration","inputs":{"lfg:item/sporebean":3},"outputs":{"lfg:item/ration":1},"tags":["ration"]},
+{"id":"lfg:recipe/ration_saltroot","name":"Saltroot Ration","inputs":{"lfg:item/saltroot":3},"outputs":{"lfg:item/ration":2},"tags":["ration"]},
+{"id":"lfg:recipe/tonic","name":"Tonic","inputs":{"lfg:item/mushroom":1,"lfg:item/glowfruit":1},"outputs":{"lfg:item/tonic":1},"requires_tag":"alchemist"},
+{"id":"lfg:recipe/spore_bomb","name":"Plague Flask","inputs":{"lfg:item/spore_sac":2,"lfg:item/stone":1},"outputs":{"lfg:item/tonic":1},"requires_tag":"alchemist"}
+]}
