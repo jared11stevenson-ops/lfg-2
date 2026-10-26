@@ -178,9 +178,9 @@
   {
    "id": "lfg:class/tavi",
    "name": "Miner/Sentinel",
-   "peace_perk": "Mines stone and timber faster.",
-   "purge_kit": "Sentinel Post: immobile turret.",
-   "weakness": "Slow walker.",
+   "peace_perk": "Miner: Mine ability yields stone and timber (+1 each on rich ground).",
+   "purge_kit": "Sentinel Post: drops an immobile turret (45s, range 3, 4 dmg/2s) at your feet.",
+   "weakness": "Slow walker: moves 35% slower, so expeditions cost more rations.",
    "stats": {
     "hp": 100,
     "atk": 4,
@@ -194,22 +194,35 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "walk_mult": 1.35,
+    "mine_bonus": 1
+   },
    "ability": {
-    "id": "lfg:ability/todo_tavi",
+    "id": "lfg:ability/sentinel_post",
     "name": "Sentinel Post",
     "energy": 25,
     "cooldown": 30,
+    "duration": 45,
+    "range": 3,
+    "damage": 4,
+    "max_active": 1
+   },
+   "peace_ability": {
+    "id": "lfg:ability/mine",
+    "name": "Mine",
+    "energy": 8,
+    "cooldown": 12,
     "duration": 0
    }
   },
   {
    "id": "lfg:class/pip",
    "name": "Courier/Skirmisher",
-   "peace_perk": "Fast travel on roads.",
-   "purge_kit": "Hit and run dash.",
-   "weakness": "Carries little.",
+   "peace_perk": "Courier: roads are 40% faster and you walk 10% faster everywhere.",
+   "purge_kit": "Hit and Run: dash up to 3 hexes, strike 150% damage, then evade (-40% damage taken for 4s).",
+   "weakness": "Carries little: at most 30 non-coin items in your pack.",
    "stats": {
     "hp": 75,
     "atk": 4,
@@ -223,22 +236,28 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "walk_mult": 0.9,
+    "road_mult": 0.6,
+    "carry_cap": 30
+   },
    "ability": {
-    "id": "lfg:ability/todo_pip",
-    "name": "Hit and run dash.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/dash",
+    "name": "Hit and Run",
+    "energy": 20,
+    "cooldown": 14,
+    "duration": 4,
+    "range": 3,
+    "strike_mult": 1.5
    }
   },
   {
    "id": "lfg:class/sable",
    "name": "Hunter/Trapper",
-   "peace_perk": "Tracks wild game.",
-   "purge_kit": "Snare traps.",
-   "weakness": "Noisy: drawn aggro.",
+   "peace_perk": "Hunter: kills of wild creatures also yield game meat (cook 2 into a ration); Track reveals wild creatures.",
+   "purge_kit": "Snare Traps: up to 3 hidden traps (60s) that root (6s) and wound (8) the first hostile to step on them.",
+   "weakness": "Noisy: wild creatures notice you from 3 hexes further away.",
    "stats": {
     "hp": 85,
     "atk": 4,
@@ -252,22 +271,37 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "noise": 3,
+    "hunt_meat": 1
+   },
    "ability": {
-    "id": "lfg:ability/todo_sable",
-    "name": "Snare traps.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/snare",
+    "name": "Snare Trap",
+    "energy": 15,
+    "cooldown": 10,
+    "duration": 60,
+    "damage": 8,
+    "root": 6,
+    "max_active": 3,
+    "arm": 3
+   },
+   "peace_ability": {
+    "id": "lfg:ability/track",
+    "name": "Track",
+    "energy": 5,
+    "cooldown": 20,
+    "duration": 60,
+    "radius": 12
    }
   },
   {
    "id": "lfg:class/quill",
    "name": "Scribe/Envoy",
-   "peace_perk": "Better trade prices.",
-   "purge_kit": "Envoy truce flag.",
-   "weakness": "Fragile.",
+   "peace_perk": "Scribe: buys 15% cheaper and sells 25% dearer at merchants.",
+   "purge_kit": "Truce Flag: for 15s wild creatures and rival raiders ignore you; with a rival holding in reach, 10 coin buys 40s of no raids from that faction. You cannot attack, capture or steal under the flag.",
+   "weakness": "Fragile: takes 25% extra damage.",
    "stats": {
     "hp": 70,
     "atk": 3,
@@ -281,22 +315,29 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "buy_mult": 0.85,
+    "sell_mult": 1.25,
+    "dmg_taken_mult": 1.25
+   },
    "ability": {
-    "id": "lfg:ability/todo_quill",
-    "name": "Envoy truce flag.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/truce",
+    "name": "Truce Flag",
+    "energy": 30,
+    "cooldown": 60,
+    "duration": 15,
+    "gift": 10,
+    "faction_secs": 40,
+    "range": 2
    }
   },
   {
    "id": "lfg:class/forge",
    "name": "Smith/Siegewright",
-   "peace_perk": "Cheaper buildings.",
-   "purge_kit": "Siege ram.",
-   "weakness": "Slow.",
+   "peace_perk": "Smith: buildings and upgrades cost 25% less (rounded up).",
+   "purge_kit": "Siege Ram: batter an adjacent rival holding; removes one defensive building and weakens it for 30s; your next capture there gets +50% power.",
+   "weakness": "Slow: moves 25% slower.",
    "stats": {
     "hp": 105,
     "atk": 4,
@@ -310,22 +351,26 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "build_cost_mult": 0.75,
+    "walk_mult": 1.25,
+    "siege_mult": 1.5
+   },
    "ability": {
-    "id": "lfg:ability/todo_forge",
-    "name": "Siege ram.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/siege_ram",
+    "name": "Siege Ram",
+    "energy": 30,
+    "cooldown": 45,
+    "duration": 30
    }
   },
   {
    "id": "lfg:class/nyx",
    "name": "Fungal Shaman",
-   "peace_perk": "Grows crops in fungal groves faster.",
-   "purge_kit": "Spore swarm.",
-   "weakness": "Sickly outside groves.",
+   "peace_perk": "Shaman: crops in a Fungal Grove grow two days per day and yield +1.",
+   "purge_kit": "Spore Swarm: a poison cloud (3/s, radius 2 in a grove, 1 elsewhere) at a hex within 4 for 8s.",
+   "weakness": "Sickly outside groves: 25% less attack and defense and half energy regeneration.",
    "stats": {
     "hp": 80,
     "atk": 3,
@@ -339,22 +384,28 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "grove_growth": 1,
+    "offgrove_mult": 0.75
+   },
    "ability": {
-    "id": "lfg:ability/todo_nyx",
-    "name": "Spore swarm.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/spore_swarm",
+    "name": "Spore Swarm",
+    "energy": 30,
+    "cooldown": 25,
+    "duration": 8,
+    "radius": 2,
+    "dps": 3,
+    "range": 4
    }
   },
   {
    "id": "lfg:class/rook",
    "name": "Banner/Warlord",
-   "peace_perk": "Garrison upkeep discount.",
-   "purge_kit": "Rally banner.",
-   "weakness": "Marked leader.",
+   "peace_perk": "Banner: garrison ration upkeep is 30% lower.",
+   "purge_kit": "Rally Banner: for 20s every holding of yours within 8 hexes defends at +40% and sends out troops at +25%; you hit 25% harder.",
+   "weakness": "Marked leader: wild creatures notice you from 2 hexes further and rivals favour targets near you.",
    "stats": {
     "hp": 100,
     "atk": 4,
@@ -368,22 +419,26 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "upkeep_mult": 0.7,
+    "marked": 2
+   },
    "ability": {
-    "id": "lfg:ability/todo_rook",
-    "name": "Rally banner.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/rally",
+    "name": "Rally Banner",
+    "energy": 30,
+    "cooldown": 60,
+    "duration": 20,
+    "radius": 8
    }
   },
   {
    "id": "lfg:class/dune",
    "name": "Tinker/Smuggler",
-   "peace_perk": "Cheap gadgets.",
-   "purge_kit": "Smuggler cache.",
-   "weakness": "Weak armor.",
+   "peace_perk": "Tinker: craft gadgets cheaply (1 timber + 1 stone makes 3); watchtowers and wells cost half.",
+   "purge_kit": "Smuggler Cache: bury up to 12 items (costs 1 gadget) where you stand; hidden from raiders and thieves until you recover them.",
+   "weakness": "Weak armour: takes 25% extra damage.",
    "stats": {
     "hp": 80,
     "atk": 3,
@@ -395,24 +450,30 @@
     "lfg:item/ration": 6,
     "lfg:item/glowfruit_seed": 6,
     "lfg:item/sporebean_seed": 3,
-    "lfg:item/saltroot_seed": 3
+    "lfg:item/saltroot_seed": 3,
+    "lfg:item/gadget": 2
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "tinker": 1,
+    "gadget_build_mult": 0.5,
+    "dmg_taken_mult": 1.25
+   },
    "ability": {
-    "id": "lfg:ability/todo_dune",
-    "name": "Smuggler cache.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/cache",
+    "name": "Smuggler Cache",
+    "energy": 20,
+    "cooldown": 20,
+    "duration": 0,
+    "max_items": 12
    }
   },
   {
    "id": "lfg:class/halo",
    "name": "Pilgrim/Warden",
-   "peace_perk": "Blessed shrines.",
-   "purge_kit": "Warding aura.",
-   "weakness": "Pacifist.",
+   "peace_perk": "Pilgrim: Bless an owned holding; for 2 days its crops yield +1 and its garrison eats nothing.",
+   "purge_kit": "Warding Aura: for 15s you and allies within 3 take 40% less damage; holdings within 3 defend +50% and resist theft.",
+   "weakness": "Pacifist: cannot attack people, capture or steal (only wild creatures).",
    "stats": {
     "hp": 95,
     "atk": 2,
@@ -426,14 +487,26 @@
     "lfg:item/sporebean_seed": 3,
     "lfg:item/saltroot_seed": 3
    },
-   "implemented": false,
-   "mods": {},
+   "implemented": true,
+   "mods": {
+    "pacifist": 1,
+    "bless": 1
+   },
    "ability": {
-    "id": "lfg:ability/todo_halo",
-    "name": "Warding aura.",
-    "energy": 25,
-    "cooldown": 30,
-    "duration": 0
+    "id": "lfg:ability/ward",
+    "name": "Warding Aura",
+    "energy": 30,
+    "cooldown": 40,
+    "duration": 15,
+    "radius": 3
+   },
+   "peace_ability": {
+    "id": "lfg:ability/bless",
+    "name": "Bless",
+    "energy": 20,
+    "cooldown": 60,
+    "duration": 0,
+    "days": 2
    }
   }
  ]

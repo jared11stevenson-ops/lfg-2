@@ -1,6 +1,6 @@
 extends RulesTestBase
 
-const IMPLEMENTED := ["judd", "mira", "bram", "vex", "oren"]
+const IMPLEMENTED := ["judd", "mira", "bram", "vex", "oren", "tavi", "pip", "sable", "quill", "forge", "nyx", "rook", "dune", "halo"]
 
 func _enemy_next_to(s: MatchState, arch: String = "lfg:enemy/sporeling", dir: int = 0) -> int:
 	return Setup.spawn_enemy(s, arch, s.actors[1]["hex"] + HexGrid.DIRS[dir], false)
@@ -25,7 +25,7 @@ func test_fourteen_classes_complete_data() -> void:
 			impl += 1
 		else:
 			check(not (c["ability"]["id"] as String).is_empty(), "%s has placeholder ability id" % id)
-	eq(impl, 5, "exactly 5 implemented")
+	eq(impl, 14, "all 14 implemented")
 
 func test_every_class_can_start_a_match() -> void:
 	for id in Content.classes().keys():
@@ -34,10 +34,13 @@ func test_every_class_can_start_a_match() -> void:
 		check(s.actors[1]["hp"] > 0, "hp")
 
 func test_unimplemented_class_ability_rejected_cleanly() -> void:
+	var cd: Dictionary = Content.class_def("lfg:class/tavi")
+	cd["implemented"] = false
 	var s: MatchState = quiet("lfg:class/tavi")
 	var before: String = snap(s)
 	eq(cmd(s, "use_ability", {})["error"], "ability_not_implemented", "flagged unimplemented")
 	eq(snap(s), before, "no mutation")
+	cd["implemented"] = true
 
 func test_judd_guard_halves_damage_with_cost_and_cooldown() -> void:
 	var s: MatchState = quiet("lfg:class/judd")

@@ -1,7 +1,7 @@
 class_name Abilities
 extends RefCounted
 ## use_ability. Fully implemented: Judd (guard), Mira (plague_cloud), Bram (rage + forage), Vex (pickpocket), Oren (field_dressing).
-## Other classes are data-complete with implemented:false and are rejected with "ability_not_implemented".
+## Tavi/Pip/Sable/Quill/Forge/Nyx/Rook/Dune/Halo live in class_kits.gd. A class with implemented:false is rejected with "ability_not_implemented".
 
 static func ability_for(cd: Dictionary, id: String) -> Dictionary:
 	var main: Dictionary = cd.get("ability", {})
@@ -66,7 +66,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 			var gain: Dictionary = {"lfg:item/mushroom": 1 + state.rand_i(2)}
 			if (b == "fungal_grove" or b == "bog") and state.rand_f() < 0.4:
 				gain["lfg:item/spore_sac"] = 1
-			if not Inv.room_for(a["inv"], gain):
+			if not Inv.can_carry(a, gain):
 				return "no_room"
 			Inv.add_all(a["inv"], gain)
 			events.append({"type": &"ability_used", "actor": a["id"], "ability": aid, "items": gain})
@@ -90,7 +90,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 					pick = String(k)
 			if pick == "":
 				return "nothing_to_steal"
-			if not Inv.room_for(a["inv"], {pick: 1}):
+			if not Inv.can_carry(a, {pick: 1}):
 				return "no_room"
 			Combat.set_cd(state, a, key, float(ab["cooldown"]))
 			a["energy"] = MatchState.q(float(a["energy"]) - float(ab["energy"]))
@@ -117,7 +117,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 			var healed: int = Combat.heal(t2, int(ab["heal"]))
 			events.append({"type": &"ability_used", "actor": a["id"], "ability": aid, "target": tid, "healed": healed})
 		_:
-			return "ability_not_implemented"
+			res = ClassKits.run(state, a, ab, args, events)
 	if res != "":
 		return res
 	Combat.set_cd(state, a, key, float(ab["cooldown"]))

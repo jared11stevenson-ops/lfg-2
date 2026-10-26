@@ -12,17 +12,22 @@ static func engaged(state: MatchState) -> bool:
 
 static func _nearest_target(state: MatchState, e: Dictionary, aggro: int) -> Dictionary:
 	var best: Dictionary = {}
-	var bd: int = aggro + 1
+	var bd: int = 1 << 30
 	var ids: Array = state.actors.keys()
 	ids.sort()
 	for id in ids:
 		var t: Dictionary = state.actors[id]
-		if t["kind"] == "enemy" or not t["alive"] or t["kind"] == "ai_leader":
+		if t["kind"] == "enemy" or not t["alive"] or t["kind"] == "ai_leader" or t["kind"] == "party":
 			continue
 		var d: int = HexGrid.distance(e["hex"], t["hex"])
-		if d < bd:
-			bd = d
-			best = t
+		if d >= bd or d > aggro + 12:
+			continue
+		# Sable is noisy, Rook is marked (weaknesses widen the notice radius); a Quill truce flag hides you.
+		var reach: int = aggro + int(Combat.class_mod(t, "noise", 0)) + int(Combat.class_mod(t, "marked", 0))
+		if d > reach or Combat.has_effect(state, t, "truce"):
+			continue
+		bd = d
+		best = t
 	return best
 
 static func step(state: MatchState, events: Array) -> void:
@@ -59,7 +64,7 @@ static func step(state: MatchState, events: Array) -> void:
 					ai["hit_done"] = []
 					events.append({"type": &"enemy_telegraph", "enemy": e["id"], "attack": atk["id"], "shape": atk["shape"], "target_hex": th,
 						"radius": atk["radius"], "windup": atk["windup"], "hit": atk["hit"], "recovery": atk["recovery"], "hit_at": ai["t_hit"]})
-				elif now >= float(ai["next_move"]):
+				elif now >= float(ai["next_move"]) and not Movement.rooted(state, e):
 					var best: Vector2i = e["hex"]
 					var bd: int = d
 					for n in HexGrid.neighbors(e["hex"]):

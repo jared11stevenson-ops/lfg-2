@@ -4,14 +4,14 @@ extends RefCounted
 
 const AI_COUNT := 12
 const WILD_COUNT := 24
-const PERSONAS: Array[String] = ["raider", "thief", "turtle"]
+const PERSONAS: Array[String] = ["raider", "hoarder", "trader", "turtle"]
 const FACTION_NAMES: Array[String] = ["Ember Reeve", "Mosskin Compact", "The Gilded Spade", "Hollow Court", "Saltwind Clan", "Red Lantern Guild",
 	"Thistle Pact", "Brine Brothers", "Ashen Plough", "Lantern Wardens", "Cinder Sowers", "The Last Furrow"]
 
 static func make_actor(id: int, kind: String, faction: int, nm: String, hex: Vector2i, hp: int, atk: int, df: int, energy: int) -> Dictionary:
 	return {"id": id, "kind": kind, "faction": faction, "name": nm, "class_id": "", "archetype": "", "hex": hex, "hp": hp, "max_hp": hp,
 		"atk": atk, "def": df, "energy": float(energy), "max_energy": energy, "inv": {}, "cd": {}, "effects": [], "alive": true,
-		"last_seq": 0, "move": {}, "is_ai": faction >= 1 and kind != "enemy", "ai": {}}
+		"last_seq": 0, "move": {}, "sync_t": 0.0, "is_ai": faction >= 1 and kind != "enemy", "ai": {}}
 
 static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> MatchState:
 	var s := MatchState.new()
@@ -64,6 +64,8 @@ static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> Ma
 		else:
 			h["store"] = {"lfg:item/glowfruit_seed": 12, "lfg:item/sporebean_seed": 12, "lfg:item/saltroot_seed": 8, "lfg:item/ration": 10,
 				"lfg:item/timber": 10, "lfg:item/stone": 8, "lfg:item/coin": 60, "lfg:item/mushroom": 4}
+		if owner == -1:
+			h["base_stock"] = h["store"].duplicate()
 		s.holdings[h["id"]] = h
 	s.next_id = 100
 	# Player
@@ -82,7 +84,7 @@ static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> Ma
 	# AI factions
 	var personas: Array[String] = []
 	for i in range(AI_COUNT):
-		personas.append(PERSONAS[i % 3])
+		personas.append(PERSONAS[i % PERSONAS.size()])
 	for i in range(personas.size() - 1, 0, -1):
 		var j: int = rng.rand_i(i + 1)
 		var tmp: String = personas[i]

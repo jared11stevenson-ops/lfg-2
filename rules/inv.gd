@@ -58,6 +58,35 @@ static func remove_all(inv: Dictionary, bundle: Dictionary) -> void:
 		else:
 			inv[k] = left
 
+## Carry limit (Pip): non-coin units an actor may hold. Classes without "carry_cap" are unlimited.
+static func carry_cap(a: Dictionary) -> int:
+	return int(Combat.class_mod(a, "carry_cap", 0))
+
+static func carried(a: Dictionary) -> int:
+	var n: int = 0
+	for k in (a["inv"] as Dictionary).keys():
+		if String(k) != "lfg:item/coin":
+			n += int(a["inv"][k])
+	return n
+
+## True when `add` (net of `remove`) fits the actor's pack and per-item cap.
+static func can_carry(a: Dictionary, add: Dictionary, remove: Dictionary = {}) -> bool:
+	var probe: Dictionary = (a["inv"] as Dictionary).duplicate()
+	remove_all(probe, remove)
+	if not room_for(probe, add):
+		return false
+	var cap: int = carry_cap(a)
+	if cap <= 0:
+		return true
+	var n: int = 0
+	for k in probe.keys():
+		if String(k) != "lfg:item/coin":
+			n += int(probe[k])
+	for k in add.keys():
+		if String(k) != "lfg:item/coin":
+			n += int(add[k])
+	return n <= cap
+
 ## Atomic move between two DIFFERENT containers. Returns "" on success or an error with nothing changed.
 static func transfer(from_inv: Dictionary, to_inv: Dictionary, bundle: Dictionary) -> String:
 	if not has_all(from_inv, bundle):
@@ -83,4 +112,7 @@ static func world_totals(state: MatchState) -> Dictionary:
 		add_all(t, state.holdings[id]["store"])
 	for k in state.drops.keys():
 		add_all(t, state.drops[k])
+	for fx in state.fx:
+		if fx.has("items"):
+			add_all(t, fx["items"])
 	return t

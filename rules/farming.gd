@@ -31,6 +31,9 @@ static func plant(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 		return "occupied"
 	if CmdUtil.holding_at(state, h) != -1:
 		return "occupied"
+	for oh in state.holdings.values():
+		if (oh.get("sites", {}) as Dictionary).has(MatchState.plot_key(h)):
+			return "occupied"
 	var hid: int = CmdUtil.nearest_owned_holding(state, int(a["faction"]), h, PLANT_RANGE)
 	if hid == -1:
 		return "not_near_own_holding"
@@ -79,10 +82,16 @@ static func harvest(state: MatchState, a: Dictionary, args: Dictionary, events: 
 			return "not_yours"
 		if int(p["age"]) < int(crop["grow_days"]):
 			return "not_ready"
-		var yield_n: int = int(crop["yield"]) + int(crop.get("biome_bonus", {}).get(WorldGen.biome_at(state.world, h), 0)) + int(Combat.class_mod(a, "yield_bonus", 0))
+		var hold: Dictionary = state.holdings[int(p["holding"])]
+		var biome: String = WorldGen.biome_at(state.world, h)
+		var yield_n: int = int(crop["yield"]) + int(crop.get("biome_bonus", {}).get(biome, 0)) + int(Combat.class_mod(a, "yield_bonus", 0))
+		if Economy.blessed(state, hold):
+			yield_n += 1
+		if biome == "fungal_grove" and int(Combat.class_mod(a, "grove_growth", 0)) > 0:
+			yield_n += 1
 		var gain: Dictionary = {String(crop["item"]): yield_n}
 		Inv.add_all(gain, {String(crop["seed"]): 1})
-		if not Inv.room_for(a["inv"], gain):
+		if not Inv.can_carry(a, gain):
 			return "no_room"
 		Inv.add_all(a["inv"], gain)
 		state.plots.erase(key)
@@ -92,12 +101,14 @@ static func harvest(state: MatchState, a: Dictionary, args: Dictionary, events: 
 		if HexGrid.distance(a["hex"], h) > 1:
 			return "too_far"
 		var d: Dictionary = state.drops[key]
-		if not Inv.room_for(a["inv"], d):
+		if not Inv.can_carry(a, d):
 			return "no_room"
 		Inv.add_all(a["inv"], d)
 		state.drops.erase(key)
 		events.append({"type": &"items_picked_up", "actor": a["id"], "hex": h, "items": d})
 		return ""
+	if Fx.cache_at(state, int(a["faction"]), h) and HexGrid.distance(a["hex"], h) <= 1:
+		return Fx.recover_cache(state, a, h, events)
 	return "nothing_to_harvest"
 
 static func craft(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
@@ -125,9 +136,7 @@ static func craft(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 	if not Inv.has_all(a["inv"], cost):
 		return "insufficient_items"
 	# room check against the post-consumption inventory
-	var probe: Dictionary = a["inv"].duplicate()
-	Inv.remove_all(probe, cost)
-	if not Inv.room_for(probe, out):
+	if not Inv.can_carry(a, out, cost):
 		return "no_room"
 	Inv.remove_all(a["inv"], cost)
 	Inv.add_all(a["inv"], out)
@@ -173,9 +182,22 @@ static func dawn_crops(state: MatchState, events: Array) -> void:
 		p["watered"] = false
 		if grew and int(p["age"]) < int(crop["grow_days"]):
 			p["age"] = int(p["age"]) + 1
+			if int(p["age"]) < int(crop["grow_days"]) and _grove_boost(state, k, p):
+				p["age"] = int(p["age"]) + 1
 			if int(p["age"]) >= int(crop["grow_days"]):
 				var parts: PackedStringArray = (k as String).split(",")
 				events.append({"type": &"crop_grown", "hex": Vector2i(int(parts[0]), int(parts[1])), "crop": crop["id"]})
 	for k in dead:
 		state.plots.erase(k)
 		events.append({"type": &"crop_withered", "key": k})
+
+## Nyx: a plot of hers in a Fungal Grove grows two days per day.
+static func _grove_boost(state: MatchState, key: String, p: Dictionary) -> bool:
+	var hold: Dictionary = state.holdings.get(int(p["holding"]), {})
+	if hold.is_empty() or int(hold["owner"]) < 0:
+		return false
+	var leader: Dictionary = state.actors.get(int(state.factions[int(hold["owner"])]["leader"]), {})
+	if leader.is_empty() or not leader["alive"] or int(Combat.class_mod(leader, "grove_growth", 0)) < 1:
+		return false
+	var parts: PackedStringArray = key.split(",")
+	return WorldGen.biome_at(state.world, Vector2i(int(parts[0]), int(parts[1]))) == "fungal_grove"

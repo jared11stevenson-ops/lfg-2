@@ -81,6 +81,12 @@ static func to_world(h: Vector2i) -> Vector2:
 	var w: float = HEX_METERS
 	return Vector2(w * (h.x + h.y * 0.5), w * 0.8660254 * h.y)
 
+## Inverse of to_world: hex containing world point (metres).
+static func from_world(p: Vector2) -> Vector2i:
+	var r: float = p.y / (HEX_METERS * 0.8660254)
+	var q: float = p.x / HEX_METERS - r * 0.5
+	return _round(q, r)
+
 ## A* path. cost_fn(hex)->float (<=0 or INF means impassable). Returns [] if none; path excludes start, includes goal.
 static func find_path(start: Vector2i, goal: Vector2i, cost_fn: Callable, max_nodes: int = 6000) -> Array[Vector2i]:
 	var empty: Array[Vector2i] = []

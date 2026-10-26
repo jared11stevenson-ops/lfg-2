@@ -26,6 +26,8 @@ static func run(state: MatchState, dt: float, events: Array) -> void:
 			step = minf(step, 0.1)
 		elif _any_moving(state):
 			step = minf(step, 0.5)
+		elif AIFactions.has_parties(state):
+			step = minf(step, 1.0)
 		step = minf(step, maxf(_boundary_dt(state), 1e-4))
 		advance(state, step, events)
 		remaining -= step
@@ -52,6 +54,8 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 		events.append({"type": &"phase_changed", "from": old, "to": np, "day": state.clock["day"]})
 		if np == &"PURGE_ACTIVE":
 			_spawn_wave(state, events)
+			if state.opts.get("ai_enabled", true):
+				AIFactions.purge_round(state, events)
 		elif np == &"RESOLUTION":
 			settle(state, events)
 	if rolled:
@@ -59,13 +63,18 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 	_actors(state, step, events)
 	if state.opts.get("ai_enabled", true):
 		state.ai_t = MatchState.q(state.ai_t + step)
-		while state.ai_t >= AIFactions.AI_PERIOD:
-			state.ai_t = MatchState.q(state.ai_t - AIFactions.AI_PERIOD)
+		var per: float = AIFactions.period(state)
+		while state.ai_t >= per:
+			state.ai_t = MatchState.q(state.ai_t - per)
 			if state.phase == &"PURGE_ACTIVE":
 				AIFactions.purge_round(state, events)
+		AIFactions.party_step(state, events)
+	Fx.step(state, events)
 	EnemyAI.step(state, events)
 
 static func dawn(state: MatchState, events: Array) -> void:
+	Economy.dawn_buildings(state, events)
+	Economy.drift_prices(state)
 	Farming.dawn_crops(state, events)
 	if state.opts.get("ai_enabled", true):
 		AIFactions.dawn(state, events)
@@ -89,7 +98,8 @@ static func _actors(state: MatchState, step: float, events: Array) -> void:
 		if not a["alive"]:
 			continue
 		if a["kind"] != "enemy":
-			a["energy"] = MatchState.q(minf(float(a["max_energy"]), float(a["energy"]) + ENERGY_REGEN * step))
+			var regen: float = ENERGY_REGEN * Combat.offgrove_mult(state, a)
+			a["energy"] = MatchState.q(minf(float(a["max_energy"]), float(a["energy"]) + regen * step))
 		# poison / expiry
 		var effs: Array = a["effects"]
 		if not effs.is_empty():
@@ -105,15 +115,16 @@ static func _actors(state: MatchState, step: float, events: Array) -> void:
 			a["effects"] = keep
 		# movement
 		var mv: Dictionary = a["move"]
-		if a["alive"] and not mv.is_empty():
+		if a["alive"] and not mv.is_empty() and not Movement.rooted(state, a):
 			var path: Array = mv["path"]
 			mv["acc"] = MatchState.q(float(mv["acc"]) + step)
 			var moved: bool = false
 			while not path.is_empty():
 				var nxt: Vector2i = path[0]
-				var cost: float = WorldGen.move_cost(state.world, nxt) * WALK_SEC_PER_HEX
-				if float(a["hunger_slow"] if a.has("hunger_slow") else 1.0) != 1.0:
-					cost *= float(a["hunger_slow"])
+				var cost: float = Movement.step_secs(state, a, nxt)
+				if cost <= 0.0:
+					path.clear()
+					break
 				if float(mv["acc"]) + 1e-9 >= cost:
 					mv["acc"] = MatchState.q(float(mv["acc"]) - cost)
 					a["hex"] = nxt

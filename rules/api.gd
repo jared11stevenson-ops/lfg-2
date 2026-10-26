@@ -2,7 +2,7 @@ class_name Rules
 extends RefCounted
 ## Public Rules API (frozen contract). Everything is deterministic given (seed, command stream, tick stream).
 const COMMAND_TYPES: Array[StringName] = [&"move_intent", &"plant", &"water", &"harvest", &"craft", &"build", &"demolish", &"trade", &"eat",
-	&"attack", &"use_ability", &"capture", &"steal", &"set_policy", &"rest"]
+	&"attack", &"use_ability", &"capture", &"steal", &"set_policy", &"rest", &"move_to_pos", &"sync_position"]
 const MAX_PATH := 160
 
 static func new_match(seed: int, class_id: StringName, opts: Dictionary = {}) -> MatchState:
@@ -59,6 +59,8 @@ static func apply(state: MatchState, cmd: Dictionary) -> Dictionary:
 static func _dispatch(state: MatchState, a: Dictionary, t: StringName, args: Dictionary, events: Array) -> String:
 	match t:
 		&"move_intent": return _move(state, a, args)
+		&"move_to_pos": return _move_to_pos(state, a, args)
+		&"sync_position": return _sync(state, a, args, events)
 		&"plant": return Farming.plant(state, a, args, events)
 		&"water": return Farming.water(state, a, args, events)
 		&"harvest": return Farming.harvest(state, a, args, events)
@@ -96,6 +98,33 @@ static func _move(state: MatchState, a: Dictionary, args: Dictionary) -> String:
 	a["move"] = {"path": path, "acc": 0.0}
 	return ""
 
+## Walk toward a world position (metres, x east / y south, see HexGrid.to_world). Same rules as move_intent.
+static func _move_to_pos(state: MatchState, a: Dictionary, args: Dictionary) -> String:
+	var p: Variant = args.get("pos")
+	if typeof(p) == TYPE_VECTOR2:
+		p = [p.x, p.y]
+	if typeof(p) != TYPE_ARRAY or (p as Array).size() != 2:
+		return "bad_pos"
+	for c in p:
+		if (typeof(c) != TYPE_INT and typeof(c) != TYPE_FLOAT) or is_nan(float(c)) or is_inf(float(c)) or absf(float(c)) > 100000.0:
+			return "bad_pos"
+	var h: Vector2i = HexGrid.from_world(Vector2(float(p[0]), float(p[1])))
+	if not HexGrid.in_bounds(h):
+		return "bad_hex"
+	return _move(state, a, {"to": h})
+
+## Presentation-driven leader position: {hex:[q,r]}. Validated against speed/path (Movement.sync_position).
+static func _sync(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
+	var hv: Variant = CmdUtil.parse_hex(args.get("hex"))
+	if hv == null:
+		return "bad_hex"
+	return Movement.sync_position(state, a, hv, events)
+
+## Smooth authoritative position in metres for any actor (interpolates along its walking path).
+static func actor_pos(state: MatchState, actor_id: int) -> Vector2:
+	var a: Dictionary = state.actors.get(actor_id, {})
+	return Vector2.ZERO if a.is_empty() else Movement.world_pos(state, a)
+
 static func _attack(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
 	var tid: int = CmdUtil.parse_id(args.get("target"))
 	var t: Dictionary = state.actors.get(tid, {})
@@ -103,6 +132,11 @@ static func _attack(state: MatchState, a: Dictionary, args: Dictionary, events: 
 		return "bad_target"
 	if int(t["faction"]) == int(a["faction"]):
 		return "friendly"
+	if t["kind"] != "enemy":
+		if int(Combat.class_mod(a, "pacifist", 0)) > 0:
+			return "pacifist"
+		if Combat.has_effect(state, a, "truce"):
+			return "truce_active"
 	if HexGrid.distance(a["hex"], t["hex"]) > 1:
 		return "too_far"
 	if t["kind"] != "enemy" and state.phase != &"PURGE_ACTIVE":

@@ -29,16 +29,25 @@ static func hungry(state: MatchState, a: Dictionary) -> bool:
 	var f: Dictionary = state.factions.get(int(a["faction"]), {})
 	return int(f.get("hunger_days", 0)) >= 1 and a["kind"] != "enemy"
 
+## Nyx is "sickly" away from Fungal Groves (weakness). Returns the stat multiplier.
+static func offgrove_mult(state: MatchState, a: Dictionary) -> float:
+	var m: float = float(class_mod(a, "offgrove_mult", 1.0))
+	if m == 1.0 or state.world.is_empty():
+		return 1.0
+	return 1.0 if WorldGen.biome_at(state.world, a["hex"]) == "fungal_grove" else m
+
 static func atk_of(state: MatchState, a: Dictionary) -> float:
-	var v: float = float(a["atk"]) * float(class_mod(a, "atk_mult", 1.0))
+	var v: float = float(a["atk"]) * float(class_mod(a, "atk_mult", 1.0)) * offgrove_mult(state, a)
 	if has_effect(state, a, "rage"):
 		v *= 1.5
+	if has_effect(state, a, "rally"):
+		v *= 1.25
 	if hungry(state, a):
 		v *= 0.8
 	return v
 
 static func def_of(state: MatchState, a: Dictionary) -> float:
-	var v: float = float(a["def"])
+	var v: float = float(a["def"]) * offgrove_mult(state, a)
 	if has_effect(state, a, "rage"):
 		v *= 0.7
 	if hungry(state, a):
@@ -66,6 +75,13 @@ static func hurt(state: MatchState, target_id: int, amount: int, source_id: int,
 	var dmg: int = amount
 	if has_effect(state, t, "guard"):
 		dmg = maxi(1, dmg / 2)
+	var m: float = float(class_mod(t, "dmg_taken_mult", 1.0))
+	if has_effect(state, t, "evade"):
+		m *= 0.6
+	if has_effect(state, t, "ward"):
+		m *= 0.6
+	if m != 1.0:
+		dmg = maxi(1, int(round(float(dmg) * m)))
 	dmg = mini(dmg, int(t["hp"]))
 	t["hp"] = int(t["hp"]) - dmg
 	events.append({"type": &"actor_damaged", "actor": target_id, "source": source_id, "amount": dmg, "hp": t["hp"], "tag": tag})
@@ -90,12 +106,15 @@ static func kill(state: MatchState, target_id: int, killer_id: int, events: Arra
 	var loot: Dictionary = {}
 	if t["kind"] == "enemy":
 		loot = Content.enemy(String(t["archetype"])).get("loot", {}).duplicate()
+		var kr: Dictionary = state.actors.get(killer_id, {})
+		if not kr.is_empty() and int(class_mod(kr, "hunt_meat", 0)) > 0:
+			loot["lfg:item/game_meat"] = int(loot.get("lfg:item/game_meat", 0)) + int(class_mod(kr, "hunt_meat", 0)) + (1 if has_effect(state, kr, "tracking") else 0)
 	var dropped_to: String = "none"
 	var all: Dictionary = carried.duplicate()
 	Inv.add_all(all, loot)
 	if not all.is_empty():
 		var killer: Dictionary = state.actors.get(killer_id, {})
-		if not killer.is_empty() and killer["alive"] and Inv.room_for(killer["inv"], all) and HexGrid.distance(killer["hex"], t["hex"]) <= 3:
+		if not killer.is_empty() and killer["alive"] and Inv.can_carry(killer, all) and HexGrid.distance(killer["hex"], t["hex"]) <= 3:
 			Inv.add_all(killer["inv"], all)
 			dropped_to = "killer"
 		else:

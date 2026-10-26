@@ -6,22 +6,36 @@ const STEAL_CAP := 5
 const CAPTURE_RANGE := 1
 const SUPPLY_RANGE := 14
 
+static func _active(state: MatchState, h: Dictionary, key: String) -> bool:
+	return float(h.get(key, 0.0)) > float(state.clock["elapsed"])
+
 static func defender_power(state: MatchState, h: Dictionary) -> float:
 	var p: float = float(h["garrison"]) * 3.0 + 2.0
-	for b in h["buildings"]:
-		p += float(Content.building(String(b)).get("defense", 0))
+	var breached: bool = _active(state, h, "breach")
+	if not breached:
+		for b in h["buildings"]:
+			p += float(Content.building(String(b)).get("defense", 0))
 	var of: int = int(h["owner"])
 	if of >= 0:
 		var l: Dictionary = state.actors.get(int(state.factions[of]["leader"]), {})
 		if not l.is_empty() and l["alive"] and HexGrid.distance(l["hex"], h["hex"]) <= 2:
 			p += float(l["atk"]) * 2.0
+	if breached:
+		p *= 0.75
+	if _active(state, h, "rally"):
+		p *= 1.4
+	if _active(state, h, "ward"):
+		p *= 1.5
 	return p
 
-static func attacker_power(state: MatchState, actor: Dictionary, commit: int) -> float:
+static func attacker_power(state: MatchState, actor: Dictionary, commit: int, boost: float = 1.0) -> float:
 	var base: float = 3.0
-	if not actor.is_empty():
+	if not actor.is_empty() and actor["kind"] != "party":
 		base = Combat.atk_of(state, actor) * 2.0
-	return float(commit) * 3.0 + base
+	var pw: float = float(commit) * 3.0 * boost + base
+	if not actor.is_empty() and Combat.has_effect(state, actor, "ram"):
+		pw *= float(Combat.class_mod(actor, "siege_mult", 1.0))
+	return pw
 
 ## Moves as much of `bundle` as fits (per item). Returns what moved.
 static func move_fitting(from_inv: Dictionary, to_inv: Dictionary, bundle: Dictionary) -> Dictionary:
@@ -34,9 +48,19 @@ static func move_fitting(from_inv: Dictionary, to_inv: Dictionary, bundle: Dicti
 	Inv.add_all(to_inv, moved)
 	return moved
 
+static func _peaceful(state: MatchState, a: Dictionary) -> String:
+	if int(Combat.class_mod(a, "pacifist", 0)) > 0:
+		return "pacifist"
+	if Combat.has_effect(state, a, "truce"):
+		return "truce_active"
+	return ""
+
 static func capture(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
 	if state.phase != &"PURGE_ACTIVE":
 		return "not_purge"
+	var pe: String = _peaceful(state, a)
+	if pe != "":
+		return pe
 	var hid: int = CmdUtil.parse_id(args.get("holding"))
 	if not state.holdings.has(hid):
 		return "unknown_holding"
@@ -75,7 +99,10 @@ static func resolve_capture(state: MatchState, fid: int, actor_id: int, hid: int
 	var h: Dictionary = state.holdings[hid]
 	var actor: Dictionary = state.actors.get(actor_id, {})
 	var is_ai: bool = bool(state.factions[fid]["is_ai"])
-	var att: float = attacker_power(state, actor, commit) * (0.8 + 0.4 * state.rand_f())
+	var boost: float = 1.0
+	if from_id != -1 and _active(state, state.holdings[from_id], "rally"):
+		boost = 1.25
+	var att: float = attacker_power(state, actor, commit, boost) * (0.8 + 0.4 * state.rand_f())
 	var dfn: float = defender_power(state, h) * (0.8 + 0.4 * state.rand_f())
 	var prev_owner: int = int(h["owner"])
 	if from_id != -1 and commit > 0:
@@ -87,8 +114,13 @@ static func resolve_capture(state: MatchState, fid: int, actor_id: int, hid: int
 		h["garrison"] = maxi(1, survivors)
 		var loot_src: Dictionary = h["store"]
 		var half: Dictionary = {}
+		var shield: float = 0.0
+		for b in h["buildings"]:
+			shield = maxf(shield, float(Content.building(String(b)).get("loot_shield", 0.0)))
 		for k in loot_src.keys():
 			var q: int = int(loot_src[k]) / 2
+			if k == Economy.RATION and shield > 0.0:
+				q = int(float(q) * (1.0 - shield))
 			if q > 0:
 				half[k] = q
 		var moved: Dictionary = {}
@@ -128,11 +160,16 @@ static func steal_chance(state: MatchState, actor: Dictionary, h: Dictionary) ->
 		c += float(Combat.class_mod(actor, "steal_bonus", 0.0))
 	for b in h["buildings"]:
 		c -= float(Content.building(String(b)).get("steal_guard", 0.0))
+	if _active(state, h, "ward"):
+		c -= 0.25
 	return clampf(c, 0.05, 0.95)
 
 static func steal(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
 	if state.phase != &"PURGE_ACTIVE":
 		return "not_purge"
+	var pe: String = _peaceful(state, a)
+	if pe != "":
+		return pe
 	var hid: int = CmdUtil.parse_id(args.get("holding"))
 	if not state.holdings.has(hid):
 		return "unknown_holding"
@@ -149,7 +186,7 @@ static func steal(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 		return "bad_quantity"
 	if not Inv.has_all(h["store"], {item: q}):
 		return "insufficient_stock"
-	if not Inv.room_for(a["inv"], {item: q}):
+	if not Inv.can_carry(a, {item: q}):
 		return "no_room"
 	if not Combat.ready(state, a, "steal"):
 		return "cooldown"

@@ -183,7 +183,7 @@ func test_ai_full_purge_with_ticks_acts_and_stays_bounded() -> void:
 	var ev: Array = tick_all(s, 60.0 * 7.9, 5.0)
 	var ai_actions: int = 0
 	for e in ev:
-		if String(e["type"]) in ["holding_captured", "capture_failed", "item_stolen", "steal_failed"]:
+		if String(e["type"]) in ["holding_captured", "capture_failed", "item_stolen", "steal_failed", "party_dispatched"]:
 			ai_actions += 1
 			check(e["ai"] or int(e["by"]) == 0, "attributed")
 	check(ai_actions > 0, "AI raided/stole during the first purge (%d)" % ai_actions)
@@ -199,7 +199,8 @@ func test_ai_economy_rations_and_starvation() -> void:
 	check(fed >= 12, "AI factions eat rations daily (%d)" % fed)
 	var farmed: int = ev.filter(func(e: Dictionary) -> bool: return String(e["type"]) == "ai_farmed").size()
 	check(farmed > 0, "AI factions farm")
-	# starve one AI
+	# starve one AI (farming off so it cannot feed itself)
+	s.opts["ai_enabled"] = false
 	var h: Dictionary = s.holdings[int(s.factions[1]["home"])]
 	h["store"] = {}
 	h["garrison"] = 40
