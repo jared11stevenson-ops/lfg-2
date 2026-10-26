@@ -312,7 +312,7 @@ static func persons(state: MatchState, fid: int) -> int:
 	for hid in state.holdings_of(fid):
 		if not blessed(state, state.holdings[hid]):
 			g += int(state.holdings[hid]["garrison"])
-	return n + (g if up == 1.0 else int(ceil(float(g) * up - 1e-9)))
+	return n + (g if up == 1.0 else int(round(float(g) * up)))
 
 static func rations_available(state: MatchState, fid: int) -> int:
 	var f: Dictionary = state.factions[fid]

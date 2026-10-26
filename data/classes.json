@@ -387,7 +387,8 @@
    "implemented": true,
    "mods": {
     "grove_growth": 1,
-    "offgrove_mult": 0.75
+    "offgrove_mult": 0.75,
+    "offgrove_regen": 0.5
    },
    "ability": {
     "id": "lfg:ability/spore_swarm",

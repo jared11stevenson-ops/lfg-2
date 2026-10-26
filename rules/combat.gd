@@ -36,6 +36,12 @@ static func offgrove_mult(state: MatchState, a: Dictionary) -> float:
 		return 1.0
 	return 1.0 if WorldGen.biome_at(state.world, a["hex"]) == "fungal_grove" else m
 
+## Energy regeneration multiplier (Nyx regains half as fast away from groves).
+static func regen_mult(state: MatchState, a: Dictionary) -> float:
+	if offgrove_mult(state, a) == 1.0:
+		return 1.0
+	return float(class_mod(a, "offgrove_regen", 1.0))
+
 static func atk_of(state: MatchState, a: Dictionary) -> float:
 	var v: float = float(a["atk"]) * float(class_mod(a, "atk_mult", 1.0)) * offgrove_mult(state, a)
 	if has_effect(state, a, "rage"):

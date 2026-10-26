@@ -98,7 +98,7 @@ static func _actors(state: MatchState, step: float, events: Array) -> void:
 		if not a["alive"]:
 			continue
 		if a["kind"] != "enemy":
-			var regen: float = ENERGY_REGEN * Combat.offgrove_mult(state, a)
+			var regen: float = ENERGY_REGEN * Combat.regen_mult(state, a)
 			a["energy"] = MatchState.q(minf(float(a["max_energy"]), float(a["energy"]) + regen * step))
 		# poison / expiry
 		var effs: Array = a["effects"]
