@@ -96,3 +96,25 @@ func test_player_input_mapping_and_class_colors() -> void:
 	pl.set_class_colors(Color.RED, Color.BLUE)
 	check(pl.get_child_count() > 0, "model rebuilt after recolor")
 	pl.free()
+
+func test_player_process_moves_with_joystick_and_updates_fog_hex() -> void:
+	var pl := Player.new()
+	pl.world = w
+	pl.camera_yaw = 0.0
+	pl.place_on_ground(Vector2(Walk.find_spawn(w, w.start_hex).x, Walk.find_spawn(w, w.start_hex).z))
+	var hexes: Array[Vector2i] = []
+	pl.hex_changed.connect(func(h: Vector2i) -> void: hexes.append(h))
+	var start: Vector3 = pl.position
+	pl.touch_move = Vector2(0, 1) # joystick forward
+	for i in 120:
+		pl._process(1.0 / 60.0)
+	check(pl.position.z < start.z - 5.0, "forward joystick walks toward -Z (moved %.1f m)" % (start.z - pl.position.z))
+	check(w.walkable(pl.position.x, pl.position.z), "still on walkable ground")
+	check(absf(pl.position.y - w.height_at(pl.position.x, pl.position.z)) < 0.001, "feet on the terrain")
+	check(hexes.size() >= 1, "hex_changed emitted while walking (%d)" % hexes.size())
+	check(absf(wrapf(pl.rotation.y, -PI, PI)) < 0.5, "character turned to face -Z")
+	pl.input_enabled = false
+	var before: Vector3 = pl.position
+	pl._process(0.1)
+	eq(before, pl.position, "input_enabled=false freezes the player")
+	pl.free()

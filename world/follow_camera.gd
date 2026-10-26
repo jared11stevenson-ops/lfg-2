@@ -32,14 +32,19 @@ func zoom_by(factor: float) -> void:
 	distance = clampf(distance * factor, min_distance, max_distance)
 
 func snap() -> void:
-	if target != null:
-		global_position = _desired_position()
-		_aim()
+	if target == null:
+		return
+	if not is_inside_tree():
+		position = _desired_position() # headless tests build the rig off-tree
+		return
+	global_position = _desired_position()
+	_aim()
 
 func _desired_position() -> Vector3:
 	var pr: float = deg_to_rad(pitch_deg)
 	var off := Vector3(sin(yaw) * cos(pr), sin(pr), cos(yaw) * cos(pr)) * distance
-	var p: Vector3 = target.global_position + Vector3(0, look_height, 0) + off
+	var tp: Vector3 = target.global_position if target.is_inside_tree() else target.position
+	var p: Vector3 = tp + Vector3(0, look_height, 0) + off
 	if world != null:
 		p.y = maxf(p.y, world.height_at(p.x, p.z) + 3.0)
 	return p

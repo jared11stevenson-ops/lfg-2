@@ -175,22 +175,28 @@ func _on_interact() -> void:
 func nearest_interactable() -> Dictionary:
 	if world == null:
 		return {}
+	var pp := Vector2(player.position.x, player.position.z)
+	# Farm plots win over the holding they sit in when the player is right next to one.
+	var best_plot: Dictionary = {}
+	var pd: float = 5.5
+	for id in farm.plots:
+		var p: Dictionary = farm.plots[id]
+		var d2: float = pp.distance_to(p["pos"])
+		if d2 < pd:
+			pd = d2
+			var st: int = p["stage"]
+			var verb: String = "Plant seeds" if st == FarmLayer.Stage.TILLED else ("Water" if (st == FarmLayer.Stage.SEEDED or st == FarmLayer.Stage.SPROUT or st == FarmLayer.Stage.GROWING) else ("Harvest" if st == FarmLayer.Stage.RIPE else "Clear wilted crop"))
+			best_plot = {"kind": &"plot", "label": verb, "id": id, "stage": st, "dist": d2}
+	if not best_plot.is_empty():
+		return best_plot
 	var best: Dictionary = {}
 	var bd: float = prompt_range
 	for h in world.holdings:
 		var c: Vector2 = HexMath.offset_center(h["hex"].x, h["hex"].y)
-		var d: float = Vector2(player.position.x, player.position.z).distance_to(c)
+		var d: float = pp.distance_to(c)
 		if d < bd:
 			bd = d
 			best = {"kind": &"holding", "label": "Visit %s" % h["name"], "hex": h["hex"], "dist": d}
-	for id in farm.plots:
-		var p: Dictionary = farm.plots[id]
-		var d2: float = Vector2(player.position.x, player.position.z).distance_to(p["pos"])
-		if d2 < minf(bd, 5.5):
-			bd = d2
-			var st: int = p["stage"]
-			var verb: String = "Plant seeds" if st == FarmLayer.Stage.TILLED else ("Water" if (st == FarmLayer.Stage.SEEDED or st == FarmLayer.Stage.SPROUT or st == FarmLayer.Stage.GROWING) else ("Harvest" if st == FarmLayer.Stage.RIPE else "Clear wilted crop"))
-			best = {"kind": &"plot", "label": verb, "id": id, "stage": st, "dist": d2}
 	return best
 
 func _process(dt: float) -> void:
