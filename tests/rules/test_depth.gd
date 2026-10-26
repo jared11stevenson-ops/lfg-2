@@ -137,9 +137,12 @@ func test_kitchen_cooks_the_store_and_cookhouse_adds_bonus() -> void:
 	eq(Inv.count(st, "lfg:item/saltroot"), 0, "6 saltroot used")
 	eq(Inv.count(st, "lfg:item/glowfruit"), 10, "glowfruit waits")
 	s.holdings[1]["buildings"] = ["lfg:building/kitchen_2"]
-	var r1: int = Inv.count(st, "lfg:item/ration")
-	_dawn(s)
-	eq(Inv.count(st, "lfg:item/ration") - r1, 10, "cookhouse: 5 glowfruit batches of 2 -> 1+1 bonus ration each")
+	var ev2: Array = _dawn(s)
+	var made: int = 0
+	for e in ev2:
+		if String(e["type"]) == "produced":
+			made += int(e["items"]["lfg:item/ration"])
+	eq(made, 10, "cookhouse: 5 glowfruit batches of 2 -> 1+1 bonus ration each")
 	eq(Inv.count(st, "lfg:item/glowfruit"), 0, "all glowfruit cooked")
 
 func test_well_waters_thirsty_plots_at_dawn() -> void:
