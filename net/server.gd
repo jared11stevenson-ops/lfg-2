@@ -204,6 +204,10 @@ func _on_hello(peer: ENetPacketPeer, meta: Dictionary, msg: Dictionary) -> void:
 		_kick(old, "replaced")           # reconnect from a new socket wins; old binding is dropped
 	meta["key"] = key
 	s["peer"] = peer
+	# After a server restart the session is fresh but the state remembers the actor's last applied seq.
+	var acts: Variant = state.get("actors")
+	if acts is Dictionary and (acts as Dictionary).has(s["actor"]) and (acts[s["actor"]] as Dictionary).has("last_seq"):
+		s["last_seq"] = maxi(int(s["last_seq"]), int(acts[s["actor"]]["last_seq"]))
 	_send(peer, {"t": "welcome", "actor": s["actor"], "last_seq": s["last_seq"], "clock": clock,
 		"state": state.call("to_dict"), "match_over": match_over})
 
