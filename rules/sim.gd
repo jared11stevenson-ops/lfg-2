@@ -7,7 +7,7 @@ const ENERGY_REGEN := 2.0
 
 static func _boundary_dt(state: MatchState) -> float:
 	var ds: float = state.day_seconds
-	var tod: float = float(state.clock["time_of_day"])
+	var tod: float = state.tod()
 	var dt: float = (1.0 - tod) * ds
 	var dow: int = state.day_of_week()
 	if dow == 7 and tod < Calendar.PURGE_START_TOD:
@@ -36,14 +36,16 @@ static func _any_moving(state: MatchState) -> bool:
 
 static func advance(state: MatchState, step: float, events: Array) -> void:
 	state.clock["elapsed"] = MatchState.q(float(state.clock["elapsed"]) + step)
-	state.clock["time_of_day"] = MatchState.q(float(state.clock["time_of_day"]) + step / state.day_seconds)
+	state.clock["day_t"] = MatchState.q(float(state.clock["day_t"]) + step)
+	state.clock["time_of_day"] = MatchState.q(state.tod())
 	var rolled: bool = false
-	if float(state.clock["time_of_day"]) >= 1.0 - 1e-9:
+	if state.day_seconds - float(state.clock["day_t"]) < 1e-5:
 		state.clock["day"] = int(state.clock["day"]) + 1
+		state.clock["day_t"] = 0.0
 		state.clock["time_of_day"] = 0.0
 		rolled = true
 		events.append({"type": &"day_changed", "day": state.clock["day"]})
-	var np: StringName = Calendar.phase_for(int(state.clock["day"]), float(state.clock["time_of_day"]))
+	var np: StringName = Calendar.phase_for(int(state.clock["day"]), state.tod())
 	if np != state.phase:
 		var old: StringName = state.phase
 		state.phase = np

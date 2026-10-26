@@ -8,7 +8,7 @@ const SAVE_FIELDS: Array[String] = ["schema_version", "seed", "rng_state", "cloc
 var schema_version: int = SCHEMA_VERSION
 var seed: int = 0
 var rng_state: int = 1
-var clock: Dictionary = {"day": 1, "time_of_day": 0.0, "elapsed": 0.0}
+var clock: Dictionary = {"day": 1, "time_of_day": 0.0, "elapsed": 0.0, "day_t": 0.0}  # day_t = seconds into the day (authoritative)
 var phase: StringName = &"PEACE"
 var day_seconds: float = 360.0
 var actors: Dictionary = {}     # id -> actor dict
@@ -30,6 +30,15 @@ var opts: Dictionary = {}
 ## Quantise floats to 1e-6 so JSON round trips are bit-exact.
 static func q(x: float) -> float:
 	return roundf(x * 1000000.0) / 1000000.0
+
+func set_time(day: int, tod: float) -> void:
+	clock["day"] = day
+	clock["day_t"] = q(tod * day_seconds)
+	clock["time_of_day"] = q(tod)
+	phase = Calendar.phase_for(day, tod)
+
+func tod() -> float:
+	return float(clock["day_t"]) / day_seconds
 
 func rand_f() -> float:
 	var r := Rng.new(1)
@@ -126,6 +135,7 @@ static func from_dict(d: Dictionary) -> MatchState:
 	s.phase = StringName(String(s.phase))
 	s.day_seconds = float(s.day_seconds)
 	s.clock["time_of_day"] = float(s.clock["time_of_day"])
+	s.clock["day_t"] = float(s.clock.get("day_t", float(s.clock["time_of_day"]) * s.day_seconds))
 	s.clock["elapsed"] = float(s.clock["elapsed"])
 	s.ai_t = float(s.ai_t)
 	s.world = WorldGen.generate(s.seed)

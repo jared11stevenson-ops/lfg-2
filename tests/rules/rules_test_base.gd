@@ -18,9 +18,7 @@ func snap(s: MatchState) -> String:
 	return JSON.stringify(s.to_dict())
 
 func warp(s: MatchState, day: int, tod: float = 0.0) -> void:
-	s.clock["day"] = day
-	s.clock["time_of_day"] = tod
-	s.phase = Calendar.phase_for(day, tod)
+	s.set_time(day, tod)
 
 func home(s: MatchState) -> Dictionary:
 	return s.holdings[1]
