@@ -72,12 +72,24 @@ func _init() -> void:
 
 ## Generate (or accept) the world and build it over several frames. Await this or listen for ready_to_play.
 func start(seed_value: int = 1, world_override: WorldData = null) -> void:
+	_prepare(seed_value, world_override)
+	await view.build_async(4)
+	_finish()
+
+## Same as start() but builds every chunk immediately (tests, capture tools). Blocks ~1-3 s.
+func start_sync(seed_value: int = 1, world_override: WorldData = null) -> void:
+	_prepare(seed_value, world_override)
+	view.build_all()
+	_finish()
+
+func _prepare(seed_value: int, world_override: WorldData) -> void:
 	world = world_override if world_override != null else StubWorldGen.generate(seed_value)
 	fog = FogOfWar.new()
 	view.setup(world, fog)
 	farm.world = world
 	farm.bind_fog(fog.texture)
 	preview.world = world
+	preview.extra_validator = func(h: Vector2i) -> bool: return not farm.hex_has_plot(h)
 	telegraphs.world = world
 	cam.world = world
 	player.world = world
@@ -88,10 +100,48 @@ func start(seed_value: int = 1, world_override: WorldData = null) -> void:
 	fog.reveal(world.start_hex)
 	cam.target = player
 	cam.snap()
-	await view.build_async(4)
+
+func _finish() -> void:
 	_loading_layer.visible = false
 	started = true
 	ready_to_play.emit()
+
+## Start from authoritative Rules state: real world, player hex, fog, plots. Await or listen for ready_to_play.
+func start_from_state(state: Object) -> void:
+	await start(int(state.get("seed")), RulesWorldAdapter.from_state(state))
+	_apply_state(state)
+
+func start_from_state_sync(state: Object) -> void:
+	start_sync(int(state.get("seed")), RulesWorldAdapter.from_state(state))
+	_apply_state(state)
+
+func _apply_state(state: Object) -> void:
+	var actors: Variant = state.get("actors")
+	var pid: int = int(state.get("player_id"))
+	if actors is Dictionary and (actors as Dictionary).has(pid):
+		var hx: Vector2i = HexMath.axial_to_offset((actors as Dictionary)[pid]["hex"])
+		var sp: Vector3 = Walk.find_spawn(world, hx)
+		player.place_on_ground(Vector2(sp.x, sp.z))
+		fog.reveal(hx)
+		cam.snap()
+	farm.sync_from_state(state)
+	set_hud_model(HudBinder.model_from_state(state))
+
+## Call with Game.events_emitted payloads. Handles crop/phase events and enemy telegraphs.
+func on_events(events: Array, state: Object = null) -> void:
+	var farm_dirty := false
+	for e in events:
+		match e.get("type", &""):
+			&"enemy_telegraph": telegraphs.handle_event(e)
+			&"crop_planted", &"crop_grown", &"crop_watered", &"crop_harvested", &"crop_withered": farm_dirty = true
+			&"phase_changed":
+				match e.get("to", &""):
+					&"PURGE_ACTIVE": hud.toast("THE PURGE BEGINS", UiStyle.BAD, 4.0)
+					&"WARNING": hud.toast("Warning: the Purge nears", UiStyle.WARN, 4.0)
+	if state != null:
+		if farm_dirty:
+			farm.sync_from_state(state)
+		set_hud_model(HudBinder.model_from_state(state))
 
 func set_phase(phase: StringName, instant: bool = false) -> void:
 	atmosphere.set_phase(phase, instant)

@@ -16,6 +16,10 @@ func _init() -> void:
 	name = "Telegraphs"
 	_shader = load("res://world/shaders/telegraph.gdshader")
 
+func set_progress_seconds(t: float) -> void:
+	for z in _live:
+		z["t"] = t
+
 func active_count() -> int:
 	return _live.size()
 
@@ -48,8 +52,8 @@ func spawn(shape: int, origin: Vector3, yaw: float, radius: float, windup: float
 	mat.set_shader_parameter("half_angle", float(params.get("half_angle", 0.7)))
 	mat.set_shader_parameter("line_half_width", clampf(float(params.get("width", 1.5)) * 0.5 / radius, 0.03, 1.0))
 	if purge_colors:
-		mat.set_shader_parameter("color_a", Color(1.0, 0.1, 0.6))
-		mat.set_shader_parameter("color_b", Color(0.9, 0.5, 1.0))
+		mat.set_shader_parameter("color_a", Color(1.0, 0.3, 0.9))
+		mat.set_shader_parameter("color_b", Color(1.0, 1.0, 0.55))
 	node.material_override = mat
 	add_child(node)
 	_live.append({"node": node, "mat": mat, "t": 0.0, "windup": maxf(windup, 0.05), "flash": 0.2})

@@ -2,9 +2,9 @@ class_name Atmosphere
 extends Node3D
 ## Sun, ambient, fog and background. Phase changes blend smoothly; PURGE_ACTIVE goes ominous red/violet.
 const LOOKS: Dictionary = {
-	&"PEACE": {"sun": Color("fff0dc"), "sun_e": 1.19, "amb": Color("b9a8dc"), "amb_e": 0.87, "fog": Color("f1cdbd"), "fog_d": 0.0030, "sat": 1.0, "purge": 0.0},
+	&"PEACE": {"sun": Color("fff0dc"), "sun_e": 1.19, "amb": Color("b9a8dc"), "amb_e": 0.87, "fog": Color("f1cdbd"), "fog_d": 0.0026, "sat": 1.0, "purge": 0.0},
 	&"WARNING": {"sun": Color("ffbe80"), "sun_e": 1.12, "amb": Color("b890c0"), "amb_e": 0.77, "fog": Color("e9a07e"), "fog_d": 0.0036, "sat": 1.08, "purge": 0.25},
-	&"PURGE_ACTIVE": {"sun": Color("ff4a5a"), "sun_e": 1.05, "amb": Color("7a40c0"), "amb_e": 0.84, "fog": Color("4a0f44"), "fog_d": 0.0052, "sat": 1.15, "purge": 1.0},
+	&"PURGE_ACTIVE": {"sun": Color("d04088"), "sun_e": 0.7, "amb": Color("7a50e8"), "amb_e": 1.25, "fog": Color("3d0b4a"), "fog_d": 0.0056, "sat": 1.1, "purge": 1.0},
 	&"RESOLUTION": {"sun": Color("e3c8ff"), "sun_e": 1.12, "amb": Color("9a88d8"), "amb_e": 0.77, "fog": Color("b58bd0"), "fog_d": 0.0038, "sat": 1.05, "purge": 0.3},
 }
 var phase: StringName = &"PEACE"

@@ -47,6 +47,45 @@ func remove_plot(id: Variant) -> void:
 	if plots.erase(id):
 		_dirty = true
 
+func hex_has_plot(hex: Vector2i) -> bool:
+	for p in plots.values():
+		var pos: Vector2 = p["pos"]
+		if HexMath.world_to_offset(pos.x, pos.y) == hex:
+			return true
+	return false
+
+## Rebuild every plot from Rules state (state.plots: "q,r" -> {crop, age, watered, ...}). Cheap; call on crop events.
+func sync_from_state(state: Object) -> void:
+	var src: Variant = state.get("plots")
+	if not (src is Dictionary):
+		return
+	var keep: Dictionary = {}
+	for k in src:
+		var p: Dictionary = src[k]
+		var parts: PackedStringArray = String(k).split(",")
+		var off: Vector2i = HexMath.axial_to_offset(Vector2i(int(parts[0]), int(parts[1])))
+		var c: Vector2 = HexMath.offset_center(off.x, off.y)
+		var grow_days: int = 3
+		var crop: Variant = Content.crop(String(p.get("crop", "")))
+		if crop is Dictionary and (crop as Dictionary).has("grow_days"):
+			grow_days = maxi(int(crop["grow_days"]), 1)
+		var st: int = stage_for_age(int(p.get("age", 0)), grow_days)
+		var tint := Color.WHITE
+		keep[k] = true
+		if not plots.has(k) or plots[k]["stage"] != st or plots[k]["watered"] != bool(p.get("watered", false)):
+			set_plot(k, c, st, bool(p.get("watered", false)), tint)
+	for k in plots.keys():
+		if not keep.has(k):
+			remove_plot(k)
+
+static func stage_for_age(age: int, grow_days: int) -> int:
+	if age >= grow_days:
+		return Stage.RIPE
+	if age <= 0:
+		return Stage.SEEDED
+	var f: float = float(age) / float(grow_days)
+	return Stage.SPROUT if f < 0.5 else Stage.GROWING
+
 func stage_of(id: Variant) -> int:
 	return plots[id]["stage"] if plots.has(id) else -1
 

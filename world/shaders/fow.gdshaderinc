@@ -1,7 +1,7 @@
 // Shared hex lookup + fog-of-war. Pointy-top, odd-r offset, 16 m flat-to-flat (matches HexMath).
 uniform sampler2D fow_tex : filter_nearest, repeat_disable;
 uniform bool fow_enabled = true;
-uniform vec3 fow_unseen_color : source_color = vec3(0.16, 0.08, 0.26);
+uniform vec3 fow_unseen_color : source_color = vec3(0.27, 0.10, 0.44);
 uniform bool grid_on = false;
 uniform vec3 grid_color : source_color = vec3(1.0, 0.9, 0.5);
 

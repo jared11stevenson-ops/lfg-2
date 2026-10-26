@@ -87,7 +87,11 @@ static func generate(seed_value: int) -> WorldData:
 		if HexMath.distance(Vector2i(i % cols, i / cols), w.start_hex) > 5:
 			w.biome[i] = Biomes.B.SHORE
 	_holdings(w)
-	_heights(w)
+	w.terrain.resize(cols * rows)
+	for i in cols * rows:
+		w.terrain[i] = WorldData.T_DEEP if w.biome[i] == Biomes.B.WATER else WorldData.T_GROUND
+	w.road.resize(cols * rows)
+	TerrainHeights.build(w)
 	return w
 
 static func _holdings(w: WorldData) -> void:
@@ -110,60 +114,3 @@ static func _holdings(w: WorldData) -> void:
 				break
 		if ok:
 			w.holdings.append({"hex": c, "name": syll[rng.randi() % syll.size()] + tail[rng.randi() % tail.size()], "owner": 1 + (w.holdings.size() % 5)})
-
-static func _heights(w: WorldData) -> void:
-	var nx1: int = WorldData.NX + 1
-	var nz1: int = WorldData.NZ + 1
-	var det := FastNoiseLite.new()
-	det.seed = w.world_seed + 7
-	det.frequency = 0.02
-	det.fractal_octaves = 3
-	var cliff := FastNoiseLite.new()
-	cliff.seed = w.world_seed + 77
-	cliff.frequency = 0.0075
-	var base: PackedFloat32Array = PackedFloat32Array()
-	base.resize(nx1 * nz1)
-	var cliff_add: PackedFloat32Array = PackedFloat32Array()
-	cliff_add.resize(nx1 * nz1)
-	# per-biome base height + amplitude
-	var bh: Array[float] = [2.0, 0.7, 3.0, 2.6, 1.4, 9.0, 0.55, -4.0]
-	var ba: Array[float] = [1.3, 0.35, 3.0, 1.2, 0.35, 6.0, 0.35, 0.2]
-	for iz in nz1:
-		for ix in nx1:
-			var x: float = WorldData.ORIGIN.x + float(ix) * WorldData.CELL
-			var z: float = WorldData.ORIGIN.y + float(iz) * WorldData.CELL
-			var b: int = w.biome_at(x, z)
-			var n: float = det.get_noise_2d(x, z)
-			base[iz * nx1 + ix] = bh[b] + n * ba[b]
-			if b == Biomes.B.HIGHLANDS:
-				var cn: float = cliff.get_noise_2d(x, z) * 0.5 + 0.5
-				cliff_add[iz * nx1 + ix] = 7.0 * smoothstep(0.50, 0.53, cn) + 7.0 * smoothstep(0.70, 0.73, cn)
-	# two separable 5-tap blur passes so biome borders become ramps.
-	var tmp := PackedFloat32Array()
-	tmp.resize(nx1 * nz1)
-	for _pass in 2:
-		for iz in nz1:
-			for ix in nx1:
-				var s: float = 0.0
-				for k in range(-2, 3):
-					s += base[iz * nx1 + clampi(ix + k, 0, nx1 - 1)]
-				tmp[iz * nx1 + ix] = s / 5.0
-		for iz in nz1:
-			for ix in nx1:
-				var s2: float = 0.0
-				for k in range(-2, 3):
-					s2 += tmp[clampi(iz + k, 0, nz1 - 1) * nx1 + ix]
-				base[iz * nx1 + ix] = s2 / 5.0
-	w.heights.resize(nx1 * nz1)
-	for i in base.size():
-		w.heights[i] = base[i] + cliff_add[i]
-	# Flatten the homestead so the first hex-ring is pleasant to farm.
-	var sp: Vector2 = HexMath.offset_center(w.start_hex.x, w.start_hex.y)
-	for iz in nz1:
-		for ix in nx1:
-			var x2: float = WorldData.ORIGIN.x + float(ix) * WorldData.CELL
-			var z2: float = WorldData.ORIGIN.y + float(iz) * WorldData.CELL
-			var d: float = Vector2(x2, z2).distance_to(sp)
-			if d < 60.0:
-				var t: float = 1.0 - smoothstep(30.0, 60.0, d)
-				w.heights[iz * nx1 + ix] = lerpf(w.heights[iz * nx1 + ix], 2.0, t)

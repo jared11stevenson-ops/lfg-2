@@ -100,12 +100,18 @@ func _tri_color(a: Vector3, b: Vector3, c: Vector3, ix: int, iz: int, t: int) ->
 		n = -n
 	var nz: float = _hash01(ix, iz, t)
 	var col: Color = Biomes.GROUND[biome_id].lerp(Biomes.GROUND_ALT[biome_id], nz * 0.85)
+	var hx: Vector2i = HexMath.world_to_offset(cen.x, cen.z)
+	var hn: float = _hash01(hx.x, hx.y, 5)
+	if hn > 0.45:
+		col = col.lerp(Biomes.ACCENT[biome_id], (hn - 0.45) * 0.95)
 	if cen.y < 0.35:
 		# wet sand / lake bed
 		var depth: float = clampf(-cen.y / 3.5, 0.0, 1.0)
 		col = col.lerp(Color("2b7f8c"), 0.25 + depth * 0.7)
 	elif biome_id == Biomes.B.HIGHLANDS:
 		col = col.lerp(Color("d9c6ee"), clampf(cen.y / 26.0, 0.0, 0.5))
+	if data.is_road(hx):
+		col = col.lerp(Color("f0d9a8"), 0.55)
 	var rock_t: float = smoothstep(0.88, 0.62, n.y)
 	if rock_t > 0.0:
 		col = col.lerp(Biomes.ROCK.lerp(Color("a58bb5"), nz), rock_t)

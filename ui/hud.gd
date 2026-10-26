@@ -52,7 +52,7 @@ func _build() -> void:
 	purge_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var sm := ShaderMaterial.new()
 	var sh := Shader.new()
-	sh.code = "shader_type canvas_item;\nuniform float amount = 0.0;\nuniform vec3 tint : source_color = vec3(0.8,0.0,0.2);\nvoid fragment(){ vec2 q = UV-0.5; float v = smoothstep(0.18, 0.75, length(q*vec2(1.0,1.25))); COLOR = vec4(tint, v*amount*0.75); }"
+	sh.code = "shader_type canvas_item;\nuniform float amount = 0.0;\nuniform vec3 tint : source_color = vec3(0.55,0.0,0.4);\nvoid fragment(){ vec2 q = UV-0.5; float v = smoothstep(0.18, 0.75, length(q*vec2(1.0,1.25))); COLOR = vec4(tint, v*amount*0.75); }"
 	sm.shader = sh
 	purge_veil.material = sm
 	root.add_child(purge_veil)

@@ -2,7 +2,7 @@ class_name BuildPreview
 extends Node3D
 ## Building placement ghost: hex footprint + toy-house ghost, green when valid, red when not.
 ## Validity = WorldData.can_build(hex) AND (optional) `extra_validator.call(hex) -> bool` (e.g. Rules check).
-const VALID_COLOR := Color(0.25, 1.0, 0.45, 0.5)
+const VALID_COLOR := Color(0.25, 1.0, 0.45, 0.55)
 const INVALID_COLOR := Color(1.0, 0.2, 0.25, 0.5)
 var world: WorldData
 var hex: Vector2i = Vector2i(-1, -1)
@@ -106,4 +106,4 @@ func _pt(cen: Vector2, ang: float, f: float, base_y: float) -> Vector3:
 func _process(_dt: float) -> void:
 	if visible:
 		_ghost.position.y = 0.0
-		_ghost_mat.albedo_color.a = 0.42 + 0.14 * sin(Time.get_ticks_msec() * 0.008)
+		_ghost_mat.albedo_color.a = 0.55 + 0.15 * sin(Time.get_ticks_msec() * 0.008)

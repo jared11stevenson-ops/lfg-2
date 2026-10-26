@@ -44,8 +44,11 @@ func reveal(center: Vector2i, radius: int = -1) -> bool:
 			var cc := Vector2i(c, r)
 			if HexMath.distance(cc, center) <= radius:
 				next.append(HexMath.idx(cc))
+	var next_set := {}
+	for i in next:
+		next_set[i] = true
 	for i in _visible_cells:
-		if state[i] == VISIBLE:
+		if not next_set.has(i) and state[i] == VISIBLE:
 			state[i] = SEEN
 			changed_any = true
 	for i in next:

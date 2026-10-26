@@ -9,9 +9,15 @@ const NZ := 190
 const WATER_LEVEL := 0.0
 const WALK_MIN_HEIGHT := 0.18
 const MAX_WALK_SLOPE := 0.95 # rise/run; steeper than this is a cliff
+const T_GROUND := 0 # same codes as rules/worldgen.gd
+const T_SHALLOW := 1
+const T_DEEP := 2
+const T_CLIFF := 3
 
 var world_seed: int = 0
 var biome: PackedByteArray = PackedByteArray() # HexMath.COLS*ROWS, Biomes.B
+var terrain: PackedByteArray = PackedByteArray() # T_* per hex (empty = all ground)
+var road: PackedByteArray = PackedByteArray() # 0/1 per hex
 var heights: PackedFloat32Array = PackedFloat32Array() # (NX+1)*(NZ+1)
 var holdings: Array[Dictionary] = [] # {hex:Vector2i, name:String, owner:int}
 var start_hex: Vector2i = Vector2i(42, 27)
@@ -20,6 +26,14 @@ func biome_hex(c: Vector2i) -> int:
 	if not HexMath.in_bounds(c):
 		return Biomes.B.WATER
 	return biome[HexMath.idx(c)]
+
+func terrain_hex(c: Vector2i) -> int:
+	if terrain.size() == 0 or not HexMath.in_bounds(c):
+		return T_GROUND if terrain.size() == 0 else T_DEEP
+	return terrain[HexMath.idx(c)]
+
+func is_road(c: Vector2i) -> bool:
+	return road.size() > 0 and HexMath.in_bounds(c) and road[HexMath.idx(c)] == 1
 
 func biome_at(x: float, z: float) -> int:
 	return biome_hex(HexMath.world_to_offset(x, z))
@@ -63,7 +77,10 @@ func walkable(x: float, z: float) -> bool:
 	var c: Vector2i = HexMath.world_to_offset(x, z)
 	if not HexMath.in_bounds(c) or biome[HexMath.idx(c)] == Biomes.B.WATER:
 		return false
-	if height_at(x, z) < WALK_MIN_HEIGHT:
+	var t: int = terrain_hex(c)
+	if t == T_DEEP or t == T_CLIFF:
+		return false
+	if height_at(x, z) < (WALK_MIN_HEIGHT if t != T_SHALLOW else -0.75): # shallows are wadeable
 		return false
 	return slope_at(x, z) <= MAX_WALK_SLOPE
 
@@ -75,7 +92,7 @@ func holding_at(c: Vector2i) -> int:
 
 ## Building is allowed on dry, gentle land that is not already a holding hex.
 func can_build(c: Vector2i) -> bool:
-	if not HexMath.in_bounds(c) or biome_hex(c) == Biomes.B.WATER:
+	if not HexMath.in_bounds(c) or biome_hex(c) == Biomes.B.WATER or terrain_hex(c) != T_GROUND:
 		return false
 	var p: Vector2 = HexMath.offset_center(c.x, c.y)
 	if height_at(p.x, p.y) < WALK_MIN_HEIGHT or slope_at(p.x, p.y) > 0.45:

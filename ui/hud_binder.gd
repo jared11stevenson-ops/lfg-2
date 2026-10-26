@@ -1,42 +1,35 @@
 class_name HudBinder
 extends RefCounted
-## Duck-typed MatchState -> HUD model. Tolerant of fields not existing yet (Stream A is concurrent);
-## anything missing falls back to a neutral default instead of erroring.
-static func _get(o: Variant, key: String, default: Variant) -> Variant:
-	if o is Dictionary:
-		return (o as Dictionary).get(key, default)
-	if o is Object:
-		var v: Variant = (o as Object).get(key)
-		return default if v == null else v
-	return default
-
-static func model_from_state(state: Object, actor_id: int = 0) -> Dictionary:
-	var clock: Variant = _get(state, "clock", {})
+## MatchState (Rules) -> HUD model. Read-only; never mutates state.
+static func model_from_state(state: Object, actor_id: int = -1) -> Dictionary:
+	var clock: Dictionary = state.get("clock") if state.get("clock") is Dictionary else {}
+	var pid: int = int(state.get("player_id")) if actor_id < 0 else actor_id
 	var m: Dictionary = {
-		"day": int(_get(clock, "day", 1)),
-		"time_of_day": float(_get(clock, "time_of_day", 0.0)),
-		"phase": StringName(str(_get(state, "phase", &"PEACE"))),
-		"rations": 0, "rations_per_day": 1, "class_label": "", "hp": 1.0, "hp_max": 1.0, "inventory": [], "prompt": "",
+		"day": int(clock.get("day", 1)),
+		"time_of_day": float(clock.get("time_of_day", 0.0)),
+		"phase": StringName(str(state.get("phase"))),
+		"rations": 0, "rations_per_day": 1, "class_label": "", "hp": 1.0, "hp_max": 1.0, "inventory": [],
 	}
-	var actors: Variant = _get(state, "actors", null)
-	var a: Variant = null
-	if actors is Dictionary:
-		a = (actors as Dictionary).get(actor_id, (actors as Dictionary).get(str(actor_id), null))
-	elif actors is Array and actor_id < (actors as Array).size():
-		a = (actors as Array)[actor_id]
-	if a != null:
-		m["class_label"] = str(_get(a, "class_label", _get(a, "class_id", "")))
-		m["hp"] = float(_get(a, "hp", 1.0))
-		m["hp_max"] = float(_get(a, "hp_max", _get(a, "max_hp", 1.0)))
-		var inv: Variant = _get(a, "inventory", {})
-		var rations: int = 0
-		var items: Array = []
-		if inv is Dictionary:
-			for k in inv:
-				var cnt: int = int(inv[k])
-				if str(k).ends_with("ration"):
-					rations += cnt
-				items.append({"id": k, "name": str(k).get_slice("/", 1) if str(k).contains("/") else str(k), "count": cnt, "color": Color.from_hsv(fmod(float(hash(k) & 0xff) / 255.0, 1.0), 0.7, 1.0)})
-		m["inventory"] = items
-		m["rations"] = rations
+	var actors: Variant = state.get("actors")
+	if not (actors is Dictionary) or not (actors as Dictionary).has(pid):
+		return m
+	var a: Dictionary = actors[pid]
+	var cd: Dictionary = Content.class_def(String(a.get("class_id", "")))
+	var nm: String = String(a.get("name", ""))
+	var cname: String = String(cd.get("id", "")).get_slice("/", 1).capitalize()
+	m["class_label"] = ("%s - %s" % [cname, String(cd.get("name", ""))]) if not cd.is_empty() else nm
+	m["hp"] = float(a.get("hp", 1))
+	m["hp_max"] = float(a.get("max_hp", 1))
+	var fid: int = int(a.get("faction", 0))
+	m["rations"] = Economy.rations_available(state as MatchState, fid)
+	m["rations_per_day"] = maxi(Economy.persons(state as MatchState, fid), 1)
+	var items: Array = []
+	var inv: Dictionary = a.get("inv", {})
+	var keys: Array = inv.keys()
+	keys.sort()
+	for k in keys:
+		var it: Dictionary = Content.item(String(k))
+		var nm2: String = String(it.get("name", String(k).get_slice("/", 1).capitalize()))
+		items.append({"id": k, "name": nm2, "count": int(inv[k]), "color": Color.from_hsv(float(absi(hash(String(k))) % 360) / 360.0, 0.65, 1.0)})
+	m["inventory"] = items
 	return m

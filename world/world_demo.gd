@@ -8,39 +8,38 @@ var day: int = 1
 var tod: float = 0.4
 var auto_clock: bool = true
 var demo_seed: int = 7
+var state: MatchState
 
 func _ready() -> void:
 	stage = WorldStage.new()
 	add_child(stage)
-	stage.set_hud_model({"day": 1, "time_of_day": tod, "phase": &"PEACE", "rations": 14, "rations_per_day": 4, "class_label": "Judd - Farmer", "hp": 80.0, "hp_max": 100.0, "prompt": "",
-		"inventory": [
-			{"id": "lfg:crop/glowfruit", "name": "Glowfruit", "count": 12, "color": Color("ff2fb5")},
-			{"id": "lfg:item/seed", "name": "Seeds", "count": 30, "color": Color("e6ff2e")},
-			{"id": "lfg:item/hoe", "name": "Hoe", "count": 1, "color": Color("c9a070")},
-			{"id": "lfg:item/spore", "name": "Spore", "count": 4, "color": Color("19e0c8")},
-			{"id": "lfg:item/wood", "name": "Wood", "count": 22, "color": Color("a06a3a")},
-		]})
+	state = Rules.new_match(demo_seed, &"lfg:class/judd")
 	stage.interact_requested.connect(_on_interact)
 	stage.action_requested.connect(func() -> void: stage.hud.toast("Swing!", UiStyle.BAD, 1.0))
-	await stage.start(demo_seed)
+	await stage.start_from_state(state)
 	_seed_demo_plots()
 	stage.hud.toast("Welcome to the Homestead", UiStyle.GOOD)
 
+## Plant through the real Rules API next to the start holding, then fast-forward ages for variety.
 func _seed_demo_plots() -> void:
-	var h: Vector2i = stage.world.start_hex
-	var stages: Array[int] = [FarmLayer.Stage.TILLED, FarmLayer.Stage.SEEDED, FarmLayer.Stage.SPROUT, FarmLayer.Stage.GROWING]
-	for i in 4:
-		stage.farm.set_plot("a%d" % i, stage.farm.slot_position(h, i), stages[i], i == 1)
-	var h2 := Vector2i(h.x + 1, h.y)
-	var st2: Array[int] = [FarmLayer.Stage.RIPE, FarmLayer.Stage.WILTED, FarmLayer.Stage.RIPE, FarmLayer.Stage.GROWING]
-	for i in 4:
-		stage.farm.set_plot("b%d" % i, stage.farm.slot_position(h2, i), st2[i])
+	var start_ax: Vector2i = state.world["start"]
+	var n: int = 0
+	for h in HexGrid.ring_within(start_ax, 2):
+		if h == start_ax or n >= 6:
+			continue
+		var res: Dictionary = Rules.apply(state, {"type": &"plant", "actor": 1, "seq": 100 + n, "args": {"crop": "lfg:crop/glowfruit", "hex": h}})
+		if res.get("ok", false):
+			var k: String = MatchState.plot_key(h)
+			state.plots[k]["age"] = n % 3
+			state.plots[k]["watered"] = n % 2 == 0
+			n += 1
+	stage.farm.sync_from_state(state)
 
 func _on_interact(kind: StringName, data: Dictionary) -> void:
 	if kind == &"plot":
 		var st: int = data["stage"]
 		var p: Dictionary = stage.farm.plots[data["id"]]
-		stage.farm.set_plot(data["id"], p["pos"], mini(st + 1, FarmLayer.Stage.RIPE) if st != FarmLayer.Stage.RIPE else FarmLayer.Stage.TILLED, st == FarmLayer.Stage.SEEDED)
+		stage.farm.set_plot(data["id"], p["pos"], (st + 1) % FarmLayer.Stage.size(), p["watered"])
 	stage.hud.toast("%s" % data.get("label", ""), UiStyle.TEXT, 1.5)
 
 func _unhandled_key_input(ev: InputEvent) -> void:

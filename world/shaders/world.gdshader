@@ -26,8 +26,9 @@ void fragment() {
 	col = mix(vec3(lum), col, saturation);
 	if (fow_enabled) {
 		if (st < 0.25) {
-			col = srgb_to_lin(fow_unseen_color) * 1.0;
-			EMISSION = srgb_to_lin(fow_unseen_color) * 0.9;
+			float e = hex_edge_dist(hi.zw);
+			float line = 1.0 - smoothstep(0.1, 0.5, e);
+			EMISSION = srgb_to_lin(fow_unseen_color) * 1.1 + srgb_to_lin(vec3(0.55, 0.3, 0.9)) * line * 0.45;
 			ALBEDO = vec3(0.0);
 		} else if (st < 0.75) {
 			vec3 grey = vec3(dot(col, vec3(0.299, 0.587, 0.114)));

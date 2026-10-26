@@ -19,6 +19,9 @@ const GROUND: Array[Color] = [
 const GROUND_ALT: Array[Color] = [
 	Color("bf9444"), Color("e3b878"), Color("8f3f7a"), Color("8a6652"), Color("e8c6c0"), Color("705582"), Color("3f7a62"), Color("166a80"),
 ]
+const ACCENT: Array[Color] = [
+	Color("b4cf4a"), Color("ffd0a0"), Color("37c9b8"), Color("d4705a"), Color("ffb0d0"), Color("a98ae0"), Color("39c9a0"), Color("1b7f93"),
+]
 const ROCK := Color("6d5382")
 const FUNGI: Array[Color] = [Color("ff2fb5"), Color("19e0c8"), Color("e6ff2e"), Color("ff7a2f"), Color("8f5cff")]
 

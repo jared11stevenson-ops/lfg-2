@@ -125,7 +125,7 @@ func _run() -> void:
 	var vh := Vector2i(-1, -1)
 	var ih := Vector2i(-1, -1)
 	for n in HexMath.neighbors(home):
-		if stage.world.can_build(n) and vh.x < 0:
+		if stage.preview.is_valid_hex(n) and vh.x < 0:
 			vh = n
 	for r in range(home.y - 8, home.y + 8):
 		for c in range(home.x - 8, home.x + 8):
@@ -147,7 +147,9 @@ func _run() -> void:
 	stage.cam.yaw = 0.0
 	stage.cam.snap()
 	demo.demo_telegraph()
-	await _frames(70)
+	await _frames(2)
+	stage.telegraphs.set_progress_seconds(1.4)
+	await _frames(1)
 	await _shot("12_enemy_telegraphs")
 	stage.set_phase(&"PEACE", true)
 	await _frames(2)
@@ -167,6 +169,31 @@ func _run() -> void:
 	await _shot("14_hex_grid_and_bag")
 	stage.hud.set_bag_open(false)
 	stage.toggle_grid()
+	# 16 fog of war from a high camera: only the start radius is explored
+	var fresh := FogOfWar.new()
+	for i in stage.fog.state.size():
+		stage.fog.state[i] = FogOfWar.UNSEEN
+	stage.fog.reveal_all = false
+	stage.fog._visible_cells = []
+	_tp(home, 4)
+	stage.cam.max_distance = 260.0
+	stage.cam.distance = 140.0
+	stage.cam.pitch_deg = 48.0
+	stage.cam.snap()
+	await _shot("16_fog_of_war")
+	# 17 farm growth-state lineup (Tilled, Seeded, Sprout, Growing, Ripe, Wilted)
+	stage.farm.plots.clear()
+	var base: Vector2 = HexMath.offset_center(home.x, home.y) + Vector2(-16, 26)
+	for s_i in FarmLayer.STAGE_NAMES.size():
+		stage.farm.set_plot("L%d" % s_i, base + Vector2(float(s_i) * 6.5, 0), s_i, s_i == 1)
+	stage.player.place_on_ground(base + Vector2(16, 9))
+	stage.fog.reveal(home, 6)
+	stage.cam.distance = 34.0
+	stage.cam.pitch_deg = 40.0
+	stage.cam.snap()
+	await _shot("17_farm_growth_states")
+	var mon := {"draw_calls": Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), "objects": Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME), "primitives": Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME), "fps_software_gl": Performance.get_monitor(Performance.TIME_FPS)}
+	print("RENDERMON ", mon)
 	# 15 phone-landscape aspect
 	root.size = Vector2i(1440, 640)
 	await _frames(3)
