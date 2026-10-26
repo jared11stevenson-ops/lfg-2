@@ -14,11 +14,11 @@ func run(main: Node) -> void:
 	var n: int = 0
 	for h in HexGrid.ring_within(here, 1):
 		if n >= 4: break
-		var r: Dictionary = m._cmd(&"plant", {"crop": "lfg:crop/glowfruit", "hex": h})
-		log.append("plant %s -> %s" % [h, r.get("ok")])
+		var r: Dictionary = m.cmd(&"plant", {"crop": "lfg:crop/glowfruit", "hex": h})
+		log.append("plant %s -> %s %s" % [h, r.get("ok"), r.get("error")])
 		if r.get("ok"):
 			n += 1
-			m._cmd(&"water", {"hex": h})
+			m.cmd(&"water", {"hex": h})
 	m.stage.farm.sync_from_state(st)
 	await _shot("02_planted")
 	var pid: int = st.player_id

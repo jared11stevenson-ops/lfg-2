@@ -1,15 +1,21 @@
 extends Node
-## Autoload "Game": bridge between Rules (pure) and presentation.
+## Autoload "Game": holds the active GameSession (local or online) and re-exposes state/events to presentation.
 signal events_emitted(events: Array)
 signal state_replaced()
+var session: GameSession
 var state: RefCounted
+func use_session(s: GameSession) -> void:
+	if session != null:
+		session.close()
+		session.queue_free()
+	session = s
+	add_child(s)
+	state = s.state
+	s.events_emitted.connect(func(e: Array) -> void: events_emitted.emit(e))
+	s.state_replaced.connect(func() -> void:
+		state = s.state
+		state_replaced.emit())
+func command(type: StringName, args: Dictionary = {}) -> Dictionary:
+	return session.command(type, args) if session != null else {"ok": false, "error": "no_session"}
 func submit(cmd: Dictionary) -> Dictionary:
-	var res: Dictionary = Rules.apply(state, cmd)
-	if res.get("ok", false):
-		events_emitted.emit(res.get("events", []))
-	return res
-func _process(dt: float) -> void:
-	if state != null:
-		var ev: Array = Rules.tick(state, dt)
-		if ev.size() > 0:
-			events_emitted.emit(ev)
+	return session.submit(cmd) if session != null else {"ok": false, "error": "no_session"}
