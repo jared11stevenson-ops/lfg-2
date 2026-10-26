@@ -269,8 +269,8 @@
    "purge_kit": "Envoy truce flag.",
    "weakness": "Fragile.",
    "stats": {
-    "hp": 65,
-    "atk": 2,
+    "hp": 70,
+    "atk": 3,
     "def": 0,
     "energy": 100
    },
