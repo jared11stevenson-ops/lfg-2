@@ -77,7 +77,9 @@ static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> Ma
 	var hp: int = int(round(float(stt["hp"]) * float(cd.get("mods", {}).get("max_hp_mult", 1.0))))
 	var p: Dictionary = make_actor(1, "leader", 0, "Leader", start, hp, int(stt["atk"]), int(stt["def"]), int(stt["energy"]))
 	p["class_id"] = String(class_id)
-	p["inv"] = cd["start_kit"].duplicate()
+	p["inv"] = {}
+	for k in (cd["start_kit"] as Dictionary).keys():
+		p["inv"][k] = int(cd["start_kit"][k])      # data JSON numbers are floats; state must hold ints
 	s.actors[1] = p
 	s.player_id = 1
 	s.factions[0] = {"id": 0, "name": "You", "is_ai": false, "leader": 1, "home": 1, "alive": true, "hunger_days": 0, "persona": "player"}

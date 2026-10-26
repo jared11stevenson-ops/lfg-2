@@ -370,7 +370,7 @@ static func _dispatch(state: MatchState, fid: int, home_id: int, target_id: int,
 	home["garrison"] = int(home["garrison"]) - troops
 	var pid: int = state.new_id()
 	var p: Dictionary = Setup.make_actor(pid, "party", fid, "%s %s" % [f["name"], "Raiders" if mission == "capture" else "Thieves"], home["hex"], troops * HP_PER_TROOP, 2, 1, 0)
-	p["speed_mult"] = tscale(state)
+	p["speed_mult"] = MatchState.q(tscale(state))
 	p["ai"] = {"state": "march", "mission": mission, "target": target_id, "home": home_id, "troops": troops, "item": item, "qty": qty,
 		"warned": false, "retry": 0, "scout_t": now + 3.0, "hit_t": 0.0, "sortie_t": 0.0, "siege_end": 0.0}
 	p["move"] = {"path": path, "acc": 0.0}

@@ -162,6 +162,8 @@ static func steal_chance(state: MatchState, actor: Dictionary, h: Dictionary) ->
 		c -= float(Content.building(String(b)).get("steal_guard", 0.0))
 	if _active(state, h, "ward"):
 		c -= 0.25
+	if _active(state, h, "alert"):
+		c -= 0.15         # a robbed/raided holding is on its guard for 30s
 	return clampf(c, 0.05, 0.95)
 
 static func steal(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
@@ -202,9 +204,10 @@ static func resolve_steal(state: MatchState, fid: int, actor_id: int, hid: int, 
 	var chance: float = steal_chance(state, actor, h)
 	if state.rand_f() < chance:
 		Inv.transfer(h["store"], dest, {item: qty})
-		events.append({"type": &"item_stolen", "holding": hid, "by": fid, "ai": is_ai, "actor": actor_id, "item": item, "qty": qty})
+		events.append({"type": &"item_stolen", "holding": hid, "by": fid, "ai": is_ai, "actor": actor_id, "item": item, "qty": qty, "chance": chance})
 		return true
-	events.append({"type": &"steal_failed", "holding": hid, "by": fid, "ai": is_ai, "actor": actor_id, "item": item, "qty": qty})
+	h["alert"] = MatchState.q(float(state.clock["elapsed"]) + 30.0)
+	events.append({"type": &"steal_failed", "holding": hid, "by": fid, "ai": is_ai, "actor": actor_id, "item": item, "qty": qty, "chance": chance})
 	if not actor.is_empty():
 		var dmg: int = 2
 		var cd: Dictionary = Content.class_def(String(actor["class_id"]))
