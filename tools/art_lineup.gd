@@ -2,6 +2,7 @@ extends SceneTree
 ## Character lineup sheet: 14 classes, 6 enemies, NPCs. Needs a display:
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --rendering-driver opengl3 --resolution 1280x720 -s tools/art_lineup.gd
 var out_dir: String = "res://art/captures/pass1"
+var _cam: Camera3D
 
 func _init() -> void:
 	_run()
@@ -56,6 +57,7 @@ func _stage(rigs: Array, cols: int, spacing: float, cam_dist: float) -> Node3D:
 	w.add_child(cam)
 	cam.look_at(Vector3(0, 1.4, 0))
 	cam.current = true
+	_cam = cam
 	return w
 
 func _run() -> void:
@@ -75,4 +77,46 @@ func _run() -> void:
 	foes.append(CharacterKit.build_npc("raider", 3))
 	var w2: Node3D = _stage(foes, 5, 5.5, 26.0)
 	await _save("enemies_npcs_raiders")
+	w2.queue_free()
+	await _buildings_and_crops()
 	quit()
+
+func _vc_mat() -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.vertex_color_use_as_albedo = true
+	m.vertex_color_is_srgb = true
+	m.roughness = 1.0
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	return m
+
+func _mesh_row(w: Node3D, meshes: Array, cols: int, spacing: float, scale_f: float = 1.0) -> void:
+	var rows: int = int(ceil(float(meshes.size()) / float(cols)))
+	var mat: StandardMaterial3D = _vc_mat()
+	for i in meshes.size():
+		var mi := MeshInstance3D.new()
+		mi.mesh = meshes[i]
+		mi.material_override = mat
+		mi.scale = Vector3.ONE * scale_f
+		mi.position = Vector3((float(i % cols) - float(cols - 1) * 0.5) * spacing, 0, (float(i / cols) - float(rows - 1) * 0.5) * spacing)
+		mi.rotation.y = 0.5
+		w.add_child(mi)
+
+func _buildings_and_crops() -> void:
+	var w: Node3D = _stage([], 1, 1.0, 40.0)
+	var ms: Array = []
+	for id in BuildingModels.all_ids():
+		ms.append(BuildingModels.mesh_for(id))
+	_mesh_row(w, ms, 4, 12.0)
+	_cam.position = Vector3(0, 44, 46)
+	_cam.look_at(Vector3(0, 1, 2))
+	await _save("buildings_all_types")
+	w.queue_free()
+	var w2: Node3D = _stage([], 1, 1.0, 30.0)
+	var cm: Array = []
+	for cid in CropModels.CROPS:
+		for st in [FarmLayer.Stage.SPROUT, FarmLayer.Stage.GROWING, FarmLayer.Stage.RIPE, FarmLayer.Stage.WILTED]:
+			cm.append(FarmLayer.stage_mesh(st, cid))
+	_mesh_row(w2, cm, 4, 7.5)
+	_cam.position = Vector3(0, 26, 22)
+	_cam.look_at(Vector3(0, 1.5, 0))
+	await _save("crops_per_crop_and_stage")

@@ -47,9 +47,9 @@ func _init() -> void:
 	_cur = (LOOKS[&"PEACE"] as Dictionary).duplicate()
 	_apply(1.0)
 
-## Rules clock -> visual clock. Rules time_of_day 0 = dawn, 0.5 = Purge start (dusk), so the Purge is a real night.
+## Rules clock -> visual clock. Rules time_of_day 0 = early morning, 0.5 = Purge start (dusk), so the Purge is a real night.
 static func visual_tod(rules_tod: float) -> float:
-	return fposmod(rules_tod + 0.25, 1.0)
+	return fposmod(rules_tod + 0.3, 1.0)
 
 ## Colour-cycle weights for time of day t in 0..1 (0.5 = noon): {night, dawn, dusk} each 0..1. Continuous in t.
 static func tod_weights(t: float) -> Dictionary:

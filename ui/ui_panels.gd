@@ -3,7 +3,7 @@ extends CanvasLayer
 ## Host for the playable panels (Build, Craft, Trade, Policy, Holdings) plus the left-edge toolbar. Pure view:
 ## it reads state through PanelModels and re-emits panel signals; it never calls Rules. The lead maps the signals to
 ## commands with UiCommands (build_requested -> UiCommands.build, ...). Call refresh() after any events so numbers stay live.
-signal build_requested(building_id: String, holding_id: int)
+signal build_requested(building_id: String, holding_id: int, hex: Vector2i)
 signal craft_requested(recipe_id: String, qty: int)
 signal trade_requested(holding_id: int, side: String, item: String, qty: int)
 signal policy_requested(key: String, value: String, holding_id: int)
@@ -53,8 +53,8 @@ func _init() -> void:
 		root.add_child(p)
 		(p as PanelBase).closed.connect(_on_panel_closed)
 	build.building_picked.connect(_on_pick)
-	build.build_confirmed.connect(func(b: String, h: int) -> void:
-		build_requested.emit(b, h))
+	build.build_confirmed.connect(func(b: String, h: int, hx: Vector2i) -> void:
+		build_requested.emit(b, h, hx))
 	build.placement_cancelled.connect(end_placement)
 	craft.craft_requested.connect(func(r: String, q: int) -> void: craft_requested.emit(r, q))
 	trade.trade_requested.connect(func(h: int, s: String, i: String, q: int) -> void: trade_requested.emit(h, s, i, q))

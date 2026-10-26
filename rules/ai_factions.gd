@@ -79,9 +79,9 @@ static func dawn(state: MatchState, events: Array) -> void:
 			var crop: String = "lfg:item/saltroot" if int(h["tier"]) >= 2 else "lfg:item/glowfruit"
 			if Inv.room_for(h["store"], {crop: n}):
 				Inv.add_all(h["store"], {crop: n})
-			var mats: Dictionary = {"lfg:item/timber": 1}
-			if int(h["tier"]) >= 1 or persona == "turtle":
-				mats["lfg:item/stone"] = 1
+			var mats: Dictionary = {"lfg:item/timber": 3 if persona == "trader" else 1}
+			if int(h["tier"]) >= 1 or persona == "turtle" or persona == "trader":
+				mats["lfg:item/stone"] = 2 if persona == "trader" else 1
 			if Inv.room_for(h["store"], mats):
 				Inv.add_all(h["store"], mats)
 			var cooked: int = 0
@@ -98,6 +98,8 @@ static func dawn(state: MatchState, events: Array) -> void:
 			var cap: int = 4 + 4 * int(h["tier"])
 			var rec: int = 2 if persona == "turtle" else 1
 			var comfy: bool = persona != "hoarder" or Inv.count(h["store"], "lfg:item/ration") >= 3 * maxi(1, int(h["garrison"]))
+			if persona == "trader" and Inv.count(h["store"], "lfg:item/coin") < 3 * rec + 8:
+				comfy = false          # traders keep a coin reserve for the warning-day hiring
 			if comfy and int(h["garrison"]) < cap and Inv.count(h["store"], "lfg:item/coin") >= 3 * rec:
 				Inv.remove_all(h["store"], {"lfg:item/coin": 3 * rec})
 				h["garrison"] = mini(cap, int(h["garrison"]) + rec)
@@ -167,7 +169,7 @@ static func _trade(state: MatchState, fid: int, events: Array) -> void:
 	# sell surplus goods
 	var sold: int = 0
 	for item in ["lfg:item/saltroot", "lfg:item/timber", "lfg:item/stone", "lfg:item/glowfruit"]:
-		var keep: int = 10 if item == "lfg:item/glowfruit" else 6
+		var keep: int = 10 if item == "lfg:item/glowfruit" else 4
 		var q: int = Inv.count(st, item) - keep
 		if q <= 0:
 			continue

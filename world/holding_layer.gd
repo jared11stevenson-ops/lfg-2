@@ -5,6 +5,7 @@ extends Node3D
 var world: WorldData
 var material: ShaderMaterial
 var counts: Dictionary = {} # building id -> instances
+var placed_last: Array = [] # last placement list (inspectable; MultiMesh buffers are write-only on the dummy renderer)
 var _mmis: Dictionary = {}
 
 func _init() -> void:
@@ -33,6 +34,7 @@ func _mmi(id: String) -> MultiMeshInstance3D:
 
 ## placed: Array[{id:String(building), pos:Vector3, yaw:float}]
 func set_buildings(placed: Array) -> void:
+	placed_last = placed
 	var by: Dictionary = {}
 	for b in placed:
 		var id: String = String(b["id"])
@@ -52,6 +54,7 @@ func set_buildings(placed: Array) -> void:
 			var b: Dictionary = list[i]
 			mm.set_instance_transform(i, Transform3D(Basis(Vector3.UP, float(b["yaw"])), b["pos"]))
 
+## Buildings stand on their Rules sites (holding.sites: "q,r" -> building id) when present; otherwise on the slot ring.
 func sync_from_state(state: Object) -> void:
 	var hs: Variant = state.get("holdings")
 	if not (hs is Dictionary) or world == null:
@@ -63,11 +66,21 @@ func sync_from_state(state: Object) -> void:
 		var h: Dictionary = hs[hid]
 		var off: Vector2i = HexMath.axial_to_offset(h["hex"])
 		var cen: Vector2 = HexMath.offset_center(off.x, off.y)
-		var list: Array = h.get("buildings", [])
+		var list: Array = (h.get("buildings", []) as Array).duplicate()
+		var sites: Dictionary = h.get("sites", {})
+		var skeys: Array = sites.keys()
+		skeys.sort()
+		for k in skeys:
+			var bid: String = String(sites[k])
+			if not list.has(bid):
+				continue
+			list.erase(bid)
+			var parts: PackedStringArray = String(k).split(",")
+			var c: Vector2 = BuildingModels.site_world(Vector2i(int(parts[0]), int(parts[1])))
+			var p: Vector3 = Vector3(c.x, world.height_at(c.x, c.y), c.y)
+			placed.append({"id": bid, "pos": p, "yaw": atan2(-(cen.x - p.x), -(cen.y - p.z))})
 		for i in list.size():
-			var p: Vector3 = BuildingModels.slot_position(cen, i)
-			p.y = world.height_at(p.x, p.z)
-			# face the village centre (front is -Z)
-			var yaw: float = atan2(-(cen.x - p.x), -(cen.y - p.z))
-			placed.append({"id": String(list[i]), "pos": p, "yaw": yaw})
+			var p2: Vector3 = BuildingModels.slot_position(cen, i)
+			p2.y = world.height_at(p2.x, p2.z)
+			placed.append({"id": String(list[i]), "pos": p2, "yaw": atan2(-(cen.x - p2.x), -(cen.y - p2.z))})
 	set_buildings(placed)

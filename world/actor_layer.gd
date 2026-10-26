@@ -52,10 +52,14 @@ func npc_rig_count() -> int:
 	return n
 
 func _actor_world_pos(a: Dictionary) -> Vector3:
-	var off: Vector2i = HexMath.axial_to_offset(a["hex"])
-	var c: Vector2 = HexMath.offset_center(off.x, off.y)
 	var id: int = int(a["id"])
-	c += Vector2(float((id * 37) % 7) - 3.0, float((id * 53) % 7) - 3.0) * 0.8
+	var c: Vector2
+	if state is MatchState:
+		c = Rules.actor_pos(state as MatchState, id) # smooth metres along the actor's path (same frame as HexMath)
+	else:
+		var off: Vector2i = HexMath.axial_to_offset(a["hex"])
+		c = HexMath.offset_center(off.x, off.y)
+	c += Vector2(float((id * 37) % 7) - 3.0, float((id * 53) % 7) - 3.0) * 0.5
 	return Vector3(c.x, world.height_at(c.x, c.y) if world != null else 0.0, c.y)
 
 func _visible_hex(a: Dictionary) -> bool:

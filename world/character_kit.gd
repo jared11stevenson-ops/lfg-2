@@ -12,14 +12,14 @@ const CLASS_LOOKS: Dictionary = {
 	"lfg:class/bram": {"tunic": Color("b8402a"), "accent": Color("5b3a2a"), "pants": Color("4a3020"), "skin": 2, "hat": "horns", "prop": "club", "back": "pelt", "width": 1.2},
 	"lfg:class/tavi": {"tunic": Color("6a7a8a"), "accent": Color("ffd02a"), "pants": Color("3a4250"), "skin": 3, "hat": "lamp_helm", "prop": "pickaxe", "back": "pack", "width": 1.1},
 	"lfg:class/pip": {"tunic": Color("2fa8ff"), "accent": Color("ff5a2f"), "pants": Color("23406a"), "skin": 4, "hat": "feather_cap", "prop": "scroll", "back": "satchel", "width": 0.86},
-	"lfg:class/oren": {"tunic": Color("fff2e0"), "accent": Color("e8453a"), "pants": Color("7a6a5a"), "skin": 2, "hat": "toque", "prop": "ladle", "back": "apron", "width": 1.15},
+	"lfg:class/oren": {"tunic": Color("ff9a5a"), "accent": Color("e8453a"), "pants": Color("7a6a5a"), "skin": 2, "hat": "toque", "prop": "ladle", "back": "apron", "width": 1.15},
 	"lfg:class/vex": {"tunic": Color("2a2236"), "accent": Color("ff2fb5"), "pants": Color("1a1424"), "skin": 0, "hat": "cowl", "prop": "dagger", "back": "cloak", "width": 0.84},
 	"lfg:class/sable": {"tunic": Color("4d8a3a"), "accent": Color("c98a4a"), "pants": Color("5b4a2a"), "skin": 3, "hat": "ranger", "prop": "bow", "back": "quiver", "width": 0.95},
 	"lfg:class/quill": {"tunic": Color("2f4fa8"), "accent": Color("f0e6c8"), "pants": Color("1f2a5a"), "skin": 4, "hat": "beret", "prop": "quill", "back": "scroll_case", "width": 0.9},
 	"lfg:class/forge": {"tunic": Color("5a5a66"), "accent": Color("ff7a1a"), "pants": Color("2a2a30"), "skin": 2, "hat": "goggles", "prop": "hammer", "back": "leather_apron", "width": 1.25},
 	"lfg:class/nyx": {"tunic": Color("1fb08a"), "accent": Color("ff2fb5"), "pants": Color("0f5a50"), "skin": 0, "hat": "mushroom", "prop": "spore_staff", "back": "spores", "width": 0.98},
 	"lfg:class/rook": {"tunic": Color("a01830"), "accent": Color("ffd24a"), "pants": Color("4a1020"), "skin": 3, "hat": "crown", "prop": "banner", "back": "cape", "width": 1.12},
-	"lfg:class/dune": {"tunic": Color("d8a050"), "accent": Color("2f9aa0"), "pants": Color("8a6a3a"), "skin": 1, "hat": "turban", "prop": "wrench", "back": "bigpack", "width": 1.0},
+	"lfg:class/dune": {"tunic": Color("c8742e"), "accent": Color("2f9aa0"), "pants": Color("8a6a3a"), "skin": 1, "hat": "turban", "prop": "wrench", "back": "bigpack", "width": 1.0},
 	"lfg:class/halo": {"tunic": Color("f4f0ff"), "accent": Color("ffe66a"), "pants": Color("b8a8e0"), "skin": 4, "hat": "halo", "prop": "lantern", "back": "wings", "width": 1.0},
 }
 

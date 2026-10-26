@@ -52,17 +52,19 @@ func _init() -> void:
 	mid.add_theme_constant_override("separation", 14)
 	outer.add_child(mid)
 	var sc: ScrollContainer = UiKit.scroll(400)
-	sc.size_flags_stretch_ratio = 1.5
+	sc.size_flags_stretch_ratio = 1.0
+	sc.custom_minimum_size = Vector2(470, 400)
 	mid.add_child(sc)
 	grid = GridContainer.new()
-	grid.columns = 4
+	grid.columns = 3
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
 	sc.add_child(grid)
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.size_flags_stretch_ratio = 1.4
+	right.size_flags_stretch_ratio = 1.6
+	right.custom_minimum_size = Vector2(600, 0)
 	mid.add_child(right)
 	var dcard: PanelContainer = UiKit.card(Color(0.12, 0.07, 0.22, 0.95))
 	dcard.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -145,7 +147,7 @@ func populate() -> void:
 		var cd: Dictionary = Content.class_def(String(id))
 		var impl: bool = bool(cd.get("implemented", false))
 		var roles: Array[String] = role_split(String(cd["name"]))
-		var b: Button = UiKit.button("%s\n%s / %s%s" % [person_name(String(id)).to_upper(), roles[0], roles[1], "" if impl else "\n[WIP]"], UiStyle.PURPLE if impl else Color("77708a"), Vector2(150, 92), 18)
+		var b: Button = UiKit.button("%s\n%s%s" % [person_name(String(id)).to_upper(), roles[0] if roles[1] == "" else "%s / %s" % [roles[0], roles[1]], "" if impl else "\n[WIP]"], UiStyle.PURPLE if impl else Color("77708a"), Vector2(140, 92), 17)
 		b.pressed.connect(select.bind(String(id)))
 		grid.add_child(b)
 		cards[String(id)] = b
@@ -170,7 +172,7 @@ func _fill_detail(class_id: String) -> void:
 	var impl: bool = bool(cd.get("implemented", false))
 	var roles: Array[String] = role_split(String(cd["name"]))
 	detail.add_child(UiKit.heading(person_name(class_id).to_upper(), 34, UiStyle.TEXT))
-	detail.add_child(UiStyle.label("Peace: %s   Purge: %s" % [roles[0], roles[1]], 20, UiStyle.GOOD, false))
+	detail.add_child(UiStyle.label("Peace: %s   Purge: %s" % [roles[0], roles[1]] if roles[1] != "" else roles[0], 20, UiStyle.GOOD, false))
 	var st: Dictionary = cd["stats"]
 	detail.add_child(UiStyle.label("HP %d   ATK %d   DEF %d   ENERGY %d" % [int(st["hp"]), int(st["atk"]), int(st["def"]), int(st["energy"])], 20, UiStyle.TEXT, false))
 	detail.add_child(_line("PEACE PERK", String(cd["peace_perk"]), UiStyle.GOOD))
@@ -189,6 +191,6 @@ func _line(head: String, text: String, color: Color) -> Control:
 	v.add_child(UiStyle.label(head, 16, color, false))
 	var l: Label = UiStyle.label(text, 18, UiStyle.TEXT, false)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(260, 0)
+	l.custom_minimum_size = Vector2(300, 0)
 	v.add_child(l)
 	return v

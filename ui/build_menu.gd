@@ -2,9 +2,10 @@ class_name BuildMenu
 extends PanelBase
 ## Building list from data/buildings.json with costs (red = short) and a placement section. Picking a building emits
 ## building_picked (the stage then shows the ghost via BuildPreview.follow and feeds back set_placement()).
-## Place emits build_confirmed(building_id, holding_id); the lead turns that into a `build` command (see UiCommands).
+## Place emits build_confirmed(building_id, holding_id, hex); the lead turns that into a `build` command with
+## UiCommands.build(building_id, holding_id, hex). Upgrade rows skip placement and confirm immediately (hex = (-9999,-9999)).
 signal building_picked(building_id: String)
-signal build_confirmed(building_id: String, holding_id: int)
+signal build_confirmed(building_id: String, holding_id: int, hex: Vector2i)
 signal placement_cancelled
 var model: Dictionary = {}
 var selected: String = ""
@@ -93,9 +94,13 @@ func _row(r: Dictionary) -> Control:
 		info.add_child(UiStyle.label(String(r["info"]), 16, Color(1, 1, 1, 0.7), false))
 	if String(r["reason"]) != "":
 		info.add_child(UiStyle.label(PanelModels.reason_text(String(r["reason"])), 16, UiStyle.WARN, false))
-	var b: Button = UiKit.button("SELECT", UiStyle.PURPLE, Vector2(140, 56))
+	var b: Button = UiKit.button("UPGRADE" if bool(r.get("upgrade", false)) else "SELECT", UiStyle.GOOD if bool(r.get("upgrade", false)) else UiStyle.PURPLE, Vector2(150, 56))
 	b.disabled = not bool(r["buildable"])
-	b.pressed.connect(func() -> void: pick(String(r["id"])))
+	b.pressed.connect(func() -> void:
+		if bool(r.get("upgrade", false)):
+			build_confirmed.emit(String(r["id"]), int(model.get("holding_id", -1)), Vector2i(-9999, -9999))
+		else:
+			pick(String(r["id"])))
 	buttons[String(r["id"])] = b
 	h.add_child(b)
 	return card
@@ -126,4 +131,4 @@ func _refresh_footer() -> void:
 
 func _on_place() -> void:
 	if selected != "" and bool(placement.get("valid", false)):
-		build_confirmed.emit(selected, int(placement.get("holding_id", -1)))
+		build_confirmed.emit(selected, int(placement.get("holding_id", -1)), placement.get("hex", Vector2i(-9999, -9999)))

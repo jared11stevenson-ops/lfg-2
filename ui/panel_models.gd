@@ -11,6 +11,11 @@ const REASONS: Dictionary = {
 	"blocked": "Can't build on this ground",
 	"unknown_building": "Unknown building",
 	"plot_here": "A crop plot is in the way",
+	"needs_base_building": "Build the base building first",
+	"site_out_of_range": "Aim 1-2 hexes from the village centre",
+	"bad_terrain": "Only open ground can be built on",
+	"occupied": "Something already stands there",
+	"no_site": "No free building site left",
 	"class_required": "Your class can't make this",
 	"not_near_own_holding": "Craft near one of your holdings",
 	"too_far": "Walk up to the merchant",
@@ -57,31 +62,45 @@ static func own_holding_near(state: Object, axial_hex: Vector2i, max_d: int = BU
 			best = int(id)
 	return best
 
-## Can the player build `building_id` right now with the ghost on `axial_hex`? -> {valid, reason, holding_id}
-## Rules requires the ACTOR within 3 hexes of an own holding; we also require the aimed hex to be within 3 so the ghost
-## reads honestly. world_ok is the presentation terrain check (WorldData.can_build) passed in by the caller.
+## Can the player build `building_id` with the ghost on `axial_hex` right now? -> {valid, reason, holding_id, hex, upgrade}
+## Mirrors Economy.build: actor within 3 hexes of an own holding, group limit, site_free (1-2 hexes from that holding, ground,
+## unoccupied), class-discounted cost. Upgrades (`upgrade_of`) need the base building and no site. `world_ok` is the
+## presentation terrain check (WorldData.can_build), `plot_here` the farm-layer check.
 static func check_placement(state: Object, building_id: String, axial_hex: Vector2i, world_ok: bool = true, plot_here: bool = false) -> Dictionary:
 	var b: Dictionary = Content.building(building_id)
 	if b.is_empty():
-		return {"valid": false, "reason": "unknown_building", "holding_id": -1}
+		return {"valid": false, "reason": "unknown_building", "holding_id": -1, "hex": axial_hex, "upgrade": false}
 	var a: Dictionary = _actor(state, -1)
 	var hid: int = own_holding_near(state, a.get("hex", axial_hex))
-	if hid < 0 or HexGrid.distance(axial_hex, state.get("holdings")[hid]["hex"]) > BUILD_RANGE:
-		return {"valid": false, "reason": "no_own_holding_nearby", "holding_id": -1}
+	if hid < 0:
+		return {"valid": false, "reason": "no_own_holding_nearby", "holding_id": -1, "hex": axial_hex, "upgrade": b.has("upgrade_of")}
 	var h: Dictionary = state.get("holdings")[hid]
+	var up: bool = b.has("upgrade_of")
+	var bl: Array = h["buildings"]
+	var cost: Dictionary = Economy.build_cost(a, b)
+	if up:
+		var r_up: String = ""
+		if not bl.has(String(b["upgrade_of"])):
+			r_up = "needs_base_building"
+		elif not Inv.has_all(a["inv"], cost):
+			r_up = "insufficient_items"
+		return {"valid": r_up == "", "reason": r_up, "holding_id": hid, "hex": axial_hex, "upgrade": true}
 	var have: int = 0
-	for x in h["buildings"]:
-		if x == building_id:
+	for x in bl:
+		if Economy.group_of(Content.building(String(x))) == Economy.group_of(b):
 			have += 1
+	var reason: String = ""
 	if have >= int(b["max"]):
-		return {"valid": false, "reason": "building_limit", "holding_id": hid}
-	if not world_ok:
-		return {"valid": false, "reason": "blocked", "holding_id": hid}
-	if plot_here:
-		return {"valid": false, "reason": "plot_here", "holding_id": hid}
-	if not Inv.has_all(a["inv"], b["cost"]):
-		return {"valid": false, "reason": "insufficient_items", "holding_id": hid}
-	return {"valid": true, "reason": "", "holding_id": hid}
+		reason = "building_limit"
+	elif not world_ok:
+		reason = "blocked"
+	elif plot_here:
+		reason = "plot_here"
+	else:
+		reason = Economy.site_free(state as MatchState, h, axial_hex)
+		if reason == "" and not Inv.has_all(a["inv"], cost):
+			reason = "insufficient_items"
+	return {"valid": reason == "", "reason": reason, "holding_id": hid, "hex": axial_hex, "upgrade": false}
 
 static func build_model(state: Object, actor_id: int = -1) -> Dictionary:
 	var a: Dictionary = _actor(state, actor_id)
@@ -92,32 +111,56 @@ static func build_model(state: Object, actor_id: int = -1) -> Dictionary:
 	ids.sort()
 	for id in ids:
 		var b: Dictionary = Content.building(String(id))
+		var up: bool = b.has("upgrade_of")
 		var here: int = 0
-		if near >= 0:
-			for x in state.get("holdings")[near]["buildings"]:
-				if x == id:
-					here += 1
-		var cost: Array = bundle_entries(b["cost"], inv)
-		var afford: bool = Inv.has_all(inv, b["cost"])
+		var bl: Array = state.get("holdings")[near]["buildings"] if near >= 0 else []
+		for x in bl:
+			if Economy.group_of(Content.building(String(x))) == Economy.group_of(b):
+				here += 1
+		var cost_d: Dictionary = Economy.build_cost(a, b)
+		var cost: Array = bundle_entries(cost_d, inv)
+		var afford: bool = Inv.has_all(inv, cost_d)
 		var reason: String = ""
 		if near < 0:
 			reason = "no_own_holding_nearby"
-		elif here >= int(b["max"]):
+		elif up and not bl.has(String(b["upgrade_of"])):
+			reason = "needs_base_building"
+		elif up and bl.has(String(id)):
+			reason = "building_limit"
+		elif not up and here >= int(b["max"]):
 			reason = "building_limit"
 		elif not afford:
 			reason = "insufficient_items"
 		rows.append({"id": String(id), "name": String(b["name"]), "cost": cost, "afford": afford, "max": int(b["max"]), "count_here": here,
-			"reason": reason, "info": _building_info(b), "buildable": reason == ""})
+			"reason": reason, "info": _building_info(b), "buildable": reason == "", "upgrade": up,
+			"upgrade_of": String(b.get("upgrade_of", "")), "group": Economy.group_of(b)})
 	return {"holding_id": near, "holding_name": String(state.get("holdings")[near]["name"]) if near >= 0 else "", "rows": rows}
 
 static func _building_info(b: Dictionary) -> String:
 	var bits: Array[String] = []
+	if b.has("upgrade_of"):
+		bits.append("Upgrade of %s" % String(Content.building(String(b["upgrade_of"])).get("name", "?")))
 	if b.has("defense"):
 		bits.append("Defense +%d" % int(b["defense"]))
+	if b.has("vision"):
+		bits.append("Sees %d hexes" % int(b["vision"]))
 	if b.has("recruit_per_day"):
 		bits.append("Recruits %d/day for %d coin" % [int(b["recruit_per_day"]), int(b.get("recruit_coin", 0))])
 	if b.has("steal_guard"):
 		bits.append("Thieves %d%% less likely" % int(round(float(b["steal_guard"]) * 100.0)))
+	if b.has("loot_shield"):
+		bits.append("Loot -%d%%" % int(round(float(b["loot_shield"]) * 100.0)))
+	if b.has("work"):
+		var w: Dictionary = b["work"]
+		if w.has("outputs"):
+			var o: Array[String] = []
+			for k in (w["outputs"] as Dictionary).keys():
+				o.append("%s +%d/day" % [UiKit.item_name(String(k)), int(w["outputs"][k])])
+			bits.append(", ".join(o))
+		if w.has("batches"):
+			bits.append("Cooks %d ration batches/day" % int(w["batches"]))
+		if bool(w.get("waters", false)):
+			bits.append("Waters nearby plots")
 	return ", ".join(bits)
 
 static func craft_model(state: Object, actor_id: int = -1) -> Dictionary:
@@ -165,14 +208,14 @@ static func trade_model(state: Object, holding_id: int, actor_id: int = -1) -> D
 	for k in keys:
 		if k == Economy.COIN or int(h["store"][k]) <= 0:
 			continue
-		var price: int = Economy.buy_price(String(k))
+		var price: int = Economy.buy_price(String(k), Economy.price_mult(h, String(k)), a)
 		buy.append({"item": String(k), "name": UiKit.item_name(String(k)), "price": price, "stock": int(h["store"][k]), "affordable": coin >= price})
 	var ik: Array = inv.keys()
 	ik.sort()
 	for k in ik:
 		if k == Economy.COIN or int(inv[k]) <= 0:
 			continue
-		sell.append({"item": String(k), "name": UiKit.item_name(String(k)), "price": Economy.sell_price(a, String(k)), "have": int(inv[k])})
+		sell.append({"item": String(k), "name": UiKit.item_name(String(k)), "price": Economy.sell_price(a, String(k), Economy.price_mult(h, String(k))), "have": int(inv[k])})
 	var reason: String = ""
 	if not is_merchant:
 		reason = "not_a_merchant"
