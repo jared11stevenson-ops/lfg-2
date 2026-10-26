@@ -25,6 +25,18 @@ var _btn_idx: Dictionary = {} # touch index -> button name
 var _cam_touches: Dictionary = {} # index -> last position
 var _pinch_prev: float = 0.0
 var visible_ui: bool = true
+## Screen rects owned by other UI (ability bar, toolbar). Touches that start inside them never reach joystick/camera.
+var blockers: Array[Rect2] = []
+## True while a modal panel is open: every on-screen control ignores touches.
+var suspended: bool = false
+
+func _blocked(p: Vector2) -> bool:
+	if suspended:
+		return true
+	for r in blockers:
+		if r.has_point(p):
+			return true
+	return false
 
 func _init() -> void:
 	name = "TouchControls"
@@ -92,6 +104,8 @@ func _input(event: InputEvent) -> void:
 		var t := event as InputEventScreenTouch
 		if t.pressed:
 			var btn: String = _button_at(t.position)
+			if _blocked(t.position):
+				return
 			if btn != "":
 				_btn_idx[t.index] = btn
 				_emit_button(btn)

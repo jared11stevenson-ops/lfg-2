@@ -37,6 +37,22 @@ func _init() -> void:
 	_ghost.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_ghost)
 
+## Swap the ghost for a building's model ("" restores the generic toy house).
+func set_model(building_id: String) -> void:
+	_ghost.mesh = BuildingModels.mesh_for(building_id) if building_id != "" else Props.mesh_for(Props.T.HOUSE)
+	_ghost.scale = Vector3.ONE * (1.0 if building_id != "" else 1.6)
+
+## Recompute validity for the current hex (inventory/state may have changed since show_at).
+func revalidate() -> void:
+	if not visible or not HexMath.in_bounds(hex):
+		return
+	var v: bool = is_valid_hex(hex)
+	if v != valid:
+		valid = v
+		var col: Color = VALID_COLOR if valid else INVALID_COLOR
+		_ghost_mat.albedo_color = col
+		_foot.mesh = _footprint_mesh(col)
+
 func is_valid_hex(c: Vector2i) -> bool:
 	if world == null or not world.can_build(c):
 		return false

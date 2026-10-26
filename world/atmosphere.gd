@@ -7,6 +7,12 @@ const LOOKS: Dictionary = {
 	&"PURGE_ACTIVE": {"sun": Color("d04088"), "sun_e": 0.7, "amb": Color("7a50e8"), "amb_e": 1.25, "fog": Color("3d0b4a"), "fog_d": 0.0056, "sat": 1.1, "purge": 1.0},
 	&"RESOLUTION": {"sun": Color("e3c8ff"), "sun_e": 1.12, "amb": Color("9a88d8"), "amb_e": 0.77, "fog": Color("b58bd0"), "fog_d": 0.0038, "sat": 1.05, "purge": 0.3},
 }
+const DAWN_TINT := Color("ffb07a")
+const DUSK_TINT := Color("ff5f9a")
+const NIGHT_TINT := Color("4a58d8")
+const NIGHT_AMBIENT := Color("33409c")
+const NIGHT_FOG := Color("1c2064")
+var night_amount: float = 0.0 # 0 day .. 1 deep night, read by water shader/HUD
 var phase: StringName = &"PEACE"
 var time_of_day: float = 0.5 # 0..1 across the in-game day
 var purge_amount: float = 0.0 # smoothed 0..1, read by presentation (HUD, water tint)
@@ -41,6 +47,27 @@ func _init() -> void:
 	_cur = (LOOKS[&"PEACE"] as Dictionary).duplicate()
 	_apply(1.0)
 
+## Rules clock -> visual clock. Rules time_of_day 0 = dawn, 0.5 = Purge start (dusk), so the Purge is a real night.
+static func visual_tod(rules_tod: float) -> float:
+	return fposmod(rules_tod + 0.25, 1.0)
+
+## Colour-cycle weights for time of day t in 0..1 (0.5 = noon): {night, dawn, dusk} each 0..1. Continuous in t.
+static func tod_weights(t: float) -> Dictionary:
+	t = fposmod(t, 1.0)
+	var night: float = 1.0 - smoothstep(0.08, 0.28, t) if t < 0.5 else smoothstep(0.76, 0.94, t)
+	var dawn: float = exp(-pow((t - 0.2) / 0.07, 2.0))
+	var dusk: float = exp(-pow((t - 0.8) / 0.07, 2.0))
+	return {"night": night, "dawn": dawn, "dusk": dusk}
+
+## Final sun/ambient/fog colours for a base look and time of day (pure, used by _apply and tests).
+static func tod_colors(sun: Color, amb: Color, fog: Color, t: float) -> Dictionary:
+	var w: Dictionary = tod_weights(t)
+	var n: float = w["night"]
+	var sc: Color = sun.lerp(DAWN_TINT, float(w["dawn"]) * 0.65).lerp(DUSK_TINT, float(w["dusk"]) * 0.65).lerp(NIGHT_TINT, n * 0.7)
+	var ac: Color = amb.lerp(DAWN_TINT, float(w["dawn"]) * 0.25).lerp(DUSK_TINT, float(w["dusk"]) * 0.25).lerp(NIGHT_AMBIENT, n * 0.75)
+	var fc: Color = fog.lerp(DAWN_TINT, float(w["dawn"]) * 0.5).lerp(DUSK_TINT, float(w["dusk"]) * 0.5).lerp(NIGHT_FOG, n * 0.85)
+	return {"sun": sc, "amb": ac, "fog": fc, "night": n}
+
 func set_phase(p: StringName, instant: bool = false) -> void:
 	if not LOOKS.has(p):
 		push_warning("Atmosphere: unknown phase %s" % p)
@@ -72,12 +99,14 @@ func _apply(dt: float) -> void:
 	sun.rotation = Vector3(-elev, azim, 0.0)
 	var daylight: float = smoothstep(0.1, 0.3, time_of_day) * (1.0 - smoothstep(0.78, 0.95, time_of_day))
 	var night_dim: float = lerpf(0.35, 1.0, daylight)
-	sun.light_color = _cur["sun"]
+	var cyc: Dictionary = tod_colors(_cur["sun"], _cur["amb"], _cur["fog"], time_of_day)
+	night_amount = cyc["night"]
+	sun.light_color = cyc["sun"]
 	sun.light_energy = _cur["sun_e"] * night_dim
-	env.ambient_light_color = _cur["amb"]
+	env.ambient_light_color = cyc["amb"]
 	env.ambient_light_energy = _cur["amb_e"] * lerpf(0.7, 1.0, daylight)
-	var fogc: Color = _cur["fog"]
-	env.fog_light_color = fogc.darkened((1.0 - night_dim) * 0.8)
+	var fogc: Color = cyc["fog"]
+	env.fog_light_color = fogc
 	env.background_color = env.fog_light_color
 	env.fog_density = _cur["fog_d"]
 	env.adjustment_saturation = _cur["sat"]

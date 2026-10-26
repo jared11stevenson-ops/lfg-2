@@ -50,12 +50,22 @@ func add_part(kit: MeshKit, pivot_pos: Vector3 = Vector3.ZERO, kind: String = "b
 	var mi := MeshInstance3D.new()
 	mi.mesh = kit.build()
 	mi.material_override = _mat
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if _casts_shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(mi)
 	mesh_count += 1
 	tri_total += kit.tri_count()
 	parts.append({"node": n, "kind": kind, "side": side})
 	return n
+
+var _casts_shadows: bool = false
+func set_cast_shadows(on: bool) -> void:
+	_casts_shadows = on
+	var stack: Array[Node] = [body]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is MeshInstance3D:
+			(n as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		stack.append_array(n.get_children())
 
 func limbs(kind: String) -> Array[Node3D]:
 	var out: Array[Node3D] = []

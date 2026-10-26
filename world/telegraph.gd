@@ -11,6 +11,7 @@ var world: WorldData
 var _live: Array[Dictionary] = []
 var _shader: Shader
 var purge_colors: bool = false
+var last_event_radius: float = 0.0
 
 func _init() -> void:
 	name = "Telegraphs"
@@ -20,11 +21,28 @@ func set_progress_seconds(t: float) -> void:
 	for z in _live:
 		z["t"] = t
 
+## World positions of live danger zones (for the screen-edge danger indicator).
+func live_positions() -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for z in _live:
+		out.append((z["node"] as Node3D).position)
+	return out
+
 func active_count() -> int:
 	return _live.size()
 
 func handle_event(e: Dictionary) -> void:
 	if e.get("type", &"") != &"enemy_telegraph":
+		return
+	# Rules shape: {enemy, attack, shape:"single"|"aoe"|"self_aoe", target_hex:Vector2i (axial), radius:int (hexes), windup:float}
+	if e.has("target_hex") and not e.has("pos"):
+		var off: Vector2i = HexMath.axial_to_offset(e["target_hex"])
+		var cen: Vector2 = HexMath.offset_center(off.x, off.y)
+		var rad_hex: float = float(e.get("radius", 0))
+		var rm: float = 5.0 if rad_hex <= 0.0 else rad_hex * HexMath.HEX_W + 3.0
+		var h: float = world.height_at(cen.x, cen.y) if world != null else 0.0
+		last_event_radius = rm
+		spawn(Shape.CIRCLE, Vector3(cen.x, h, cen.y), 0.0, rm, float(e.get("windup", 1.0)))
 		return
 	var pos: Variant = e.get("pos", Vector2.ZERO)
 	var p3 := Vector3.ZERO

@@ -49,6 +49,19 @@ func set_fog_enabled(on: bool) -> void:
 func set_purge_amount(t: float) -> void:
 	water_mat.set_shader_parameter("purge", t)
 
+func set_night_amount(t: float) -> void:
+	water_mat.set_shader_parameter("night", t)
+
+## Shadow opt-in: let terrain/props/roads cast shadows when the sun's shadow map is on.
+func set_cast_shadows(on: bool) -> void:
+	var mode: int = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var stack: Array[Node] = [self]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is MultiMeshInstance3D and n.name != "Water":
+			(n as GeometryInstance3D).cast_shadow = mode
+		stack.append_array(n.get_children())
+
 ## Synchronous build (tests, tools).
 func build_all() -> void:
 	var t0: int = Time.get_ticks_msec()
@@ -111,7 +124,7 @@ func _tri_color(a: Vector3, b: Vector3, c: Vector3, ix: int, iz: int, t: int) ->
 	elif biome_id == Biomes.B.HIGHLANDS:
 		col = col.lerp(Color("d9c6ee"), clampf(cen.y / 26.0, 0.0, 0.5))
 	if data.is_road(hx):
-		col = col.lerp(Color("f0d9a8"), 0.55)
+		col = col.lerp(Color("f0d9a8"), 0.18) # the ribbon mesh (RoadLayer) carries the road look
 	var rock_t: float = smoothstep(0.88, 0.62, n.y)
 	if rock_t > 0.0:
 		col = col.lerp(Biomes.ROCK.lerp(Color("a58bb5"), nz), rock_t)

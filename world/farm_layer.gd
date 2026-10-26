@@ -17,13 +17,15 @@ func _init() -> void:
 	material = ShaderMaterial.new()
 	material.shader = load("res://world/shaders/world.gdshader")
 	material.set_shader_parameter("hide_unseen", true)
-	for s in STAGE_NAMES.size():
+	for slot in CropModels.CROPS.size() * STAGE_NAMES.size():
+		var s: int = slot % STAGE_NAMES.size()
+		var crop_id: String = CropModels.CROPS[slot / STAGE_NAMES.size()]
 		var mmi := MultiMeshInstance3D.new()
-		mmi.name = "Plots_" + STAGE_NAMES[s]
+		mmi.name = "Plots_%s_%s" % [crop_id.get_slice("/", 1), STAGE_NAMES[s]]
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_colors = true
-		mm.mesh = stage_mesh(s)
+		mm.mesh = stage_mesh(s, crop_id)
 		mm.instance_count = 0
 		mmi.multimesh = mm
 		mmi.material_override = material
@@ -39,8 +41,8 @@ func slot_position(hex: Vector2i, slot: int) -> Vector2:
 	var offs: Array[Vector2] = [Vector2(-3.2, -2.6), Vector2(3.2, -2.6), Vector2(-3.2, 3.0), Vector2(3.2, 3.0)]
 	return c + offs[slot % 4]
 
-func set_plot(id: Variant, pos_xz: Vector2, stage: int, watered: bool = false, tint: Color = Color.WHITE) -> void:
-	plots[id] = {"pos": pos_xz, "stage": clampi(stage, 0, STAGE_NAMES.size() - 1), "watered": watered, "tint": tint}
+func set_plot(id: Variant, pos_xz: Vector2, stage: int, watered: bool = false, tint: Color = Color.WHITE, crop: String = "lfg:crop/glowfruit") -> void:
+	plots[id] = {"pos": pos_xz, "stage": clampi(stage, 0, STAGE_NAMES.size() - 1), "watered": watered, "tint": tint, "crop": crop}
 	_dirty = true
 
 func remove_plot(id: Variant) -> void:
@@ -72,8 +74,9 @@ func sync_from_state(state: Object) -> void:
 		var st: int = stage_for_age(int(p.get("age", 0)), grow_days)
 		var tint := Color.WHITE
 		keep[k] = true
-		if not plots.has(k) or plots[k]["stage"] != st or plots[k]["watered"] != bool(p.get("watered", false)):
-			set_plot(k, c, st, bool(p.get("watered", false)), tint)
+		var crop_id: String = String(p.get("crop", "lfg:crop/glowfruit"))
+		if not plots.has(k) or plots[k]["stage"] != st or plots[k]["watered"] != bool(p.get("watered", false)) or plots[k].get("crop", "") != crop_id:
+			set_plot(k, c, st, bool(p.get("watered", false)), tint, crop_id)
 	for k in plots.keys():
 		if not keep.has(k):
 			remove_plot(k)
@@ -102,12 +105,14 @@ func _process(_dt: float) -> void:
 
 func rebuild() -> void:
 	_dirty = false
-	for s in STAGE_NAMES.size():
+	for slot in _mmis.size():
+		var s: int = slot % STAGE_NAMES.size()
+		var ci: int = slot / STAGE_NAMES.size()
 		var list: Array[Dictionary] = []
 		for p in plots.values():
-			if p["stage"] == s:
+			if p["stage"] == s and CropModels.index_of(String(p.get("crop", ""))) == ci:
 				list.append(p)
-		var mm: MultiMesh = _mmis[s].multimesh
+		var mm: MultiMesh = _mmis[slot].multimesh
 		mm.instance_count = list.size()
 		for i in list.size():
 			var p: Dictionary = list[i]
@@ -120,9 +125,10 @@ func rebuild() -> void:
 			mm.set_instance_color(i, tint)
 
 static var _stage_cache: Dictionary = {}
-static func stage_mesh(stage: int) -> ArrayMesh:
-	if _stage_cache.has(stage):
-		return _stage_cache[stage]
+static func stage_mesh(stage: int, crop: String = "lfg:crop/glowfruit") -> ArrayMesh:
+	var ckey: String = "%s|%d" % [crop, stage]
+	if _stage_cache.has(ckey):
+		return _stage_cache[ckey]
 	var k := MeshKit.new()
 	var h: float = PLOT_SIZE * 0.5
 	# wooden frame + soil bed
@@ -139,29 +145,12 @@ static func stage_mesh(stage: int) -> ArrayMesh:
 		for i in 4:
 			var x: float = -1.65 + float(i) * 1.1
 			var base := Vector3(x, 0.4, z)
-			match stage:
-				Stage.SEEDED:
-					k.dome(base, 0.16, 0.8, 1, 5, Color("e8d8a0"))
-				Stage.SPROUT:
-					k.pyramid(base, 0.14, 0.04, 0.55, Color("7fe05a"), Color("a8f06a"))
-					k.pyramid(base, 0.04, 0.14, 0.45, Color("7fe05a"), Color("a8f06a"))
-				Stage.GROWING:
-					k.frustum(base, 0.0, 0.07, 0.9, 0.05, 4, Color("3fc08a"), Color("6fe0a0"))
-					k.dome(base + Vector3(0, 0.55, 0), 0.38, 0.7, 1, 6, Color("2fa87a"), Color("2fa87a"))
-					k.dome(base + Vector3(0, 0.95, 0), 0.14, 1.0, 1, 5, Color("e6ff2e"))
-				Stage.RIPE:
-					k.frustum(base, 0.0, 0.08, 1.2, 0.06, 4, Color("2f9a6a"), Color("4fb88a"))
-					k.dome(base + Vector3(0, 0.7, 0), 0.5, 0.7, 1, 6, Color("2fa87a"), Color("2fa87a"))
-					var orb: Color = Color("ff2fb5") if (i + row) % 2 == 0 else Color("ffe82e")
-					k.blob(base + Vector3(0, 1.45, 0), Vector3(0.36, 0.36, 0.36), 3 + i + row * 7, orb, orb.lightened(0.4))
-				Stage.WILTED:
-					k.frustum(base, 0.0, 0.06, 0.45, 0.05, 4, Color("8a7a4a"), Color("8a7a4a"))
-					k.pyramid(base + Vector3(0.18, 0.2, 0), 0.2, 0.04, 0.2, Color("6a5a38"))
+			CropModels.add_plant(k, crop, stage, base, i, row)
 	if stage == Stage.RIPE:
 		# glowing gold corner posts so ripe plots read from afar
 		for sx in [-1.0, 1.0]:
 			for sz in [-1.0, 1.0]:
 				k.frustum(Vector3(sx * h, 0.0, sz * h), 0.0, 0.14, 1.1, 0.08, 4, Color("ffd24a"), Color("fff08a"))
 	var m: ArrayMesh = k.build()
-	_stage_cache[stage] = m
+	_stage_cache[ckey] = m
 	return m
