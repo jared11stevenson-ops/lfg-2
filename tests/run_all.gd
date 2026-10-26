@@ -37,8 +37,8 @@ static func discover(dir_path: String = ROOT) -> Array[String]:
 	return out
 
 func _run_all(filter: String) -> int:
-	if not FileAccess.file_exists("res://.godot/global_script_class_cache.cfg"):
-		# class_name registry is built by an import pass; do it once so `extends TestCase` resolves.
+	if true:
+		# Refresh the class_name registry (new class_name files are otherwise invisible to headless runs).
 		var o: Array = []
 		OS.execute(OS.get_executable_path(), ["--headless", "--path", ProjectSettings.globalize_path("res://"), "--import"], o, true)
 	var files: Array[String] = discover()
