@@ -115,6 +115,38 @@ static func clear_slot(slot: int) -> void:
 	SafeFile.delete_all(_base(slot))
 	SafeFile.delete_all(_tomb(slot), 0)
 
+static func slot_in_use(slot: int) -> bool:
+	return is_over(slot) or FileAccess.file_exists(_base(slot)) or FileAccess.file_exists(SafeFile.backup_path(_base(slot), 1))
+
+## Menu-friendly summary of a slot without building a MatchState:
+## {slot, ok, status: active|over|corrupt|empty, reason, saved_at, class_id, day, phase, seed, saves, recovered}
+static func peek(slot: int) -> Dictionary:
+	var out := {"slot": slot, "ok": false, "status": "empty", "reason": "", "saved_at": 0, "class_id": "", "day": 0, "phase": "", "seed": 0, "saves": 0, "recovered": false}
+	if not _valid_slot(slot):
+		return out
+	var b: Dictionary = _best(slot)
+	if b["ok"]:
+		var d: Dictionary = b["data"]
+		var st: Dictionary = d.get("state", {})
+		out["ok"] = true
+		out["saved_at"] = int(d.get("saved_at", 0))
+		out["saves"] = int(d.get("stats", {}).get("saves", 0))
+		out["recovered"] = b["recovered"]
+		out["seed"] = int(st.get("seed", 0))
+		out["day"] = int(st.get("clock", {}).get("day", 0))
+		out["phase"] = str(st.get("phase", ""))
+		var pid: String = str(int(st.get("player_id", 1)))
+		out["class_id"] = str(st.get("actors", {}).get(pid, {}).get("class_id", ""))
+		out["status"] = "active" if d.get("status", "active") != "over" else "over"
+	elif slot_in_use(slot):
+		out["status"] = "corrupt"
+	if is_over(slot):
+		out["status"] = "over"
+		out["reason"] = over_reason(slot)
+	elif out["status"] == "over":
+		out["reason"] = str(b["data"].get("over_reason", "")) if b["ok"] else ""
+	return out
+
 static func list_slots() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	for s in range(0, MAX_SLOT + 1):

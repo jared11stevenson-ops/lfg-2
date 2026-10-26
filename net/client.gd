@@ -23,6 +23,7 @@ var server_clock: float = 0.0
 var events_log: Array = []
 var last_bye: String = ""
 var match_over: bool = false
+var locked_for: float = 0.0           # >0: server-side command lock (disconnect-during-Purge policy), seconds
 
 func connect_to(p_addr: String, p_port: int, p_token: String) -> int:
 	addr = p_addr
@@ -106,6 +107,7 @@ func _on_msg(m: Dictionary) -> void:
 			snapshot = m["state"]
 			server_clock = m["clock"]
 			match_over = m.get("match_over", false)
+			locked_for = float(m.get("locked_for", 0.0))
 			is_ready = true
 			# server remembers last accepted seq; continue after it so we never collide
 			next_seq = maxi(next_seq, int(m["last_seq"]) + 1)
