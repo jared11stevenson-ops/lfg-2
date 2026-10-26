@@ -141,7 +141,7 @@ static func steal(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 		return "already_yours"
 	if HexGrid.distance(a["hex"], h["hex"]) > CAPTURE_RANGE:
 		return "too_far"
-	var item: String = String(args.get("item", ""))
+	var item: String = CmdUtil.s(args.get("item", ""))
 	if Content.item(item).is_empty():
 		return "unknown_item"
 	var q: int = Inv.parse_qty(args.get("qty"))

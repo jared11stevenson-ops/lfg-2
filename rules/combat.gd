@@ -53,7 +53,7 @@ static func ready(state: MatchState, a: Dictionary, key: String) -> bool:
 	return float(a["cd"].get(key, 0.0)) <= float(state.clock["elapsed"])
 
 static func set_cd(state: MatchState, a: Dictionary, key: String, secs: float) -> void:
-	a["cd"][key] = float(state.clock["elapsed"]) + secs
+	a["cd"][key] = MatchState.q(float(state.clock["elapsed"]) + secs)
 
 static func living(a: Dictionary) -> bool:
 	return bool(a["alive"])

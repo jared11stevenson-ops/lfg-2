@@ -13,7 +13,7 @@ static func plots_of(state: MatchState, hid: int) -> int:
 	return n
 
 static func plant(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
-	var crop: Dictionary = Content.crop(String(args.get("crop", "")))
+	var crop: Dictionary = Content.crop(CmdUtil.s(args.get("crop", "")))
 	if crop.is_empty():
 		return "unknown_crop"
 	var hv: Variant = CmdUtil.parse_hex(args.get("hex"))
@@ -101,7 +101,7 @@ static func harvest(state: MatchState, a: Dictionary, args: Dictionary, events: 
 	return "nothing_to_harvest"
 
 static func craft(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
-	var r: Dictionary = Content.recipe(String(args.get("recipe", "")))
+	var r: Dictionary = Content.recipe(CmdUtil.s(args.get("recipe", "")))
 	if r.is_empty():
 		return "unknown_recipe"
 	var n: int = 1
@@ -135,7 +135,7 @@ static func craft(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 	return ""
 
 static func eat(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
-	var item: String = String(args.get("item", "lfg:item/ration"))
+	var item: String = CmdUtil.s(args.get("item", "lfg:item/ration"))
 	var def: Dictionary = Content.item(item)
 	if def.is_empty() or not def.has("food"):
 		return "not_food"

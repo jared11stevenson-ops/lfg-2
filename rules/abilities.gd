@@ -16,7 +16,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 	var cd: Dictionary = Content.class_def(String(a["class_id"]))
 	if cd.is_empty():
 		return "no_class"
-	var ab: Dictionary = ability_for(cd, String(args.get("ability", "")))
+	var ab: Dictionary = ability_for(cd, CmdUtil.s(args.get("ability", "")))
 	if ab.is_empty():
 		return "unknown_ability"
 	if not bool(cd.get("implemented", false)):
@@ -31,13 +31,13 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 	var res: String = ""
 	match aid:
 		"lfg:ability/guard":
-			Combat.add_effect(a, "guard", now + float(ab["duration"]))
+			Combat.add_effect(a, "guard", MatchState.q(now + float(ab["duration"])))
 		"lfg:ability/rage":
 			var cost: int = int(ab["hp_cost"])
 			if int(a["hp"]) <= cost:
 				return "too_weak"
 			a["hp"] = int(a["hp"]) - cost
-			Combat.add_effect(a, "rage", now + float(ab["duration"]))
+			Combat.add_effect(a, "rage", MatchState.q(now + float(ab["duration"])))
 		"lfg:ability/plague_cloud":
 			var hit: Array[int] = []
 			var ids: Array = state.actors.keys()
@@ -54,7 +54,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 			if hit.is_empty():
 				return "no_targets"
 			for id in hit:
-				Combat.add_effect(state.actors[id], "poison", now + float(ab["duration"]), {"dps": int(ab["dps"]), "next": now + 1.0, "source": a["id"]})
+				Combat.add_effect(state.actors[id], "poison", MatchState.q(now + float(ab["duration"])), {"dps": int(ab["dps"]), "next": MatchState.q(now + 1.0), "source": a["id"]})
 			events.append({"type": &"ability_used", "actor": a["id"], "ability": aid, "targets": hit})
 		"lfg:ability/forage":
 			if state.phase == &"PURGE_ACTIVE":
@@ -93,7 +93,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 			if not Inv.room_for(a["inv"], {pick: 1}):
 				return "no_room"
 			Combat.set_cd(state, a, key, float(ab["cooldown"]))
-			a["energy"] = float(a["energy"]) - float(ab["energy"])
+			a["energy"] = MatchState.q(float(a["energy"]) - float(ab["energy"]))
 			if state.rand_f() < 0.5 + float(Combat.class_mod(a, "steal_bonus", 0.0)):
 				Inv.transfer(t["inv"], a["inv"], {pick: 1})
 				events.append({"type": &"ability_used", "actor": a["id"], "ability": aid, "target": t["id"], "item": pick, "success": true})
@@ -121,7 +121,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 	if res != "":
 		return res
 	Combat.set_cd(state, a, key, float(ab["cooldown"]))
-	a["energy"] = float(a["energy"]) - float(ab["energy"])
+	a["energy"] = MatchState.q(float(a["energy"]) - float(ab["energy"]))
 	if aid == "lfg:ability/guard" or aid == "lfg:ability/rage":
 		events.append({"type": &"ability_used", "actor": a["id"], "ability": aid})
 	return ""

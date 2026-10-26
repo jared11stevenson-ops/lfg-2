@@ -53,3 +53,7 @@ func tick_all(s: MatchState, secs: float, step: float = 1.0) -> Array:
 		all.append_array(Rules.tick(s, d))
 		left -= d
 	return all
+
+## Numeric-semantic equality of two states (1 == 1.0), via JSON.
+func same(a: MatchState, b: MatchState) -> bool:
+	return JSON.parse_string(JSON.stringify(a.to_dict())) == JSON.parse_string(JSON.stringify(b.to_dict()))

@@ -22,8 +22,8 @@ static func trade(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 	var h: Dictionary = state.holdings[hid]
 	if HexGrid.distance(a["hex"], h["hex"]) > TRADE_RANGE:
 		return "too_far"
-	var side: String = String(args.get("side", ""))
-	var item: String = String(args.get("item", ""))
+	var side: String = CmdUtil.s(args.get("side", ""))
+	var item: String = CmdUtil.s(args.get("item", ""))
 	if Content.item(item).is_empty():
 		return "unknown_item"
 	var q: int = Inv.parse_qty(args.get("qty"))
@@ -94,7 +94,7 @@ static func build(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 		return "unknown_holding"
 	if hid == -2:
 		return "not_near_own_holding"
-	var b: Dictionary = Content.building(String(args.get("building", "")))
+	var b: Dictionary = Content.building(CmdUtil.s(args.get("building", "")))
 	if b.is_empty():
 		return "unknown_building"
 	var h: Dictionary = state.holdings[hid]
@@ -117,7 +117,7 @@ static func demolish(state: MatchState, a: Dictionary, args: Dictionary, events:
 		return "unknown_holding"
 	if hid == -2:
 		return "not_near_own_holding"
-	var bid: String = String(args.get("building", ""))
+	var bid: String = CmdUtil.s(args.get("building", ""))
 	var h: Dictionary = state.holdings[hid]
 	if not (h["buildings"] as Array).has(bid):
 		return "no_such_building"
@@ -134,7 +134,7 @@ static func demolish(state: MatchState, a: Dictionary, args: Dictionary, events:
 	return ""
 
 static func set_policy(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
-	var key: String = String(args.get("key", ""))
+	var key: String = CmdUtil.s(args.get("key", ""))
 	var val: String = CmdUtil.policy_value(args.get("value"))
 	if key == "ration":
 		if not ["full", "half", "none"].has(val):

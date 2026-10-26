@@ -47,3 +47,6 @@ static func holding_at(state: MatchState, hex: Vector2i) -> int:
 
 static func policy_value(v: Variant) -> String:
 	return String(v) if typeof(v) in [TYPE_STRING, TYPE_STRING_NAME] else ""
+
+static func s(v: Variant) -> String:
+	return String(v) if (typeof(v) == TYPE_STRING or typeof(v) == TYPE_STRING_NAME) else ""

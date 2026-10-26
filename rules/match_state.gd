@@ -27,6 +27,10 @@ var ai_t: float = 0.0
 var sim_acc: Dictionary = {}    # misc timers
 var opts: Dictionary = {}
 
+## Quantise floats to 1e-6 so JSON round trips are bit-exact.
+static func q(x: float) -> float:
+	return roundf(x * 1000000.0) / 1000000.0
+
 func rand_f() -> float:
 	var r := Rng.new(1)
 	r.state = rng_state

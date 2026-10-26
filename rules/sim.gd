@@ -35,8 +35,8 @@ static func _any_moving(state: MatchState) -> bool:
 	return not p.is_empty() and not (p["move"] as Dictionary).is_empty()
 
 static func advance(state: MatchState, step: float, events: Array) -> void:
-	state.clock["elapsed"] = float(state.clock["elapsed"]) + step
-	state.clock["time_of_day"] = float(state.clock["time_of_day"]) + step / state.day_seconds
+	state.clock["elapsed"] = MatchState.q(float(state.clock["elapsed"]) + step)
+	state.clock["time_of_day"] = MatchState.q(float(state.clock["time_of_day"]) + step / state.day_seconds)
 	var rolled: bool = false
 	if float(state.clock["time_of_day"]) >= 1.0 - 1e-9:
 		state.clock["day"] = int(state.clock["day"]) + 1
@@ -56,9 +56,9 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 		dawn(state, events)
 	_actors(state, step, events)
 	if state.opts.get("ai_enabled", true):
-		state.ai_t += step
+		state.ai_t = MatchState.q(state.ai_t + step)
 		while state.ai_t >= AIFactions.AI_PERIOD:
-			state.ai_t -= AIFactions.AI_PERIOD
+			state.ai_t = MatchState.q(state.ai_t - AIFactions.AI_PERIOD)
 			if state.phase == &"PURGE_ACTIVE":
 				AIFactions.purge_round(state, events)
 	EnemyAI.step(state, events)
@@ -87,14 +87,14 @@ static func _actors(state: MatchState, step: float, events: Array) -> void:
 		if not a["alive"]:
 			continue
 		if a["kind"] != "enemy":
-			a["energy"] = minf(float(a["max_energy"]), float(a["energy"]) + ENERGY_REGEN * step)
+			a["energy"] = MatchState.q(minf(float(a["max_energy"]), float(a["energy"]) + ENERGY_REGEN * step))
 		# poison / expiry
 		var effs: Array = a["effects"]
 		if not effs.is_empty():
 			for e in effs:
 				if e["id"] == "poison":
 					while float(e["next"]) <= now and float(e["next"]) <= float(e["until"]) + 1e-9 and a["alive"]:
-						e["next"] = float(e["next"]) + 1.0
+						e["next"] = MatchState.q(float(e["next"]) + 1.0)
 						Combat.hurt(state, int(id), int(e["dps"]), int(e.get("source", -1)), events, "poison")
 			var keep: Array = []
 			for e in effs:
@@ -105,7 +105,7 @@ static func _actors(state: MatchState, step: float, events: Array) -> void:
 		var mv: Dictionary = a["move"]
 		if a["alive"] and not mv.is_empty():
 			var path: Array = mv["path"]
-			mv["acc"] = float(mv["acc"]) + step
+			mv["acc"] = MatchState.q(float(mv["acc"]) + step)
 			var moved: bool = false
 			while not path.is_empty():
 				var nxt: Vector2i = path[0]
@@ -113,7 +113,7 @@ static func _actors(state: MatchState, step: float, events: Array) -> void:
 				if float(a["hunger_slow"] if a.has("hunger_slow") else 1.0) != 1.0:
 					cost *= float(a["hunger_slow"])
 				if float(mv["acc"]) + 1e-9 >= cost:
-					mv["acc"] = float(mv["acc"]) - cost
+					mv["acc"] = MatchState.q(float(mv["acc"]) - cost)
 					a["hex"] = nxt
 					path.remove_at(0)
 					moved = true

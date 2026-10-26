@@ -53,9 +53,9 @@ static func step(state: MatchState, events: Array) -> void:
 					ai["state"] = "windup"
 					ai["attack"] = atk["id"]
 					ai["target_hex"] = th
-					ai["t_hit"] = now + float(atk["windup"])
-					ai["t_end"] = now + float(atk["windup"]) + float(atk["hit"])
-					ai["t_rec"] = float(ai["t_end"]) + float(atk["recovery"])
+					ai["t_hit"] = MatchState.q(now + float(atk["windup"]))
+					ai["t_end"] = MatchState.q(now + float(atk["windup"]) + float(atk["hit"]))
+					ai["t_rec"] = MatchState.q(float(ai["t_end"]) + float(atk["recovery"]))
 					ai["hit_done"] = []
 					events.append({"type": &"enemy_telegraph", "enemy": e["id"], "attack": atk["id"], "shape": atk["shape"], "target_hex": th,
 						"radius": atk["radius"], "windup": atk["windup"], "hit": atk["hit"], "recovery": atk["recovery"], "hit_at": ai["t_hit"]})
@@ -71,7 +71,7 @@ static func step(state: MatchState, events: Array) -> void:
 							best = n
 					if best != e["hex"]:
 						e["hex"] = best
-						ai["next_move"] = now + float(def["sec_per_hex"]) * WorldGen.move_cost(state.world, best)
+						ai["next_move"] = MatchState.q(now + float(def["sec_per_hex"]) * WorldGen.move_cost(state.world, best))
 						events.append({"type": &"actor_moved", "actor": e["id"], "hex": best})
 					else:
 						ai["next_move"] = now + 1.0
@@ -96,7 +96,7 @@ static func step(state: MatchState, events: Array) -> void:
 						events.append({"type": &"enemy_hit", "enemy": e["id"], "attack": atk2["id"], "target": tid, "damage": dmg})
 						Combat.hurt(state, int(tid), dmg, int(e["id"]), events, String(atk2["id"]))
 						if atk2.has("poison_dps") and state.actors[tid]["alive"]:
-							Combat.add_effect(state.actors[tid], "poison", now + float(atk2["poison_secs"]), {"dps": int(atk2["poison_dps"]), "next": now + 1.0, "source": e["id"]})
+							Combat.add_effect(state.actors[tid], "poison", MatchState.q(now + float(atk2["poison_secs"])), {"dps": int(atk2["poison_dps"]), "next": MatchState.q(now + 1.0), "source": e["id"]})
 				if now >= float(ai["t_end"]):
 					ai["state"] = "recovery"
 					continue

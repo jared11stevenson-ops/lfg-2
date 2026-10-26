@@ -1,5 +1,5 @@
 {"schema":1,"crops":[
 {"id":"lfg:crop/glowfruit","name":"Glowfruit","seed":"lfg:item/glowfruit_seed","item":"lfg:item/glowfruit","grow_days":2,"yield":2,"needs_water":true,"biomes":["meadow","shore","ruins"],"biome_bonus":{"meadow":1},"note":"fast, thirsty, meadow-loving"},
-{"id":"lfg:crop/sporebean","name":"Sporebean","seed":"lfg:item/sporebean_seed","item":"lfg:item/sporebean","grow_days":4,"yield":4,"needs_water":false,"biomes":["fungal_grove","bog","meadow"],"biome_bonus":{"fungal_grove":2,"bog":1},"note":"slow, drought-proof, poor food value"},
-{"id":"lfg:crop/saltroot","name":"Saltroot","seed":"lfg:item/saltroot_seed","item":"lfg:item/saltroot","grow_days":6,"yield":6,"needs_water":true,"biomes":["salt_flats","highlands","shore"],"biome_bonus":{"salt_flats":2},"note":"slowest, richest, needs salt or highland soil and water"}
+{"id":"lfg:crop/sporebean","name":"Sporebean","seed":"lfg:item/sporebean_seed","item":"lfg:item/sporebean","grow_days":4,"yield":3,"needs_water":false,"biomes":["fungal_grove","bog","meadow"],"biome_bonus":{"fungal_grove":2,"bog":1},"note":"slow, drought-proof, poor food value"},
+{"id":"lfg:crop/saltroot","name":"Saltroot","seed":"lfg:item/saltroot_seed","item":"lfg:item/saltroot","grow_days":6,"yield":7,"needs_water":true,"biomes":["salt_flats","highlands","shore"],"biome_bonus":{"salt_flats":2},"note":"slowest, richest, needs salt or highland soil and water"}
 ]}

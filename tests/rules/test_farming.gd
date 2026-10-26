@@ -19,7 +19,7 @@ func test_glowfruit_full_cycle_and_yield() -> void:
 	eq(count_type(ev, "crop_grown"), 1, "crop_grown event once")
 	check(cmd(s, "harvest", {"hex": h})["ok"], "harvest")
 	# base 2 + meadow 1 + Judd 1
-	eq(s.actors[1]["inv"]["lfg:item/glowfruit"], 4 + 4, "yield 4 (+4 starting)")
+	eq(s.actors[1]["inv"]["lfg:item/glowfruit"], 4, "yield 2 base + 1 meadow + 1 Judd")
 	eq(s.actors[1]["inv"]["lfg:item/glowfruit_seed"], 6, "seed returned")
 	check(not s.plots.has(MatchState.plot_key(h)), "plot cleared")
 
@@ -38,8 +38,7 @@ func test_sporebean_needs_no_water_but_is_slow() -> void:
 	eq(cmd(s, "harvest", {"hex": h})["error"], "not_ready", "not ready on day 3")
 	tick_all(s, 60.0 * 1.0, 5.0)
 	check(cmd(s, "harvest", {"hex": h})["ok"], "ready after 4 days with zero watering")
-	eq(s.actors[1]["inv"]["lfg:item/sporebean"], 4 + 1 + 1, "yield 4 + meadow 0 + judd 1 = 5? (got inv)") if false else null
-	check(s.actors[1]["inv"]["lfg:item/sporebean"] >= 5, "sporebean yield at least 5")
+	eq(s.actors[1]["inv"]["lfg:item/sporebean"], 4, "yield 3 base + 0 meadow + 1 Judd")
 
 func test_saltroot_biome_gated_slow_rich() -> void:
 	var s: MatchState = quiet()
@@ -56,7 +55,7 @@ func test_saltroot_biome_gated_slow_rich() -> void:
 			break
 	eq(days, 6, "takes 6 days")
 	check(cmd(s, "harvest", {"hex": h})["ok"], "harvest saltroot")
-	eq(s.actors[1]["inv"]["lfg:item/saltroot"], 6 + 2 + 1, "6 base + 2 salt + 1 judd")
+	eq(s.actors[1]["inv"]["lfg:item/saltroot"], 7 + 2 + 1, "7 base + 2 salt + 1 judd")
 
 func test_crops_have_distinct_tradeoffs() -> void:
 	var crops: Array = Content.crops().values()
