@@ -1,0 +1,96 @@
+seeds=24 days=336
+total_conquest=0/24  exactly_one_alive_by_week24=0/24 (0%)  one_alive_ever=0/24
+  alive at week 8: mean 12.9  min 10  max 14
+  alive at week 12: mean 10.2  min 7  max 13
+  alive at week 24: mean 6.0  min 4  max 8
+  alive at week 48: mean 5.3  min 3  max 8
+territory: last change day mean 330, min 211, seeds still changing after week 8: 24/24, after week 24: 24/24
+  mean territory changes per week (weeks 1,5,9,13,17,25,33,45): w1=2.2, w5=5.5, w9=6.1, w13=8.3, w17=8.5, w25=5.3, w33=2.7, w45=2.0
+cpu: mean tick 0.86 ms (max 0.96), wall/seed 52s
+
+## By persona
+persona | factions | avg final holdings | captures/faction | leader kills | % with >=1 deed | deeds/faction | avg final rank | avg max rank | eliminated % | R0>8wk&0 deeds | parties/faction | tributes
+hoarder | 84 | 0.46 | 1.79 | 6 | 92% | 25.7 | 1.26 | 2.01 | 83% | 0 | 31.6 | 861
+raider | 91 | 2.56 | 24.33 | 73 | 100% | 56.0 | 2.93 | 4.64 | 54% | 0 | 79.4 | 163
+trader | 76 | 1.59 | 9.01 | 17 | 100% | 62.5 | 1.86 | 3.22 | 63% | 0 | 55.9 | 1173
+turtle | 85 | 2.49 | 10.00 | 45 | 100% | 64.1 | 2.09 | 3.29 | 48% | 0 | 69.0 | 1162
+
+## Deed kinds by persona (total over all seeds)
+persona | broker | capture | defend | escort | heal | kill_leader | kill_raider | kill_wild | scout | steal
+hoarder | 861 | 150 | 233 | 6 | 17 | 6 | 12 | 0 | 839 | 36
+raider | 163 | 2214 | 888 | 230 | 45 | 73 | 11 | 3 | 1457 | 9
+trader | 1173 | 685 | 294 | 83 | 29 | 17 | 8 | 2 | 2459 | 1
+turtle | 1162 | 849 | 515 | 122 | 36 | 45 | 5 | 0 | 2697 | 14
+
+## By class
+class | n | avg final holdings | alive at end % | elim % | avg elim day | captures | leader kills | avg final rank | deeds/faction | skill pts | nodes | wins | elimination causes
+judd | 24 | 4.33 | 67% | 33% | 99 | 21.2 | 12 | 2.17 | 70.7 | 152 | 13.0 | 0 | {'raid_party': 2, 'holdings_lost': 5, 'famine': 1}
+oren | 24 | 3.83 | 58% | 42% | 89 | 22.9 | 18 | 2.21 | 73.7 | 164 | 12.6 | 0 | {'holdings_lost': 10}
+bram | 24 | 3.67 | 46% | 54% | 99 | 21.2 | 13 | 2.67 | 50.2 | 135 | 13.8 | 0 | {'raid_party': 8, 'holdings_lost': 5}
+rook | 24 | 2.54 | 33% | 67% | 110 | 16.2 | 16 | 2.75 | 45.9 | 114 | 13.0 | 0 | {'holdings_lost': 6, 'raid_party': 7, 'famine': 1, 'spores': 2}
+forge | 24 | 2.29 | 46% | 54% | 116 | 19.2 | 22 | 1.67 | 46.0 | 122 | 13.1 | 0 | {'holdings_lost': 7, 'raid_party': 3, 'famine': 2, 'spores': 1}
+sable | 24 | 1.62 | 42% | 58% | 95 | 6.7 | 9 | 2.04 | 53.4 | 83 | 13.0 | 0 | {'holdings_lost': 5, 'raid_party': 7, 'leader_duel': 2}
+pip | 24 | 1.33 | 17% | 83% | 113 | 13.2 | 15 | 2.29 | 33.6 | 86 | 11.9 | 0 | {'raid_party': 14, 'holdings_lost': 5, 'leader_duel': 1}
+tavi | 24 | 1.33 | 46% | 54% | 137 | 14.4 | 10 | 1.42 | 60.0 | 120 | 13.8 | 0 | {'raid_party': 6, 'holdings_lost': 5, 'famine': 2}
+halo | 24 | 1.00 | 100% | 0% | -1 | 0.0 | 0 | 0.92 | 109.6 | 110 | 15.0 | 0 | {}
+mira | 24 | 1.00 | 17% | 83% | 71 | 6.0 | 3 | 2.67 | 30.4 | 55 | 12.5 | 0 | {'raid_party': 16, 'leader_duel': 3, 'spores': 1}
+dune | 24 | 0.92 | 12% | 88% | 103 | 6.2 | 4 | 2.29 | 31.8 | 58 | 13.4 | 0 | {'raid_party': 18, 'holdings_lost': 2, 'leader_duel': 1}
+nyx | 24 | 0.83 | 33% | 67% | 122 | 7.5 | 15 | 2.17 | 64.1 | 99 | 13.5 | 0 | {'raid_party': 11, 'famine': 1, 'holdings_lost': 4}
+quill | 24 | 0.50 | 17% | 83% | 113 | 6.2 | 3 | 1.67 | 41.5 | 64 | 14.5 | 0 | {'raid_party': 15, 'leader_duel': 1, 'famine': 3, 'holdings_lost': 1}
+vex | 24 | 0.00 | 0% | 100% | 79 | 1.7 | 1 | 1.92 | 16.3 | 24 | 11.1 | 0 | {'raid_party': 18, 'leader_duel': 3, 'famine': 2, 'spores': 1}
+class spread (avg final holdings): min 0.00, max 4.33, mean 1.80, max/min 433.3x
+
+## Rank distribution (share of faction-weeks)
+R0: 3% | R1: 35% | R2: 24% | R3: 9% | R4: 15% | R5: 14%
+Marked faction changes: mean distinct marked factions per seed 4.9; seeds with a single permanent mark (>=20 marked weeks): 0/24
+
+## Per-ability attempts (AI leaders via Abilities.use)
+ability | attempts | ok | failure reasons
+bless | 2304 | 2304 (100%) | {}
+cache | 276 | 276 (100%) | {}
+dash | 93 | 85 (91%) | {'occupied': 8}
+field_dressing | 133 | 133 (100%) | {}
+forage | 4964 | 4963 (100%) | {'bad_terrain': 1}
+guard | 47 | 47 (100%) | {}
+mine | 5463 | 5463 (100%) | {}
+plague_cloud | 84 | 84 (100%) | {}
+rage | 105 | 105 (100%) | {}
+rally | 309 | 309 (100%) | {}
+sentinel_post | 79 | 79 (100%) | {}
+siege_ram | 200 | 200 (100%) | {}
+snare | 154 | 81 (53%) | {'occupied': 73}
+spore_swarm | 94 | 94 (100%) | {}
+
+## Leader deaths by cause (last damage tag/source kind): {'raid_party/leader': 20, 'raid_party/party': 105, 'leader_duel/leader': 11, 'raid_party': 5, 'sortie': 2, 'unknown': 3, 'spores/leader': 5, 'sortie/leader': 2}
+## Faction eliminations by cause: {'raid_party': 125, 'holdings_lost': 55, 'leader_duel': 11, 'famine': 12, 'spores': 5}
+## Damage taken by leaders by tag: {'dash': 127, 'leader_duel': 1474, 'poison': 504, 'raid_party': 29785, 'sortie': 4432, 'spores': 729, 'sentinel': 337}
+
+## Skill nodes taken by branch (e=economy p=purge h=hybrid): {'p': 1480, 'h': 1486, 'e': 1451}; distinct nodes taken 210/210
+factions that finished their whole tree: 234/336; mean nodes 13.1
+
+## Per seed
+seed | end_day | conquest | alive@w24 | alive@end | neutral | last change day | leader deaths | winner
+1 | 336 | False | 6 | 6 | 16 | 334 | 6 | 
+2 | 336 | False | 7 | 7 | 12 | 337 | 4 | 
+3 | 336 | False | 8 | 8 | 13 | 329 | 4 | 
+4 | 336 | False | 6 | 6 | 21 | 335 | 5 | 
+5 | 336 | False | 6 | 5 | 14 | 337 | 6 | 
+6 | 336 | False | 7 | 6 | 13 | 336 | 7 | 
+7 | 336 | False | 6 | 5 | 17 | 321 | 7 | 
+8 | 336 | False | 5 | 3 | 14 | 336 | 9 | 
+9 | 336 | False | 6 | 6 | 13 | 336 | 7 | 
+10 | 336 | False | 5 | 4 | 21 | 336 | 7 | 
+11 | 336 | False | 5 | 4 | 9 | 336 | 9 | 
+12 | 336 | False | 6 | 4 | 13 | 336 | 8 | 
+13 | 336 | False | 8 | 7 | 17 | 336 | 4 | 
+14 | 336 | False | 6 | 5 | 14 | 336 | 5 | 
+15 | 336 | False | 6 | 5 | 12 | 211 | 6 | 
+16 | 336 | False | 5 | 4 | 20 | 337 | 8 | 
+17 | 336 | False | 7 | 7 | 7 | 336 | 4 | 
+18 | 336 | False | 6 | 5 | 11 | 336 | 7 | 
+19 | 336 | False | 6 | 5 | 15 | 336 | 8 | 
+20 | 336 | False | 6 | 6 | 19 | 336 | 6 | 
+21 | 336 | False | 5 | 4 | 23 | 332 | 10 | 
+22 | 336 | False | 4 | 4 | 15 | 336 | 7 | 
+23 | 336 | False | 6 | 6 | 14 | 336 | 3 | 
+24 | 336 | False | 7 | 6 | 12 | 336 | 6 | 

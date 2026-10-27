@@ -1,0 +1,2418 @@
+{
+  "ability_log": {
+    "bless": {
+      "ok": 96
+    },
+    "cache": {
+      "ok": 8
+    },
+    "dash": {
+      "ok": 2
+    },
+    "field_dressing": {
+      "ok": 25
+    },
+    "forage": {
+      "ok": 55
+    },
+    "mine": {
+      "ok": 212
+    },
+    "plague_cloud": {
+      "ok": 5
+    },
+    "rage": {
+      "ok": 2
+    },
+    "rally": {
+      "ok": 10
+    },
+    "sentinel_post": {
+      "ok": 1
+    },
+    "siege_ram": {
+      "ok": 5
+    },
+    "snare": {
+      "occupied": 13,
+      "ok": 12
+    },
+    "spore_swarm": {
+      "ok": 3
+    }
+  },
+  "alive_final": [
+    "sable",
+    "halo",
+    "judd",
+    "oren"
+  ],
+  "conquest_day": -1,
+  "end_day": 337,
+  "factions": {
+    "0": {
+      "alive": false,
+      "captures": 6,
+      "class": "vex",
+      "deed_counts": {
+        "capture": 6,
+        "defend": 2
+      },
+      "deeds": {
+        "capture": 6,
+        "defend": 2
+      },
+      "elim_cause": "raid_party/party",
+      "elim_day": 28,
+      "final_holdings": 0,
+      "final_rank": 3,
+      "final_standing": 38.575926,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 0,
+      "levy_unpaid": 0,
+      "marked_weeks": 0,
+      "max_rank": 4,
+      "nodes": [
+        "vex.p1",
+        "vex.p2",
+        "vex.h1",
+        "vex.p3",
+        "vex.h2",
+        "vex.p4",
+        "vex.e1",
+        "vex.h3",
+        "vex.p5",
+        "vex.h4",
+        "vex.e2",
+        "vex.h5",
+        "vex.e3"
+      ],
+      "parties": 11,
+      "party_leader": 0,
+      "persona": "raider",
+      "prosperity": {
+        "holdings": 30,
+        "output": 1367,
+        "ration_days": 3.0,
+        "reserves": 80,
+        "score": 1477,
+        "thriving": true
+      },
+      "rank_weeks": [
+        0,
+        2,
+        4,
+        4
+      ],
+      "revolts": 0,
+      "sp_total": 29,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 0
+    },
+    "1": {
+      "alive": true,
+      "captures": 8,
+      "class": "sable",
+      "deed_counts": {
+        "capture": 8,
+        "defend": 3,
+        "scout": 9,
+        "steal": 5
+      },
+      "deeds": {
+        "capture": 8,
+        "defend": 3,
+        "scout": 9,
+        "steal": 5
+      },
+      "elim_cause": "",
+      "elim_day": -1,
+      "final_holdings": 5,
+      "final_rank": 2,
+      "final_standing": 40.997619,
+      "idle_bleed": 27,
+      "implemented": true,
+      "joined_raids": 41,
+      "leader_kills": 0,
+      "levy_unpaid": 10,
+      "marked_weeks": 1,
+      "max_rank": 4,
+      "nodes": [
+        "sable.h1",
+        "sable.p1",
+        "sable.e1",
+        "sable.h2",
+        "sable.h3",
+        "sable.h4",
+        "sable.p2",
+        "sable.h5",
+        "sable.p3",
+        "sable.e2",
+        "sable.p4",
+        "sable.p5",
+        "sable.e3",
+        "sable.e4",
+        "sable.e5"
+      ],
+      "parties": 272,
+      "party_leader": 0,
+      "persona": "turtle",
+      "prosperity": {
+        "holdings": 70,
+        "output": 1780,
+        "ration_days": 5.633333,
+        "reserves": 80,
+        "score": 1930,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        3,
+        4,
+        3,
+        3,
+        3,
+        2,
+        3,
+        3,
+        4,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        2,
+        3,
+        2,
+        3,
+        3,
+        3,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "revolts": 0,
+      "sp_total": 75,
+      "starve_days": 0,
+      "steals": 5,
+      "tributes": 0
+    },
+    "2": {
+      "alive": true,
+      "captures": 0,
+      "class": "halo",
+      "deed_counts": {
+        "broker": 30,
+        "scout": 23
+      },
+      "deeds": {
+        "broker": 30,
+        "scout": 23
+      },
+      "elim_cause": "",
+      "elim_day": -1,
+      "final_holdings": 1,
+      "final_rank": 1,
+      "final_standing": 13.0,
+      "idle_bleed": 113,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 0,
+      "levy_unpaid": 4,
+      "marked_weeks": 0,
+      "max_rank": 2,
+      "nodes": [
+        "halo.e1",
+        "halo.h1",
+        "halo.p1",
+        "halo.e2",
+        "halo.e3",
+        "halo.h2",
+        "halo.h3",
+        "halo.p2",
+        "halo.p3",
+        "halo.e4",
+        "halo.h4",
+        "halo.p4",
+        "halo.e5",
+        "halo.h5",
+        "halo.p5"
+      ],
+      "parties": 33,
+      "party_leader": 0,
+      "persona": "hoarder",
+      "prosperity": {
+        "holdings": 16,
+        "output": 134,
+        "ration_days": 147.0,
+        "reserves": 60,
+        "score": 210,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        2,
+        1,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "revolts": 0,
+      "sp_total": 53,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 30
+    },
+    "3": {
+      "alive": false,
+      "captures": 0,
+      "class": "mira",
+      "deed_counts": {
+        "broker": 9,
+        "defend": 4,
+        "scout": 13
+      },
+      "deeds": {
+        "broker": 9,
+        "defend": 4,
+        "scout": 13
+      },
+      "elim_cause": "raid_party/party",
+      "elim_day": 77,
+      "final_holdings": 0,
+      "final_rank": 2,
+      "final_standing": 21.007143,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 0,
+      "levy_unpaid": 7,
+      "marked_weeks": 0,
+      "max_rank": 2,
+      "nodes": [
+        "mira.h1",
+        "mira.p1",
+        "mira.e1",
+        "mira.h2",
+        "mira.h3",
+        "mira.p2",
+        "mira.p3",
+        "mira.e2",
+        "mira.e3",
+        "mira.h4",
+        "mira.h5",
+        "mira.p4",
+        "mira.p5"
+      ],
+      "parties": 16,
+      "party_leader": 0,
+      "persona": "turtle",
+      "prosperity": {
+        "holdings": 16,
+        "output": 491,
+        "ration_days": 5.8,
+        "reserves": 60,
+        "score": 567,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "revolts": 0,
+      "sp_total": 30,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 9
+    },
+    "4": {
+      "alive": true,
+      "captures": 45,
+      "class": "judd",
+      "deed_counts": {
+        "capture": 45,
+        "defend": 4,
+        "escort": 7,
+        "kill_leader": 1,
+        "scout": 2
+      },
+      "deeds": {
+        "capture": 45,
+        "defend": 4,
+        "escort": 7,
+        "kill_leader": 1,
+        "scout": 2
+      },
+      "elim_cause": "",
+      "elim_day": -1,
+      "final_holdings": 9,
+      "final_rank": 3,
+      "final_standing": 66.82963,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 1,
+      "levy_unpaid": 23,
+      "marked_weeks": 22,
+      "max_rank": 5,
+      "nodes": [
+        "judd.p1",
+        "judd.p2",
+        "judd.h1",
+        "judd.e1",
+        "judd.p3",
+        "judd.p4",
+        "judd.p5",
+        "judd.h2",
+        "judd.h3",
+        "judd.h4",
+        "judd.e2",
+        "judd.h5",
+        "judd.e3",
+        "judd.e4",
+        "judd.e5"
+      ],
+      "parties": 106,
+      "party_leader": 0,
+      "persona": "raider",
+      "prosperity": {
+        "holdings": 94,
+        "output": 1541,
+        "ration_days": 8.934783,
+        "reserves": 61,
+        "score": 1696,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        3,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        3,
+        5,
+        4,
+        4,
+        4,
+        4,
+        5,
+        4,
+        4,
+        4,
+        5,
+        4,
+        4,
+        4,
+        3,
+        3,
+        3,
+        4,
+        3,
+        4,
+        3,
+        3,
+        4,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        3,
+        3,
+        4,
+        3
+      ],
+      "revolts": 27,
+      "sp_total": 219,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 0
+    },
+    "5": {
+      "alive": false,
+      "captures": 8,
+      "class": "forge",
+      "deed_counts": {
+        "broker": 8,
+        "capture": 8,
+        "defend": 6,
+        "escort": 1,
+        "kill_leader": 2,
+        "scout": 1
+      },
+      "deeds": {
+        "broker": 8,
+        "capture": 8,
+        "defend": 6,
+        "escort": 1,
+        "kill_leader": 2,
+        "scout": 1
+      },
+      "elim_cause": "spores/leader",
+      "elim_day": 63,
+      "final_holdings": 0,
+      "final_rank": 5,
+      "final_standing": 104.201323,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 5,
+      "leader_kills": 2,
+      "levy_unpaid": 1,
+      "marked_weeks": 2,
+      "max_rank": 5,
+      "nodes": [
+        "forge.p1",
+        "forge.h1",
+        "forge.e1",
+        "forge.p2",
+        "forge.p3",
+        "forge.h2",
+        "forge.p4",
+        "forge.h3",
+        "forge.e2",
+        "forge.p5",
+        "forge.h4",
+        "forge.e3",
+        "forge.h5",
+        "forge.e4",
+        "forge.e5"
+      ],
+      "parties": 16,
+      "party_leader": 0,
+      "persona": "trader",
+      "prosperity": {
+        "holdings": 96,
+        "output": 2837,
+        "ration_days": 6.632353,
+        "reserves": 80,
+        "score": 3013,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        2,
+        2,
+        2,
+        4,
+        5,
+        5,
+        5,
+        5
+      ],
+      "revolts": 0,
+      "sp_total": 66,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 8
+    },
+    "6": {
+      "alive": false,
+      "captures": 3,
+      "class": "bram",
+      "deed_counts": {
+        "broker": 8,
+        "capture": 3,
+        "defend": 4
+      },
+      "deeds": {
+        "broker": 8,
+        "capture": 3,
+        "defend": 4
+      },
+      "elim_cause": "raid_party/party",
+      "elim_day": 56,
+      "final_holdings": 0,
+      "final_rank": 4,
+      "final_standing": 56.092063,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 5,
+      "leader_kills": 0,
+      "levy_unpaid": 1,
+      "marked_weeks": 0,
+      "max_rank": 4,
+      "nodes": [
+        "bram.p1",
+        "bram.h1",
+        "bram.e1",
+        "bram.p2",
+        "bram.p3",
+        "bram.h2",
+        "bram.p4",
+        "bram.h3",
+        "bram.p5",
+        "bram.h4",
+        "bram.e2",
+        "bram.h5",
+        "bram.e3"
+      ],
+      "parties": 11,
+      "party_leader": 0,
+      "persona": "trader",
+      "prosperity": {
+        "holdings": 48,
+        "output": 1934,
+        "ration_days": 4.08,
+        "reserves": 80,
+        "score": 2062,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        2,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4
+      ],
+      "revolts": 0,
+      "sp_total": 30,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 8
+    },
+    "7": {
+      "alive": false,
+      "captures": 20,
+      "class": "nyx",
+      "deed_counts": {
+        "capture": 20,
+        "defend": 1,
+        "escort": 9,
+        "kill_leader": 2,
+        "kill_raider": 1
+      },
+      "deeds": {
+        "capture": 20,
+        "defend": 1,
+        "escort": 9,
+        "kill_leader": 2,
+        "kill_raider": 1
+      },
+      "elim_cause": "raid_party/party",
+      "elim_day": 140,
+      "final_holdings": 0,
+      "final_rank": 4,
+      "final_standing": 73.810053,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 7,
+      "leader_kills": 2,
+      "levy_unpaid": 0,
+      "marked_weeks": 2,
+      "max_rank": 5,
+      "nodes": [
+        "nyx.p1",
+        "nyx.p2",
+        "nyx.h1",
+        "nyx.e1",
+        "nyx.p3",
+        "nyx.p4",
+        "nyx.h2",
+        "nyx.p5",
+        "nyx.h3",
+        "nyx.h4",
+        "nyx.h5",
+        "nyx.e2",
+        "nyx.e3",
+        "nyx.e4",
+        "nyx.e5"
+      ],
+      "parties": 63,
+      "party_leader": 0,
+      "persona": "raider",
+      "prosperity": {
+        "holdings": 86,
+        "output": 2110,
+        "ration_days": 7.086957,
+        "reserves": 80,
+        "score": 2276,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        4,
+        4
+      ],
+      "revolts": 6,
+      "sp_total": 106,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 0
+    },
+    "8": {
+      "alive": false,
+      "captures": 25,
+      "class": "tavi",
+      "deed_counts": {
+        "capture": 25,
+        "defend": 10,
+        "escort": 1,
+        "kill_leader": 2,
+        "kill_wild": 1,
+        "scout": 1
+      },
+      "deeds": {
+        "capture": 25,
+        "defend": 10,
+        "escort": 1,
+        "kill_leader": 2,
+        "kill_wild": 1,
+        "scout": 1
+      },
+      "elim_cause": "famine",
+      "elim_day": 213,
+      "final_holdings": 0,
+      "final_rank": 0,
+      "final_standing": 5.0,
+      "idle_bleed": 38,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 2,
+      "levy_unpaid": 11,
+      "marked_weeks": 8,
+      "max_rank": 5,
+      "nodes": [
+        "tavi.p1",
+        "tavi.p2",
+        "tavi.h1",
+        "tavi.e1",
+        "tavi.p3",
+        "tavi.h2",
+        "tavi.p4",
+        "tavi.p5",
+        "tavi.h3",
+        "tavi.h4",
+        "tavi.h5",
+        "tavi.e2",
+        "tavi.e3",
+        "tavi.e4",
+        "tavi.e5"
+      ],
+      "parties": 47,
+      "party_leader": 0,
+      "persona": "raider",
+      "prosperity": {
+        "holdings": 10,
+        "output": 63,
+        "ration_days": 0.0,
+        "reserves": 0,
+        "score": 73,
+        "thriving": false
+      },
+      "rank_weeks": [
+        1,
+        3,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        4,
+        5,
+        5,
+        4,
+        3,
+        2,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "revolts": 6,
+      "sp_total": 141,
+      "starve_days": 57,
+      "steals": 0,
+      "tributes": 0
+    },
+    "9": {
+      "alive": true,
+      "captures": 30,
+      "class": "oren",
+      "deed_counts": {
+        "capture": 30,
+        "defend": 54,
+        "escort": 4,
+        "heal": 23,
+        "kill_leader": 2,
+        "scout": 79
+      },
+      "deeds": {
+        "capture": 30,
+        "defend": 54,
+        "escort": 4,
+        "heal": 23,
+        "kill_leader": 2,
+        "scout": 79
+      },
+      "elim_cause": "",
+      "elim_day": -1,
+      "final_holdings": 2,
+      "final_rank": 1,
+      "final_standing": 23.875,
+      "idle_bleed": 13,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 2,
+      "levy_unpaid": 21,
+      "marked_weeks": 13,
+      "max_rank": 5,
+      "nodes": [
+        "oren.h1",
+        "oren.p1",
+        "oren.e1",
+        "oren.h2",
+        "oren.h3",
+        "oren.p2",
+        "oren.p3",
+        "oren.h4",
+        "oren.e2",
+        "oren.h5",
+        "oren.p4",
+        "oren.e3",
+        "oren.p5",
+        "oren.e4",
+        "oren.e5"
+      ],
+      "parties": 133,
+      "party_leader": 0,
+      "persona": "turtle",
+      "prosperity": {
+        "holdings": 22,
+        "output": 232,
+        "ration_days": 14.545455,
+        "reserves": 60,
+        "score": 314,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "revolts": 21,
+      "sp_total": 355,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 0
+    },
+    "10": {
+      "alive": false,
+      "captures": 0,
+      "class": "rook",
+      "deed_counts": {
+        "broker": 12,
+        "defend": 6
+      },
+      "deeds": {
+        "broker": 12,
+        "defend": 6
+      },
+      "elim_cause": "raid_party/party",
+      "elim_day": 84,
+      "final_holdings": 0,
+      "final_rank": 1,
+      "final_standing": 15.120106,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 7,
+      "leader_kills": 0,
+      "levy_unpaid": 7,
+      "marked_weeks": 0,
+      "max_rank": 2,
+      "nodes": [
+        "rook.p1",
+        "rook.h1",
+        "rook.e1",
+        "rook.p2",
+        "rook.p3",
+        "rook.h2",
+        "rook.h3",
+        "rook.e2",
+        "rook.e3",
+        "rook.p4",
+        "rook.h4",
+        "rook.e4"
+      ],
+      "parties": 7,
+      "party_leader": 0,
+      "persona": "hoarder",
+      "prosperity": {
+        "holdings": 10,
+        "output": 147,
+        "ration_days": 38.5,
+        "reserves": 62,
+        "score": 219,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "revolts": 0,
+      "sp_total": 24,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 12
+    },
+    "11": {
+      "alive": false,
+      "captures": 0,
+      "class": "dune",
+      "deed_counts": {
+        "broker": 8,
+        "defend": 1
+      },
+      "deeds": {
+        "broker": 8,
+        "defend": 1
+      },
+      "elim_cause": "raid_party/party",
+      "elim_day": 56,
+      "final_holdings": 0,
+      "final_rank": 2,
+      "final_standing": 19.380159,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 0,
+      "levy_unpaid": 6,
+      "marked_weeks": 0,
+      "max_rank": 2,
+      "nodes": [
+        "dune.e1",
+        "dune.h1",
+        "dune.p1",
+        "dune.e2",
+        "dune.e3",
+        "dune.e4"
+      ],
+      "parties": 13,
+      "party_leader": 0,
+      "persona": "hoarder",
+      "prosperity": {
+        "holdings": 16,
+        "output": 251,
+        "ration_days": 24.0,
+        "reserves": 62,
+        "score": 329,
+        "thriving": true
+      },
+      "rank_weeks": [
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "revolts": 0,
+      "sp_total": 11,
+      "starve_days": 0,
+      "steals": 0,
+      "tributes": 8
+    },
+    "12": {
+      "alive": false,
+      "captures": 0,
+      "class": "pip",
+      "deed_counts": {
+        "broker": 4,
+        "defend": 1,
+        "scout": 8
+      },
+      "deeds": {
+        "broker": 4,
+        "defend": 1,
+        "scout": 8
+      },
+      "elim_cause": "leader_duel/leader",
+      "elim_day": 42,
+      "final_holdings": 0,
+      "final_rank": 0,
+      "final_standing": 5.968651,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 0,
+      "levy_unpaid": 1,
+      "marked_weeks": 0,
+      "max_rank": 1,
+      "nodes": [
+        "pip.p1",
+        "pip.h1",
+        "pip.e1",
+        "pip.p2",
+        "pip.p3",
+        "pip.h2",
+        "pip.h3",
+        "pip.e2"
+      ],
+      "parties": 9,
+      "party_leader": 0,
+      "persona": "trader",
+      "prosperity": {
+        "holdings": 6,
+        "output": 224,
+        "ration_days": 0.0,
+        "reserves": 5,
+        "score": 235,
+        "thriving": false
+      },
+      "rank_weeks": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "revolts": 0,
+      "sp_total": 14,
+      "starve_days": 5,
+      "steals": 0,
+      "tributes": 4
+    },
+    "13": {
+      "alive": false,
+      "captures": 0,
+      "class": "quill",
+      "deed_counts": {
+        "broker": 18,
+        "defend": 2,
+        "scout": 18
+      },
+      "deeds": {
+        "broker": 18,
+        "defend": 2,
+        "scout": 18
+      },
+      "elim_cause": "raid_party/party",
+      "elim_day": 126,
+      "final_holdings": 0,
+      "final_rank": 1,
+      "final_standing": 17.030423,
+      "idle_bleed": 0,
+      "implemented": true,
+      "joined_raids": 0,
+      "leader_kills": 0,
+      "levy_unpaid": 0,
+      "marked_weeks": 0,
+      "max_rank": 2,
+      "nodes": [
+        "quill.h1",
+        "quill.p1",
+        "quill.e1",
+        "quill.h2",
+        "quill.h3",
+        "quill.p2",
+        "quill.p3",
+        "quill.e2",
+        "quill.e3",
+        "quill.h4",
+        "quill.p4",
+        "quill.e4",
+        "quill.h5",
+        "quill.p5",
+        "quill.e5"
+      ],
+      "parties": 29,
+      "party_leader": 0,
+      "persona": "turtle",
+      "prosperity": {
+        "holdings": 10,
+        "output": 315,
+        "ration_days": 0.0,
+        "reserves": 20,
+        "score": 345,
+        "thriving": false
+      },
+      "rank_weeks": [
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      "revolts": 0,
+      "sp_total": 42,
+      "starve_days": 10,
+      "steals": 0,
+      "tributes": 18
+    }
+  },
+  "final_holdings": {
+    "bram": 0,
+    "dune": 0,
+    "forge": 0,
+    "halo": 1,
+    "judd": 9,
+    "mira": 0,
+    "nyx": 0,
+    "oren": 2,
+    "pip": 0,
+    "quill": 0,
+    "rook": 0,
+    "sable": 5,
+    "tavi": 0,
+    "vex": 0
+  },
+  "kill_causes": {
+    "leader_duel/leader": 1,
+    "raid_party": 1,
+    "raid_party/party": 7,
+    "spores/leader": 1
+  },
+  "last_territory_change_day": 332,
+  "leader_damage": {
+    "leader_duel": 186,
+    "raid_party": 1778,
+    "sortie": 196,
+    "spores": 32
+  },
+  "mark_final": 4,
+  "neutral_holdings": 23,
+  "seed": 21,
+  "solo_day": -1,
+  "territory_changes_by_week": [
+    4,
+    5,
+    7,
+    7,
+    5,
+    6,
+    6,
+    4,
+    7,
+    6,
+    5,
+    6,
+    8,
+    2,
+    9,
+    5,
+    13,
+    9,
+    8,
+    9,
+    12,
+    4,
+    8,
+    6,
+    6,
+    4,
+    5,
+    5,
+    2,
+    0,
+    2,
+    1,
+    2,
+    1,
+    1,
+    2,
+    1,
+    0,
+    1,
+    0,
+    0,
+    2,
+    2,
+    2,
+    0,
+    2,
+    2,
+    1,
+    0
+  ],
+  "tick_avg_ms": 0.803083201058173,
+  "timeline": [
+    {
+      "alive": 14,
+      "day": 1,
+      "holdings": {
+        "bram": 1,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 1,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      },
+      "mark": -1,
+      "rank": {
+        "bram": 1,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 1,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 0,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 0
+      }
+    },
+    {
+      "alive": 14,
+      "day": 8,
+      "holdings": {
+        "bram": 1,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 2,
+        "mira": 1,
+        "nyx": 2,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 2,
+        "vex": 2
+      },
+      "mark": 4,
+      "rank": {
+        "bram": 2,
+        "dune": 2,
+        "forge": 2,
+        "halo": 2,
+        "judd": 3,
+        "mira": 2,
+        "nyx": 3,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 3,
+        "vex": 2
+      }
+    },
+    {
+      "alive": 14,
+      "day": 15,
+      "holdings": {
+        "bram": 1,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 3,
+        "mira": 1,
+        "nyx": 2,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 4,
+        "vex": 4
+      },
+      "mark": 8,
+      "rank": {
+        "bram": 2,
+        "dune": 2,
+        "forge": 2,
+        "halo": 2,
+        "judd": 4,
+        "mira": 2,
+        "nyx": 3,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 4,
+        "vex": 4
+      }
+    },
+    {
+      "alive": 14,
+      "day": 22,
+      "holdings": {
+        "bram": 1,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 5,
+        "mira": 1,
+        "nyx": 3,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 6,
+        "vex": 5
+      },
+      "mark": 8,
+      "rank": {
+        "bram": 2,
+        "dune": 2,
+        "forge": 2,
+        "halo": 2,
+        "judd": 4,
+        "mira": 2,
+        "nyx": 4,
+        "oren": 1,
+        "pip": 1,
+        "quill": 2,
+        "rook": 2,
+        "sable": 1,
+        "tavi": 5,
+        "vex": 4
+      }
+    },
+    {
+      "alive": 13,
+      "day": 29,
+      "holdings": {
+        "bram": 2,
+        "dune": 1,
+        "forge": 3,
+        "halo": 1,
+        "judd": 5,
+        "mira": 1,
+        "nyx": 4,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 8
+      },
+      "mark": 8,
+      "rank": {
+        "bram": 3,
+        "dune": 2,
+        "forge": 4,
+        "halo": 2,
+        "judd": 4,
+        "mira": 2,
+        "nyx": 4,
+        "oren": 1,
+        "pip": 1,
+        "quill": 2,
+        "rook": 2,
+        "sable": 1,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 13,
+      "day": 36,
+      "holdings": {
+        "bram": 2,
+        "dune": 1,
+        "forge": 4,
+        "halo": 1,
+        "judd": 7,
+        "mira": 1,
+        "nyx": 5,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 9
+      },
+      "mark": 8,
+      "rank": {
+        "bram": 3,
+        "dune": 2,
+        "forge": 5,
+        "halo": 2,
+        "judd": 5,
+        "mira": 2,
+        "nyx": 4,
+        "oren": 2,
+        "pip": 1,
+        "quill": 2,
+        "rook": 2,
+        "sable": 1,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 12,
+      "day": 43,
+      "holdings": {
+        "bram": 3,
+        "dune": 1,
+        "forge": 5,
+        "halo": 1,
+        "judd": 8,
+        "mira": 1,
+        "nyx": 5,
+        "oren": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 10
+      },
+      "mark": 8,
+      "rank": {
+        "bram": 4,
+        "dune": 2,
+        "forge": 5,
+        "halo": 2,
+        "judd": 5,
+        "mira": 2,
+        "nyx": 4,
+        "oren": 2,
+        "quill": 2,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 12,
+      "day": 50,
+      "holdings": {
+        "bram": 3,
+        "dune": 1,
+        "forge": 5,
+        "halo": 1,
+        "judd": 8,
+        "mira": 1,
+        "nyx": 6,
+        "oren": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 11
+      },
+      "mark": 5,
+      "rank": {
+        "bram": 4,
+        "dune": 2,
+        "forge": 5,
+        "halo": 2,
+        "judd": 5,
+        "mira": 2,
+        "nyx": 4,
+        "oren": 2,
+        "quill": 2,
+        "rook": 1,
+        "sable": 2,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 10,
+      "day": 57,
+      "holdings": {
+        "forge": 6,
+        "halo": 1,
+        "judd": 8,
+        "mira": 1,
+        "nyx": 6,
+        "oren": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 12
+      },
+      "mark": 5,
+      "rank": {
+        "forge": 5,
+        "halo": 2,
+        "judd": 4,
+        "mira": 2,
+        "nyx": 4,
+        "oren": 2,
+        "quill": 1,
+        "rook": 1,
+        "sable": 2,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 9,
+      "day": 64,
+      "holdings": {
+        "halo": 1,
+        "judd": 7,
+        "mira": 1,
+        "nyx": 7,
+        "oren": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 2,
+        "tavi": 12
+      },
+      "mark": 8,
+      "rank": {
+        "halo": 2,
+        "judd": 4,
+        "mira": 2,
+        "nyx": 5,
+        "oren": 2,
+        "quill": 1,
+        "rook": 1,
+        "sable": 3,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 9,
+      "day": 71,
+      "holdings": {
+        "halo": 1,
+        "judd": 8,
+        "mira": 1,
+        "nyx": 8,
+        "oren": 2,
+        "quill": 1,
+        "rook": 1,
+        "sable": 3,
+        "tavi": 11
+      },
+      "mark": 8,
+      "rank": {
+        "halo": 2,
+        "judd": 4,
+        "mira": 2,
+        "nyx": 5,
+        "oren": 3,
+        "quill": 1,
+        "rook": 2,
+        "sable": 4,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 8,
+      "day": 78,
+      "holdings": {
+        "halo": 1,
+        "judd": 8,
+        "nyx": 9,
+        "oren": 3,
+        "quill": 1,
+        "rook": 1,
+        "sable": 3,
+        "tavi": 11
+      },
+      "mark": 7,
+      "rank": {
+        "halo": 2,
+        "judd": 4,
+        "nyx": 5,
+        "oren": 4,
+        "quill": 1,
+        "rook": 2,
+        "sable": 3,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 7,
+      "day": 85,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "nyx": 9,
+        "oren": 4,
+        "quill": 1,
+        "sable": 3,
+        "tavi": 11
+      },
+      "mark": 8,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "nyx": 5,
+        "oren": 5,
+        "quill": 1,
+        "sable": 3,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 7,
+      "day": 92,
+      "holdings": {
+        "halo": 1,
+        "judd": 8,
+        "nyx": 9,
+        "oren": 6,
+        "quill": 1,
+        "sable": 3,
+        "tavi": 11
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "nyx": 5,
+        "oren": 5,
+        "quill": 1,
+        "sable": 3,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 7,
+      "day": 99,
+      "holdings": {
+        "halo": 1,
+        "judd": 7,
+        "nyx": 10,
+        "oren": 6,
+        "quill": 1,
+        "sable": 3,
+        "tavi": 11
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 2,
+        "judd": 3,
+        "nyx": 5,
+        "oren": 5,
+        "quill": 1,
+        "sable": 2,
+        "tavi": 4
+      }
+    },
+    {
+      "alive": 7,
+      "day": 106,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "nyx": 9,
+        "oren": 5,
+        "quill": 1,
+        "sable": 4,
+        "tavi": 9
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 5,
+        "nyx": 5,
+        "oren": 5,
+        "quill": 1,
+        "sable": 3,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 7,
+      "day": 113,
+      "holdings": {
+        "halo": 1,
+        "judd": 8,
+        "nyx": 9,
+        "oren": 6,
+        "quill": 1,
+        "sable": 4,
+        "tavi": 9
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 2,
+        "judd": 4,
+        "nyx": 5,
+        "oren": 5,
+        "quill": 1,
+        "sable": 3,
+        "tavi": 5
+      }
+    },
+    {
+      "alive": 7,
+      "day": 120,
+      "holdings": {
+        "halo": 1,
+        "judd": 7,
+        "nyx": 10,
+        "oren": 3,
+        "quill": 1,
+        "sable": 5,
+        "tavi": 8
+      },
+      "mark": 7,
+      "rank": {
+        "halo": 2,
+        "judd": 4,
+        "nyx": 5,
+        "oren": 4,
+        "quill": 2,
+        "sable": 4,
+        "tavi": 4
+      }
+    },
+    {
+      "alive": 6,
+      "day": 127,
+      "holdings": {
+        "halo": 1,
+        "judd": 6,
+        "nyx": 8,
+        "oren": 5,
+        "sable": 5,
+        "tavi": 5
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "nyx": 4,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 3
+      }
+    },
+    {
+      "alive": 6,
+      "day": 134,
+      "holdings": {
+        "halo": 1,
+        "judd": 6,
+        "nyx": 8,
+        "oren": 7,
+        "sable": 5,
+        "tavi": 4
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "nyx": 4,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 2
+      }
+    },
+    {
+      "alive": 5,
+      "day": 141,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 9,
+        "sable": 5,
+        "tavi": 2
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 5,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 1
+      }
+    },
+    {
+      "alive": 5,
+      "day": 148,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 8,
+        "sable": 5,
+        "tavi": 2
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 1
+      }
+    },
+    {
+      "alive": 5,
+      "day": 155,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 11,
+        "sable": 5,
+        "tavi": 1
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 1
+      }
+    },
+    {
+      "alive": 5,
+      "day": 162,
+      "holdings": {
+        "halo": 1,
+        "judd": 11,
+        "oren": 6,
+        "sable": 5,
+        "tavi": 1
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 0
+      }
+    },
+    {
+      "alive": 5,
+      "day": 169,
+      "holdings": {
+        "halo": 1,
+        "judd": 11,
+        "oren": 9,
+        "sable": 4,
+        "tavi": 1
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 5,
+        "oren": 5,
+        "sable": 2,
+        "tavi": 0
+      }
+    },
+    {
+      "alive": 5,
+      "day": 176,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 7,
+        "sable": 4,
+        "tavi": 1
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 1
+      }
+    },
+    {
+      "alive": 5,
+      "day": 183,
+      "holdings": {
+        "halo": 1,
+        "judd": 11,
+        "oren": 7,
+        "sable": 3,
+        "tavi": 1
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 5,
+        "sable": 2,
+        "tavi": 0
+      }
+    },
+    {
+      "alive": 5,
+      "day": 190,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 7,
+        "sable": 4,
+        "tavi": 1
+      },
+      "mark": 9,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 5,
+        "sable": 3,
+        "tavi": 0
+      }
+    },
+    {
+      "alive": 5,
+      "day": 197,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 3,
+        "sable": 4,
+        "tavi": 1
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 2,
+        "sable": 3,
+        "tavi": 0
+      }
+    },
+    {
+      "alive": 5,
+      "day": 204,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 2,
+        "sable": 5,
+        "tavi": 1
+      },
+      "mark": 1,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 2,
+        "sable": 3,
+        "tavi": 0
+      }
+    },
+    {
+      "alive": 5,
+      "day": 211,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 2,
+        "sable": 5,
+        "tavi": 1
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 2,
+        "sable": 3,
+        "tavi": 0
+      }
+    },
+    {
+      "alive": 4,
+      "day": 218,
+      "holdings": {
+        "halo": 1,
+        "judd": 11,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 225,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 232,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 239,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 246,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 253,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 260,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 267,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 274,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 281,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 288,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 295,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 302,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 309,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 316,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 323,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 330,
+      "holdings": {
+        "halo": 1,
+        "judd": 10,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 4,
+        "oren": 1,
+        "sable": 2
+      }
+    },
+    {
+      "alive": 4,
+      "day": 337,
+      "holdings": {
+        "halo": 1,
+        "judd": 9,
+        "oren": 2,
+        "sable": 5
+      },
+      "mark": 4,
+      "rank": {
+        "halo": 1,
+        "judd": 3,
+        "oren": 1,
+        "sable": 2
+      }
+    }
+  ],
+  "total_conquest": false,
+  "wall_s": 48.906,
+  "winner": "",
+  "winner_faction": -1
+}
