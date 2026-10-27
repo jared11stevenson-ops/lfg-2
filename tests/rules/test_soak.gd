@@ -7,6 +7,8 @@ func test_twelve_week_soak_is_stable_and_deterministic() -> void:
 		s.actors[1]["max_hp"] = 100000
 		s.actors[1]["hp"] = 100000
 		s.holdings[1]["store"]["lfg:item/ration"] = 5000
+		s.actors[1]["inv"]["lfg:item/ration"] = 9000      # a pack does not spoil
+		s.holdings[1]["garrison"] = 60                    # pass-2 AI raids with real parties and leaders: an undefended player would lose the capital
 	var t0: int = Time.get_ticks_msec()
 	var ea: Array = tick_all(a, 60.0 * 86.0, 5.0)
 	var elapsed: int = Time.get_ticks_msec() - t0

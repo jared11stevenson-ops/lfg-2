@@ -205,8 +205,12 @@ static func _recover_cache(state: MatchState, l: Dictionary, home: Dictionary, e
 		Conquest.move_fitting(l["inv"], home["store"], gain)
 
 # ------------------------------------------------------------------ raids: the leader marches with the party and can die
+## A brittle leader (low effective health) keeps out of the field; it is only at risk when its own home is besieged.
+static func fragile(l: Dictionary) -> bool:
+	return float(l["max_hp"]) / maxf(0.5, float(Combat.class_mod(l, "dmg_taken_mult", 1.0))) < FRAGILE_HP
+
 static func wants_to_join(state: MatchState, fid: int, l: Dictionary, mission: String, troops: int) -> bool:
-	if l.is_empty() or int(l["ai"].get("party", -1)) != -1:
+	if l.is_empty() or int(l["ai"].get("party", -1)) != -1 or fragile(l):
 		return false
 	var k: Dictionary = kit(l)
 	if not bool(k.get("joins_raid", false)) or mission == "scout" or mission == "supply":
@@ -316,6 +320,7 @@ static func melee(state: MatchState, attacker: Dictionary, victim: Dictionary, e
 
 # ------------------------------------------------------------------ defence: the leader reinforces a threatened holding (and can die there)
 const DEFEND_RANGE := 6
+const FRAGILE_HP := 70.0
 const STAY_HOME: Array[String] = ["support", "builder", "tinker", "diplomat", "pilgrim"]
 
 ## A hostile party has begun a siege of one of our holdings: leaders within DEFEND_RANGE march to it (fast march, abstracted), unless their
@@ -333,7 +338,7 @@ static func defend_call(state: MatchState, party: Dictionary) -> void:
 		return
 	if String(f["persona"]) != "turtle" and STAY_HOME.has(String(kit(l).get("role", ""))):
 		return
-	if float(l["hp"]) < 0.5 * float(l["max_hp"]) or HexGrid.distance(l["hex"], t["hex"]) > DEFEND_RANGE:
+	if fragile(l) or float(l["hp"]) < 0.5 * float(l["max_hp"]) or HexGrid.distance(l["hex"], t["hex"]) > DEFEND_RANGE:
 		return
 	if l["hex"] == t["hex"]:
 		return

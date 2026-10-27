@@ -153,6 +153,15 @@ static func eliminate_faction(state: MatchState, fid: int, events: Array) -> voi
 	for hid in state.holdings_of(fid):
 		state.holdings[hid]["owner"] = -1
 		state.holdings[hid]["garrison"] = maxi(1, int(state.holdings[hid]["garrison"]) / 3)      # a leaderless garrison routs
+		var keep: Array = []
+		for b in state.holdings[hid]["buildings"]:
+			if float(Content.building(String(b)).get("defense", 0)) <= 0.0:
+				keep.append(b)
+		var sites: Dictionary = state.holdings[hid].get("sites", {})
+		for k in sites.keys().duplicate():
+			if not keep.has(sites[k]):
+				sites.erase(k)
+		state.holdings[hid]["buildings"] = keep      # its walls and towers fall with it
 	events.append({"type": &"faction_eliminated", "faction": fid, "ai": bool(f["is_ai"])})
 	Economy.check_victory(state, events)
 

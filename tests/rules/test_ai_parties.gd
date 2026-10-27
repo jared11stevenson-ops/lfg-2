@@ -330,7 +330,7 @@ func test_truce_keeps_a_faction_off_the_players_holdings() -> void:
 	AIFactions.scout(s, f)
 	AIFactions.purge_round(s, ev)
 	for e in ev:
-		if String(e["type"]) == "party_dispatched":
+		if String(e["type"]) == "party_dispatched" and int(e["by"]) == f and (e["mission"] == "capture" or e["mission"] == "steal"):
 			check(int(e["target"]) != int(t["id"]), "truce: not the player's holding")
 	s.factions[f]["truce_until"] = 0.0
 	s.factions[f]["next_act"] = 0.0

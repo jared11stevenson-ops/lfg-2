@@ -310,6 +310,10 @@ static func effective_persona(state: MatchState, fid: int) -> String:
 		return "turtle"          # a pacifist class never raids, whatever the persona says
 	if p != "raider" and state.week() >= 6 and Standing.rank_of(state, fid) >= 3:
 		return "raider"
+	if p != "raider" and state.week() >= 8:
+		for hid in state.holdings_of(fid):
+			if int(state.holdings[hid]["garrison"]) >= 16:
+				return "raider"      # a fat standing army does not sit idle forever
 	return p
 
 # ---------------------------------------------------------------- purge: decisions

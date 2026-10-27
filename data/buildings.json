@@ -182,7 +182,8 @@
    "max": 1,
    "group": "shrine",
    "rank": 2,
-   "levy_cut": 0.25
+   "levy_cut": 0.25,
+   "model_pending": true
   },
   {
    "id": "lfg:building/greenhouse",
@@ -195,7 +196,8 @@
    "max": 1,
    "group": "greenhouse",
    "rank": 3,
-   "yield_bonus": 1
+   "yield_bonus": 1,
+   "model_pending": true
   },
   {
    "id": "lfg:building/forge",
@@ -213,7 +215,8 @@
     "outputs": {
      "lfg:item/gadget": 1
     }
-   }
+   },
+   "model_pending": true
   }
  ]
 }
