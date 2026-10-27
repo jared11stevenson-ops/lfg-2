@@ -25,6 +25,7 @@ var tilt: TiltShift
 var actors: ActorLayer
 var roads: RoadLayer
 var holding_layer: HoldingLayer
+var pois: PoiLayer
 var panels: UiPanels
 var combat_hud: CombatHud
 var state_ref: Object
@@ -50,6 +51,8 @@ func _init() -> void:
 	add_child(roads)
 	holding_layer = HoldingLayer.new()
 	add_child(holding_layer)
+	pois = PoiLayer.new()
+	add_child(pois)
 	farm = FarmLayer.new()
 	add_child(farm)
 	actors = ActorLayer.new()
@@ -123,6 +126,8 @@ func _prepare(seed_value: int, world_override: WorldData) -> void:
 	roads.build(world)
 	holding_layer.world = world
 	holding_layer.bind_fog(fog.texture)
+	pois.world = world
+	pois.bind_fog(fog.texture)
 	actors.world = world
 	actors.fog = fog
 	actors.player = player
@@ -171,20 +176,49 @@ func _apply_state(state: Object) -> void:
 	actors.player_id = pid
 	actors.bind_state(state)
 	holding_layer.sync_from_state(state)
+	_sync_pois(state)
 	panels.bind_state(state)
 	farm.sync_from_state(state)
 	set_hud_model(HudBinder.model_from_state(state))
+
+func _sync_pois(state: Object) -> void:
+	pois.sync_from_state(state)
+	var pa: Dictionary = (state.get("actors") as Dictionary).get(int(state.get("player_id")), {}) if state.get("actors") is Dictionary else {}
+	if not pa.is_empty():
+		map.set_poi_markers(Pois.markers(state as MatchState, pa))
+
+const POI_VERBS: Dictionary = {"farm": "Tend the old farm", "cave": "Peer into the cave", "shrine": "Visit the shrine", "vault": "Study the vault door", "wreck": "Search the wreck",
+	"hut": "Knock at the hut", "spire": "Approach the spire"}
+const TOAST_COLORS: Dictionary = {"good": UiStyle.GOOD, "warn": UiStyle.WARN, "bad": UiStyle.BAD, "info": UiStyle.TEXT}
+
+## Quest and point-of-interest events become HUD toasts (only the player's own).
+func _toast_for(e: Dictionary) -> void:
+	var t: Dictionary = {}
+	var ty: String = String(e.get("type", ""))
+	if ty.begins_with("poi_"):
+		t = Pois.toast_for(e)
+	elif ty.begins_with("quest_"):
+		t = Quests.toast_for(e)
+	if t.is_empty() or (e.has("actor") and int(e["actor"]) != actors.player_id):
+		return
+	var text: String = String(t["title"]) + (("  -  " + String(t["body"])) if String(t.get("body", "")) != "" else "")
+	hud.toast(text, TOAST_COLORS.get(String(t.get("kind", "info")), UiStyle.TEXT), 5.0)
 
 ## Call with Game.events_emitted payloads. Handles crop/phase events and enemy telegraphs.
 func on_events(events: Array, state: Object = null) -> void:
 	var farm_dirty := false
 	var holdings_dirty := false
+	var pois_dirty := false
 	actors.on_events(events)
 	for e in events:
 		match e.get("type", &""):
 			&"enemy_telegraph": telegraphs.handle_event(e)
 			&"crop_planted", &"crop_grown", &"crop_watered", &"crop_harvested", &"crop_withered": farm_dirty = true
 			&"built", &"demolished", &"holding_captured": holdings_dirty = true
+			&"poi_discovered", &"poi_claimed", &"poi_guarded", &"poi_progress":
+				pois_dirty = true
+				_toast_for(e)
+			&"quest_accepted", &"quest_step", &"quest_ready", &"quest_done": _toast_for(e)
 			&"phase_changed":
 				match e.get("to", &""):
 					&"PURGE_ACTIVE": hud.toast("THE PURGE BEGINS", UiStyle.BAD, 4.0)
@@ -195,6 +229,8 @@ func on_events(events: Array, state: Object = null) -> void:
 			farm.sync_from_state(state)
 		if holdings_dirty:
 			holding_layer.sync_from_state(state)
+		if pois_dirty or (state.get("phase") == &"RESOLUTION"):
+			_sync_pois(state)
 		set_hud_model(HudBinder.model_from_state(state))
 		combat_hud.abilities.update_from_state(state)
 		if panels.visible or panels.any_open():
@@ -226,6 +262,8 @@ func toggle_grid() -> void:
 func _on_interact() -> void:
 	var it: Dictionary = nearest_interactable()
 	if not it.is_empty():
+		if it["kind"] == &"poi" and state_ref != null:
+			panels.open_poi(int(it["id"]))
 		interact_requested.emit(it["kind"], it)
 
 ## Closest holding or farm plot within prompt_range -> {kind, label, dist, ...}.
@@ -246,6 +284,10 @@ func nearest_interactable() -> Dictionary:
 			best_plot = {"kind": &"plot", "label": verb, "id": id, "stage": st, "dist": d2}
 	if not best_plot.is_empty():
 		return best_plot
+	var np: Dictionary = pois.nearest(player.position, 9.0)
+	if not np.is_empty():
+		var nm: String = String(POI_VERBS.get(String(np["prop"]), "Look closer"))
+		return {"kind": &"poi", "label": nm, "id": int(np["id"]), "dist": float(np["dist"]), "available": bool(np["available"])}
 	var best: Dictionary = {}
 	var bd: float = prompt_range
 	for h in world.holdings:

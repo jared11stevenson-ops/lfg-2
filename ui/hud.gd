@@ -18,6 +18,8 @@ var hp_bar: ProgressBar
 var rations_chip: PanelContainer
 var rations_label: Label
 var rations_sub: Label
+var tracker_chip: PanelContainer
+var tracker_label: Label
 var prompt_chip: PanelContainer
 var prompt_label: Label
 var hotbar: HBoxContainer
@@ -59,6 +61,7 @@ func _build() -> void:
 	_build_banner()
 	_build_class_chip()
 	_build_rations()
+	_build_tracker()
 	_build_prompt()
 	_build_hotbar()
 	_build_bag()
@@ -144,6 +147,21 @@ func _build_rations() -> void:
 	rations_sub = UiStyle.label("", 16)
 	rations_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(rations_sub)
+
+## Quest tracker: the active quest's current step, under the class chip. Hidden when there is nothing to track.
+func _build_tracker() -> void:
+	tracker_chip = PanelContainer.new()
+	tracker_chip.name = "QuestTracker"
+	tracker_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tracker_chip.position = Vector2(20, 82)
+	tracker_chip.custom_minimum_size = Vector2(260, 0)
+	tracker_chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.10, 0.06, 0.18, 0.7), UiStyle.GOOD, 12, 2))
+	tracker_chip.visible = false
+	root.add_child(tracker_chip)
+	tracker_label = UiStyle.label("", 17, UiStyle.TEXT, false)
+	tracker_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tracker_label.custom_minimum_size = Vector2(240, 0)
+	tracker_chip.add_child(tracker_label)
 
 func _build_prompt() -> void:
 	prompt_chip = PanelContainer.new()
@@ -282,6 +300,9 @@ func set_model(m: Dictionary) -> void:
 	elif days_left < 3.0:
 		rc = UiStyle.WARN
 	rations_label.add_theme_color_override("font_color", rc)
+	var trk: String = String(m.get("quest_tracker", ""))
+	tracker_chip.visible = trk != ""
+	tracker_label.text = trk
 	var prompt: String = m.get("prompt", "")
 	prompt_chip.visible = prompt != ""
 	prompt_label.text = prompt

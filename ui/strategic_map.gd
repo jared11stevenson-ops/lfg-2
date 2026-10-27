@@ -19,6 +19,7 @@ var _xform: Transform2D = Transform2D()
 var _info: Label
 var _title: Label
 var _legend: VBoxContainer
+var poi_markers: Array = []       # [{hex:Vector2i (offset), prop:String, name:String, available:bool}] discovered points of interest (Pois.markers)
 const MARGIN_TOP := 58.0
 
 func _ready() -> void:
@@ -73,6 +74,14 @@ func set_open(open: bool) -> void:
 		queue_redraw()
 	else:
 		closed.emit()
+
+## Discovered points of interest (Pois.markers(state, actor)); axial hexes are converted here. Drawn only for explored ground.
+func set_poi_markers(markers: Array) -> void:
+	poi_markers = []
+	for m in markers:
+		poi_markers.append({"hex": HexMath.axial_to_offset(m["hex"]), "prop": String(m.get("prop", "hut")), "name": String(m.get("name", "")), "available": bool(m.get("available", true))})
+	if visible:
+		queue_redraw()
 
 func set_player(pos: Vector3, yaw: float) -> void:
 	player_pos = pos
@@ -151,6 +160,17 @@ func _draw() -> void:
 		var col: Color = Color("19e0c8") if int(h["owner"]) == 0 else Biomes.FUNGI[int(h["owner"]) % Biomes.FUNGI.size()]
 		draw_rect(Rect2(p - Vector2(5, 5), Vector2(10, 10)), Color("1d1030"))
 		draw_rect(Rect2(p - Vector2(3.5, 3.5), Vector2(7, 7)), col)
+	# points of interest: a diamond in the type's accent colour; a bright ring while this week's reward is still there, a dim one once spent
+	for pm in poi_markers:
+		var phex: Vector2i = pm["hex"]
+		var pp2: Vector2 = _xform * HexMath.offset_center(phex.x, phex.y)
+		var acc: Color = PoiModels.ACCENT.get(String(pm["prop"]), Color.WHITE)
+		if not bool(pm["available"]):
+			acc = acc.darkened(0.55)
+		draw_colored_polygon(PackedVector2Array([pp2 + Vector2(0, -7), pp2 + Vector2(6, 0), pp2 + Vector2(0, 7), pp2 + Vector2(-6, 0)]), acc)
+		draw_polyline(PackedVector2Array([pp2 + Vector2(0, -7), pp2 + Vector2(6, 0), pp2 + Vector2(0, 7), pp2 + Vector2(-6, 0), pp2 + Vector2(0, -7)]), Color("1d1030"), 1.5)
+		if bool(pm["available"]):
+			draw_arc(pp2, 10.0, 0.0, TAU, 16, acc, 1.5)
 	# selection
 	if HexMath.in_bounds(selected):
 		var sp: Vector2 = _xform * HexMath.offset_center(selected.x, selected.y)
@@ -182,6 +202,9 @@ func _select_at(p: Vector2) -> void:
 		var hi: int = world.holding_at(hex)
 		if hi >= 0:
 			txt += "  -  " + String(world.holdings[hi]["name"])
+		for pm in poi_markers:
+			if pm["hex"] == hex:
+				txt += "  -  %s%s" % [pm["name"], "" if bool(pm["available"]) else " (spent this week)"]
 	_info.text = txt
 	hex_selected.emit(hex)
 	queue_redraw()

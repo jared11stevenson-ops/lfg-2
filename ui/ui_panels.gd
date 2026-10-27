@@ -9,11 +9,15 @@ signal trade_requested(holding_id: int, side: String, item: String, qty: int)
 signal policy_requested(key: String, value: String, holding_id: int)
 signal store_requested(holding_id: int, side: String, item: String, qty: int)
 signal demolish_requested(holding_id: int, building_id: String)
+signal quest_accept_requested(quest_id: String)
+signal quest_abandon_requested(quest_id: String)
+signal quest_turn_in_requested(quest_id: String)
+signal poi_action_requested(poi_id: int, pick: int)
 signal placement_started(building_id: String)
 signal placement_ended
 signal panel_changed(kind: StringName) # &"" when all closed
-const KINDS: Array[StringName] = [&"build", &"craft", &"trade", &"policy", &"holdings"]
-const LABELS: Dictionary = {&"build": "BUILD", &"craft": "CRAFT", &"trade": "TRADE", &"policy": "POLICY", &"holdings": "HOLD"}
+const KINDS: Array[StringName] = [&"build", &"craft", &"trade", &"policy", &"holdings", &"quests", &"poi"]
+const LABELS: Dictionary = {&"build": "BUILD", &"craft": "CRAFT", &"trade": "TRADE", &"policy": "POLICY", &"holdings": "HOLD", &"quests": "JOURNAL"}
 var state: Object
 var root: Control
 var build: BuildMenu
@@ -21,6 +25,9 @@ var craft: CraftPanel
 var trade: TradePanel
 var policy: PolicyPanel
 var holdings: HoldingPanel
+var quests: QuestPanel
+var poi: PoiPanel
+var poi_id: int = -1
 var toolbar: VBoxContainer
 var toolbar_buttons: Dictionary = {}
 var merchant_id: int = -1
@@ -35,10 +42,12 @@ func _init() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	toolbar = VBoxContainer.new()
-	toolbar.position = Vector2(20, 104)
+	toolbar.position = Vector2(20, 140)
 	toolbar.add_theme_constant_override("separation", 6)
 	root.add_child(toolbar)
 	for k in KINDS:
+		if not LABELS.has(k):
+			continue      # the point-of-interest panel opens from the world, not from the toolbar
 		var b: Button = UiKit.button(String(LABELS[k]), UiStyle.PURPLE, Vector2(132, 56), 20)
 		b.pressed.connect(toggle.bind(k))
 		toolbar.add_child(b)
@@ -49,7 +58,9 @@ func _init() -> void:
 	trade = TradePanel.new()
 	policy = PolicyPanel.new()
 	holdings = HoldingPanel.new()
-	for p in [build, craft, trade, policy, holdings]:
+	quests = QuestPanel.new()
+	poi = PoiPanel.new()
+	for p in [build, craft, trade, policy, holdings, quests, poi]:
 		root.add_child(p)
 		(p as PanelBase).closed.connect(_on_panel_closed)
 	build.building_picked.connect(_on_pick)
@@ -61,6 +72,10 @@ func _init() -> void:
 	policy.policy_changed.connect(func(k: String, v: String, h: int) -> void: policy_requested.emit(k, v, h))
 	holdings.store_requested.connect(func(h: int, s: String, i: String, q: int) -> void: store_requested.emit(h, s, i, q))
 	holdings.demolish_requested.connect(func(h: int, b: String) -> void: demolish_requested.emit(h, b))
+	quests.accept_requested.connect(func(q: String) -> void: quest_accept_requested.emit(q))
+	quests.abandon_requested.connect(func(q: String) -> void: quest_abandon_requested.emit(q))
+	quests.turn_in_requested.connect(func(q: String) -> void: quest_turn_in_requested.emit(q))
+	poi.action_requested.connect(func(i: int, pk: int) -> void: poi_action_requested.emit(i, pk))
 
 func bind_state(s: Object) -> void:
 	state = s
@@ -73,6 +88,8 @@ func panel_for(kind: StringName) -> PanelBase:
 		&"trade": return trade
 		&"policy": return policy
 		&"holdings": return holdings
+		&"quests": return quests
+		&"poi": return poi
 	return null
 
 func any_open() -> bool:
@@ -99,6 +116,11 @@ func open(kind: StringName) -> void:
 	refresh()
 	panel_for(kind).open()
 	panel_changed.emit(kind)
+
+## Opens the point-of-interest panel for a poi id (the lead calls this from interact_requested(&"poi", {id})).
+func open_poi(id: int) -> void:
+	poi_id = id
+	open(&"poi")
 
 func close_all() -> void:
 	if placing:
@@ -134,6 +156,10 @@ func refresh() -> void:
 				trade.set_model(PanelModels.trade_model(state, merchant_id))
 		&"policy": policy.set_model(PanelModels.policy_model(state))
 		&"holdings": holdings.set_model(PanelModels.holdings_model(state))
+		&"quests": quests.set_model(Quests.journal(state as MatchState, PanelModels._actor(state, -1)))
+		&"poi":
+			if poi_id >= 0:
+				poi.set_model(Pois.info(state as MatchState, PanelModels._actor(state, -1), poi_id))
 
 func _on_pick(building_id: String) -> void:
 	placing = true
@@ -151,6 +177,8 @@ func end_placement() -> void:
 func toolbar_rects() -> Array[Rect2]:
 	var out: Array[Rect2] = []
 	for k in KINDS:
+		if not toolbar_buttons.has(k):
+			continue
 		var b: Button = toolbar_buttons[k]
 		out.append(Rect2(b.global_position, b.size).grow(8.0))
 	return out

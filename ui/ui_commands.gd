@@ -27,6 +27,22 @@ static func policy(key: String, value: String, holding_id: int = -1) -> Dictiona
 static func ability(ability_id: String) -> Dictionary:
 	return {"type": &"use_ability", "args": {"ability": ability_id}}
 
+static func accept_quest(quest_id: String) -> Dictionary:
+	return {"type": &"accept_quest", "args": {"quest": quest_id}}
+
+static func abandon_quest(quest_id: String) -> Dictionary:
+	return {"type": &"abandon_quest", "args": {"quest": quest_id}}
+
+static func turn_in(quest_id: String) -> Dictionary:
+	return {"type": &"turn_in", "args": {"quest": quest_id}}
+
+## pick: -1 for challenges without one (offering / effort / guard), else the lamp or plate index 0..2.
+static func interact_poi(poi_id: int, pick: int = -1) -> Dictionary:
+	var args: Dictionary = {"poi": poi_id}
+	if pick >= 0:
+		args["pick"] = pick
+	return {"type": &"interact_poi", "args": args}
+
 ## Wrap with actor + seq for Game.submit().
 static func wrap(cmd: Dictionary, actor: int, seq: int) -> Dictionary:
 	return {"type": cmd["type"], "actor": actor, "seq": seq, "args": cmd["args"]}

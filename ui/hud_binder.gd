@@ -32,4 +32,6 @@ static func model_from_state(state: Object, actor_id: int = -1) -> Dictionary:
 		var nm2: String = String(it.get("name", String(k).get_slice("/", 1).capitalize()))
 		items.append({"id": k, "name": nm2, "count": int(inv[k]), "color": Color.from_hsv(float(absi(hash(String(k))) % 360) / 360.0, 0.65, 1.0)})
 	m["inventory"] = items
+	var trk: Dictionary = Quests.tracker(state as MatchState, a)
+	m["quest_tracker"] = "%s\n%s" % [String(trk["title"]), String(trk["text"])] if not trk.is_empty() else ""
 	return m
