@@ -201,8 +201,11 @@ func _toast_for(e: Dictionary) -> void:
 		t = Quests.toast_for(e)
 	if t.is_empty() or (e.has("actor") and int(e["actor"]) != actors.player_id):
 		return
-	var text: String = String(t["title"]) + (("  -  " + String(t["body"])) if String(t.get("body", "")) != "" else "")
-	hud.toast(text, TOAST_COLORS.get(String(t.get("kind", "info")), UiStyle.TEXT), 5.0)
+	var col: Color = TOAST_COLORS.get(String(t.get("kind", "info")), UiStyle.TEXT)
+	hud.toast(String(t["title"]), col, 5.0)
+	var body: String = String(t.get("body", "")).get_slice(".", 0).strip_edges()      # toasts do not wrap: the first sentence, short
+	if body != "":
+		hud.toast(body.substr(0, 56) + ("..." if body.length() > 56 else ""), Color(1, 1, 1, 0.85), 5.0)
 
 ## Call with Game.events_emitted payloads. Handles crop/phase events and enemy telegraphs.
 func on_events(events: Array, state: Object = null) -> void:
