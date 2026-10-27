@@ -6,9 +6,10 @@ const SAVE_FIELDS: Array[String] = ["schema_version", "seed", "rng_state", "cloc
 	"factions", "plots", "drops", "player_id", "next_id", "settled_week", "over", "result", "won", "ai_t", "opts", "sim_acc", "fx"]
 ## Keys whose numbers are ALWAYS floats in memory (JSON turns 0.0 into 0; _dec restores the type). Add new float fields here.
 const FLOAT_KEYS: Array[String] = ["energy", "until", "next", "acc", "t_hit", "t_end", "t_rec", "next_move", "next_act", "truce_until", "breach",
-	"rally", "ward", "elapsed", "day_t", "time_of_day", "ai_t", "day_seconds", "seen_t", "mult", "arm_at", "slack_t", "sync_t", "born", "stalled", "siege_end", "sortie_t", "hit_t", "scout_t", "speed_mult", "alert"]
+	"rally", "ward", "elapsed", "day_t", "time_of_day", "ai_t", "day_seconds", "seen_t", "mult", "arm_at", "slack_t", "sync_t", "born", "stalled", "siege_end", "sortie_t", "hit_t", "scout_t", "speed_mult", "alert",
+	"deed_t", "last_deed", "gx", "out_ema", "standing", "ration_days"]
 ## Dictionaries whose VALUES are all floats (cooldowns, price multipliers).
-const FLOAT_VALUE_DICTS: Array[String] = ["cd", "prices"]
+const FLOAT_VALUE_DICTS: Array[String] = ["cd", "prices", "truces"]
 
 var schema_version: int = SCHEMA_VERSION
 var seed: int = 0
@@ -27,7 +28,7 @@ var next_id: int = 100
 var settled_week: int = -1
 var over: bool = false
 var result: Dictionary = {}     # {reason, day} once match_over
-var won: String = ""            # "", "dominion", "crowned" (match continues in Endless)
+var won: String = ""            # "" or "total_conquest" (the only win; play may continue in Endless)
 var ai_t: float = 0.0
 var sim_acc: Dictionary = {}    # misc timers
 var opts: Dictionary = {}

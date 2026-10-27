@@ -37,6 +37,7 @@ static func _any_moving(state: MatchState) -> bool:
 	return not p.is_empty() and not (p["move"] as Dictionary).is_empty()
 
 static func advance(state: MatchState, step: float, events: Array) -> void:
+	var ev0: int = events.size()
 	state.clock["elapsed"] = MatchState.q(float(state.clock["elapsed"]) + step)
 	state.clock["day_t"] = MatchState.q(float(state.clock["day_t"]) + step)
 	state.clock["time_of_day"] = MatchState.q(state.tod())
@@ -71,6 +72,7 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 		AIFactions.party_step(state, events)
 	Fx.step(state, events)
 	EnemyAI.step(state, events)
+	Standing.observe(state, events, ev0)
 
 static func dawn(state: MatchState, events: Array) -> void:
 	Economy.dawn_buildings(state, events)
@@ -81,9 +83,11 @@ static func dawn(state: MatchState, events: Array) -> void:
 	Economy.dawn_recruit(state, events)
 	var fids: Array = state.factions.keys()
 	fids.sort()
+	Standing.dawn_upkeep(state, events)
 	for fid in fids:
 		if state.factions[fid]["alive"]:
 			Economy.feed_faction(state, fid, events)
+	Standing.recompute(state, events)
 	Economy.check_victory(state, events)
 	Economy.check_starved_out(state, events)
 	if state.over:
@@ -139,28 +143,38 @@ static func _actors(state: MatchState, step: float, events: Array) -> void:
 					events.append({"type": &"move_finished", "actor": id, "hex": a["hex"]})
 
 static func _spawn_wave(state: MatchState, events: Array) -> void:
-	var homes: Array[int] = state.holdings_of(0)
-	if homes.is_empty() or not state.opts.get("wild_enemies", true):
+	if not state.opts.get("wild_enemies", true):
 		return
-	var n: int = mini(2 + state.week(), 8)
+	var esc: Dictionary = Standing.cfg().get("escalation", {})
+	var homes: Array[int] = state.holdings_of(0)
+	var n: int = mini(int(esc.get("wave_base", 2)) + state.week(), int(esc.get("wave_cap", 14)))
+	var targets: Array = []     # [holding ids, count]
+	targets.append([homes, n])
+	var mk: int = Standing.mark_of(state)
+	if mk > 0 and state.factions.has(mk) and state.factions[mk]["alive"]:
+		targets.append([state.holdings_of(mk), int(Standing.cfg()["mark"]["wave_extra"]) + state.week() / 2])
 	var kinds: Array = Content.enemies().keys()
 	kinds.sort()
 	var spawned: Array[int] = []
-	for i in range(n):
-		var hid: int = homes[state.rand_i(homes.size())]
-		var center: Vector2i = state.holdings[hid]["hex"]
-		var ring: Array[Vector2i] = []
-		for hx in HexGrid.ring_within(center, 6):
-			var d: int = HexGrid.distance(hx, center)
-			if d >= 4 and int(state.world["terrain"][HexGrid.index(hx)]) == WorldGen.T_GROUND:
-				ring.append(hx)
-		if ring.is_empty():
+	for tg in targets:
+		var hs: Array = tg[0]
+		if hs.is_empty():
 			continue
-		var hx2: Vector2i = ring[state.rand_i(ring.size())]
-		var arch: String = String(kinds[state.rand_i(kinds.size())])
-		var eid: int = Setup.spawn_enemy(state, arch, hx2, true)
-		if eid != -1:
-			spawned.append(eid)
+		for i in range(int(tg[1])):
+			var hid: int = hs[state.rand_i(hs.size())]
+			var center: Vector2i = state.holdings[hid]["hex"]
+			var ring: Array[Vector2i] = []
+			for hx in HexGrid.ring_within(center, 6):
+				var d: int = HexGrid.distance(hx, center)
+				if d >= 4 and int(state.world["terrain"][HexGrid.index(hx)]) == WorldGen.T_GROUND:
+					ring.append(hx)
+			if ring.is_empty():
+				continue
+			var hx2: Vector2i = ring[state.rand_i(ring.size())]
+			var arch: String = String(kinds[state.rand_i(kinds.size())])
+			var eid: int = Setup.spawn_enemy(state, arch, hx2, true)
+			if eid != -1:
+				spawned.append(eid)
 	events.append({"type": &"purge_wave", "enemies": spawned, "week": state.week()})
 
 static func settle(state: MatchState, events: Array) -> void:
@@ -175,6 +189,8 @@ static func settle(state: MatchState, events: Array) -> void:
 		if a["kind"] == "enemy" and (bool(a.get("wave", false)) or not a["alive"]):
 			state.actors.erase(id)
 			removed += 1
+	Farming.purge_growth(state, events)
+	Standing.charge_levy(state, events)
 	var counts: Dictionary = {}
 	for fid in state.factions.keys():
 		counts[fid] = state.holdings_of(int(fid)).size()
@@ -182,7 +198,4 @@ static func settle(state: MatchState, events: Array) -> void:
 	if not p.is_empty() and p["alive"]:
 		Combat.heal(p, int(int(p["max_hp"]) * 0.3))
 	events.append({"type": &"purge_resolved", "week": done_week, "holdings": counts, "enemies_removed": removed})
-	if done_week + 1 >= Calendar.CROWNED_WEEKS and state.won == "":
-		state.won = "crowned"
-		events.append({"type": &"victory", "kind": "crowned", "weeks": done_week + 1})
 	Economy.check_victory(state, events)

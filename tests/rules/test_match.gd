@@ -61,36 +61,82 @@ func test_leader_dies_to_poison_and_enemies() -> void:
 	check(s.over, "poison killed leader -> match over")
 	check(count_type(ev, "match_over") == 1, "match_over once")
 
-func test_dominion_win_at_60_percent() -> void:
+func _others_dead(s: MatchState, keep: int) -> void:
+	for fid in s.factions.keys():
+		if int(fid) != keep:
+			s.factions[fid]["alive"] = false
+
+func test_no_dominion_or_crowned_win_any_more() -> void:
 	var s: MatchState = quiet()
 	var ids: Array = s.holdings.keys()
 	ids.sort()
-	for i in range(23):
+	for i in range(30):
 		s.holdings[ids[i]]["owner"] = 0
 	var ev: Array = []
 	Economy.check_victory(s, ev)
-	eq(s.won, "", "23/40 is not enough")
-	s.holdings[ids[23]]["owner"] = 0
+	eq(s.won, "", "30/40 holdings is not a win")
+	home(s)["store"]["lfg:item/ration"] = 9000
+	warp(s, 7 * 12 + 7, 0.97)
+	var ev2: Array = tick_all(s, 60.0 * 0.2, 1.0)
+	eq(s.won, "", "twelve weeks is not a win")
+	eq(count_type(ev2, "victory"), 0, "no victory event")
+
+func test_total_conquest_needs_every_rival_dead_and_every_holding() -> void:
+	var s: MatchState = quiet()
+	for h in s.holdings.values():
+		h["owner"] = 0
+	var ev: Array = []
 	Economy.check_victory(s, ev)
-	eq(s.won, "dominion", "24/40 = 60% wins")
-	eq(count_type(ev, "victory"), 1, "victory event")
+	eq(s.won, "", "rivals still alive: no win even owning every holding")
+	_others_dead(s, 0)
+	s.holdings[7]["owner"] = -1
+	Economy.check_victory(s, ev)
+	eq(s.won, "", "one neutral holding left: no win")
+	s.holdings[7]["owner"] = 0
+	Economy.check_victory(s, ev)
+	eq(s.won, "total_conquest", "all rivals gone and every holding owned")
+	eq(count_type(ev, "victory"), 1, "one victory event")
+	eq(ev[0]["kind"], "total_conquest", "kind")
+	check(ev[0]["player"] and int(ev[0]["faction"]) == 0, "the player won")
 	check(not s.over, "winning does not end the match (Endless)")
 	Economy.check_victory(s, ev)
-	eq(count_type(ev, "victory"), 1, "victory only once")
+	eq(count_type(ev, "victory"), 1, "only once")
 
-func test_crowned_after_twelve_weeks() -> void:
+func test_a_rival_can_win_total_conquest_too() -> void:
 	var s: MatchState = quiet()
-	home(s)["store"]["lfg:item/ration"] = 9000
-	warp(s, 7 * 11 + 7, 0.97)
-	eq(s.week(), 11, "week index 11")
-	var ev: Array = tick_all(s, 60.0 * 0.2, 1.0)
-	eq(s.won, "crowned", "crowned after surviving 12 purges")
-	eq(count_type(ev, "victory"), 1, "one victory event")
-	var s2: MatchState = quiet()
-	home(s2)["store"]["lfg:item/ration"] = 9000
-	warp(s2, 7 * 10 + 7, 0.97)
-	tick_all(s2, 60.0 * 0.2, 1.0)
-	eq(s2.won, "", "11 weeks is not enough")
+	for h in s.holdings.values():
+		h["owner"] = 4
+	_others_dead(s, 4)
+	var ev: Array = []
+	Economy.check_victory(s, ev)
+	eq(s.won, "total_conquest", "rival conquest")
+	check(not ev[0]["player"] and int(ev[0]["faction"]) == 4, "flagged as not the player")
+
+func test_killing_the_last_rival_leader_wins_when_the_map_is_owned() -> void:
+	var s: MatchState = quiet()
+	for h in s.holdings.values():
+		h["owner"] = 0
+	for fid in s.factions.keys():
+		if int(fid) != 0 and int(fid) != 9:
+			s.factions[fid]["alive"] = false
+	var lid: int = int(s.factions[9]["leader"])
+	var ev: Array = []
+	Combat.hurt(s, lid, 99999, 1, ev, "test")
+	check(not s.factions[9]["alive"], "leader death eliminates an AI faction")
+	eq(s.won, "total_conquest", "last rival gone with the whole map owned -> victory")
+	eq(count_type(ev, "faction_eliminated"), 1, "one elimination")
+
+func test_leader_death_eliminates_any_faction_and_frees_its_holdings() -> void:
+	var s: MatchState = quiet()
+	var hs: Array = s.holdings_of(5)
+	check(hs.size() >= 1, "faction 5 owns something")
+	var ev: Array = []
+	Combat.kill(s, int(s.factions[5]["leader"]), 1, ev)
+	check(not s.factions[5]["alive"], "eliminated by leader death although holdings remained")
+	eq(s.holdings_of(5).size(), 0, "holdings released")
+	for h in hs:
+		eq(s.holdings[h]["owner"], -1, "neutral")
+	check(not s.over, "the player's match goes on")
 
 func test_starved_out_loss() -> void:
 	var s: MatchState = quiet()

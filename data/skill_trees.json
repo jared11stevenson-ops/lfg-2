@@ -1,0 +1,3013 @@
+{
+ "schema": 1,
+ "_notes": "Skill points come only from Purge deeds. No respec. Effects are small capped deltas (caps below = [min,max] of the summed effect).",
+ "caps": {
+  "yield_bonus": [
+   -1,
+   2
+  ],
+  "growth_pct": [
+   0,
+   20
+  ],
+  "plot_slots": [
+   -2,
+   4
+  ],
+  "ration_bonus": [
+   0,
+   1
+  ],
+  "max_hp": [
+   -10,
+   20
+  ],
+  "ab_cd_pct": [
+   0,
+   25
+  ],
+  "atk": [
+   -1,
+   2
+  ],
+  "def": [
+   0,
+   1
+  ],
+  "max_energy": [
+   -10,
+   16
+  ],
+  "ab_power_pct": [
+   0,
+   35
+  ],
+  "ab_duration": [
+   0,
+   3
+  ],
+  "levy_pct": [
+   0,
+   25
+  ],
+  "steal_bonus": [
+   0,
+   0.1
+  ],
+  "upkeep_pct": [
+   0,
+   20
+  ],
+  "supply_range": [
+   0,
+   2
+  ],
+  "garrison_cap": [
+   0,
+   2
+  ],
+  "ab_energy_pct": [
+   0,
+   20
+  ],
+  "dmg_taken_mult": [
+   -0.1,
+   0.15
+  ],
+  "walk_mult": [
+   -0.15,
+   0.1
+  ],
+  "buy_mult": [
+   -0.1,
+   0.15
+  ],
+  "carry_cap": [
+   0,
+   12
+  ],
+  "mine_bonus": [
+   0,
+   1
+  ],
+  "sell_mult": [
+   -0.1,
+   0.15
+  ],
+  "build_cost_mult": [
+   -0.15,
+   0.1
+  ]
+ },
+ "trees": [
+  {
+   "class": "lfg:class/judd",
+   "name": "Way of the Staff",
+   "nodes": [
+    {
+     "id": "judd.e1",
+     "name": "Deep Furrows",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.e2",
+     "name": "Patient Harvest",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "judd.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.e3",
+     "name": "Wider Rows",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "judd.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.e4",
+     "name": "Heavy Hands",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "judd.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "judd.e5",
+     "name": "Abbot's Granary",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "judd.e3",
+      "judd.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.p1",
+     "name": "Thick Skin",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.p2",
+     "name": "Steady Stance",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "judd.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.p3",
+     "name": "Iron Posture",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "judd.p1"
+     ],
+     "effects": {
+      "def": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.p4",
+     "name": "Overgrown Vows",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "judd.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "judd.p5",
+     "name": "Unbroken Calm",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "judd.p3",
+      "judd.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.h1",
+     "name": "Quiet Reserve",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.h2",
+     "name": "Tithe Discipline",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "judd.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.h3",
+     "name": "Mender's Mind",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "judd.e1",
+      "judd.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "judd.h4",
+     "name": "Hungry Monastery",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "judd.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "judd.h5",
+     "name": "Staff Master",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "judd.h3",
+      "judd.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/mira",
+   "name": "Plaguebinder's Notebook",
+   "nodes": [
+    {
+     "id": "mira.e1",
+     "name": "Tonic Garden",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.e2",
+     "name": "Hardy Cultures",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "mira.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.e3",
+     "name": "Bitter Herbs",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "mira.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.e4",
+     "name": "Volatile Brews",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "mira.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "mira.e5",
+     "name": "Master Apothecary",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "mira.e3",
+      "mira.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.p1",
+     "name": "Thicker Vapors",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.p2",
+     "name": "Slow Rot",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "mira.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.p3",
+     "name": "Lingering Cloud",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "mira.p1"
+     ],
+     "effects": {
+      "ab_power_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.p4",
+     "name": "Virulence",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "mira.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "mira.p5",
+     "name": "Plague Saint",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "mira.p3",
+      "mira.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.h1",
+     "name": "Spare Vials",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.h2",
+     "name": "Levy Remedy",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "mira.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.h3",
+     "name": "Cross-Pollination",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "mira.e1",
+      "mira.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "mira.h4",
+     "name": "Pricey Reagents",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "mira.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "mira.h5",
+     "name": "Quiet Contagion",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "mira.h3",
+      "mira.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/bram",
+   "name": "Wildblood Trails",
+   "nodes": [
+    {
+     "id": "bram.e1",
+     "name": "Forager's Eye",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.e2",
+     "name": "Bulging Pantry",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "bram.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.e3",
+     "name": "Bog Plots",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "bram.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.e4",
+     "name": "Gorge",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "bram.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "bram.e5",
+     "name": "Feast of the Wild",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "bram.e3",
+      "bram.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.p1",
+     "name": "Scarred Hide",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.p2",
+     "name": "Faster Fury",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "bram.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.p3",
+     "name": "Red Mist",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "bram.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.p4",
+     "name": "Reckless Rage",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "bram.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "bram.p5",
+     "name": "Berserker's Peak",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "bram.p3",
+      "bram.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.h1",
+     "name": "Stout Heart",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.h2",
+     "name": "Tribute Share",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "bram.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.h3",
+     "name": "Hunter's Cross",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "bram.e1",
+      "bram.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "bram.h4",
+     "name": "Heavy Footed",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "bram.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "bram.h5",
+     "name": "Wildblood Crown",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "bram.h3",
+      "bram.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/tavi",
+   "name": "Deep Shaft Lore",
+   "nodes": [
+    {
+     "id": "tavi.e1",
+     "name": "Seam Reading",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.e2",
+     "name": "Rich Veins",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "tavi.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.e3",
+     "name": "Terraced Slopes",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "tavi.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.e4",
+     "name": "Overwork",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "tavi.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "tavi.e5",
+     "name": "Quarry Lord",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "tavi.e3",
+      "tavi.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "mine_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.p1",
+     "name": "Hard Hat",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.p2",
+     "name": "Sentinel Cooldown",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "tavi.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.p3",
+     "name": "Longer Watch",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "tavi.p1"
+     ],
+     "effects": {
+      "def": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.p4",
+     "name": "Hasty Posts",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "tavi.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "tavi.p5",
+     "name": "Unsleeping Post",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "tavi.p3",
+      "tavi.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.h1",
+     "name": "Pack Mule",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.h2",
+     "name": "Toll Rebate",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "tavi.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.h3",
+     "name": "Picks and Pickets",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "tavi.e1",
+      "tavi.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "tavi.h4",
+     "name": "Dusty Lungs",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "tavi.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "tavi.h5",
+     "name": "Mountain Warden",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "tavi.h3",
+      "tavi.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/pip",
+   "name": "Courier's Roads",
+   "nodes": [
+    {
+     "id": "pip.e1",
+     "name": "Light Packs",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.e2",
+     "name": "Fast Crossing",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "pip.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.e3",
+     "name": "Roadside Plots",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "pip.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.e4",
+     "name": "Overloaded",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "pip.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "pip.e5",
+     "name": "Grand Circuit",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "pip.e3",
+      "pip.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "carry_cap": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.p1",
+     "name": "Quick Lungs",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.p2",
+     "name": "Short Rests",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "pip.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.p3",
+     "name": "Long Dash",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "pip.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.p4",
+     "name": "Reckless Dash",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "pip.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "pip.p5",
+     "name": "Ghost Runner",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "pip.p3",
+      "pip.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.h1",
+     "name": "Second Wind",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.h2",
+     "name": "Duty Rebate",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "pip.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.h3",
+     "name": "Signal Relay",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "pip.e1",
+      "pip.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.h4",
+     "name": "Costly Couriers",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "pip.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "pip.h5",
+     "name": "Legend of the Road",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "pip.h3",
+      "pip.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/oren",
+   "name": "Hearth and Hospital",
+   "nodes": [
+    {
+     "id": "oren.e1",
+     "name": "Warm Stove",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.e2",
+     "name": "Second Helping",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "oren.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.e3",
+     "name": "Herb Rows",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "oren.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.e4",
+     "name": "Open Kitchen",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "oren.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "oren.e5",
+     "name": "Banquet Table",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "oren.e3",
+      "oren.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.p1",
+     "name": "Apron Armor",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.p2",
+     "name": "Deft Bandages",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "oren.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.p3",
+     "name": "Tender Touch",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "oren.p1"
+     ],
+     "effects": {
+      "ab_power_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.p4",
+     "name": "Long Shifts",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "oren.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "oren.p5",
+     "name": "Field Surgeon",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "oren.p3",
+      "oren.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.h1",
+     "name": "Pantry Order",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.h2",
+     "name": "Charity Rebate",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "oren.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.h3",
+     "name": "Soup for All",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "oren.e1",
+      "oren.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "oren.h4",
+     "name": "Short Stock",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "oren.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "oren.h5",
+     "name": "Hearthkeeper",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "oren.h3",
+      "oren.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/vex",
+   "name": "Cutpurse Ledger",
+   "nodes": [
+    {
+     "id": "vex.e1",
+     "name": "Fence Network",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.e2",
+     "name": "Clean Books",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "vex.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.e3",
+     "name": "Window Boxes",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "vex.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.e4",
+     "name": "Greedy Fingers",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "vex.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "vex.e5",
+     "name": "Master Fence",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "vex.e3",
+      "vex.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "sell_mult": 0.1
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.p1",
+     "name": "Soft Soles",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.p2",
+     "name": "Quick Hands",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "vex.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.p3",
+     "name": "Light Touch",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "vex.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.p4",
+     "name": "Pushy Pockets",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "vex.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "vex.p5",
+     "name": "Phantom Purse",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "vex.p3",
+      "vex.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.h1",
+     "name": "Spare Coin",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.h2",
+     "name": "Hush Money",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "vex.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.h3",
+     "name": "Casing the Joint",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "vex.e1",
+      "vex.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "vex.h4",
+     "name": "Debt Collector",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "vex.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "vex.h5",
+     "name": "Prince of Thieves",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "vex.h3",
+      "vex.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/sable",
+   "name": "Trapper's Almanac",
+   "nodes": [
+    {
+     "id": "sable.e1",
+     "name": "Game Trails",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.e2",
+     "name": "Smoked Meat",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "sable.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.e3",
+     "name": "Hillside Beds",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "sable.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.e4",
+     "name": "Heavy Traps",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "sable.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "sable.e5",
+     "name": "Larder Master",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "sable.e3",
+      "sable.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.p1",
+     "name": "Camouflage",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.p2",
+     "name": "Faster Snares",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "sable.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.p3",
+     "name": "Deeper Jaws",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "sable.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.p4",
+     "name": "Noisy Hunts",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "sable.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "sable.p5",
+     "name": "Apex Trapper",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "sable.p3",
+      "sable.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.h1",
+     "name": "Keen Senses",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.h2",
+     "name": "Pelt Rebate",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "sable.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.h3",
+     "name": "Pathfinding",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "sable.e1",
+      "sable.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "sable.h4",
+     "name": "Wild Appetite",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "sable.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "sable.h5",
+     "name": "Warden of the Wild",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "sable.h3",
+      "sable.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/quill",
+   "name": "Envoy's Correspondence",
+   "nodes": [
+    {
+     "id": "quill.e1",
+     "name": "Fair Ledgers",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.e2",
+     "name": "Good Terms",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "quill.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.e3",
+     "name": "Garden Charters",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "quill.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.e4",
+     "name": "Loose Purse",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "quill.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "quill.e5",
+     "name": "Grand Exchange",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "quill.e3",
+      "quill.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "sell_mult": 0.1
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.p1",
+     "name": "Pressed Collar",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.p2",
+     "name": "Brief Flags",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "quill.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.p3",
+     "name": "Long Parley",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "quill.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.p4",
+     "name": "Brittle Pride",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "quill.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "quill.p5",
+     "name": "Silver Tongue",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "quill.p3",
+      "quill.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.h1",
+     "name": "Seal of Office",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.h2",
+     "name": "Tax Relief",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "quill.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.h3",
+     "name": "Shared Maps",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "quill.e1",
+      "quill.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.h4",
+     "name": "Costly Escort",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "quill.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "quill.h5",
+     "name": "Chancellor",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "quill.h3",
+      "quill.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/forge",
+   "name": "Siegewright's Plans",
+   "nodes": [
+    {
+     "id": "forge.e1",
+     "name": "Efficient Kilns",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.e2",
+     "name": "Stone Stock",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "forge.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.e3",
+     "name": "Terraced Works",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "forge.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.e4",
+     "name": "Overbuilt",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "forge.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "forge.e5",
+     "name": "Master Foundry",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "forge.e3",
+      "forge.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "build_cost_mult": -0.1
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.p1",
+     "name": "Plate Apron",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.p2",
+     "name": "Quick Rams",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "forge.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.p3",
+     "name": "Heavy Ram",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "forge.p1"
+     ],
+     "effects": {
+      "def": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.p4",
+     "name": "Rushed Joints",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "forge.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "forge.p5",
+     "name": "Breaker of Gates",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "forge.p3",
+      "forge.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.h1",
+     "name": "Tool Rack",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.h2",
+     "name": "Guild Rebate",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "forge.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.h3",
+     "name": "Surveyed Roads",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "forge.e1",
+      "forge.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.h4",
+     "name": "Spendthrift Works",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "forge.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "forge.h5",
+     "name": "Grand Engineer",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "forge.h3",
+      "forge.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/nyx",
+   "name": "Mycelial Whispers",
+   "nodes": [
+    {
+     "id": "nyx.e1",
+     "name": "Grove Tending",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.e2",
+     "name": "Spore Bloom",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "nyx.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.e3",
+     "name": "Rooted Beds",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "nyx.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.e4",
+     "name": "Thin Skin",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "nyx.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "nyx.e5",
+     "name": "Wood-Wide Web",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "nyx.e3",
+      "nyx.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.p1",
+     "name": "Sporewrap",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.p2",
+     "name": "Swift Swarm",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "nyx.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.p3",
+     "name": "Wide Swarm",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "nyx.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.p4",
+     "name": "Overgrowth",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "nyx.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "nyx.p5",
+     "name": "Grove Mother",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "nyx.p3",
+      "nyx.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.h1",
+     "name": "Deep Roots",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.h2",
+     "name": "Blight Tithe",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "nyx.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.h3",
+     "name": "Mycelium Links",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "nyx.e1",
+      "nyx.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "nyx.h4",
+     "name": "Sickly Away",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "nyx.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "nyx.h5",
+     "name": "Voice of the Grove",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "nyx.h3",
+      "nyx.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/rook",
+   "name": "Banner Doctrine",
+   "nodes": [
+    {
+     "id": "rook.e1",
+     "name": "Quartermaster",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.e2",
+     "name": "Stores of War",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "rook.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.e3",
+     "name": "Camp Fields",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "rook.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.e4",
+     "name": "Standing Army",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "rook.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "rook.e5",
+     "name": "Commissary",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "rook.e3",
+      "rook.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.p1",
+     "name": "Mail Coat",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.p2",
+     "name": "Short Muster",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "rook.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.p3",
+     "name": "Long Banner",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "rook.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.p4",
+     "name": "Loud Banner",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "rook.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "rook.p5",
+     "name": "Warlord's Presence",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "rook.p3",
+      "rook.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.h1",
+     "name": "Drilled Ranks",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.h2",
+     "name": "War Levy Waiver",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "rook.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.h3",
+     "name": "Field Marshals",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "rook.e1",
+      "rook.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "rook.h4",
+     "name": "Heavy Rations",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "rook.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "rook.h5",
+     "name": "Marshal of the Realm",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "rook.h3",
+      "rook.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/dune",
+   "name": "Tinker's Workbench",
+   "nodes": [
+    {
+     "id": "dune.e1",
+     "name": "Scrap Savvy",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.e2",
+     "name": "Tuned Gadgets",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "dune.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.e3",
+     "name": "Cart Gardens",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "dune.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.e4",
+     "name": "Cheap Parts",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "dune.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "dune.e5",
+     "name": "Master Tinker",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "dune.e3",
+      "dune.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "build_cost_mult": -0.1
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.p1",
+     "name": "Padded Coat",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.p2",
+     "name": "Quick Stash",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "dune.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.p3",
+     "name": "Deep Stash",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "dune.p1"
+     ],
+     "effects": {
+      "atk": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.p4",
+     "name": "Overclocked",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "dune.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "dune.p5",
+     "name": "Smuggler King",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "dune.p3",
+      "dune.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.h1",
+     "name": "Hidden Pockets",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.h2",
+     "name": "Bribed Clerks",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "dune.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.h3",
+     "name": "Wired Alarms",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "dune.e1",
+      "dune.p1"
+     ],
+     "effects": {
+      "steal_bonus": 0.05
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.h4",
+     "name": "Costly Prototypes",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "dune.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "dune.h5",
+     "name": "Wasteland Maker",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "dune.h3",
+      "dune.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  },
+  {
+   "class": "lfg:class/halo",
+   "name": "Pilgrim's Vows",
+   "nodes": [
+    {
+     "id": "halo.e1",
+     "name": "Humble Garden",
+     "branch": "economy",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "growth_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.e2",
+     "name": "Blessed Soil",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "halo.e1"
+     ],
+     "effects": {
+      "yield_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.e3",
+     "name": "Cloister Plots",
+     "branch": "economy",
+     "cost": 2,
+     "requires": [
+      "halo.e1"
+     ],
+     "effects": {
+      "plot_slots": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.e4",
+     "name": "Fasting Vows",
+     "branch": "economy",
+     "cost": 3,
+     "requires": [
+      "halo.e2"
+     ],
+     "effects": {
+      "plot_slots": 2,
+      "growth_pct": 5,
+      "dmg_taken_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "halo.e5",
+     "name": "Abundant Alms",
+     "branch": "economy",
+     "cost": 4,
+     "requires": [
+      "halo.e3",
+      "halo.e4"
+     ],
+     "effects": {
+      "yield_bonus": 1,
+      "ration_bonus": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.p1",
+     "name": "Gentle Armor",
+     "branch": "purge",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_hp": 6
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.p2",
+     "name": "Brighter Aura",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "halo.p1"
+     ],
+     "effects": {
+      "ab_cd_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.p3",
+     "name": "Wide Aura",
+     "branch": "purge",
+     "cost": 2,
+     "requires": [
+      "halo.p1"
+     ],
+     "effects": {
+      "def": 1
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.p4",
+     "name": "Vow of Peace",
+     "branch": "purge",
+     "cost": 3,
+     "requires": [
+      "halo.p2"
+     ],
+     "effects": {
+      "ab_power_pct": 25,
+      "max_energy": -10
+     },
+     "drawback": true
+    },
+    {
+     "id": "halo.p5",
+     "name": "Saint's Ward",
+     "branch": "purge",
+     "cost": 4,
+     "requires": [
+      "halo.p3",
+      "halo.p4"
+     ],
+     "effects": {
+      "ab_cd_pct": 10,
+      "ab_duration": 3
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.h1",
+     "name": "Open Hands",
+     "branch": "hybrid",
+     "cost": 1,
+     "requires": [],
+     "effects": {
+      "max_energy": 8
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.h2",
+     "name": "Alms Waiver",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "halo.h1"
+     ],
+     "effects": {
+      "levy_pct": 10
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.h3",
+     "name": "Pilgrim Roads",
+     "branch": "hybrid",
+     "cost": 2,
+     "requires": [
+      "halo.e1",
+      "halo.p1"
+     ],
+     "effects": {
+      "levy_pct": 5
+     },
+     "drawback": false
+    },
+    {
+     "id": "halo.h4",
+     "name": "Heavy Vigil",
+     "branch": "hybrid",
+     "cost": 3,
+     "requires": [
+      "halo.h2"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "supply_range": 1,
+      "buy_mult": 0.1
+     },
+     "drawback": true
+    },
+    {
+     "id": "halo.h5",
+     "name": "Warden of Hearths",
+     "branch": "hybrid",
+     "cost": 4,
+     "requires": [
+      "halo.h3",
+      "halo.h4"
+     ],
+     "effects": {
+      "upkeep_pct": 10,
+      "garrison_cap": 1,
+      "ab_energy_pct": 10
+     },
+     "drawback": false
+    }
+   ]
+  }
+ ]
+}

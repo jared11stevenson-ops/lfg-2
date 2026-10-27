@@ -81,10 +81,10 @@ static func capture(state: MatchState, a: Dictionary, args: Dictionary, events: 
 	if commit > 0:
 		from_id = CmdUtil.parse_id(args.get("from", -1))
 		if from_id == -1:
-			from_id = CmdUtil.nearest_owned_holding(state, int(a["faction"]), h["hex"], SUPPLY_RANGE)
+			from_id = CmdUtil.nearest_owned_holding(state, int(a["faction"]), h["hex"], Standing.supply_range(state, int(a["faction"])))
 		if not state.holdings.has(from_id) or int(state.holdings[from_id]["owner"]) != int(a["faction"]):
 			return "bad_source"
-		if HexGrid.distance(state.holdings[from_id]["hex"], h["hex"]) > SUPPLY_RANGE:
+		if HexGrid.distance(state.holdings[from_id]["hex"], h["hex"]) > Standing.supply_range(state, int(a["faction"])):
 			return "source_too_far"
 		if int(state.holdings[from_id]["garrison"]) < commit:
 			return "insufficient_troops"
@@ -130,7 +130,8 @@ static func resolve_capture(state: MatchState, fid: int, actor_id: int, hid: int
 			var home: int = int(state.factions[fid]["home"])
 			if state.holdings.has(home) and home != hid and int(state.holdings[home]["owner"]) == fid:
 				moved = move_fitting(loot_src, state.holdings[home]["store"], half)
-		# plots follow the holding
+		if is_ai:
+			state.factions[fid]["spoils"] = int(state.factions[fid].get("spoils", 0)) + Inv.total(moved)
 		events.append({"type": &"holding_captured", "holding": hid, "by": fid, "from": prev_owner, "ai": is_ai, "actor": actor_id, "loot": moved, "faction_name": state.factions[fid]["name"]})
 		if prev_owner >= 0:
 			_check_faction_alive(state, prev_owner, events)
@@ -146,7 +147,7 @@ static func resolve_capture(state: MatchState, fid: int, actor_id: int, hid: int
 	return false
 
 static func _check_faction_alive(state: MatchState, fid: int, events: Array) -> void:
-	if fid == 0 or not state.factions.has(fid):
+	if not state.factions.has(fid) or (fid == 0 and not state.player().is_empty()):
 		return
 	if state.holdings_of(fid).is_empty():
 		Combat.eliminate_faction(state, fid, events)
@@ -204,6 +205,8 @@ static func resolve_steal(state: MatchState, fid: int, actor_id: int, hid: int, 
 	var chance: float = steal_chance(state, actor, h)
 	if state.rand_f() < chance:
 		Inv.transfer(h["store"], dest, {item: qty})
+		if is_ai:
+			state.factions[fid]["spoils"] = int(state.factions[fid].get("spoils", 0)) + qty
 		events.append({"type": &"item_stolen", "holding": hid, "by": fid, "ai": is_ai, "actor": actor_id, "item": item, "qty": qty, "chance": chance})
 		return true
 	h["alert"] = MatchState.q(float(state.clock["elapsed"]) + 30.0)

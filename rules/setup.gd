@@ -13,6 +13,24 @@ static func make_actor(id: int, kind: String, faction: int, nm: String, hex: Vec
 		"atk": atk, "def": df, "energy": float(energy), "max_energy": energy, "inv": {}, "cd": {}, "effects": [], "alive": true,
 		"last_seq": 0, "move": {}, "sync_t": 0.0, "is_ai": faction >= 1 and kind != "enemy", "ai": {}}
 
+## Gives a leader actor a class: stats, kit and ability set (used for the player and for AI/bot leaders).
+static func set_leader_class(a: Dictionary, class_id: String) -> void:
+	var cd: Dictionary = Content.class_def(class_id)
+	if cd.is_empty():
+		return
+	var stt: Dictionary = cd["stats"]
+	var hp: int = int(round(float(stt["hp"]) * float(cd.get("mods", {}).get("max_hp_mult", 1.0))))
+	a["class_id"] = class_id
+	a["max_hp"] = hp
+	a["hp"] = hp
+	a["atk"] = int(stt["atk"])
+	a["def"] = int(stt["def"])
+	a["max_energy"] = int(stt["energy"])
+	a["energy"] = float(stt["energy"])
+	a["inv"] = {}
+	for k in (cd["start_kit"] as Dictionary).keys():
+		a["inv"][k] = int(cd["start_kit"][k])
+
 static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> MatchState:
 	var s := MatchState.new()
 	s.seed = seed_value
@@ -99,6 +117,23 @@ static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> Ma
 		la["id"] = s.new_id()
 		s.actors[la["id"]] = la
 		s.factions[fid] = {"id": fid, "name": FACTION_NAMES[i], "is_ai": true, "leader": la["id"], "home": home["id"], "alive": true, "hunger_days": 0, "persona": personas[i]}
+	# AI leaders get a class too (never the player's): the 13 classes minus the player's are dealt out by seed.
+	if bool(opts.get("ai_classes", true)):
+		var pool_c: Array[String] = []
+		for cid in Content.classes().keys():
+			if String(cid) != String(class_id):
+				pool_c.append(String(cid))
+		pool_c.sort()
+		var crng := Rng.new(seed_value ^ 0x5eed11)
+		for i in range(pool_c.size() - 1, 0, -1):
+			var j2: int = crng.rand_i(i + 1)
+			var t2: String = pool_c[i]
+			pool_c[i] = pool_c[j2]
+			pool_c[j2] = t2
+		for i in range(ai_sites.size()):
+			var lead: Dictionary = s.actors[int(s.factions[i + 1]["leader"])]
+			set_leader_class(lead, pool_c[i % pool_c.size()])
+			lead["ai_class"] = true
 	# Wild enemies
 	if bool(opts.get("wild_enemies", true)):
 		var comp: Dictionary = WorldGen.flood(s.world, start)
@@ -121,6 +156,7 @@ static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> Ma
 			var arch: String = fits[rng.rand_i(fits.size())] if not fits.is_empty() else "lfg:enemy/sporeling"
 			spawn_enemy(s, arch, hx, false)
 	s.rng_state = rng.state
+	Standing.init_state(s)
 	return s
 
 static func spawn_enemy(s: MatchState, archetype: String, hex: Vector2i, wave: bool) -> int:

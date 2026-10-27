@@ -6,7 +6,14 @@ static func class_mod(a: Dictionary, key: String, default: Variant) -> Variant:
 	var cd: Dictionary = Content.class_def(String(a.get("class_id", "")))
 	if cd.is_empty():
 		return default
-	return cd.get("mods", {}).get(key, default)
+	var base: Variant = cd.get("mods", {}).get(key, default)
+	var fx: Variant = a.get("skill_fx")
+	if fx == null or not (fx as Dictionary).has(key):
+		return base
+	var d: float = float(fx[key])
+	if typeof(base) == TYPE_INT and d == floorf(d):
+		return int(base) + int(d)
+	return float(base) + d
 
 static func has_effect(state: MatchState, a: Dictionary, id: String) -> bool:
 	var now: float = float(state.clock["elapsed"])
@@ -115,6 +122,9 @@ static func kill(state: MatchState, target_id: int, killer_id: int, events: Arra
 		var kr: Dictionary = state.actors.get(killer_id, {})
 		if not kr.is_empty() and int(class_mod(kr, "hunt_meat", 0)) > 0:
 			loot["lfg:item/game_meat"] = int(loot.get("lfg:item/game_meat", 0)) + int(class_mod(kr, "hunt_meat", 0)) + (1 if has_effect(state, kr, "tracking") else 0)
+	if (t["kind"] == "enemy" and bool(t.get("wave", false))) or t["kind"] == "party":
+		# Purge-only material: raiders and wave beasts drop ashmarrow (feeds rank-gated recipes).
+		loot["lfg:item/ashmarrow"] = 1 + (1 if state.rand_f() < 0.5 else 0)
 	var dropped_to: String = "none"
 	var all: Dictionary = carried.duplicate()
 	Inv.add_all(all, loot)
@@ -132,7 +142,7 @@ static func kill(state: MatchState, target_id: int, killer_id: int, events: Arra
 	events.append({"type": &"actor_died", "actor": target_id, "kind": t["kind"], "faction": t["faction"], "killer": killer_id, "hex": t["hex"], "items": all, "items_to": dropped_to})
 	if target_id == state.player_id:
 		end_match(state, "leader_died", events)
-	elif t["kind"] == "ai_leader":
+	elif t["kind"] == "ai_leader" or (t["kind"] == "leader" and int(t["faction"]) >= 0):
 		eliminate_faction(state, int(t["faction"]), events)
 
 static func eliminate_faction(state: MatchState, fid: int, events: Array) -> void:
@@ -143,6 +153,7 @@ static func eliminate_faction(state: MatchState, fid: int, events: Array) -> voi
 	for hid in state.holdings_of(fid):
 		state.holdings[hid]["owner"] = -1
 	events.append({"type": &"faction_eliminated", "faction": fid, "ai": bool(f["is_ai"])})
+	Economy.check_victory(state, events)
 
 static func end_match(state: MatchState, reason: String, events: Array) -> void:
 	if state.over:

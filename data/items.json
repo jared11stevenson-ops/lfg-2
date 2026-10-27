@@ -1,88 +1,146 @@
 {
-"schema": 1,
-"items": [
-{
-"id": "lfg:item/coin",
-"name": "Coin",
-"value": 1
-},
-{
-"id": "lfg:item/glowfruit",
-"name": "Glowfruit",
-"value": 2,
-"food": 3
-},
-{
-"id": "lfg:item/sporebean",
-"name": "Sporebean",
-"value": 1,
-"food": 2
-},
-{
-"id": "lfg:item/saltroot",
-"name": "Saltroot",
-"value": 3,
-"food": 4
-},
-{
-"id": "lfg:item/ration",
-"name": "Ration",
-"value": 5,
-"food": 8,
-"ration": true
-},
-{
-"id": "lfg:item/glowfruit_seed",
-"name": "Glowfruit Seed",
-"value": 1
-},
-{
-"id": "lfg:item/sporebean_seed",
-"name": "Sporebean Seed",
-"value": 1
-},
-{
-"id": "lfg:item/saltroot_seed",
-"name": "Saltroot Seed",
-"value": 2
-},
-{
-"id": "lfg:item/mushroom",
-"name": "Wild Mushroom",
-"value": 2,
-"food": 2
-},
-{
-"id": "lfg:item/tonic",
-"name": "Tonic",
-"value": 8,
-"heal": 25
-},
-{
-"id": "lfg:item/timber",
-"name": "Timber",
-"value": 3
-},
-{
-"id": "lfg:item/stone",
-"name": "Stone",
-"value": 3
-},
-{
-"id": "lfg:item/spore_sac",
-"name": "Spore Sac",
-"value": 4
-},
-{
-"id": "lfg:item/gadget",
-"name": "Gadget",
-"value": 5
-},
-{
-"id": "lfg:item/game_meat",
-"name": "Game Meat",
-"value": 3,
-"food": 4
-}
-]
+ "schema": 1,
+ "items": [
+  {
+   "id": "lfg:item/coin",
+   "name": "Coin",
+   "value": 1
+  },
+  {
+   "id": "lfg:item/glowfruit",
+   "name": "Glowfruit",
+   "value": 2,
+   "food": 3
+  },
+  {
+   "id": "lfg:item/sporebean",
+   "name": "Sporebean",
+   "value": 1,
+   "food": 2
+  },
+  {
+   "id": "lfg:item/saltroot",
+   "name": "Saltroot",
+   "value": 3,
+   "food": 4
+  },
+  {
+   "id": "lfg:item/ration",
+   "name": "Ration",
+   "value": 5,
+   "food": 8,
+   "ration": true
+  },
+  {
+   "id": "lfg:item/glowfruit_seed",
+   "name": "Glowfruit Seed",
+   "value": 1
+  },
+  {
+   "id": "lfg:item/sporebean_seed",
+   "name": "Sporebean Seed",
+   "value": 1
+  },
+  {
+   "id": "lfg:item/saltroot_seed",
+   "name": "Saltroot Seed",
+   "value": 2
+  },
+  {
+   "id": "lfg:item/mushroom",
+   "name": "Wild Mushroom",
+   "value": 2,
+   "food": 2
+  },
+  {
+   "id": "lfg:item/tonic",
+   "name": "Tonic",
+   "value": 8,
+   "heal": 25
+  },
+  {
+   "id": "lfg:item/timber",
+   "name": "Timber",
+   "value": 3
+  },
+  {
+   "id": "lfg:item/stone",
+   "name": "Stone",
+   "value": 3
+  },
+  {
+   "id": "lfg:item/spore_sac",
+   "name": "Spore Sac",
+   "value": 4
+  },
+  {
+   "id": "lfg:item/gadget",
+   "name": "Gadget",
+   "value": 5
+  },
+  {
+   "id": "lfg:item/game_meat",
+   "name": "Game Meat",
+   "value": 3,
+   "food": 4
+  },
+  {
+   "id": "lfg:item/ashmarrow",
+   "name": "Ashmarrow",
+   "value": 6,
+   "tier": 4,
+   "note": "Purge-only: dropped by raiders and wave beasts"
+  },
+  {
+   "id": "lfg:item/purgebloom",
+   "name": "Purgebloom",
+   "value": 7,
+   "food": 5,
+   "tier": 4
+  },
+  {
+   "id": "lfg:item/purgebloom_seed",
+   "name": "Purgebloom Seed",
+   "value": 3
+  },
+  {
+   "id": "lfg:item/glowfruit_prime",
+   "name": "Prime Glowfruit",
+   "value": 4,
+   "food": 5
+  },
+  {
+   "id": "lfg:item/glowfruit_prime_seed",
+   "name": "Prime Glowfruit Seed",
+   "value": 2
+  },
+  {
+   "id": "lfg:item/moonbean",
+   "name": "Moonbean",
+   "value": 5,
+   "food": 4
+  },
+  {
+   "id": "lfg:item/moonbean_seed",
+   "name": "Moonbean Seed",
+   "value": 3
+  },
+  {
+   "id": "lfg:item/crownwheat",
+   "name": "Crownwheat",
+   "value": 8,
+   "food": 6
+  },
+  {
+   "id": "lfg:item/crownwheat_seed",
+   "name": "Crownwheat Seed",
+   "value": 4
+  },
+  {
+   "id": "lfg:item/elixir",
+   "name": "Ash Elixir",
+   "value": 14,
+   "heal": 60
+  }
+ ]
 }

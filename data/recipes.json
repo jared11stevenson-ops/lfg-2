@@ -1,93 +1,226 @@
 {
-"schema": 1,
-"recipes": [
-{
-"id": "lfg:recipe/ration_glowfruit",
-"name": "Glowfruit Ration",
-"inputs": {
-"lfg:item/glowfruit": 2
-},
-"outputs": {
-"lfg:item/ration": 1
-},
-"tags": [
-"ration"
-]
-},
-{
-"id": "lfg:recipe/ration_sporebean",
-"name": "Sporebean Ration",
-"inputs": {
-"lfg:item/sporebean": 3
-},
-"outputs": {
-"lfg:item/ration": 1
-},
-"tags": [
-"ration"
-]
-},
-{
-"id": "lfg:recipe/ration_saltroot",
-"name": "Saltroot Ration",
-"inputs": {
-"lfg:item/saltroot": 3
-},
-"outputs": {
-"lfg:item/ration": 2
-},
-"tags": [
-"ration"
-]
-},
-{
-"id": "lfg:recipe/tonic",
-"name": "Tonic",
-"inputs": {
-"lfg:item/mushroom": 1,
-"lfg:item/glowfruit": 1
-},
-"outputs": {
-"lfg:item/tonic": 1
-},
-"requires_tag": "alchemist"
-},
-{
-"id": "lfg:recipe/spore_bomb",
-"name": "Plague Flask",
-"inputs": {
-"lfg:item/spore_sac": 2,
-"lfg:item/stone": 1
-},
-"outputs": {
-"lfg:item/tonic": 1
-},
-"requires_tag": "alchemist"
-},
-{
-"id": "lfg:recipe/ration_game",
-"name": "Game Ration",
-"inputs": {
-"lfg:item/game_meat": 2
-},
-"outputs": {
-"lfg:item/ration": 1
-},
-"tags": [
-"ration"
-]
-},
-{
-"id": "lfg:recipe/gadget",
-"name": "Tinker Gadgets",
-"inputs": {
-"lfg:item/timber": 1,
-"lfg:item/stone": 1
-},
-"outputs": {
-"lfg:item/gadget": 3
-},
-"requires_tag": "tinker"
-}
-]
+ "schema": 1,
+ "recipes": [
+  {
+   "id": "lfg:recipe/ration_glowfruit",
+   "name": "Glowfruit Ration",
+   "inputs": {
+    "lfg:item/glowfruit": 2
+   },
+   "outputs": {
+    "lfg:item/ration": 1
+   },
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/ration_sporebean",
+   "name": "Sporebean Ration",
+   "inputs": {
+    "lfg:item/sporebean": 3
+   },
+   "outputs": {
+    "lfg:item/ration": 1
+   },
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/ration_saltroot",
+   "name": "Saltroot Ration",
+   "inputs": {
+    "lfg:item/saltroot": 3
+   },
+   "outputs": {
+    "lfg:item/ration": 2
+   },
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/tonic",
+   "name": "Tonic",
+   "inputs": {
+    "lfg:item/mushroom": 1,
+    "lfg:item/glowfruit": 1
+   },
+   "outputs": {
+    "lfg:item/tonic": 1
+   },
+   "requires_tag": "alchemist"
+  },
+  {
+   "id": "lfg:recipe/spore_bomb",
+   "name": "Plague Flask",
+   "inputs": {
+    "lfg:item/spore_sac": 2,
+    "lfg:item/stone": 1
+   },
+   "outputs": {
+    "lfg:item/tonic": 1
+   },
+   "requires_tag": "alchemist"
+  },
+  {
+   "id": "lfg:recipe/ration_game",
+   "name": "Game Ration",
+   "inputs": {
+    "lfg:item/game_meat": 2
+   },
+   "outputs": {
+    "lfg:item/ration": 1
+   },
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/gadget",
+   "name": "Tinker Gadgets",
+   "inputs": {
+    "lfg:item/timber": 1,
+    "lfg:item/stone": 1
+   },
+   "outputs": {
+    "lfg:item/gadget": 3
+   },
+   "requires_tag": "tinker"
+  },
+  {
+   "id": "lfg:recipe/ration_stew",
+   "name": "Sporebean Stew",
+   "inputs": {
+    "lfg:item/sporebean": 3,
+    "lfg:item/glowfruit": 1
+   },
+   "outputs": {
+    "lfg:item/ration": 2
+   },
+   "rank": 2,
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/seed_prime",
+   "name": "Prime Glowfruit Seed",
+   "inputs": {
+    "lfg:item/glowfruit": 4,
+    "lfg:item/stone": 1
+   },
+   "outputs": {
+    "lfg:item/glowfruit_prime_seed": 2
+   },
+   "rank": 3
+  },
+  {
+   "id": "lfg:recipe/ration_prime",
+   "name": "Prime Ration",
+   "inputs": {
+    "lfg:item/glowfruit_prime": 2
+   },
+   "outputs": {
+    "lfg:item/ration": 3
+   },
+   "rank": 3,
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/seed_moonbean",
+   "name": "Moonbean Seed",
+   "inputs": {
+    "lfg:item/sporebean": 3,
+    "lfg:item/ashmarrow": 1
+   },
+   "outputs": {
+    "lfg:item/moonbean_seed": 2
+   },
+   "rank": 4
+  },
+  {
+   "id": "lfg:recipe/seed_purgebloom",
+   "name": "Purgebloom Seed",
+   "inputs": {
+    "lfg:item/ashmarrow": 2,
+    "lfg:item/saltroot": 1
+   },
+   "outputs": {
+    "lfg:item/purgebloom_seed": 2
+   },
+   "rank": 4
+  },
+  {
+   "id": "lfg:recipe/ration_moon",
+   "name": "Moonbean Ration",
+   "inputs": {
+    "lfg:item/moonbean": 2
+   },
+   "outputs": {
+    "lfg:item/ration": 3
+   },
+   "rank": 4,
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/ration_bloom",
+   "name": "Bloom Ration",
+   "inputs": {
+    "lfg:item/purgebloom": 2
+   },
+   "outputs": {
+    "lfg:item/ration": 5
+   },
+   "rank": 4,
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/elixir",
+   "name": "Ash Elixir",
+   "inputs": {
+    "lfg:item/purgebloom": 1,
+    "lfg:item/ashmarrow": 1,
+    "lfg:item/glowfruit": 1
+   },
+   "outputs": {
+    "lfg:item/elixir": 1
+   },
+   "rank": 4
+  },
+  {
+   "id": "lfg:recipe/seed_crown",
+   "name": "Crownwheat Seed",
+   "inputs": {
+    "lfg:item/moonbean": 2,
+    "lfg:item/purgebloom": 1,
+    "lfg:item/ashmarrow": 1
+   },
+   "outputs": {
+    "lfg:item/crownwheat_seed": 1
+   },
+   "rank": 5
+  },
+  {
+   "id": "lfg:recipe/ration_crown",
+   "name": "Crown Ration",
+   "inputs": {
+    "lfg:item/crownwheat": 2
+   },
+   "outputs": {
+    "lfg:item/ration": 6
+   },
+   "rank": 5,
+   "tags": [
+    "ration"
+   ]
+  }
+ ]
 }

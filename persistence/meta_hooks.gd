@@ -2,7 +2,7 @@ class_name MetaHooks
 extends RefCounted
 ## Gameplay -> meta-progression hooks (cosmetic only; MetaStore enforces the id allowlist, never numbers).
 ##   class first use  -> codex entry  lfg:codex/class_<name>
-##   victory (win)    -> title        lfg:title/dominion | lfg:title/crowned
+##   victory (win)    -> title        lfg:title/total_conquest (only when the PLAYER faction is the winner)
 ## All functions return the ids newly unlocked and save only when something changed.
 
 static func codex_id_for_class(class_id: String) -> String:
@@ -24,8 +24,7 @@ static func on_class_used(meta: MetaStore, class_id: String) -> Array[String]:
 
 static func title_for_victory(kind: String) -> String:
 	match kind:
-		"dominion": return "lfg:title/dominion"
-		"crowned": return "lfg:title/crowned"
+		"total_conquest": return "lfg:title/total_conquest"
 	return ""
 
 ## Feed the same event arrays the UI gets. Only `victory` events matter today.
@@ -35,6 +34,8 @@ static func on_events(meta: MetaStore, events: Array) -> Array[String]:
 		return out
 	for e in events:
 		if e is Dictionary and e.get("type", &"") == &"victory":
+			if e.has("player") and not bool(e["player"]):
+				continue      # a rival faction's conquest earns the player nothing
 			var t: String = title_for_victory(str(e.get("kind", "")))
 			if t != "" and meta.unlock("titles", t):
 				out.append(t)

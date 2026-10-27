@@ -19,6 +19,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 	var ab: Dictionary = ability_for(cd, CmdUtil.s(args.get("ability", "")))
 	if ab.is_empty():
 		return "unknown_ability"
+	ab = Skills.tune_ability(a, ab)
 	if not bool(cd.get("implemented", false)):
 		return "ability_not_implemented"
 	var key: String = "ab:" + String(ab["id"])

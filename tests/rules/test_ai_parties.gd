@@ -265,7 +265,10 @@ func test_player_can_kill_a_raid_party_and_loot_is_conserved() -> void:
 		s.actors[1]["cd"] = {}
 		cmd(s, "attack", {"target": pid})
 	check(not p["alive"], "the party can be wiped out")
-	eq(Inv.world_totals(s), t0, "its loot dropped without loss")
+	var t1: Dictionary = Inv.world_totals(s)
+	check(int(t1.get("lfg:item/ashmarrow", 0)) >= 1, "a slain raider drops Purge-only ashmarrow")
+	t1.erase("lfg:item/ashmarrow")
+	eq(t1, t0, "its loot dropped without loss (ashmarrow is the only new item)")
 	Rules.tick(s, 1.0)
 	check(not s.actors.has(pid), "dead party removed")
 	eq(t["owner"], 0, "holding saved")

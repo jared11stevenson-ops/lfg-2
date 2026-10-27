@@ -64,6 +64,7 @@ func test_auto_site_is_deterministic_and_dense_packing_ends() -> void:
 
 func test_group_limits_upgrades_and_demolish_free_the_site() -> void:
 	var s: MatchState = quiet()
+	Standing.set_rank(s, 0, 3)
 	_stock(s, {"lfg:item/timber": 100, "lfg:item/stone": 100, "lfg:item/coin": 100})
 	eq(cmd(s, "build", {"holding": 1, "building": "lfg:building/sawmill_2"})["error"], "needs_base_building", "upgrade needs the base")
 	check(cmd(s, "build", {"holding": 1, "building": "lfg:building/sawmill"})["ok"], "sawmill")
@@ -86,6 +87,7 @@ func test_group_limits_upgrades_and_demolish_free_the_site() -> void:
 
 func test_wall_upgrade_and_forge_discount_paid() -> void:
 	var s: MatchState = quiet("lfg:class/forge")
+	Standing.set_rank(s, 0, 1)
 	_stock(s, {"lfg:item/timber": 20, "lfg:item/stone": 20})
 	check(cmd(s, "build", {"holding": 1, "building": "lfg:building/wall"})["ok"], "wall")
 	var t: int = Inv.count(s.actors[1]["inv"], "lfg:item/timber")

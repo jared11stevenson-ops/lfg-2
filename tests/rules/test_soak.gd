@@ -13,7 +13,7 @@ func test_twelve_week_soak_is_stable_and_deterministic() -> void:
 	var eb: Array = tick_all(b, 60.0 * 86.0, 5.0)
 	check(same(a, b), "two identical soaks end identical")
 	eq(ea.size(), eb.size(), "identical event streams")
-	eq(a.won, "crowned", "survived 12 weeks -> crowned (or dominion earlier is also a win)") if a.won == "crowned" else check(a.won != "", "won by some route")
+	eq(a.won, "", "surviving 12 weeks is not a win any more (only Total Conquest wins)")
 	check(not a.over, "player alive")
 	var resolved: int = 0
 	var conquests: int = 0

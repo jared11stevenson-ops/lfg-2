@@ -27,6 +27,39 @@ static func buildings() -> Dictionary: return _load("buildings", "buildings")
 static func classes() -> Dictionary: return _load("classes", "classes")
 static func enemies() -> Dictionary: return _load("enemies", "enemies")
 
+## data/ranks.json (Standing, ranks, upkeep, levy, scarcity). Not an id-keyed list, so cached whole.
+static func ranks_cfg() -> Dictionary:
+	if _cache.has("ranks_cfg"):
+		return _cache["ranks_cfg"]
+	var out: Dictionary = {}
+	var f := FileAccess.open("res://data/ranks.json", FileAccess.READ)
+	if f != null:
+		var parsed: Variant = JSON.parse_string(f.get_as_text())
+		if parsed is Dictionary:
+			out = parsed
+	_cache["ranks_cfg"] = out
+	return out
+
+## data/skill_trees.json: {caps:{key:[min,max]}, trees:{class_id:{name, nodes:{id:node}, order:[ids]}}}
+static func skill_data() -> Dictionary:
+	if _cache.has("skill_data"):
+		return _cache["skill_data"]
+	var out: Dictionary = {"caps": {}, "trees": {}}
+	var f := FileAccess.open("res://data/skill_trees.json", FileAccess.READ)
+	if f != null:
+		var parsed: Variant = JSON.parse_string(f.get_as_text())
+		if parsed is Dictionary:
+			out["caps"] = parsed.get("caps", {})
+			for t in parsed.get("trees", []):
+				var nodes: Dictionary = {}
+				var order: Array = []
+				for n in t["nodes"]:
+					nodes[String(n["id"])] = n
+					order.append(String(n["id"]))
+				out["trees"][String(t["class"])] = {"name": t.get("name", ""), "nodes": nodes, "order": order}
+	_cache["skill_data"] = out
+	return out
+
 static func item(id: String) -> Dictionary: return items().get(id, {})
 static func crop(id: String) -> Dictionary: return crops().get(id, {})
 static func recipe(id: String) -> Dictionary: return recipes().get(id, {})

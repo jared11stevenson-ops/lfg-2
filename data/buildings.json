@@ -1,14 +1,219 @@
-{"schema":2,"buildings":[
-{"id":"lfg:building/wall","name":"Palisade","cost":{"lfg:item/timber":4,"lfg:item/stone":2},"defense":4,"max":3,"group":"wall"},
-{"id":"lfg:building/wall_stone","name":"Stone Wall","cost":{"lfg:item/timber":2,"lfg:item/stone":6},"defense":8,"max":3,"group":"wall","upgrade_of":"lfg:building/wall"},
-{"id":"lfg:building/barracks","name":"Barracks","cost":{"lfg:item/timber":6,"lfg:item/stone":4},"recruit_per_day":1,"recruit_coin":3,"max":1,"group":"barracks"},
-{"id":"lfg:building/storehouse","name":"Storehouse","cost":{"lfg:item/timber":5},"steal_guard":0.15,"max":1,"group":"storehouse"},
-{"id":"lfg:building/sawmill","name":"Sawmill","cost":{"lfg:item/timber":6,"lfg:item/stone":2},"max":1,"group":"sawmill","work":{"min_garrison":2,"outputs":{"lfg:item/timber":2}}},
-{"id":"lfg:building/sawmill_2","name":"Steam Sawmill","cost":{"lfg:item/timber":8,"lfg:item/stone":5},"max":1,"group":"sawmill","upgrade_of":"lfg:building/sawmill","work":{"min_garrison":3,"outputs":{"lfg:item/timber":3,"lfg:item/stone":1}}},
-{"id":"lfg:building/kitchen","name":"Kitchen","cost":{"lfg:item/timber":5,"lfg:item/stone":3},"max":1,"group":"kitchen","work":{"min_garrison":1,"batches":2}},
-{"id":"lfg:building/kitchen_2","name":"Cookhouse","cost":{"lfg:item/timber":6,"lfg:item/stone":5,"lfg:item/coin":10},"max":1,"group":"kitchen","upgrade_of":"lfg:building/kitchen","work":{"min_garrison":1,"batches":5,"bonus_ration":1}},
-{"id":"lfg:building/well","name":"Well","cost":{"lfg:item/timber":3,"lfg:item/stone":4},"max":1,"group":"well","gadget":true,"work":{"waters":true}},
-{"id":"lfg:building/granary","name":"Granary","cost":{"lfg:item/timber":6,"lfg:item/stone":3},"max":1,"group":"granary","steal_guard":0.1,"loot_shield":0.5},
-{"id":"lfg:building/watchtower","name":"Watchtower","cost":{"lfg:item/timber":5,"lfg:item/stone":4},"defense":3,"vision":6,"max":1,"group":"watchtower","gadget":true},
-{"id":"lfg:building/watchtower_2","name":"Beacon Tower","cost":{"lfg:item/timber":4,"lfg:item/stone":6},"defense":6,"vision":9,"max":1,"group":"watchtower","upgrade_of":"lfg:building/watchtower","gadget":true}
-]}
+{
+ "schema": 2,
+ "buildings": [
+  {
+   "id": "lfg:building/wall",
+   "name": "Palisade",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/stone": 2
+   },
+   "defense": 4,
+   "max": 3,
+   "group": "wall"
+  },
+  {
+   "id": "lfg:building/wall_stone",
+   "name": "Stone Wall",
+   "cost": {
+    "lfg:item/timber": 2,
+    "lfg:item/stone": 6
+   },
+   "defense": 8,
+   "max": 3,
+   "group": "wall",
+   "upgrade_of": "lfg:building/wall",
+   "rank": 1
+  },
+  {
+   "id": "lfg:building/barracks",
+   "name": "Barracks",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/stone": 4
+   },
+   "recruit_per_day": 1,
+   "recruit_coin": 3,
+   "max": 1,
+   "group": "barracks",
+   "rank": 1
+  },
+  {
+   "id": "lfg:building/storehouse",
+   "name": "Storehouse",
+   "cost": {
+    "lfg:item/timber": 5
+   },
+   "steal_guard": 0.15,
+   "max": 1,
+   "group": "storehouse"
+  },
+  {
+   "id": "lfg:building/sawmill",
+   "name": "Sawmill",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/stone": 2
+   },
+   "max": 1,
+   "group": "sawmill",
+   "work": {
+    "min_garrison": 2,
+    "outputs": {
+     "lfg:item/timber": 2
+    }
+   }
+  },
+  {
+   "id": "lfg:building/sawmill_2",
+   "name": "Steam Sawmill",
+   "cost": {
+    "lfg:item/timber": 8,
+    "lfg:item/stone": 5
+   },
+   "max": 1,
+   "group": "sawmill",
+   "upgrade_of": "lfg:building/sawmill",
+   "work": {
+    "min_garrison": 3,
+    "outputs": {
+     "lfg:item/timber": 3,
+     "lfg:item/stone": 1
+    }
+   },
+   "rank": 2
+  },
+  {
+   "id": "lfg:building/kitchen",
+   "name": "Kitchen",
+   "cost": {
+    "lfg:item/timber": 5,
+    "lfg:item/stone": 3
+   },
+   "max": 1,
+   "group": "kitchen",
+   "work": {
+    "min_garrison": 1,
+    "batches": 2
+   }
+  },
+  {
+   "id": "lfg:building/kitchen_2",
+   "name": "Cookhouse",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/stone": 5,
+    "lfg:item/coin": 10
+   },
+   "max": 1,
+   "group": "kitchen",
+   "upgrade_of": "lfg:building/kitchen",
+   "work": {
+    "min_garrison": 1,
+    "batches": 5,
+    "bonus_ration": 1
+   },
+   "rank": 2
+  },
+  {
+   "id": "lfg:building/well",
+   "name": "Well",
+   "cost": {
+    "lfg:item/timber": 3,
+    "lfg:item/stone": 4
+   },
+   "max": 1,
+   "group": "well",
+   "gadget": true,
+   "work": {
+    "waters": true
+   }
+  },
+  {
+   "id": "lfg:building/granary",
+   "name": "Granary",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/stone": 3
+   },
+   "max": 1,
+   "group": "granary",
+   "steal_guard": 0.1,
+   "loot_shield": 0.5,
+   "rank": 1
+  },
+  {
+   "id": "lfg:building/watchtower",
+   "name": "Watchtower",
+   "cost": {
+    "lfg:item/timber": 5,
+    "lfg:item/stone": 4
+   },
+   "defense": 3,
+   "vision": 6,
+   "max": 1,
+   "group": "watchtower",
+   "gadget": true,
+   "rank": 2
+  },
+  {
+   "id": "lfg:building/watchtower_2",
+   "name": "Beacon Tower",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/stone": 6
+   },
+   "defense": 6,
+   "vision": 9,
+   "max": 1,
+   "group": "watchtower",
+   "upgrade_of": "lfg:building/watchtower",
+   "gadget": true,
+   "rank": 3
+  },
+  {
+   "id": "lfg:building/shrine",
+   "name": "Shrine",
+   "cost": {
+    "lfg:item/timber": 5,
+    "lfg:item/stone": 5,
+    "lfg:item/coin": 10
+   },
+   "max": 1,
+   "group": "shrine",
+   "rank": 2,
+   "levy_cut": 0.25
+  },
+  {
+   "id": "lfg:building/greenhouse",
+   "name": "Spore Greenhouse",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/stone": 4,
+    "lfg:item/coin": 10
+   },
+   "max": 1,
+   "group": "greenhouse",
+   "rank": 3,
+   "yield_bonus": 1
+  },
+  {
+   "id": "lfg:building/forge",
+   "name": "Forge",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/stone": 6,
+    "lfg:item/coin": 10
+   },
+   "max": 1,
+   "group": "forge",
+   "rank": 3,
+   "work": {
+    "min_garrison": 2,
+    "outputs": {
+     "lfg:item/gadget": 1
+    }
+   }
+  }
+ ]
+}

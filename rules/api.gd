@@ -2,7 +2,8 @@ class_name Rules
 extends RefCounted
 ## Public Rules API (frozen contract). Everything is deterministic given (seed, command stream, tick stream).
 const COMMAND_TYPES: Array[StringName] = [&"move_intent", &"plant", &"water", &"harvest", &"craft", &"build", &"demolish", &"trade", &"eat",
-	&"attack", &"use_ability", &"capture", &"steal", &"set_policy", &"rest", &"move_to_pos", &"sync_position"]
+	&"attack", &"use_ability", &"capture", &"steal", &"set_policy", &"rest", &"move_to_pos", &"sync_position",
+	&"unlock_skill", &"scout", &"escort", &"truce", &"ransom", &"sabotage"]
 const MAX_PATH := 160
 
 static func new_match(seed: int, class_id: StringName, opts: Dictionary = {}) -> MatchState:
@@ -10,7 +11,7 @@ static func new_match(seed: int, class_id: StringName, opts: Dictionary = {}) ->
 
 static func tick(state: MatchState, dt: float) -> Array[Dictionary]:
 	var events: Array = []
-	Sim.run(state, dt, events)
+	Sim.run(state, dt, events)      # Sim.advance feeds each step's events to Standing.observe (deeds, skill points)
 	var out: Array[Dictionary] = []
 	for e in events:
 		out.append(e)
@@ -51,6 +52,7 @@ static func apply(state: MatchState, cmd: Dictionary) -> Dictionary:
 	if err != "":
 		return _fail(err)
 	a["last_seq"] = seq
+	Standing.observe(state, events, 0)
 	var out: Array[Dictionary] = []
 	for e in events:
 		out.append(e)
@@ -75,6 +77,12 @@ static func _dispatch(state: MatchState, a: Dictionary, t: StringName, args: Dic
 		&"use_ability": return Abilities.use(state, a, args, events)
 		&"capture": return Conquest.capture(state, a, args, events)
 		&"steal": return Conquest.steal(state, a, args, events)
+		&"unlock_skill": return Skills.unlock(state, a, args, events)
+		&"scout": return PurgeActions.scout(state, a, args, events)
+		&"escort": return PurgeActions.escort(state, a, args, events)
+		&"truce": return PurgeActions.truce(state, a, args, events)
+		&"ransom": return PurgeActions.ransom(state, a, args, events)
+		&"sabotage": return PurgeActions.sabotage(state, a, args, events)
 	return "unknown_command"
 
 static func _move(state: MatchState, a: Dictionary, args: Dictionary) -> String:

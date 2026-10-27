@@ -146,6 +146,10 @@ static func _truce(state: MatchState, a: Dictionary, ab: Dictionary, args: Dicti
 		Inv.remove_all(a["inv"], gift)
 		Inv.add_all(state.holdings[hid]["store"], gift)
 		f["truce_until"] = MatchState.q(now + float(ab["faction_secs"]))
+		for pair in [[int(a["faction"]), fid], [fid, int(a["faction"])]]:
+			var tr: Dictionary = state.factions[int(pair[0])].get("truces", {})
+			tr[int(pair[1])] = f["truce_until"]
+			state.factions[int(pair[0])]["truces"] = tr
 		events.append({"type": &"truce_signed", "actor": a["id"], "faction": fid, "holding": hid, "until": f["truce_until"]})
 	Combat.add_effect(a, "truce", MatchState.q(now + float(ab["duration"])))
 	events.append({"type": &"ability_used", "actor": a["id"], "ability": ab["id"], "faction": fid})

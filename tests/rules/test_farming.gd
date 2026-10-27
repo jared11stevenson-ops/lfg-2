@@ -42,6 +42,8 @@ func test_sporebean_needs_no_water_but_is_slow() -> void:
 
 func test_saltroot_biome_gated_slow_rich() -> void:
 	var s: MatchState = quiet()
+	eq(cmd(s, "plant", {"crop": "lfg:crop/saltroot", "hex": neighbor_plot(s, 0)})["error"], "rank_required", "saltroot is rank 1 access")
+	Standing.set_rank(s, 0, 1)
 	var h: Vector2i = neighbor_plot(s, 0)
 	eq(cmd(s, "plant", {"crop": "lfg:crop/saltroot", "hex": h})["error"], "bad_biome", "meadow rejects saltroot")
 	s.world["biome"][HexGrid.index(h)] = WorldGen.B_SALT
@@ -58,7 +60,10 @@ func test_saltroot_biome_gated_slow_rich() -> void:
 	eq(s.actors[1]["inv"]["lfg:item/saltroot"], 7 + 2 + 1, "7 base + 2 salt + 1 judd")
 
 func test_crops_have_distinct_tradeoffs() -> void:
-	var crops: Array = Content.crops().values()
+	var crops: Array = []
+	for c in Content.crops().values():
+		if int(c.get("rank", 0)) <= 1 and not bool(c.get("purge_only", false)):
+			crops.append(c)       # the three starter crops; higher-rank crops are covered in test_standing
 	check(crops.size() >= 3, "3+ crops")
 	var grow: Dictionary = {}
 	var rate: Dictionary = {}

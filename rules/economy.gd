@@ -5,7 +5,6 @@ const COIN := "lfg:item/coin"
 const RATION := "lfg:item/ration"
 const TRADE_RANGE := 1
 const STARVE_DESERT_DAYS := 3
-const DOMINION_FRACTION := 0.6
 
 const PRICE_MIN := 0.5
 const PRICE_MAX := 2.5
@@ -18,10 +17,12 @@ static func price_mult(h: Dictionary, item: String) -> float:
 
 static func buy_price(item: String, mult: float = 1.0, a: Dictionary = {}) -> int:
 	var cm: float = float(Combat.class_mod(a, "buy_mult", 1.0)) if not a.is_empty() else 1.0
-	return maxi(1, int(ceil(float(Content.item_value(item)) * 1.25 * mult * cm - 1e-9)))
+	var rk: float = 1.0 - (Standing.price_pct(a) if not a.is_empty() else 0.0)
+	return maxi(1, int(ceil(float(Content.item_value(item)) * 1.25 * mult * cm * rk - 1e-9)))
 
 static func sell_price(a: Dictionary, item: String, mult: float = 1.0) -> int:
-	return maxi(1, int(floor(float(Content.item_value(item)) * 0.6 * mult * float(Combat.class_mod(a, "sell_mult", 1.0)) + 1e-9)))
+	var rk: float = 1.0 + (Standing.price_pct(a) if not a.is_empty() else 0.0)
+	return maxi(1, int(floor(float(Content.item_value(item)) * 0.6 * mult * float(Combat.class_mod(a, "sell_mult", 1.0)) * rk + 1e-9)))
 
 static func _bump_price(h: Dictionary, item: String, q: int, up: bool) -> void:
 	if not h.has("prices"):
@@ -192,6 +193,8 @@ static func build(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 		return "unknown_building"
 	var h: Dictionary = state.holdings[hid]
 	var bl: Array = h["buildings"]
+	if not Standing.rank_ok(state, int(a["faction"]), int(b.get("rank", 0))):
+		return "rank_required"
 	var cost: Dictionary = build_cost(a, b)
 	if b.has("upgrade_of"):
 		# Upgrade: replaces the base building in place (keeps its site).
@@ -374,26 +377,39 @@ static func dawn_recruit(state: MatchState, events: Array) -> void:
 		if int(state.factions[int(h["owner"])]["hunger_days"]) > 0:
 			continue
 		var b: Dictionary = Content.building("lfg:building/barracks")
-		var cap: int = 4 + 4 * int(h["tier"])
+		var cap: int = Standing.garrison_cap(state, h)
 		if int(h["garrison"]) < cap and Inv.has_all(h["store"], {COIN: int(b["recruit_coin"])}):
 			Inv.remove_all(h["store"], {COIN: int(b["recruit_coin"])})
 			h["garrison"] = int(h["garrison"]) + int(b["recruit_per_day"])
 			events.append({"type": &"recruited", "holding": hid, "garrison": h["garrison"]})
 
 # ---------- win / loss ----------
+## Total Conquest is the ONLY win: every rival leader dead/eliminated AND one faction owns every holding on the map.
+## Emits victory{kind:"total_conquest", faction, player}. Playing on (Endless) stays possible; the event fires once.
 static func check_victory(state: MatchState, events: Array) -> void:
 	if state.won != "" or state.over:
 		return
-	var total: int = state.holdings.size()
-	var mine: int = state.holdings_of(0).size()
-	if total > 0 and float(mine) >= DOMINION_FRACTION * float(total):
-		state.won = "dominion"
-		events.append({"type": &"victory", "kind": "dominion", "holdings": mine, "total": total})
+	var winner: int = -1
+	for fid in state.factions.keys():
+		if state.factions[fid]["alive"]:
+			if winner != -1:
+				return
+			winner = int(fid)
+	if winner == -1:
+		return
+	for h in state.holdings.values():
+		if int(h["owner"]) != winner:
+			return
+	state.won = "total_conquest"
+	events.append({"type": &"victory", "kind": "total_conquest", "faction": winner, "player": winner == 0, "holdings": state.holdings.size(),
+		"day": state.clock["day"], "faction_name": state.factions[winner]["name"]})
 
 static func check_starved_out(state: MatchState, events: Array) -> void:
 	if state.over:
 		return
 	var leader: Dictionary = state.player()
+	if leader.is_empty():
+		return
 	if state.holdings_of(0).is_empty() and Inv.count(leader["inv"], RATION) == 0:
 		Combat.end_match(state, "starved_out", events)
 
@@ -404,6 +420,8 @@ static func working(state: MatchState, h: Dictionary, work: Dictionary) -> bool:
 		return false
 	if int(state.factions[int(h["owner"])].get("hunger_days", 0)) > 0:
 		return false      # a starving faction does no work
+	if int(h.get("stab", 100)) < int(Standing.cfg().get("stability", {}).get("weak", 40)) and int(state.clock["day"]) % 2 == 0:
+		return false      # unstable holdings produce less
 	return int(h["garrison"]) >= int(work.get("min_garrison", 0))
 
 static func dawn_buildings(state: MatchState, events: Array) -> void:
@@ -433,6 +451,7 @@ static func dawn_buildings(state: MatchState, events: Array) -> void:
 				var out: Dictionary = w["outputs"]
 				if Inv.room_for(h["store"], out):
 					Inv.add_all(h["store"], out)
+					Standing.note_output(state, int(h["owner"]), out)
 					events.append({"type": &"produced", "holding": hid, "building": bid, "items": out})
 			if w.has("batches"):
 				var made: int = cook_store(h["store"], int(w["batches"]), int(w.get("bonus_ration", 0)))
