@@ -516,3 +516,35 @@ func test_companions_do_not_perturb_the_ai_world() -> void:
 	for fid in a.factions.keys():
 		if int(fid) > 0:
 			eq(JSON.stringify(a.factions[fid]), JSON.stringify(b.factions[fid]), "faction %d unchanged" % fid)
+
+func test_wild_quests_credit_adoption_and_guardian_kills() -> void:
+	var s: MatchState = quiet()
+	var a: Dictionary = s.actors[1]
+	eq(Quests.state_of(a, "lfg:quest/wild_guardian"), "locked", "the guardian chapter follows the creature chapter")
+	check(cmd(s, "accept_quest", {"quest": "lfg:quest/wild_creature"})["ok"], "accept")
+	_visit(s, "lfg:poi/derelict_farm")
+	give(s, 1, {"lfg:item/sporebean": 3})
+	check(_adopt(s, "mossbun")["ok"], "adopt at the farm")
+	check(bool(Quests.rec_of(a, "lfg:quest/wild_creature")["ready"]), "the step was credited by the adoption event")
+	eq(cmd(s, "turn_in", {"quest": "lfg:quest/wild_creature"})["error"], "not_near_own_holding", "not at the haunt")
+	a["hex"] = home(s)["hex"]
+	cmd(s, "turn_in", {"quest": "lfg:quest/wild_creature"})
+	eq(Quests.state_of(a, "lfg:quest/wild_creature"), "done", "done")
+	check(cmd(s, "accept_quest", {"quest": "lfg:quest/wild_guardian"})["ok"], "the guardian chapter opens")
+	var arena: Dictionary = {}
+	for p in s.world["pois"]:
+		if String(p["type"]) == "lfg:poi/arena_shore":
+			arena = p
+	a["hex"] = arena["hex"]
+	a["max_hp"] = 999
+	a["hp"] = 999
+	cmd(s, "interact_poi", {"poi": arena["id"]})
+	for id in s.actors.keys():
+		if s.actors[id]["kind"] == "enemy" and s.actors[id]["alive"]:
+			Combat.kill(s, int(id), 1, [])
+	var r: Dictionary = cmd(s, "interact_poi", {"poi": arena["id"]})
+	check(r["ok"], "claim")
+	check(bool(Quests.rec_of(a, "lfg:quest/wild_guardian")["ready"]), "the guardian_defeated event credited the step")
+	a["hex"] = home(s)["hex"]
+	check(cmd(s, "turn_in", {"quest": "lfg:quest/wild_guardian"})["ok"], "handed in")
+	check((a["titles"] as Array).has("Guardian Breaker"), "title")

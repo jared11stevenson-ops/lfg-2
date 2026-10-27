@@ -7,9 +7,9 @@ signal accept_requested(quest_id: String)
 signal abandon_requested(quest_id: String)
 signal turn_in_requested(quest_id: String)
 signal tab_changed(tab: String)
-const TABS: Array[String] = ["active", "available", "done", "later"]
-const TAB_LABELS: Dictionary = {"active": "ACTIVE", "available": "AVAILABLE", "done": "DONE", "later": "LATER"}
-const LINE_COLORS: Dictionary = {"general": Color("49c6e5"), "judd": Color("6fd3a0"), "mira": Color("c47bff"), "bram": Color("ff8a3c"), "tavi": Color("ffd24a"),
+const TABS: Array[String] = ["active", "available", "done", "later", "guardians"]
+const TAB_LABELS: Dictionary = {"active": "ACTIVE", "available": "AVAILABLE", "done": "DONE", "later": "LATER", "guardians": "GUARDIANS"}
+const LINE_COLORS: Dictionary = {"welcome": Color("19e0c8"), "general": Color("49c6e5"), "judd": Color("6fd3a0"), "mira": Color("c47bff"), "bram": Color("ff8a3c"), "tavi": Color("ffd24a"),
 	"pip": Color("5be0ff"), "oren": Color("ff7a8a"), "sable": Color("86b24a"), "forge": Color("ff5a3a")}
 var model: Dictionary = {}
 var tab: String = "active"
@@ -24,7 +24,7 @@ func _init() -> void:
 	bar.add_theme_constant_override("separation", 8)
 	body.add_child(bar)
 	for t in TABS:
-		var b: Button = UiKit.button(String(TAB_LABELS[t]), UiStyle.PURPLE, Vector2(150, 56), 20)
+		var b: Button = UiKit.button(String(TAB_LABELS[t]), UiStyle.PURPLE, Vector2(150, 56), 18)
 		var tt: String = t
 		b.pressed.connect(func() -> void: show_tab(tt))
 		bar.add_child(b)
@@ -55,6 +55,7 @@ func rows_for(t: String) -> Array:
 		"available": return model.get("available", [])
 		"done": return model.get("done", [])
 		"later": return (model.get("locked", []) as Array) + (model.get("soon", []) as Array)
+		"guardians": return model.get("guardians", [])
 	return []
 
 func _render() -> void:
@@ -70,11 +71,28 @@ func _render() -> void:
 	summary.text = ("Titles: " + ", ".join(titles)) if not titles.is_empty() else "Quests are optional and never need another player."
 	if rows.is_empty():
 		var msg: String = {"active": "No active quests. Open AVAILABLE to pick one up.", "available": "Nothing new right now.", "done": "Nothing finished yet.",
-			"later": "Nothing waiting."}[tab]
+			"later": "Nothing waiting.", "guardians": "No guardians known."}[tab]
 		list_box.add_child(_lbl(msg, 20, Color(1, 1, 1, 0.7)))
 		return
 	for r in rows:
-		list_box.add_child(_card(r))
+		list_box.add_child(_guardian_card(r) if tab == "guardians" else _card(r))
+
+## One region guardian: where it sleeps, whether you have beaten it, and what its first defeat opens (rules/guardians.gd progress rows).
+func _guardian_card(r: Dictionary) -> Control:
+	var card: PanelContainer = UiKit.card(Color(0.16, 0.1, 0.28, 0.92))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	card.add_child(v)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 8)
+	v.add_child(head)
+	var title: Label = UiStyle.label(String(r["name"]), 24, UiStyle.WARN if not bool(r["beaten"]) else UiStyle.GOOD, false)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	head.add_child(UiKit.chip("BEATEN" if bool(r["beaten"]) else ("FOUND" if bool(r["discovered"]) else "NOT FOUND YET"), UiStyle.GOOD if bool(r["beaten"]) else Color("9a8fb0"), 16))
+	v.add_child(_lbl("%s (%s). Telegraphed attacks: step out of the marked ground. It returns every week with smaller spoils." % [String(r["arena"]), String(r["biome"]).replace("_", " ")], 17, Color(1, 1, 1, 0.8)))
+	v.add_child(_lbl("Drops %s. Opens: %s." % [String(r["material"]), ", ".join(r["gates"])], 17, UiStyle.WARN))
+	return card
 
 func _card(r: Dictionary) -> Control:
 	var col: Color = LINE_COLORS.get(String(r["line"]), UiStyle.PURPLE)

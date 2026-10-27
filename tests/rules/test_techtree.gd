@@ -399,3 +399,18 @@ func test_t4_costs_are_scarce_but_reachable_in_weeks() -> void:
 	# bastion: the dearest buildable (three alloys = three sigils + a horn)
 	var alloy_weeks: float = 3.0 / float(per_week[_i("vault_sigil")])
 	check(alloy_weeks <= 8.0, "three alloys in under eight weeks (%.1f)" % alloy_weeks)
+
+func test_no_recipe_prints_money() -> void:
+	for r in Content.recipes().values():
+		var vin: int = _value(r["inputs"])
+		var vout: int = _value(r["outputs"])
+		check(float(vout) <= 2.5 * float(vin), "%s: out %d vs in %d (at most 2.5x)" % [r["id"], vout, vin])
+	# the new recipes in particular: nothing converts a cheap pile into a T4 item
+	for r in Content.recipes().values():
+		for k in (r["outputs"] as Dictionary).keys():
+			if int(Content.item(String(k)).get("tier", 0)) == 4:
+				var has4: bool = false
+				for ik in (r["inputs"] as Dictionary).keys():
+					if int(Content.item(String(ik)).get("tier", 0)) == 4:
+						has4 = true
+				check(has4, "%s: a T4 product needs a T4 input" % r["id"])

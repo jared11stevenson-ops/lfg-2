@@ -433,7 +433,7 @@ static func row(state: MatchState, a: Dictionary, qid: String) -> Dictionary:
 ## Journal for one actor: only quests that apply to its class (general ones + its own line). Sorted by file order.
 static func journal(state: MatchState, a: Dictionary) -> Dictionary:
 	var out: Dictionary = {"active": [], "available": [], "locked": [], "done": [], "soon": [], "titles": (a.get("titles", []) as Array).duplicate(),
-		"unlocks": (a.get("unlocks", []) as Array).duplicate()}
+		"unlocks": (a.get("unlocks", []) as Array).duplicate(), "guardians": Guardians.progress(state, a)}
 	for qid in Content.quest_order():
 		var q: Dictionary = def(String(qid))
 		var cls: String = String(q.get("class", ""))

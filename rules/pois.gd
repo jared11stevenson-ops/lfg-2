@@ -296,7 +296,7 @@ static func info(state: MatchState, a: Dictionary, pid: int) -> Dictionary:
 	return {"id": pid, "type": poi["type"], "prop": t.get("prop", ""), "name": t.get("name", "?") if disc else "Something unexplored", "hex": poi["hex"], "biome": poi["biome"], "discovered": disc,
 		"available": available(state, pid), "kind": t["challenge"]["kind"], "text": t["challenge"].get("text", "") if disc else "", "flavor": t.get("flavor", "") if disc else "",
 		"hint": hint(state, poi) if disc else {}, "prog": int(st["prog"]) if int(st["week"]) == state.week() else 0, "guards_alive": _guards_alive(state, st),
-		"loot_types": (t.get("loot", {}) as Dictionary).keys() if disc else []}
+		"loot_types": (t.get("loot", {}) as Dictionary).keys() if disc else [], "arena": t.has("guardian"), "summoned": not (st.get("guards", []) as Array).is_empty()}
 
 ## Strategic-map markers: discovered POIs only (fog of war).
 static func markers(state: MatchState, a: Dictionary) -> Array:

@@ -154,7 +154,7 @@ func test_hungry_creatures_sit_down_and_shrink_and_resting_ones_are_indoors() ->
 	var layer: CompanionLayer = ctx["layer"]
 	layer.sync()
 	var r: CharacterRig = layer.rig_for("lfg:companion/truffler")
-	check(r != null and r.scale.x < 0.9, "hungry: smaller")
+	check(r != null and r.scale.x < CompanionLayer.VIEW_SCALE * 0.9, "hungry: smaller")
 	var p0: Vector3 = r.position
 	(ctx["player"] as Node3D).position += Vector3(12, 0, 0)
 	layer.sync()
@@ -436,3 +436,93 @@ func test_stage_wires_companions_boss_bar_and_toasts() -> void:
 		{"type": &"guardian_defeated", "actor": 1, "poi": 1, "guardian": "meadow", "name": "Gourdmother's Hollow", "first": true, "bonus": {}, "unlock": "lfg:unlock/guardian_meadow"}], st)
 	check(s.hud.toast_box.get_child_count() >= 1, "toasts raised (%d)" % s.hud.toast_box.get_child_count())
 	s.free()
+
+func test_hud_shows_the_pets_line_and_the_journal_lists_guardians() -> void:
+	var st: MatchState = _mk()
+	var h := Hud.new()
+	h._ready()
+	h.set_model(HudBinder.model_from_state(st))
+	check(not h.pets_chip.visible, "no companions, no chip")
+	Companions.give(st, st.actors[1], "lfg:companion/mossbun", [])
+	Companions.find(st.actors[1], "lfg:companion/mossbun")["fed"] = false
+	h.set_model(HudBinder.model_from_state(st))
+	check(h.pets_chip.visible and h.pets_label.text == "Pets: Mossbun (hungry)", "chip: %s" % h.pets_label.text)
+	h.free()
+	var q := QuestPanel.new()
+	q.set_model(Quests.journal(st, st.actors[1]))
+	q.show_tab("guardians")
+	eq(q.rows_for("guardians").size(), 7, "seven guardians listed")
+	eq(q.list_box.get_child_count(), 7, "seven cards")
+	check(q.tab_buttons["guardians"].text.begins_with("GUARDIANS (7)"), "tab count")
+	var txt: String = ""
+	for c in q.list_box.get_children():
+		txt += _all_text(c)
+	check(txt.contains("Gourdmother") and txt.contains("Drops Mother Seed") and txt.contains("Seed Press"), "each card says what it drops and opens")
+	eq(UiKit.small_buttons(q).size(), 0, "touch sized")
+	q.free()
+
+func _all_text(n: Node) -> String:
+	var t: String = ""
+	if n is Label:
+		t += (n as Label).text + " "
+	for c in n.get_children():
+		t += _all_text(c)
+	return t
+
+func test_the_bag_can_eat_and_drink() -> void:
+	var st: MatchState = _mk()
+	st.actors[1]["inv"]["lfg:item/tonic"] = 2
+	var h := Hud.new()
+	h._ready()
+	_got.clear()
+	_on(h.item_use_requested, "use")
+	h.set_model(HudBinder.model_from_state(st))
+	var btns: Array = []
+	var stack: Array = [h.bag_panel]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Button:
+			btns.append(n)
+		stack.append_array(n.get_children())
+	check(btns.size() >= 2, "usable items get a button (%d)" % btns.size())
+	var texts: Array = btns.map(func(b: Button) -> String: return b.text)
+	check(texts.has("EAT") and texts.has("USE"), "food says EAT, a tonic says USE: %s" % str(texts))
+	for b in btns:
+		(b as Button).pressed.emit()
+	check(_got.size() == btns.size(), "each press is a request")
+	var ids: Array = _got.map(func(g: Array) -> String: return String(g[1]))
+	check(ids.has("lfg:item/ration") and ids.has("lfg:item/tonic"), "for the right items: %s" % str(ids))
+	for g in _got:
+		var c: Dictionary = UiCommands.eat(String(g[1]))
+		check(Rules.COMMAND_TYPES.has(c["type"]) and c["args"]["item"] == g[1], "maps to a real command")
+	eq(UiKit.small_buttons(h.bag_panel).size(), 0, "touch sized")
+	# the real command works with it
+	var before: int = Inv.count(st.actors[1]["inv"], "lfg:item/ration")
+	var r: Dictionary = Rules.apply(st, {"type": &"eat", "actor": 1, "seq": 1, "args": UiCommands.eat("lfg:item/ration")["args"]})
+	check(r["ok"] and Inv.count(st.actors[1]["inv"], "lfg:item/ration") == before - 1, "eat works")
+	h.free()
+
+func test_poi_panel_speaks_guardian_for_arenas() -> void:
+	var st: MatchState = _mk()
+	var a: Dictionary = st.actors[1]
+	var arena: Dictionary = {}
+	for p in st.world["pois"]:
+		if String(p["type"]) == "lfg:poi/arena_ruins":
+			arena = p
+	a["pois_seen"] = [int(arena["id"])]
+	var panel := PoiPanel.new()
+	panel.set_model(Pois.info(st, a, int(arena["id"])))
+	eq(panel.go_btn.text, "WAKE THE GUARDIAN", "before the fight")
+	check(panel.status_label.text.contains("Battle Stew"), "a hint about preparation")
+	a["hex"] = arena["hex"]
+	Rules.apply(st, {"type": &"interact_poi", "actor": 1, "seq": 1, "args": {"poi": arena["id"]}})
+	panel.set_model(Pois.info(st, a, int(arena["id"])))
+	eq(panel.go_btn.text, "THE GUARDIAN IS UP", "mid fight")
+	check(panel.go_btn.disabled and panel.status_label.text.contains("HIT"), "the button waits; the text says what to do")
+	for id in st.actors.keys():
+		if st.actors[id]["kind"] == "enemy":
+			Combat.kill(st, int(id), 1, [])
+	panel.set_model(Pois.info(st, a, int(arena["id"])))
+	eq(panel.go_btn.text, "CLAIM THE SPOILS", "after the fight")
+	check(not panel.go_btn.disabled, "enabled")
+	panel.free()

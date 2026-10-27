@@ -57,16 +57,21 @@ func _run() -> void:
 	await _shot("03_purge_card")
 	stage.panels.tutorial.card.visible = false
 	# guardian arenas: one shot each, boss standing at its gate
+	a["max_hp"] = 99999
+	a["hp"] = 99999
+	stage.panels.close_all()
 	var idx: int = 4
 	for biome in ["meadow", "ruins", "fungal_grove", "bog", "salt_flats", "highlands", "shore"]:
 		var arena: Dictionary = {}
 		for p in st.world["pois"]:
 			if String(p["type"]) == "lfg:poi/arena_" + biome:
 				arena = p
-		var at: Vector2i = arena["hex"] + HexGrid.DIRS[3] * 3
+		var at: Vector2i = arena["hex"] + HexGrid.DIRS[3]
 		a["hex"] = at
 		_tp(at)
-		(a["pois_seen"] as Array).append(int(arena["id"])) if a.has("pois_seen") else a.set("pois_seen", [int(arena["id"])])
+		if not a.has("pois_seen"):
+			a["pois_seen"] = []
+		(a["pois_seen"] as Array).append(int(arena["id"]))
 		stage.pois.show_all = true
 		stage._sync_pois(st)
 		# summon the boss (a real interact_poi), then show one telegraph
@@ -77,19 +82,21 @@ func _run() -> void:
 		stage.set_hud_model(HudBinder.model_from_state(st))
 		stage.actors.refresh()
 		stage.cam.yaw = 0.0
+		stage.cam.distance = 42.0
+		stage.cam.snap()
 		var evs: Array = []
-		for t in range(30):
+		for t in range(14):
 			evs.append_array(Rules.tick(st, 0.1))
+		print("tick ok ", biome, " events ", evs.size())
 		stage.on_events(evs, st)
 		stage._update_ui()
-		await _frames(30)
+		await _frames(6)
 		await _shot("%02d_guardian_%s" % [idx, biome])
 		idx += 1
 		for id in st.actors.keys():
 			if st.actors[id]["kind"] == "enemy":
 				st.actors[id]["alive"] = false
 		stage.actors.refresh()
-	get_root().get_child(0).queue_free()
 	quit(0)
 
 func _init() -> void:

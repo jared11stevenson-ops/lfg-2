@@ -65,11 +65,23 @@ func set_model(m: Dictionary) -> void:
 	go_btn.visible = not picks
 	go_btn.disabled = not avail
 	go_btn.text = {"offering": "LEAVE THE OFFERING", "effort": "PRY IT OPEN", "guard": "CLEAR IT" if guards == 0 else "FIGHT (%d left)" % guards}.get(kind, "TRY")
+	var arena: bool = bool(m.get("arena", false))
+	if arena:      # region guardian: wake it, fight it with the usual HIT button, then come back and claim
+		if guards > 0:
+			go_btn.text = "THE GUARDIAN IS UP"
+			go_btn.disabled = true
+		elif bool(m.get("summoned", false)):
+			go_btn.text = "CLAIM THE SPOILS"
+		else:
+			go_btn.text = "WAKE THE GUARDIAN"
 	if not avail:
 		status_label.text = "Spent for this week. It returns when the week turns."
 		status_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 	else:
 		status_label.text = "Progress: %d" % int(m.get("prog", 0)) if (kind == "lamps" or kind == "sequence") else ("Something stirs inside." if guards > 0 else "A reward waits here.")
+		if arena:
+			status_label.text = ("Fight it with HIT. Step out of the red ground when it winds up." if guards > 0 else
+				("It is down. Claim what it guarded." if bool(m.get("summoned", false)) else "Bring tonics. A Battle Stew and a Bark Salve (Alembic) make it much easier."))
 		status_label.add_theme_color_override("font_color", UiStyle.GOOD)
 
 static func _lbl(text: String, size: int, color: Color = UiStyle.TEXT) -> Label:

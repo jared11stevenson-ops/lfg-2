@@ -43,6 +43,13 @@ static func interact_poi(poi_id: int, pick: int = -1) -> Dictionary:
 		args["pick"] = pick
 	return {"type": &"interact_poi", "args": args}
 
+## Eat a ration / food, or drink a tonic / boon (the bag's EAT and USE buttons).
+static func eat(item_id: String, qty: int = 1) -> Dictionary:
+	var args: Dictionary = {"item": item_id}
+	if qty > 1:
+		args["qty"] = qty
+	return {"type": &"eat", "args": args}
+
 static func adopt_companion(kind: String) -> Dictionary:
 	return {"type": &"adopt_companion", "args": {"companion": kind}}
 

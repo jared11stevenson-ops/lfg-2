@@ -72,6 +72,8 @@ func _init() -> void:
 	quests = QuestPanel.new()
 	companions = CompanionPanel.new()
 	poi = PoiPanel.new()
+	tutorial = TutorialOverlay.new()      # added before the panels so any open panel draws over the guide
+	root.add_child(tutorial)
 	for p in [build, craft, trade, policy, holdings, quests, companions, poi]:
 		root.add_child(p)
 		(p as PanelBase).closed.connect(_on_panel_closed)
@@ -92,8 +94,6 @@ func _init() -> void:
 	companions.feed_requested.connect(func(k: String, i: String) -> void: companion_feed_requested.emit(k, i))
 	companions.assign_requested.connect(func(k: String, m: String, h: int) -> void: companion_assign_requested.emit(k, m, h))
 	companions.dismiss_requested.connect(func(k: String) -> void: companion_dismiss_requested.emit(k))
-	tutorial = TutorialOverlay.new()
-	root.add_child(tutorial)
 	tutorial.accept_requested.connect(func(q: String) -> void: quest_accept_requested.emit(q))
 	tutorial.ack_requested.connect(func(t: String) -> void: tutorial_ack_requested.emit(t))
 	tutorial.highlight_changed.connect(_on_highlight)

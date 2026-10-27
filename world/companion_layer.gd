@@ -6,6 +6,7 @@ const FOLLOW_GAP := 2.6
 const FOLLOW_SPEED := 8.5
 const TELEPORT_DIST := 40.0
 const POST_RANGE := 110.0
+const VIEW_SCALE := 1.45      # the camera sits 46 m up: a 1 m creature must still read on a phone
 var world: WorldData
 var player: Node3D
 var state: Object
@@ -83,7 +84,7 @@ func sync() -> void:
 		e["mode"] = mode
 		e["idx"] = idx
 		e["fed"] = bool(c.get("fed", false))
-		(e["rig"] as CharacterRig).scale = Vector3.ONE * (1.0 if bool(c.get("fed", false)) else 0.82)
+		(e["rig"] as CharacterRig).scale = Vector3.ONE * VIEW_SCALE * (1.0 if bool(c.get("fed", false)) else 0.82)
 	for k in rigs.keys():
 		if not want.has(k):
 			(rigs[k]["rig"] as Node).queue_free()

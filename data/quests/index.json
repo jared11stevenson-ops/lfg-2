@@ -3,6 +3,7 @@
  "files": [
   "tutorial.json",
   "general.json",
+  "wild.json",
   "judd.json",
   "mira.json",
   "bram.json",

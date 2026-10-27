@@ -1,0 +1,60 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/wild_creature",
+   "class": "",
+   "line": "wild",
+   "chapter": 1,
+   "title": "A Creature at Heel",
+   "intro": "Out past the fence the haunts keep small company: a farm that remembers sporebeans, a shrine that likes glowfruit. Offer food, and something may follow you home. Nothing here asks you to fight.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "adopt",
+     "text": "Make a companion: offer food at a haunt (see PETS, TO MEET).",
+     "companion": "any",
+     "qty": 1,
+     "prompt": "Open PETS, then TO MEET: each creature says where and with what.",
+     "ui": "journal"
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/sporebean": 3,
+     "lfg:item/glowfruit": 3
+    },
+    "text": "A little food for your new companion"
+   }
+  },
+  {
+   "id": "lfg:quest/wild_guardian",
+   "class": "",
+   "line": "wild",
+   "chapter": 2,
+   "title": "Wake the Hollow",
+   "intro": "Every region has a guardian asleep in a ring of stones. Beat one and the next tier of making opens. Bring tonics, a battle stew and a bark salve; step out of the marked ground when it winds up.",
+   "requires": [
+    "lfg:quest/wild_creature"
+   ],
+   "steps": [
+    {
+     "kind": "guardian",
+     "text": "Defeat any region guardian (see the GUARDIANS tab).",
+     "guardian": "any",
+     "qty": 1,
+     "prompt": "Walk to a guardian arena, ring the bell, dodge the marked ground, then claim again after the fight.",
+     "ui": "journal"
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/tonic": 3,
+     "lfg:item/coin": 20
+    },
+    "title": "Guardian Breaker",
+    "text": "Three tonics and a purse"
+   }
+  }
+ ]
+}

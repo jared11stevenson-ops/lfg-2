@@ -18,8 +18,8 @@ func _init() -> void:
 	anchor_right = 0.5
 	offset_left = -WIDTH * 0.5
 	offset_right = WIDTH * 0.5
-	offset_top = 236
-	offset_bottom = 330
+	offset_top = 262
+	offset_bottom = 356
 	name_label = UiStyle.label("", 24, UiStyle.WARN)
 	name_label.position = Vector2(0, 0)
 	add_child(name_label)

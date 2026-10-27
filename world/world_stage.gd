@@ -7,6 +7,7 @@ signal ready_to_play
 signal interact_requested(kind: StringName, data: Dictionary)
 signal action_requested
 signal ability_requested(ability_id: String)
+signal item_use_requested(item_id: String)      # the bag's EAT / USE button -> UiCommands.eat(item_id)
 signal placement_checked(result: Dictionary) # {valid, reason, holding_id} while a building ghost is out
 
 var world: WorldData
@@ -102,6 +103,7 @@ func _init() -> void:
 		player.play_attack()
 		action_requested.emit())
 	combat_hud.ability_pressed.connect(func(id: String) -> void: ability_requested.emit(id))
+	hud.item_use_requested.connect(func(id: String) -> void: item_use_requested.emit(id))
 	actors.player_hurt.connect(combat_hud.flash_hurt)
 	panels.placement_started.connect(begin_placement)
 	panels.placement_ended.connect(end_placement)

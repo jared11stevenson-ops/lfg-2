@@ -34,8 +34,8 @@ func _init() -> void:
 	banner.anchor_right = 0.5
 	banner.offset_left = -330
 	banner.offset_right = 330
-	banner.offset_top = 92
-	banner.offset_bottom = 230
+	banner.offset_top = 118      # just under the phase banner
+	banner.offset_bottom = 256
 	banner.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.04, 0.16, 0.9), UiStyle.GOOD, 16, 3))
 	add_child(banner)
 	var v := VBoxContainer.new()

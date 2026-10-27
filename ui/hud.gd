@@ -4,6 +4,8 @@ extends CanvasLayer
 ## model keys: day:int, time_of_day:float 0..1, phase:StringName, hint:String, rations:int, rations_per_day:int,
 ##   class_label:String, hp:float, hp_max:float, inventory:Array[{id,name,count,color}], prompt:String
 signal bag_toggled(open: bool)
+## The bag's EAT / USE button for food, tonics and boons. The lead maps it to UiCommands.eat(item). (Pass 4: before this the bag was read-only and `eat` had no UI.)
+signal item_use_requested(item_id: String)
 
 var model: Dictionary = {}
 var bag_open: bool = false
@@ -20,6 +22,8 @@ var rations_label: Label
 var rations_sub: Label
 var tracker_chip: PanelContainer
 var tracker_label: Label
+var pets_chip: PanelContainer
+var pets_label: Label
 var prompt_chip: PanelContainer
 var prompt_label: Label
 var hotbar: HBoxContainer
@@ -62,6 +66,7 @@ func _build() -> void:
 	_build_class_chip()
 	_build_rations()
 	_build_tracker()
+	_build_pets_chip()
 	_build_prompt()
 	_build_hotbar()
 	_build_bag()
@@ -147,6 +152,21 @@ func _build_rations() -> void:
 	rations_sub = UiStyle.label("", 16)
 	rations_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	v.add_child(rations_sub)
+
+## Companion line under the rations chip ("Pets: Mossbun, Dewsnail (hungry)"). Hidden when you have none.
+func _build_pets_chip() -> void:
+	pets_chip = PanelContainer.new()
+	pets_chip.name = "PetsChip"
+	pets_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pets_chip.position = Vector2(1000, 98)
+	pets_chip.custom_minimum_size = Vector2(260, 0)
+	pets_chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.10, 0.06, 0.18, 0.7), UiStyle.PURPLE, 12, 2))
+	pets_chip.visible = false
+	root.add_child(pets_chip)
+	pets_label = UiStyle.label("", 17, UiStyle.TEXT, false)
+	pets_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pets_label.custom_minimum_size = Vector2(240, 0)
+	pets_chip.add_child(pets_label)
 
 ## Quest tracker: the active quest's current step, under the class chip. Hidden when there is nothing to track.
 func _build_tracker() -> void:
@@ -237,10 +257,10 @@ func _build_bag() -> void:
 	bag_panel.anchor_right = 0.5
 	bag_panel.anchor_top = 0.5
 	bag_panel.anchor_bottom = 0.5
-	bag_panel.offset_left = -300
-	bag_panel.offset_right = 300
-	bag_panel.offset_top = -150
-	bag_panel.offset_bottom = 150
+	bag_panel.offset_left = -330
+	bag_panel.offset_right = 330
+	bag_panel.offset_top = -210
+	bag_panel.offset_bottom = 210
 	bag_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.04, 0.16, 0.93), UiStyle.PANEL_EDGE, 20, 3))
 	bag_panel.visible = false
 	root.add_child(bag_panel)
@@ -248,12 +268,14 @@ func _build_bag() -> void:
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bag_panel.add_child(v)
 	v.add_child(UiStyle.label("INVENTORY", 28, UiStyle.WARN))
+	var bag_scroll: ScrollContainer = UiKit.scroll(300)
+	v.add_child(bag_scroll)
 	bag_grid = GridContainer.new()
-	bag_grid.columns = 2
-	bag_grid.add_theme_constant_override("h_separation", 40)
+	bag_grid.columns = 3
+	bag_grid.add_theme_constant_override("h_separation", 28)
 	bag_grid.add_theme_constant_override("v_separation", 4)
 	bag_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_child(bag_grid)
+	bag_scroll.add_child(bag_grid)
 
 func toggle_bag() -> void:
 	set_bag_open(not bag_open)
@@ -303,6 +325,9 @@ func set_model(m: Dictionary) -> void:
 	var trk: String = String(m.get("quest_tracker", ""))
 	tracker_chip.visible = trk != ""
 	tracker_label.text = trk
+	var pets: String = String(m.get("companions", ""))
+	pets_chip.visible = pets != ""
+	pets_label.text = "Pets: " + pets
 	var prompt: String = m.get("prompt", "")
 	prompt_chip.visible = prompt != ""
 	prompt_label.text = prompt
@@ -345,8 +370,20 @@ func _refresh_inventory(inv: Array) -> void:
 		sw2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(sw2)
 		row.add_child(UiStyle.label("  %s" % String(it.get("name", "?")), 22))
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bag_grid.add_child(row)
 		bag_grid.add_child(UiStyle.label("x%d" % int(it.get("count", 1)), 22, UiStyle.WARN))
+		var idef: Dictionary = Content.item(String(it.get("id", "")))
+		if idef.has("food") or idef.has("heal") or idef.has("buff"):
+			var ub: Button = UiKit.button("EAT" if idef.has("food") else "USE", UiStyle.GOOD, Vector2(100, 56), 20)
+			var iid: String = String(it.get("id", ""))
+			ub.pressed.connect(func() -> void: item_use_requested.emit(iid))
+			bag_grid.add_child(ub)
+		else:
+			var sp := Control.new()
+			sp.custom_minimum_size = Vector2(100, 0)
+			sp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			bag_grid.add_child(sp)
 
 func toast(text: String, color: Color = UiStyle.WARN, seconds: float = 3.0) -> void:
 	if toast_box == null:
