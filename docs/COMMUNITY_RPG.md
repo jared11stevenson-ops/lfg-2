@@ -3,16 +3,17 @@
 ## Tone
 PEACE is warm, busy and social: a giant community RPG. The PURGE is scary, unwanted and arguably unnecessary, but the rewards (see INCENTIVES.md) are large enough that almost everyone is tempted. Personal tension is the point: the gentlest player might kill once for an edge; the fiercest player might refuse to hurt a friend.
 
-## Friendship is emergent, never a mechanic (owner correction)
-- There is NO bond/friendship meter, no relationship levels, no friendship perks, no reputation tags, no betrayal penalty system, and nothing rewards "being friends". Friendship is not a game loop.
-- Relationships form naturally from ordinary play: trading, questing together, sharing a region, building near each other, defending together. Players (and AI characters through their ordinary behaviour) decide whom to trust.
-- The moral tension comes from the Purge incentives alone: betraying someone pays the same deed points as any other kill; the only costs are the natural, in-world ones (they stop trading with you, they or their allies may retaliate, you lose a safe neighbour). The game never scores or punishes the relationship itself.
-- Non-lethal options exist as ordinary actions, not relationship tools: capture, ransom, truce terms (lower payout than a kill, still earn some deeds). They give the reluctant a middle path and the ruthless a flexible tool.
-- Tests: pacifist, ruthless and spare routes to deed points all viable and none strictly dominant; no code path reads or writes a friendship value.
+## Friendship and trade are optional, emergent by-products (owner correction)
+- There is NO bond/friendship meter, relationship levels, friendship perks, reputation tags or betrayal-penalty system. Friendship is not a game loop and is never rewarded or scored.
+- **Nothing required depends on trade or other people.** Every quest, recipe, building, rank and tree node must be completable by a self-sufficient solo player. Trade, NPC dealings and co-op are shortcuts and conveniences only; NPC markets exist so a loner is never stuck.
+- Peacetime is built to be fun and rewarding in itself (farming, building, exploring, quests, POIs, crafting). Relationships, if they form, are a natural result of people enjoying that shared space, not something the rules ask for.
+- The moral tension comes from the Purge incentives alone: a betrayal earns the same deed points as any kill; the only costs are plain in-world ones (a neighbour is gone, they or their allies may retaliate). The game never measures or punishes the relationship.
+- Non-lethal options exist as ordinary actions, not relationship tools: capture, ransom, truce terms (lower payout than a kill, still some deeds). They give the reluctant a middle path.
+- Tests: solo-completability of every quest/recipe/building/node with zero trades and zero other players; pacifist, ruthless and spare routes to deed points all viable and none strictly dominant; no code path reads or writes a friendship value.
 
 ## Class quest lines (14, original)
 - ~6–8 steps each, each ending in a signature unlock (a recipe, an ability upgrade, a building).
-- **Converging quests:** at fixed steps 2–3 class lines need each other (farmer needs miner ore, cook needs farmer and forager; online they involve real players, solo they involve AI-run characters of those classes through ordinary quest dialogue and trades, no relationship meter).
+- **Converging quests:** at fixed steps 2–3 class lines need each other (a class line may reference another class's themes but is always completable solo through gathering and crafting; cooperating only speeds or enriches it).
 - Data in data/quests/*.json, validated by tests (no unreachable step, every item obtainable, ids namespaced).
 
 ## Points of interest
