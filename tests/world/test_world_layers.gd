@@ -48,24 +48,22 @@ func test_terrain_tint_reduced_for_roads() -> void:
 
 func test_every_building_has_a_model() -> void:
 	var ids: Array[String] = BuildingModels.all_ids()
-	check(ids.size() >= 12, "data lists buildings (%d)" % ids.size())
+	check(ids.size() >= 29, "data lists buildings (%d)" % ids.size())
 	var tris: Dictionary = {}
-	var pending: int = 0
 	for id in ids:
-		if bool(Content.building(id).get("model_pending", false)):
-			pending += 1      # pass-2 rank buildings (data/buildings.json "model_pending"): the world stream owes them a dedicated mesh; they use the fallback hut until then
-			continue
+		check(not bool(Content.building(id).get("model_pending", false)), "%s: the model_pending flag is gone" % id)
 		var m: ArrayMesh = BuildingModels.mesh_for(id)
 		check(m.get_surface_count() == 1 and m.get_aabb().size.y > 1.5, "%s has a model" % id)
 		var a: AABB = BuildingModels.footprint(id)
 		check(a.size.x < 9.0 and a.size.z < 9.0, "%s footprint fits a hex site (%.1f x %.1f)" % [id, a.size.x, a.size.z])
 		check(BuildingModels.has_dedicated_model(id), "%s has a dedicated (non-fallback) model" % id)
-		tris[m.get_surface_count() * 100000 + (m.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()] = id
-	eq(tris.size(), ids.size() - pending, "no two buildings share a mesh")
-	check(pending <= 3, "at most the three pass-2 buildings still lack a model")
-	for id in ids:
-		if bool(Content.building(id).get("model_pending", false)):
-			check(BuildingModels.mesh_for(id).get_aabb().size.y > 1.0, "%s renders with the fallback hut" % id)
+		var arrs: Array = m.surface_get_arrays(0)
+		var sig: int = hash(arrs[Mesh.ARRAY_VERTEX]) ^ hash(arrs[Mesh.ARRAY_COLOR])
+		check(not tris.has(sig), "%s does not share a mesh with %s" % [id, tris.get(sig, "")])
+		tris[sig] = id
+	eq(tris.size(), ids.size(), "no two buildings share a mesh")
+	for id in ["lfg:building/shrine", "lfg:building/greenhouse", "lfg:building/forge"]:
+		check(BuildingModels.has_dedicated_model(id), "%s now has its own mesh" % id)
 	var fb: ArrayMesh = BuildingModels.mesh_for("lfg:building/not_in_data")
 	check(fb.get_aabb().size.y > 1.0, "unknown ids fall back to a generic hut")
 

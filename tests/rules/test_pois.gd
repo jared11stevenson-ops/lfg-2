@@ -10,6 +10,15 @@ func _poi_of(s: MatchState, type: String, nth: int = 0) -> Dictionary:
 			n += 1
 	return {}
 
+func _of(events: Array, t: String) -> Dictionary:
+	for e in events:
+		if String(e["type"]) == t:
+			return e
+	return {}
+
+func _claimed(events: Array) -> Dictionary:
+	return _of(events, "poi_claimed")
+
 func _go(s: MatchState, p: Dictionary) -> void:
 	s.actors[1]["hex"] = p["hex"]
 
@@ -99,8 +108,8 @@ func test_offering_the_derelict_farm_and_weekly_respawn() -> void:
 	a["inv"]["lfg:item/glowfruit_seed"] = 1
 	var r: Dictionary = cmd(s, "interact_poi", {"poi": p["id"]})
 	check(r["ok"], "claim: %s" % r["error"])
-	var ev: Dictionary = r["events"][0]
-	eq(String(ev["type"]), "poi_claimed", "poi_claimed")
+	var ev: Dictionary = _claimed(r["events"])
+	eq(String(ev.get("type", "")), "poi_claimed", "poi_claimed")
 	var loot: Dictionary = ev["items"]
 	check(loot.has("lfg:item/kiln_clay") and loot.has("lfg:item/reed_fibre"), "T3 kiln clay and T2 reed fibre: %s" % str(loot))
 	eq(cmd(s, "interact_poi", {"poi": p["id"]})["error"], "already_claimed", "once per week")
@@ -108,7 +117,7 @@ func test_offering_the_derelict_farm_and_weekly_respawn() -> void:
 	a["inv"]["lfg:item/glowfruit_seed"] = 1
 	r = cmd(s, "interact_poi", {"poi": p["id"]})
 	check(r["ok"], "claimable again next week: %s" % r["error"])
-	var loot2: Dictionary = r["events"][0]["items"]
+	var loot2: Dictionary = _claimed(r["events"])["items"]
 	check(Pois.roll_loot(s, p, 1) == loot2, "the roll is a pure function of (seed, poi, week)")
 
 func test_loot_is_in_range_and_deterministic() -> void:
@@ -156,7 +165,7 @@ func test_sequence_vault_wrong_plate_hurts_and_resets() -> void:
 	cmd(s, "interact_poi", {"poi": p["id"], "pick": order[1]})
 	r = cmd(s, "interact_poi", {"poi": p["id"], "pick": order[2]})
 	check(count_type(r["events"], "poi_claimed") == 1, "vault opens")
-	check(r["events"][0]["items"].has("lfg:item/ruin_glass"), "ruin glass (T3)")
+	check(_claimed(r["events"])["items"].has("lfg:item/ruin_glass"), "ruin glass (T3)")
 
 func test_effort_wreck_spends_energy() -> void:
 	var s: MatchState = quiet()
@@ -168,7 +177,7 @@ func test_effort_wreck_spends_energy() -> void:
 	var r: Dictionary = cmd(s, "interact_poi", {"poi": p["id"]})
 	check(r["ok"], "claim: %s" % r["error"])
 	eq(float(s.actors[1]["energy"]), 30.0, "20 energy spent")
-	check(r["events"][0]["items"].has("lfg:item/bog_iron"), "bog iron (T2) from a wreck")
+	check(_claimed(r["events"])["items"].has("lfg:item/bog_iron"), "bog iron (T2) from a wreck")
 
 func test_guard_fight_then_claim() -> void:
 	var s: MatchState = quiet()
@@ -176,7 +185,7 @@ func test_guard_fight_then_claim() -> void:
 	_go(s, p)
 	var r: Dictionary = cmd(s, "interact_poi", {"poi": p["id"]})
 	check(r["ok"] and count_type(r["events"], "poi_guarded") == 1, "the first visit wakes the guards: %s" % r["error"])
-	var guards: Array = r["events"][0]["guards"]
+	var guards: Array = _of(r["events"], "poi_guarded")["guards"]
 	eq(guards.size(), 2, "two sporelings")
 	eq(cmd(s, "interact_poi", {"poi": p["id"]})["error"], "guard_alive", "no looting past live guards")
 	check(not Pois.info(s, s.actors[1], int(p["id"]))["available"] == false, "still unclaimed")
@@ -184,11 +193,11 @@ func test_guard_fight_then_claim() -> void:
 		Combat.kill(s, int(g), 1, [])
 	r = cmd(s, "interact_poi", {"poi": p["id"]})
 	check(r["ok"] and count_type(r["events"], "poi_claimed") == 1, "claimed after the fight: %s" % r["error"])
-	check(r["events"][0]["items"].has("lfg:item/spore_silk"), "spore silk (T3) from a cave")
+	check(_claimed(r["events"])["items"].has("lfg:item/spore_silk"), "spore silk (T3) from a cave")
 	var salt: Dictionary = _poi_of(s, "lfg:poi/salt_spire")
 	_go(s, salt)
 	r = cmd(s, "interact_poi", {"poi": salt["id"]})
-	eq(r["events"][0]["guards"].size(), 1, "a thorn slinger guards the spire")
+	eq(_of(r["events"], "poi_guarded")["guards"].size(), 1, "a thorn slinger guards the spire")
 
 func test_hermit_hut_trade_with_a_hermit_is_an_offering_not_a_player_trade() -> void:
 	var s: MatchState = quiet()
@@ -198,7 +207,7 @@ func test_hermit_hut_trade_with_a_hermit_is_an_offering_not_a_player_trade() -> 
 	var r: Dictionary = cmd(s, "interact_poi", {"poi": p["id"]})
 	check(r["ok"], "hermit: %s" % r["error"])
 	eq(Inv.count(s.actors[1]["inv"], "lfg:item/ration"), rations - 1, "one ration left on the step")
-	check(r["events"][0]["items"].has("lfg:item/bog_iron"), "bog iron")
+	check(_claimed(r["events"])["items"].has("lfg:item/bog_iron"), "bog iron")
 
 func test_purge_closes_pois_and_failed_interactions_mutate_nothing() -> void:
 	var s: MatchState = quiet()

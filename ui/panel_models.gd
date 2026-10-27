@@ -20,6 +20,10 @@ const REASONS: Dictionary = {
 	"not_near_own_holding": "Craft near one of your holdings",
 	"too_far": "Walk up to the merchant",
 	"market_closed": "The market is closed during the Purge",
+	"locked_building": "Learn it from a class questline first",
+	"locked_recipe": "Learn it from a class questline first",
+	"needs_station": "Needs a crafting station at your holding",
+	"rank_required": "Needs a higher Standing rank",
 }
 
 static func reason_text(r: String) -> String:
@@ -121,7 +125,9 @@ static func build_model(state: Object, actor_id: int = -1) -> Dictionary:
 		var cost: Array = bundle_entries(cost_d, inv)
 		var afford: bool = Inv.has_all(inv, cost_d)
 		var reason: String = ""
-		if near < 0:
+		if not Quests.unlocked(a, String(b.get("requires_unlock", ""))):
+			reason = "locked_building"
+		elif near < 0:
 			reason = "no_own_holding_nearby"
 		elif up and not bl.has(String(b["upgrade_of"])):
 			reason = "needs_base_building"
@@ -160,7 +166,28 @@ static func _building_info(b: Dictionary) -> String:
 		if w.has("batches"):
 			bits.append("Cooks %d ration batches/day" % int(w["batches"]))
 		if bool(w.get("waters", false)):
-			bits.append("Waters nearby plots")
+			bits.append("Waters nearby plots" if int(w.get("waters_range", 0)) == 0 else "Waters plots up to %d hexes away" % int(w["waters_range"]))
+		if w.has("inputs"):
+			var i: Array[String] = []
+			for k in (w["inputs"] as Dictionary).keys():
+				i.append("%s x%d" % [UiKit.item_name(String(k)), int(w["inputs"][k])])
+			bits.append("uses " + ", ".join(i) + " a day")
+	if bool(b.get("station", false)):
+		bits.append("Crafting station")
+	if b.has("yield_bonus"):
+		bits.append("Harvest +%d" % int(b["yield_bonus"]))
+	if b.has("garrison_cap"):
+		bits.append("Garrison cap +%d" % int(b["garrison_cap"]))
+	if b.has("standing_bonus"):
+		bits.append("Standing +%d" % int(b["standing_bonus"]))
+	if b.has("spoil_cut"):
+		bits.append("Spoilage halved")
+	if b.has("heal_leader"):
+		bits.append("Heals the leader %d%% each dawn" % int(round(float(b["heal_leader"]) * 100.0)))
+	if b.has("levy_cut"):
+		bits.append("Purge Levy -%d%%" % int(round(float(b["levy_cut"]) * 100.0)))
+	if String(b.get("requires_unlock", "")) != "":
+		bits.append("Questline reward")
 	return ", ".join(bits)
 
 static func craft_model(state: Object, actor_id: int = -1) -> Dictionary:
@@ -174,6 +201,9 @@ static func craft_model(state: Object, actor_id: int = -1) -> Dictionary:
 		var r: Dictionary = Content.recipe(String(id))
 		var tag: String = String(r.get("requires_tag", ""))
 		var class_ok: bool = tag == "" or int(Combat.class_mod(a, tag, 0)) >= 1
+		var unlocked: bool = Quests.unlocked(a, String(r.get("requires_unlock", "")))
+		var near_h: int = CmdUtil.nearest_owned_holding(state as MatchState, int(a.get("faction", 0)), a.get("hex", Vector2i.ZERO), 3)
+		var station_ok: bool = String(r.get("station", "")) == "" or (near_h != -1 and (state.get("holdings")[near_h]["buildings"] as Array).has(String(r["station"])))
 		var inputs: Array = bundle_entries(r["inputs"], inv)
 		var maxq: int = 99
 		for e in inputs:
@@ -181,8 +211,12 @@ static func craft_model(state: Object, actor_id: int = -1) -> Dictionary:
 		var reason: String = ""
 		if not class_ok:
 			reason = "class_required"
+		elif not unlocked:
+			reason = "locked_recipe"
 		elif not near:
 			reason = "not_near_own_holding"
+		elif not station_ok:
+			reason = "needs_station"
 		elif maxq < 1:
 			reason = "insufficient_items"
 		var outs: Array = []
