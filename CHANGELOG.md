@@ -13,3 +13,9 @@
 - Menu, 14-class select, end screens; distinct class/enemy/NPC models; build/craft/trade/policy/holdings panels; combat FX, ability bar, danger indicator; roads, building/crop models.
 - Sessions (local/online), autosave/continue + permadeath tombstone, cosmetic meta store; fog-filtered snapshots, token expiry, Purge disconnect lock; multi-process shared-world test.
 - Grand Simulation #0 harness and report; docs for incentives, skill trees, Total Conquest.
+
+## v0.3.0 — Pass 2
+- Total Conquest is the only win (Dominion/Crowned removed); Prosperity score; any leader's death eliminates its faction; rival-conquest game-over.
+- Standing/ranks (0-5, no combat stat), deeds with decay, Mark + bounty, Purge Levy, upkeep/stability, thin crown; Purge-only purgebloom/ashmarrow; escalating waves; scout/escort/truce/ransom/sabotage commands.
+- 14 skill trees (15 nodes each) fed only by Purge deeds; Standing and Skills panels wired (RANK button, P/K keys).
+- Class-aware AI leaders; passive personas earn deeds. See docs/SIM_REPORT_pass2.md.

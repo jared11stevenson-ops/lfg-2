@@ -30,3 +30,8 @@ Known gaps: player-to-rules movement is hex-step sync (rules actor lags visual p
 Journey (xvfb, software GL): plant x4 via session commands, build/holdings panels, class ability, Warning and Purge phases; no script errors. Captures in art/captures/integrated/.
 Not verified: human play feel, touch on a real device, Android, real online players, hosting. Stream reports for pass 1 never arrived; contents verified from commits/tests only.
 Still open: Dominion/Crowned wins still in rules (replace with Total Conquest), Standing/rank and skill trees unbuilt, AI factions class-agnostic, no match convergence (see docs/SIM_REPORT_0.md).
+
+## Pass 2 integrated run (lead)
+42 suites, 378 tests, 19086 checks, 0 failures. Journey (software GL) captured Standing and Skill panels with no script errors.
+Sim (agent-run, 24 seeds x 336 days): territory still changes after week 24 in 24/24; non-raider personas earn deeds; Total Conquest 0/24; Vex eliminated in 100% of matches (class balance far outside band); several abilities never used by bots. See docs/SIM_REPORT_pass2.md.
+Missing: meshes for shrine/greenhouse/forge (fallback hut), HUD standing strip (toast at WARNING only), scout/escort/truce/ransom/sabotage buttons.

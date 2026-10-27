@@ -74,7 +74,7 @@ func _menus() -> void:
 	Content.class_def("lfg:class/halo")["implemented"] = true
 	flow.show_game_over({"reason": "leader_died", "day": 9, "class_label": "Judd - Farmer/Monk", "holdings": 3, "total_holdings": 25})
 	await _save("04_game_over_permadeath")
-	flow.show_victory({"kind": "dominion", "day": 31, "class_label": "Oren - Cook/Medic", "holdings": 16, "total_holdings": 25})
+	flow.show_victory({"kind": "total_conquest", "day": 31, "class_label": "Oren - Cook/Medic", "holdings": 16, "total_holdings": 25})
 	await _save("05_victory")
 	flow.queue_free()
 	await process_frame

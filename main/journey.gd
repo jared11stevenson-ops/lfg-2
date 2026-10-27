@@ -26,6 +26,12 @@ func run(main: Node) -> void:
 	m.stage.panels.open(&"holdings")
 	await _shot("03_holding_panel")
 	m.stage.panels.close_all()
+	m._open_standing()
+	await _shot("03b_standing_panel")
+	m.standing_panel.visible = false
+	m._open_skills()
+	await _shot("03c_skill_tree")
+	m.skill_panel.visible = false
 	var ab: Dictionary = m.cmd(&"use_ability", {"ability": "lfg:ability/guard"})
 	log.append("ability guard -> %s %s" % [ab.get("ok"), ab.get("error")])
 	var t: float = 0.0

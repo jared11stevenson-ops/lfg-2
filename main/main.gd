@@ -58,9 +58,48 @@ func _start(s: GameSession) -> void:
 	p.trade_requested.connect(func(h: int, sd: String, it: String, q: int) -> void: _send(UiCommands.trade(h, sd, it, q), "Traded"))
 	p.policy_requested.connect(func(k: String, v: String, h: int) -> void: _send(UiCommands.policy(k, v, h), "Policy set"))
 	p.demolish_requested.connect(func(h: int, b: String) -> void: _send(UiCommands.demolish(h, b), "Demolished"))
+	_build_progress_ui()
 	await stage.start_from_state(Game.state)
 	stage.player.hex_changed.connect(_on_hex)
 	stage.hud.toast("Feed your people. Survive the Purge.", UiStyle.GOOD, 5.0)
+
+var standing_panel: StandingPanel
+var skill_panel: SkillTreePanel
+var _prog_layer: CanvasLayer
+var _model_t: float = 0.0
+
+func _build_progress_ui() -> void:
+	if _prog_layer != null:
+		_prog_layer.queue_free()
+	_prog_layer = CanvasLayer.new()
+	_prog_layer.layer = 14
+	add_child(_prog_layer)
+	standing_panel = StandingPanel.new()
+	skill_panel = SkillTreePanel.new()
+	_prog_layer.add_child(standing_panel)
+	_prog_layer.add_child(skill_panel)
+	standing_panel.skill_tree_requested.connect(func() -> void:
+		standing_panel.visible = false
+		_open_skills())
+	skill_panel.unlock_requested.connect(func(node_id: String) -> void:
+		_report(Game.command(&"unlock_skill", {"node": node_id}), "Skill learned")
+		skill_panel.set_model(Skills.panel_model(Game.state.actors[Game.state.player_id])))
+	var box := VBoxContainer.new()
+	box.position = Vector2(20, 420)
+	box.add_theme_constant_override("separation", 6)
+	_prog_layer.add_child(box)
+	var b1: Button = UiKit.button("RANK", UiStyle.PURPLE, Vector2(132, 48), 18)
+	b1.pressed.connect(_open_standing)
+	box.add_child(b1)
+
+func _open_standing() -> void:
+	skill_panel.visible = false
+	standing_panel.set_model(Standing.hud_model(Game.state, 0))
+	standing_panel.visible = not standing_panel.visible
+
+func _open_skills() -> void:
+	skill_panel.set_model(Skills.panel_model(Game.state.actors[Game.state.player_id]))
+	skill_panel.visible = true
 
 func _send(c: Dictionary, ok_text: String) -> void:
 	var res: Dictionary = Game.command(c["type"], c["args"])
@@ -119,9 +158,19 @@ func _on_events(events: Array) -> void:
 	if _over:
 		return
 	var st: MatchState = Game.state
+	for e0 in events:
+		if e0.get("type", &"") == &"phase_changed" and e0.get("to", &"") == &"WARNING":
+			var sm: Dictionary = Standing.hud_model(Game.state, 0)
+			var lv: Dictionary = sm.get("levy", {})
+			var mk: Dictionary = sm.get("marked", {})
+			stage.hud.toast("Purge near. %s | Levy: %s rations, %s coin | Marked: %s" % [sm.get("rank_name", ""), lv.get("rations", 0), lv.get("coin", 0), "YOU" if mk.get("is_you", false) else mk.get("name", "-")], UiStyle.WARN, 7.0)
 	var extra: Dictionary = {"day": int(st.clock["day"]), "class_label": stage.hud_model.get("class_label", "")}
 	for e in events:
 		var t: StringName = e.get("type", &"")
+		if t == &"victory" and not bool(e.get("player", false)):
+			_over = true
+			menu.show_game_over(extra.merged({"reason": "rival_conquest"}))
+			return
 		if t == &"match_over" or t == &"victory":
 			_over = true
 			menu.handle_events(events, extra)
@@ -132,6 +181,12 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 	if k != null and k.pressed and not k.echo:
 		match k.physical_keycode:
 			KEY_N: menu.show_menu()
+			KEY_P:
+				if stage != null:
+					_open_standing()
+			KEY_K:
+				if stage != null:
+					_open_skills()
 			KEY_B:
 				if stage != null:
 					stage.panels.toggle(&"build")

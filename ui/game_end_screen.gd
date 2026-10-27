@@ -7,10 +7,10 @@ signal continue_endless_requested
 const REASON_TEXT: Dictionary = {
 	"leader_died": "Your leader has fallen.",
 	"starved_out": "Starved out: no holdings, no rations, no way to farm.",
+	"rival_conquest": "A rival has conquered the entire frontier.",
 }
 const VICTORY_TEXT: Dictionary = {
-	"dominion": "DOMINION - you hold most of the frontier.",
-	"crowned": "CROWNED - you outlasted twelve Purges.",
+	"total_conquest": "TOTAL CONQUEST - every rival is gone and the whole frontier is yours.",
 }
 var kind: StringName = &""
 var title_label: Label
@@ -77,7 +77,7 @@ func show_game_over(info: Dictionary) -> void:
 	primary_btn.text = "NEW MATCH"
 	visible = true
 
-## info: {kind:"dominion"|"crowned", day, class_label, holdings, total_holdings}
+## info: {kind:"total_conquest", day, class_label, holdings, total_holdings}
 func show_victory(info: Dictionary) -> void:
 	kind = &"victory"
 	veil.color = Color(0.05, 0.12, 0.2, 0.78)
