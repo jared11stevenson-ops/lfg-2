@@ -396,3 +396,20 @@ func test_state_survives_a_save_round_trip_with_deeds_and_ranks() -> void:
 	eq(Standing.rank_of(s2, 0), Standing.rank_of(s, 0), "rank persisted")
 	check(absf(Standing.deed_score(s2, s2.factions[0]) - Standing.deed_score(s, s.factions[0])) < 0.001, "same score after load")
 	eq(s2.actors[1]["sp"], s.actors[1]["sp"], "skill points persisted")
+
+func test_a_pre_pass2_save_still_plays() -> void:
+	var s: MatchState = quiet()
+	var d: Dictionary = JSON.parse_string(JSON.stringify(s.to_dict()))
+	for f in d["factions"].values():
+		for k in ["rank", "eff_rank", "deeds", "pcap", "dcount", "scouted", "escorted", "last_deed", "truces", "standing", "prosperity"]:
+			f.erase(k)
+	for h in d["holdings"].values():
+		h.erase("stab")
+	d["sim_acc"] = {}
+	var old: MatchState = MatchState.from_dict(d)
+	old.set_time(7, 0.6)
+	var ev: Array = []
+	check(Standing.record(old, 0, "capture", ev), "deeds work on an old save")
+	tick_all(old, 60.0 * 3.0, 5.0)
+	check(old.factions[0].has("rank") and old.holdings[1].has("stab"), "fields appear at the first dawn")
+	check(not Standing.hud_model(old, 0).is_empty(), "hud model works")

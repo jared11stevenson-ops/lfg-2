@@ -174,19 +174,22 @@ static func set_rank(state: MatchState, fid: int, r: int) -> void:
 		l["eff_rank"] = r
 
 # ------------------------------------------------------------------ init / dawn recompute
+## Adds the pass-2 fields to a faction dict (saves from before pass 2 lack them).
+static func ensure(f: Dictionary) -> void:
+	for k in ["rank", "eff_rank"]:
+		if not f.has(k):
+			f[k] = 0
+	for k2 in ["deeds", "pcap", "dcount", "scouted", "escorted"]:
+		if not f.has(k2):
+			f[k2] = [] if (k2 == "deeds" or k2 == "scouted" or k2 == "escorted") else {}
+	if not f.has("last_deed"):
+		f["last_deed"] = 0.0
+	if not f.has("truces"):
+		f["truces"] = {}
+
 static func init_state(state: MatchState) -> void:
 	for fid in state.factions.keys():
-		var f: Dictionary = state.factions[fid]
-		for k in ["rank", "eff_rank"]:
-			if not f.has(k):
-				f[k] = 0
-		for k2 in ["deeds", "pcap", "dcount", "scouted", "escorted"]:
-			if not f.has(k2):
-				f[k2] = [] if (k2 == "deeds" or k2 == "scouted" or k2 == "escorted") else {}
-		if not f.has("last_deed"):
-			f["last_deed"] = 0.0
-		if not f.has("truces"):
-			f["truces"] = {}
+		ensure(state.factions[fid])
 	for h in state.holdings.values():
 		if not h.has("stab"):
 			h["stab"] = 100
@@ -218,6 +221,7 @@ static func recompute(state: MatchState, events: Array, emit: bool = true) -> vo
 		var f: Dictionary = state.factions[fid]
 		if not f["alive"]:
 			continue
+		ensure(f)
 		var keep: Array = []
 		for d in f.get("deeds", []):
 			if now - float(d["deed_t"]) < decay:
@@ -290,6 +294,7 @@ static func record(state: MatchState, fid: int, kind: String, events: Array, vic
 	var d: Dictionary = deed_def(kind)
 	if f.is_empty() or d.is_empty() or not f["alive"] or state.phase != &"PURGE_ACTIVE":
 		return false
+	ensure(f)
 	var pcap: Dictionary = f.get("pcap", {})
 	var cap: int = int(d.get("cap", 0))
 	if cap > 0 and int(pcap.get(kind, 0)) >= cap:

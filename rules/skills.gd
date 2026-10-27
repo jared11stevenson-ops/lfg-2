@@ -162,3 +162,43 @@ static func tune_ability(a: Dictionary, ab: Dictionary) -> Dictionary:
 		if ab.has("strike_mult"):
 			o["strike_mult"] = float(ab["strike_mult"]) * m
 	return o
+
+# ------------------------------------------------------------------ view model (read only; ui/skill_tree_panel.gd renders it)
+const EFFECT_TEXT: Dictionary = {
+	"growth_pct": "%+d%% crop growth", "yield_bonus": "%+d harvest yield", "plot_slots": "%+d plot slots", "ration_bonus": "%+d ration per batch",
+	"max_hp": "%+d max health", "max_energy": "%+d max energy", "atk": "%+d attack", "def": "%+d defence", "ab_cd_pct": "%+d%% shorter ability cooldown",
+	"ab_energy_pct": "%+d%% cheaper ability", "ab_duration": "%+d s ability duration", "ab_power_pct": "%+d%% ability power", "levy_pct": "%+d%% Purge Levy cut",
+	"upkeep_pct": "%+d%% lower upkeep", "supply_range": "%+d supply range", "garrison_cap": "%+d garrison cap", "steal_bonus": "%+.2f steal chance",
+	"dmg_taken_mult": "%+.2f damage taken", "buy_mult": "%+.2f buying price", "sell_mult": "%+.2f selling price", "walk_mult": "%+.2f walk speed",
+	"carry_cap": "%+d carry", "mine_bonus": "%+d mining", "build_cost_mult": "%+.2f build cost"}
+
+static func effect_text(key: String, v: float) -> String:
+	var f: String = String(EFFECT_TEXT.get(key, key + " %+.2f"))
+	return f % (int(v) if f.contains("%+d") else v)
+
+## {class_id, tree_name, points, taken, total, branches:{economy:[row], purge:[row], hybrid:[row]}}
+## row: {id, name, branch, cost, requires:[names], taken, state:"taken"|"available"|"locked"|"unaffordable", drawback, effects:[text]}
+static func panel_model(a: Dictionary) -> Dictionary:
+	var cid: String = String(a.get("class_id", ""))
+	var t: Dictionary = tree(cid)
+	var out: Dictionary = {"class_id": cid, "tree_name": String(t.get("name", "")), "points": points(a), "taken": taken(a).size(), "total": (t.get("order", []) as Array).size(),
+		"branches": {"economy": [], "purge": [], "hybrid": []}}
+	for id in t.get("order", []):
+		var nd: Dictionary = t["nodes"][id]
+		var st: String = "taken"
+		if not taken(a).has(String(id)):
+			if requirement_error(a, nd) != "":
+				st = "locked"
+			elif points(a) < int(nd["cost"]):
+				st = "unaffordable"
+			else:
+				st = "available"
+		var reqs: Array = []
+		for r in nd.get("requires", []):
+			reqs.append(String(t["nodes"][r]["name"]))
+		var fx: Array = []
+		for k in (nd.get("effects", {}) as Dictionary).keys():
+			fx.append(effect_text(String(k), float(nd["effects"][k])))
+		out["branches"][String(nd["branch"])].append({"id": String(id), "name": String(nd["name"]), "branch": String(nd["branch"]), "cost": int(nd["cost"]), "requires": reqs,
+			"taken": st == "taken", "state": st, "drawback": bool(nd.get("drawback", false)), "effects": fx})
+	return out
