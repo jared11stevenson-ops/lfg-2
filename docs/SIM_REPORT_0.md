@@ -26,4 +26,5 @@ Run: 20 seeds x 336 in-world days (48 weeks), ~3m20s wall on 4 cores. Bots, not 
 3. **Leader vulnerability & elimination path**: leaders join raids/defence; defeat of a leader eliminates a faction even if a holding remains (permadeath for every competitor, as for the player).
 4. **Non-raider relevance**: hoarders/traders/turtles need real win routes (economic dominion share, alliance, trade-for-protection) rather than 0 captures forever.
 5. **Sim instrumentation**: log per-ability attempts/failure reasons, kill causes, and food/hunger deaths; re-run next Grand Simulation at pass 5.
+Design note (owner clarification): the only win is Total Conquest (last faction alive owning the whole map); thriving is the goal otherwise. So matches are NOT required to end, but total conquest must be *achievable* and *contestable*.
 Success criterion for the next sim: >=80% of seeds end with exactly one faction alive by week 24, and no class wins >2x or <0.5x the fair share (1/14) over >=40 seeds.

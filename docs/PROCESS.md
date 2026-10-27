@@ -9,3 +9,6 @@
 - Harness: tools/sim_match.gd (to build in pass 2 so it exists and is exercised before pass 5). It must use the real Rules
   module, deterministic seeds, bot command streams only (no direct state edits), and log metrics to JSON.
 - Report only what was actually run. A simulation of bots is not evidence of human fun.
+
+## Win condition (owner clarification, 2026-10-27)
+The goal is to thrive, not merely survive. Only Total Conquest wins (kill/eliminate all rivals and own the entire map). Remove Dominion(60%)/Crowned(12 weeks) wins from the rules in pass 2 and replace with Total Conquest + a non-ending Prosperity score.

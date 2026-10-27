@@ -4,8 +4,10 @@ Own take on the LFG! pitch. Not the competitor's game: match-based, hex-strategi
 ## Format
 - **Match-based.** A match = one world seed. Your leader dying in any way ends the match (permadeath, absolute). New match = new seed, fresh start.
 - **Meta-progression (cosmetic/option only, never power):** Codex entries, class "alt starts" (different starting kit, same power budget), titles. Stored in `user://meta.json`, separate from match saves.
-- **Win:** Dominion (hold >=60% of all holdings) or Survive 12 in-world weeks (Crowned). After winning you may continue in Endless; there is no global ending.
-- **Loss:** leader death, or all holdings lost AND no way to farm (Starved Out).
+- **Goal: thrive.** Success is a prosperous, well-run settlement/empire (farm output, rations secure, holdings, trade, titles). Conquering everyone is NOT required and is not the only good outcome; there are no survive-N-weeks or ownership-percentage wins.
+- **Win: Total Conquest.** A competitor wins only when every rival leader is dead/eliminated AND they own every holding on the map (so the winner is the sole survivor of the whole map). Then the match ends in victory (Endless play may continue by choice).
+- **Loss:** your leader dies (permadeath), or Starved Out. You can also be eliminated as a faction by losing your last holding.
+- **Thriving score (non-ending):** a Prosperity rating (output, reserves, holdings, trade) shown in the HUD and on the end screen; unlocks cosmetic codex/titles only.
 
 ## World
 - Hex grid **84x54** (Civ 7 Standard). Deterministic seed gen. Biomes: Homestead Meadow, Living Shore, Fungal Grove, Ruins, Salt Flats, Highlands, Bog. ~40 AI-or-player holdings (villages), 3 capturable "frontier tiers".
