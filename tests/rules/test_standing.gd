@@ -15,7 +15,11 @@ func _give_deeds(s: MatchState, fid: int, kind: String, n: int) -> void:
 		Standing.record(s, fid, kind, ev)
 
 # ------------------------------------------------------------ deeds
+func _uncap() -> void:
+	Standing.cfg()["skills"]["week_cap"] = 99      # these tests check what one deed pays; the weekly cap has its own tests (test_hold_hunt)
+
 func test_deeds_only_count_in_the_purge() -> void:
+	_uncap()
 	var s: MatchState = quiet()
 	var ev: Array = [{"type": &"holding_captured", "holding": 5, "by": 0, "from": -1, "actor": 1}]
 	Standing.observe(s, ev, 0)
@@ -28,6 +32,7 @@ func test_deeds_only_count_in_the_purge() -> void:
 	eq(s.actors[1]["sp"], 4, "capture pays 4 skill points to the leader")
 
 func test_leader_kill_is_a_deed_and_eliminates_the_victim_faction() -> void:
+	_uncap()
 	var s: MatchState = quiet()
 	_purge(s)
 	var v: Dictionary = _ai_leader(s, 3)

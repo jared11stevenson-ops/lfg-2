@@ -30,8 +30,8 @@
 "kill_wild":   {"label": "Slew a wild beast", "standing": 1, "sp": 1, "cap": 6, "fight": true},
 "heal":        {"label": "Tended the wounded", "standing": 1, "sp": 1, "cap": 3, "fight": false},
 "broker":      {"label": "Brokered a truce", "standing": 2, "sp": 1, "cap": 2, "fight": false},
-"scout":       {"label": "Scouted a rival", "standing": 1, "sp": 1, "cap": 3, "fight": false},
-"escort":      {"label": "Escorted supplies", "standing": 2, "sp": 1, "cap": 2, "fight": false}
+"scout":       {"label": "Scouted a rival", "standing": 1, "sp": 1, "cap": 1, "fight": false},
+"escort":      {"label": "Escorted supplies", "standing": 1, "sp": 1, "cap": 1, "fight": false}
 },
 "mark": {"min_rank": 2, "bounty_mult": 1.5, "ai_target_mult": 1.35, "wave_extra": 2},
 "thin_crown": {"ration_days": 3, "min_stability": 40, "rank_loss": 1},
@@ -41,5 +41,8 @@
 "idle_bleed": {"idle_days": 14, "ration_base": 1, "week_div": 4, "cap": 4},
 "scarcity": {"spoil_floor": 12, "spoil_base": 0.01, "spoil_cap": 0.1, "granary_cut": 0.5, "prod_loss_per_week": 0.02, "prod_floor": 0.5, "yield_start_week": 3, "yield_week_step": 6, "yield_loss_cap": 2},
 "escalation": {"wave_base": 2, "wave_cap": 14, "dispatch_base": 3, "dispatch_week_div": 4, "dispatch_cap": 8, "party_cap_base": 8, "party_week_div": 2, "party_cap": 26, "spoils_div": 20, "spoils_cap": 4},
-"prosperity": {"output_decay": 0.85, "ration_days_secure": 3, "thriving_min": 12}
+"prosperity": {"output_decay": 0.85, "ration_days_secure": 3, "thriving_min": 12},
+"skills": {"cost_mult": 2.0, "week_cap": 3, "_notes": "pass 3: non-root nodes cost cost_mult x their data cost; a faction leader earns at most week_cap skill points per calendar week"},
+"hold": {"last_stand": 1.4, "pacify_days": 6, "pacify_stab": 30, "pacify_floor": 62, "pacify_rations": 1, "pacify_coin": 2, "ai_below": 75, "_notes": "pass 3: Pacify (command + AI routine) lets a leader hold many holdings: stability +30, floor 62 and no revolt for 6 days; costs rations and coin per tier"},
+"hunt": {"live_at": 5, "min_week": 12, "party_mult": 3, "power_ratio": 0.7, "muster_range": 40, "path_max": 220, "range_bonus": 60, "dispatch_extra": 4, "target_mult": 4.0, "_notes": "pass 3: the last-rival hunt. Once <= live_at factions live (week >= min_week) every survivor but a pacifist raids, bigger and farther, and favours the weakest survivor's home (its leader)."}
 }

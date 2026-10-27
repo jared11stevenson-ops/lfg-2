@@ -210,9 +210,13 @@ static func fragile(l: Dictionary) -> bool:
 	return float(l["max_hp"]) / maxf(0.5, float(Combat.class_mod(l, "dmg_taken_mult", 1.0))) < FRAGILE_HP
 
 static func wants_to_join(state: MatchState, fid: int, l: Dictionary, mission: String, troops: int) -> bool:
-	if l.is_empty() or int(l["ai"].get("party", -1)) != -1 or fragile(l):
+	if l.is_empty() or int(l["ai"].get("party", -1)) != -1:
 		return false
 	var k: Dictionary = kit(l)
+	if bool(k.get("stealth", false)) and mission == "steal":
+		return float(l["hp"]) >= 0.6 * float(l["max_hp"])      # thieves go on stealth jobs even when brittle: unseen, they are not the raiders' target
+	if fragile(l):
+		return false
 	if not bool(k.get("joins_raid", false)) or mission == "scout" or mission == "supply":
 		return false
 	if mission == "capture" and troops < 3:
@@ -308,6 +312,103 @@ static func siege_cast(state: MatchState, l: Dictionary, foe: Dictionary, ctx: D
 		"siege_ram":
 			if ctx.has("holding"):
 				cast(state, l, {"ability": "lfg:ability/siege_ram", "holding": ctx["holding"]}, events)
+
+# ------------------------------------------------------------------ escape: stealth, slipping away, falling back to a neighbour
+const RETREAT_HP := 0.4
+const RETREAT_RANGE := 14
+
+## A leader on a stealth job (the party it marches with is flagged ai.stealth) cannot be struck by other raiders.
+static func hidden(state: MatchState, l: Dictionary) -> bool:
+	var pid: int = int(l["ai"].get("party", -1))
+	if pid == -1:
+		return false
+	var p: Dictionary = state.actors.get(pid, {})
+	return not p.is_empty() and bool(p["ai"].get("stealth", false))
+
+## Called before a raiding party's blow lands on `l`. True = the blow is avoided: the class kit lets it slip away (escape.slip chance), or the leader is under
+## 40% health and falls back to another own holding within RETREAT_RANGE that is not itself under siege.
+static func try_escape(state: MatchState, l: Dictionary, party: Dictionary, events: Array) -> bool:
+	var esc: Dictionary = kit(l).get("escape", {})
+	var slip: float = float(esc.get("slip", 0.0))
+	if slip > 0.0 and state.rand_f() < slip:
+		return true
+	if float(l["hp"]) >= RETREAT_HP * float(l["max_hp"]):
+		return false
+	var fid: int = int(l["faction"])
+	var here: int = CmdUtil.holding_at(state, l["hex"])
+	var best: int = -1
+	var bd: int = 1 << 30
+	for hid in state.holdings_of(fid):
+		if hid == here:
+			continue
+		var d: int = HexGrid.distance(state.holdings[hid]["hex"], l["hex"])
+		if d > RETREAT_RANGE or d >= bd or _besieged(state, hid):
+			continue
+		bd = d
+		best = hid
+	if best == -1:
+		# no other holding to fall back to: a leader whose kit can flee slips out the back and hides in the open ground until dawn
+		if not bool(esc.get("flee", false)):
+			return false
+		var hide: Variant = _hiding_hex(state, l["hex"])
+		if hide == null:
+			return false
+		l["hex"] = hide
+		l["ai"]["defending"] = -1
+		events.append({"type": &"leader_retreated", "faction": fid, "actor": l["id"], "from": here, "to": -1, "hex": hide, "ai": true})
+		return true
+	l["hex"] = state.holdings[best]["hex"]
+	l["ai"]["defending"] = -1
+	events.append({"type": &"leader_retreated", "faction": fid, "actor": l["id"], "from": here, "to": best, "ai": true})
+	return true
+
+## A passable open-ground hex 5-7 hexes from `from` that no holding or actor occupies (deterministic: first in ring order).
+static func _hiding_hex(state: MatchState, from: Vector2i) -> Variant:
+	for r in [6, 5, 7]:
+		for hx in HexGrid.ring_within(from, r):
+			if HexGrid.distance(hx, from) != r or int(state.world["terrain"][HexGrid.index(hx)]) != WorldGen.T_GROUND or CmdUtil.holding_at(state, hx) != -1:
+				continue
+			var taken: bool = false
+			for o in state.actors.values():
+				if o["alive"] and o["hex"] == hx and o["kind"] != "enemy":
+					taken = true
+					break
+			if not taken:
+				return hx
+	return null
+
+static func _besieged(state: MatchState, hid: int) -> bool:
+	for a in state.actors.values():
+		if a["kind"] == "party" and a["alive"] and int(a["ai"].get("target", -1)) == hid and String(a["ai"].get("state", "")) == "siege":
+			return true
+	return false
+
+## A siege of one of our holdings has begun: a Warding Aura leader (Halo) casts it at once, whether or not a foe is adjacent (its duration covers the siege).
+static func on_siege_begin(state: MatchState, party: Dictionary, events: Array) -> void:
+	var t: Dictionary = state.holdings.get(int(party["ai"].get("target", -1)), {})
+	if t.is_empty() or int(t["owner"]) < 0:
+		return
+	var l: Dictionary = leader_of(state, int(t["owner"]))
+	if l.is_empty() or not bool(state.factions[int(t["owner"])]["is_ai"]):
+		return
+	if String(kit(l).get("cast", "")) == "ward" and HexGrid.distance(l["hex"], t["hex"]) <= 3:
+		cast(state, l, {"ability": "lfg:ability/ward"}, events)
+
+## Stealth job resolution: the thief picks the pocket of the holding's leader if it stands at the door (a real Pickpocket through Abilities.use).
+static func pickpocket_job(state: MatchState, party: Dictionary, target_hid: int, events: Array) -> void:
+	var l: Dictionary = _party_leader_of(state, party)
+	var t: Dictionary = state.holdings.get(target_hid, {})
+	if l.is_empty() or t.is_empty() or int(t["owner"]) < 0:
+		return
+	var v: Dictionary = leader_of(state, int(t["owner"]))
+	if v.is_empty() or HexGrid.distance(v["hex"], l["hex"]) > 1:
+		return
+	cast(state, l, {"ability": "lfg:ability/pickpocket", "target": v["id"]}, events)
+
+static func _party_leader_of(state: MatchState, party: Dictionary) -> Dictionary:
+	var lid: int = int(party["ai"].get("leader", -1))
+	var l: Dictionary = state.actors.get(lid, {}) if lid != -1 else {}
+	return l if (not l.is_empty() and l["alive"]) else {}
 
 ## Leader-on-leader exchange used by AIFactions._defend: returns the victim list it touched (for tests).
 static func melee(state: MatchState, attacker: Dictionary, victim: Dictionary, events: Array) -> void:

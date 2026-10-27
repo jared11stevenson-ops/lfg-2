@@ -1,0 +1,122 @@
+seeds=24 days=336
+total_conquest=7/24  exactly_one_alive_by_week24=0/24 (0%)  one_alive_ever=9/24
+  alive at week 8: mean 13.7  min 12  max 14
+  alive at week 12: mean 12.5  min 11  max 14
+  alive at week 24: mean 8.2  min 6  max 11
+  alive at week 48: mean 4.4  min 1  max 9
+territory: last change day mean 318, min 238, seeds still changing after week 8: 24/24, after week 24: 24/24
+  mean territory changes per week (weeks 1,5,9,13,17,25,33,45): w1=2.2, w5=6.0, w9=3.6, w13=6.4, w17=5.8, w25=3.2, w33=2.6, w45=1.9
+cpu: mean tick 0.98 ms (max 1.14), wall/seed 57s
+
+## By persona
+persona | factions | avg final holdings | captures/faction | leader kills | % with >=1 deed | deeds/faction | avg final rank | avg max rank | eliminated % | R0>8wk&0 deeds | parties/faction | tributes
+hoarder | 84 | 0.33 | 1.73 | 4 | 96% | 34.0 | 1.00 | 2.17 | 81% | 0 | 33.5 | 1466
+raider | 91 | 3.88 | 21.81 | 36 | 100% | 52.0 | 1.43 | 4.56 | 63% | 0 | 61.1 | 224
+trader | 76 | 1.34 | 4.93 | 10 | 100% | 45.9 | 1.24 | 2.80 | 72% | 0 | 28.1 | 1371
+turtle | 85 | 3.84 | 9.21 | 35 | 100% | 54.1 | 1.66 | 3.36 | 59% | 0 | 41.6 | 1446
+
+## Deed kinds by persona (total over all seeds)
+persona | broker | capture | defend | escort | heal | kill_leader | kill_raider | kill_wild | scout | steal
+hoarder | 1466 | 145 | 388 | 5 | 47 | 4 | 22 | 2 | 710 | 68
+raider | 224 | 1985 | 1395 | 146 | 44 | 36 | 11 | 4 | 878 | 13
+trader | 1371 | 375 | 327 | 54 | 14 | 10 | 2 | 2 | 1332 | 4
+turtle | 1446 | 783 | 905 | 58 | 22 | 35 | 2 | 2 | 1331 | 15
+
+## By class
+class | n | avg final holdings | alive at end % | elim % | avg elim day | captures | leader kills | avg final rank | deeds/faction | skill pts | nodes | wins | elimination causes
+rook | 24 | 12.92 | 50% | 50% | 160 | 21.9 | 25 | 2.58 | 64.5 | 65 | 11.8 | 4 | {'holdings_lost': 4, 'raid_party': 3, 'famine': 5}
+oren | 24 | 5.08 | 46% | 54% | 178 | 18.1 | 12 | 2.50 | 61.8 | 63 | 12.2 | 1 | {'holdings_lost': 5, 'raid_party': 6, 'spores': 1, 'famine': 1}
+forge | 24 | 2.75 | 33% | 67% | 135 | 13.9 | 8 | 1.38 | 41.8 | 48 | 10.5 | 1 | {'famine': 4, 'holdings_lost': 9, 'raid_party': 3}
+judd | 24 | 2.50 | 38% | 62% | 171 | 10.6 | 8 | 1.42 | 46.5 | 52 | 11.4 | 0 | {'holdings_lost': 8, 'famine': 4, 'raid_party': 3}
+tavi | 24 | 2.42 | 38% | 62% | 174 | 13.8 | 7 | 0.96 | 55.3 | 57 | 11.5 | 1 | {'holdings_lost': 3, 'raid_party': 8, 'famine': 4}
+mira | 24 | 2.25 | 25% | 75% | 161 | 10.8 | 8 | 1.50 | 46.4 | 49 | 10.7 | 0 | {'dash': 1, 'famine': 4, 'holdings_lost': 10, 'raid_party': 3}
+nyx | 24 | 1.75 | 33% | 67% | 158 | 10.5 | 6 | 1.00 | 46.6 | 50 | 11.2 | 0 | {'raid_party': 12, 'leader_duel': 2, 'famine': 1, 'holdings_lost': 1}
+bram | 24 | 1.12 | 29% | 71% | 129 | 9.5 | 5 | 1.33 | 39.9 | 43 | 10.5 | 0 | {'famine': 9, 'raid_party': 4, 'holdings_lost': 3, 'spores': 1}
+quill | 24 | 0.92 | 29% | 71% | 122 | 6.6 | 2 | 1.29 | 46.7 | 46 | 10.2 | 0 | {'holdings_lost': 11, 'famine': 6}
+halo | 24 | 0.58 | 58% | 42% | 234 | 0.0 | 0 | 0.83 | 61.5 | 62 | 13.0 | 0 | {'raid_party': 9, 'holdings_lost': 1}
+dune | 24 | 0.58 | 25% | 75% | 164 | 4.6 | 1 | 0.83 | 38.0 | 43 | 10.2 | 0 | {'holdings_lost': 13, 'famine': 4, 'raid_party': 1}
+sable | 24 | 0.46 | 17% | 83% | 170 | 3.7 | 1 | 0.88 | 36.7 | 41 | 10.2 | 0 | {'raid_party': 10, 'famine': 5, 'holdings_lost': 5}
+pip | 24 | 0.33 | 17% | 83% | 138 | 9.2 | 2 | 1.25 | 31.8 | 36 | 9.2 | 0 | {'raid_party': 16, 'holdings_lost': 3, 'famine': 1}
+vex | 24 | 0.04 | 4% | 96% | 163 | 3.8 | 0 | 0.96 | 36.0 | 39 | 10.2 | 0 | {'holdings_lost': 19, 'raid_party': 1, 'famine': 2, 'sentinel': 1}
+class spread (avg final holdings): min 0.04, max 12.92, mean 2.41, max/min 310.0x
+
+## Rank distribution (share of faction-weeks)
+R0: 5% | R1: 38% | R2: 24% | R3: 8% | R4: 9% | R5: 15%
+Marked faction changes: mean distinct marked factions per seed 4.0; seeds with a single permanent mark (>=20 marked weeks): 0/24
+
+## Per-ability attempts (AI leaders via Abilities.use)
+ability | attempts | ok | failure reasons
+bless | 2012 | 2012 (100%) | {}
+cache | 279 | 279 (100%) | {}
+dash | 171 | 157 (92%) | {'occupied': 14}
+field_dressing | 134 | 134 (100%) | {}
+forage | 4531 | 4529 (100%) | {'bad_terrain': 2}
+guard | 63 | 63 (100%) | {}
+mine | 5608 | 5608 (100%) | {}
+pickpocket | 128 | 128 (100%) | {}
+plague_cloud | 261 | 261 (100%) | {}
+rage | 87 | 87 (100%) | {}
+rally | 444 | 444 (100%) | {}
+sentinel_post | 97 | 97 (100%) | {}
+siege_ram | 217 | 217 (100%) | {}
+snare | 254 | 144 (57%) | {'occupied': 110}
+spore_swarm | 130 | 130 (100%) | {}
+ward | 25 | 25 (100%) | {}
+
+## Leader deaths by cause (last damage tag/source kind): {'dash/leader': 1, 'raid_party': 28, 'raid_party/party': 68, 'raid_party/leader': 12, 'sortie/leader': 6, 'unknown': 8, 'leader_duel/leader': 3, 'sortie': 5, 'spores/leader': 3, 'sentinel/leader': 1}
+## Faction eliminations by cause: {'raid_party': 79, 'famine': 50, 'holdings_lost': 95, 'dash': 1, 'leader_duel': 2, 'spores': 2, 'sentinel': 1}
+## Damage taken by leaders by tag: {'caught_stealing': 56, 'dash': 142, 'leader_duel': 2418, 'poison': 471, 'raid_party': 43652, 'sentinel': 555, 'sortie': 4826, 'spores': 992}
+
+## Skill nodes taken by branch (e=economy p=purge h=hybrid): {'p': 1259, 'h': 1260, 'e': 1151}; distinct nodes taken 210/210
+factions that finished their whole tree: 83/336; mean nodes 10.9
+
+## Per seed
+seed | end_day | conquest | alive@w24 | alive@end | neutral | last change day | leader deaths | winner
+1 | 336 | False | 9 | 7 | 3 | 266 | 5 | 
+2 | 336 | False | 11 | 9 | 9 | 329 | 1 | 
+3 | 336 | False | 8 | 8 | 4 | 336 | 4 | 
+4 | 336 | False | 8 | 1 | 1 | 336 | 7 | 
+5 | 335 | True | 7 | 1 | 0 | 336 | 7 | forge
+6 | 258 | True | 6 | 1 | 0 | 259 | 10 | rook
+7 | 237 | True | 7 | 1 | 0 | 238 | 9 | rook
+8 | 336 | False | 8 | 8 | 11 | 336 | 5 | 
+9 | 336 | False | 9 | 7 | 8 | 336 | 4 | 
+10 | 321 | True | 6 | 1 | 0 | 322 | 8 | oren
+11 | 258 | True | 7 | 1 | 0 | 259 | 9 | rook
+12 | 336 | False | 7 | 7 | 10 | 308 | 2 | 
+13 | 336 | False | 8 | 8 | 16 | 330 | 2 | 
+14 | 336 | False | 10 | 7 | 0 | 336 | 2 | 
+15 | 336 | False | 8 | 7 | 15 | 337 | 5 | 
+16 | 321 | True | 7 | 1 | 0 | 322 | 9 | tavi
+17 | 336 | False | 9 | 7 | 9 | 336 | 4 | 
+18 | 336 | False | 9 | 9 | 6 | 329 | 2 | 
+19 | 336 | False | 9 | 7 | 3 | 336 | 3 | 
+20 | 336 | False | 8 | 2 | 25 | 336 | 8 | 
+21 | 336 | False | 7 | 2 | 11 | 336 | 6 | 
+22 | 336 | False | 11 | 1 | 1 | 336 | 9 | 
+23 | 300 | True | 10 | 1 | 0 | 301 | 6 | rook
+24 | 336 | False | 7 | 2 | 19 | 336 | 8 | 
+
+## Pass 3: holding many, the hunt, skill pacing, fairness
+peak holdings per faction: mean 5.70, max 39; factions that ever held >= 12: 50/336 (14.9%); seeds where someone held >= 12: 24/24; >= 20: 17/24
+last-rival hunt started in 12/24 seeds (mean day 217); total conquests 7/24; conquest days [336, 259, 238, 322, 259, 322, 301]; one-survivor-ever 9/24
+skill trees finished: 83/336 factions ever; by week 25: 6; by week 48: 83; median finish week 36
+mean nodes taken 10.9 / 15; mean skill points earned 50
+pickpocket attempts 128 (ok 128); warding aura casts 25; leader retreats 481; stealth steal jobs 1578; pacify actions 14983; revolts 626
+
+class | mean days alive | vs mean | peak holdings | vs mean | eliminated % | alive@w12 % | alive@w24 % | wins  (alive@: still in the last weekly snapshot at or before that day; a match ended by conquest freezes at its last snapshot)
+halo | 293 | 1.37x | 1.00 | 0.18x | 42% | 100% | 96% | 0
+oren | 250 | 1.17x | 9.58 | 1.68x | 54% | 88% | 79% | 1
+rook | 236 | 1.10x | 13.42 | 2.36x | 50% | 88% | 71% | 4
+tavi | 234 | 1.10x | 6.67 | 1.17x | 62% | 96% | 67% | 1
+judd | 233 | 1.09x | 5.83 | 1.02x | 62% | 96% | 67% | 0
+nyx | 218 | 1.02x | 5.17 | 0.91x | 67% | 88% | 62% | 0
+dune | 207 | 0.97x | 3.67 | 0.64x | 75% | 92% | 50% | 0
+mira | 205 | 0.96x | 6.92 | 1.21x | 75% | 92% | 58% | 0
+forge | 202 | 0.94x | 7.33 | 1.29x | 67% | 83% | 46% | 1
+sable | 198 | 0.93x | 3.17 | 0.56x | 83% | 96% | 54% | 0
+bram | 190 | 0.89x | 4.88 | 0.86x | 71% | 83% | 46% | 0
+quill | 185 | 0.86x | 3.62 | 0.64x | 71% | 75% | 42% | 0
+pip | 171 | 0.80x | 5.29 | 0.93x | 83% | 79% | 42% | 0
+vex | 171 | 0.80x | 3.21 | 0.56x | 96% | 92% | 38% | 0
+classes within 0.5x-2x of the mean days alive: 14/14; classes eliminated more than 60%: 11/14; wins by class: {'forge': 1, 'rook': 4, 'oren': 1, 'tavi': 1}

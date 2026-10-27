@@ -22,6 +22,8 @@ static func defender_power(state: MatchState, h: Dictionary) -> float:
 			p += float(l["atk"]) * 2.0
 	if breached:
 		p *= 0.75
+	if of >= 0 and state.holdings_of(of).size() == 1:
+		p *= float(Standing.cfg().get("hold", {}).get("last_stand", 1.0))      # a faction down to its last holding fights for its life
 	if _active(state, h, "rally"):
 		p *= 1.4
 	if _active(state, h, "ward"):

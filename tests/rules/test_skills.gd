@@ -144,8 +144,8 @@ func test_points_come_only_from_purge_deeds() -> void:
 	Skills.grant(s2, 0, 5, "capture", ev)
 	eq(int(s2.actors[1].get("sp", 0)), 0, "not even in WARNING")
 	_purge(s2)
-	Skills.grant(s2, 0, 5, "capture", ev)
-	eq(int(s2.actors[1]["sp"]), 5, "PURGE_ACTIVE grants")
+	Skills.grant(s2, 0, 3, "capture", ev)
+	eq(int(s2.actors[1]["sp"]), 3, "PURGE_ACTIVE grants (up to the weekly cap of %d)" % int(Standing.cfg()["skills"]["week_cap"]))
 	# trading, crafting, farming earn nothing
 	var s3: MatchState = quiet()
 	give(s3, 1, {"lfg:item/glowfruit": 10})
@@ -155,14 +155,15 @@ func test_points_come_only_from_purge_deeds() -> void:
 
 func test_unlock_flow_cost_prerequisites_events_and_no_double_buy() -> void:
 	var s: MatchState = quiet("lfg:class/judd")
-	_grant(s, 3)
+	_grant(s, 5)
 	eq(cmd(s, "unlock_skill", {"node": "judd.e2"})["error"], "node_locked", "e2 needs e1")
 	var r: Dictionary = cmd(s, "unlock_skill", {"node": "judd.e1"})
 	check(r["ok"], "root: %s" % r["error"])
 	eq(count_type(r["events"], "skill_unlocked"), 1, "event")
-	eq(s.actors[1]["sp"], 2, "cost 1 deducted")
+	eq(s.actors[1]["sp"], 4, "cost 1 deducted (roots keep their price)")
 	eq(cmd(s, "unlock_skill", {"node": "judd.e1"})["error"], "already_taken", "no double buy")
-	check(cmd(s, "unlock_skill", {"node": "judd.e2"})["ok"], "e2 now (cost 2)")
+	eq(Skills.cost_of(Skills.node("lfg:class/judd", "judd.e2")), 4, "a data cost of 2 now costs 4 (skills.cost_mult)")
+	check(cmd(s, "unlock_skill", {"node": "judd.e2"})["ok"], "e2 now (cost 4)")
 	eq(s.actors[1]["sp"], 0, "all spent")
 	eq(cmd(s, "unlock_skill", {"node": "judd.e3"})["error"], "not_enough_points", "broke")
 	eq((s.actors[1]["nodes"] as Array).size(), 2, "two nodes")
@@ -216,17 +217,18 @@ func test_each_tree_has_a_pacifist_deed_route() -> void:
 	for k in defs.keys():
 		if not bool(defs[k]["fight"]):
 			pac_sp += int(defs[k]["sp"]) * int(defs[k]["cap"])
-	check(pac_sp >= 8, "non-fighting deeds can pay %d points per Purge" % pac_sp)
+	var wk_cap: int = int(Standing.cfg()["skills"]["week_cap"])
+	check(pac_sp >= wk_cap, "non-fighting deeds can pay %d points per Purge, enough to reach the weekly cap of %d" % [pac_sp, wk_cap])
 	for cid in Content.classes().keys():
 		var total: int = 0
 		var econ: int = 0
 		for n in Skills.tree(String(cid))["nodes"].values():
-			total += int(n["cost"])
+			total += Skills.cost_of(n)
 			if n["branch"] == "economy":
-				econ += int(n["cost"])
-		var purges: int = int(ceil(float(total) / float(pac_sp)))
-		check(purges <= 8, "%s: the whole tree costs %d points = %d Purges of pure scouting/escorting/brokering/healing" % [cid, total, purges])
-		check(int(ceil(float(econ) / float(pac_sp))) <= 3, "%s: the economy branch alone in <= 3 Purges" % cid)
+				econ += Skills.cost_of(n)
+		var weeks: int = int(ceil(float(total) / float(mini(pac_sp, wk_cap))))
+		check(weeks <= 30, "%s: the whole tree costs %d points = %d Purges of pure scouting/escorting/brokering/healing at the weekly cap" % [cid, total, weeks])
+		check(int(ceil(float(econ) / float(mini(pac_sp, wk_cap)))) <= 12, "%s: the economy branch alone in <= 12 Purges" % cid)
 	# and it works through real commands for the pure pacifist class
 	var s: MatchState = quiet("lfg:class/halo")
 	var rv: int = s.holdings_of(3)[0]
@@ -246,13 +248,13 @@ func test_trees_are_completable_solo_in_a_lifetime_and_ask_nothing_of_anyone_els
 	for cid in Content.classes().keys():
 		var total: int = 0
 		for n in Skills.tree(String(cid))["nodes"].values():
-			total += int(n["cost"])
+			total += Skills.cost_of(n)
 			for k in (n["effects"] as Dictionary).keys():
 				check(Skills.caps().has(k), "%s effect %s is a known solo stat" % [n["id"], k])
 			for r in n["requires"]:
 				check(String(r).begins_with(String(n["id"]).get_slice(".", 0) + "."), "%s only requires its own tree's nodes" % n["id"])
 			check(not (n as Dictionary).has("trade") and not (n as Dictionary).has("ally") and not (n as Dictionary).has("friend"), "no social requirement field on %s" % n["id"])
-		check(total <= pac_sp * 48, "%s: a 48-week match of solo pacifist play pays for the whole tree" % cid)
+		check(total <= mini(pac_sp, int(Standing.cfg()["skills"]["week_cap"])) * 48, "%s: a 48-week match of solo pacifist play pays for the whole tree (%d points)" % [cid, total])
 
 func test_ai_leaders_spend_their_points_on_a_branch_that_fits_their_persona() -> void:
 	var s: MatchState = quiet()

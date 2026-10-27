@@ -15,6 +15,13 @@ static func node(class_id: String, node_id: String) -> Dictionary:
 static func caps() -> Dictionary:
 	return Content.skill_data()["caps"]
 
+## Node price: roots (data cost 1) stay 1; the rest cost cost_mult x their data cost (data/ranks.json "skills"), so a tree takes many weeks.
+static func cost_of(nd: Dictionary) -> int:
+	var base: int = int(nd["cost"])
+	if base <= 1:
+		return base
+	return int(ceil(float(base) * float(Standing.cfg().get("skills", {}).get("cost_mult", 1.0)) - 1e-9))
+
 ## Unspent points, taken nodes (ids) for the faction leader.
 static func points(a: Dictionary) -> int:
 	return int(a.get("sp", 0))
@@ -38,7 +45,7 @@ static func can_unlock(a: Dictionary, node_id: String) -> String:
 	var rq: String = requirement_error(a, nd)
 	if rq != "":
 		return rq
-	if points(a) < int(nd["cost"]):
+	if points(a) < cost_of(nd):
 		return "not_enough_points"
 	return ""
 
@@ -55,7 +62,7 @@ static func unlock(state: MatchState, a: Dictionary, args: Dictionary, events: A
 
 static func apply_node(state: MatchState, a: Dictionary, node_id: String, events: Array) -> void:
 	var nd: Dictionary = node(String(a["class_id"]), node_id)
-	a["sp"] = points(a) - int(nd["cost"])
+	a["sp"] = points(a) - cost_of(nd)
 	if not a.has("nodes"):
 		a["nodes"] = []
 	(a["nodes"] as Array).append(node_id)
@@ -97,6 +104,18 @@ static func grant(state: MatchState, fid: int, sp: int, kind: String, events: Ar
 	var l: Dictionary = state.actors.get(int(f.get("leader", -1)), {})
 	if l.is_empty() or not l["alive"]:
 		return
+	# weekly cap (data/ranks.json skills.week_cap): the rest of a week's deeds still count for Standing, just not for points
+	var wk: int = state.week()
+	var used: Array = f.get("sp_wk", [wk, 0])
+	if int(used[0]) != wk:
+		used = [wk, 0]
+	var room: int = int(Standing.cfg().get("skills", {}).get("week_cap", 99)) - int(used[1])
+	if room <= 0:
+		f["sp_wk"] = used
+		return
+	sp = mini(sp, room)
+	used[1] = int(used[1]) + sp
+	f["sp_wk"] = used
 	l["sp"] = points(l) + sp
 	l["sp_total"] = int(l.get("sp_total", 0)) + sp
 	events.append({"type": &"skill_points", "actor": l["id"], "faction": fid, "gained": sp, "points": l["sp"], "kind": kind, "ai": bool(f["is_ai"])})
@@ -119,7 +138,7 @@ static func auto_buy(state: MatchState, a: Dictionary, events: Array) -> void:
 			if can_unlock(a, String(id)) != "":
 				continue
 			var nd: Dictionary = t["nodes"][id]
-			var s: int = pref.find(String(nd["branch"])) * 100 + int(nd["cost"]) * 10 + (5 if bool(nd.get("drawback", false)) else 0)
+			var s: int = pref.find(String(nd["branch"])) * 100 + cost_of(nd) * 10 + (5 if bool(nd.get("drawback", false)) else 0)
 			if s < bscore:
 				bscore = s
 				best = String(id)
@@ -193,7 +212,7 @@ static func panel_model(a: Dictionary) -> Dictionary:
 		if not taken(a).has(String(id)):
 			if requirement_error(a, nd) != "":
 				st = "locked"
-			elif points(a) < int(nd["cost"]):
+			elif points(a) < cost_of(nd):
 				st = "unaffordable"
 			else:
 				st = "available"
@@ -203,6 +222,6 @@ static func panel_model(a: Dictionary) -> Dictionary:
 		var fx: Array = []
 		for k in (nd.get("effects", {}) as Dictionary).keys():
 			fx.append(effect_text(String(k), float(nd["effects"][k])))
-		out["branches"][String(nd["branch"])].append({"id": String(id), "name": String(nd["name"]), "branch": String(nd["branch"]), "cost": int(nd["cost"]), "requires": reqs,
+		out["branches"][String(nd["branch"])].append({"id": String(id), "name": String(nd["name"]), "branch": String(nd["branch"]), "cost": cost_of(nd), "requires": reqs,
 			"taken": st == "taken", "state": st, "drawback": bool(nd.get("drawback", false)), "effects": fx})
 	return out

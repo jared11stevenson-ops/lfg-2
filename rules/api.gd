@@ -3,7 +3,7 @@ extends RefCounted
 ## Public Rules API (frozen contract). Everything is deterministic given (seed, command stream, tick stream).
 const COMMAND_TYPES: Array[StringName] = [&"move_intent", &"plant", &"water", &"harvest", &"craft", &"build", &"demolish", &"trade", &"eat",
 	&"attack", &"use_ability", &"capture", &"steal", &"set_policy", &"rest", &"move_to_pos", &"sync_position",
-	&"unlock_skill", &"scout", &"escort", &"truce", &"ransom", &"sabotage", &"interact_poi", &"accept_quest", &"abandon_quest", &"turn_in"]
+	&"unlock_skill", &"scout", &"escort", &"truce", &"ransom", &"sabotage", &"interact_poi", &"accept_quest", &"abandon_quest", &"turn_in", &"pacify"]
 const MAX_PATH := 160
 
 static func new_match(seed: int, class_id: StringName, opts: Dictionary = {}) -> MatchState:
@@ -89,6 +89,7 @@ static func _dispatch(state: MatchState, a: Dictionary, t: StringName, args: Dic
 		&"accept_quest": return Quests.accept(state, a, args, events)
 		&"abandon_quest": return Quests.abandon(state, a, args, events)
 		&"turn_in": return Quests.turn_in(state, a, args, events)
+		&"pacify": return Standing.pacify_cmd(state, a, args, events)
 	return "unknown_command"
 
 static func _move(state: MatchState, a: Dictionary, args: Dictionary) -> String:

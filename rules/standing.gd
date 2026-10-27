@@ -450,6 +450,52 @@ static func _take_item(state: MatchState, fid: int, item: String, amount: int) -
 const PERISHABLE: Array[String] = ["lfg:item/ration", "lfg:item/glowfruit", "lfg:item/sporebean", "lfg:item/saltroot", "lfg:item/glowfruit_prime",
 	"lfg:item/moonbean", "lfg:item/mushroom", "lfg:item/game_meat"]
 
+# ------------------------------------------------------------------ pacify (hold many holdings)
+static func pacified(state: MatchState, h: Dictionary) -> bool:
+	return int(h.get("pacified_until", 0)) >= int(state.clock["day"])
+
+static func pacify_cost(h: Dictionary) -> Dictionary:
+	var hc: Dictionary = cfg().get("hold", {})
+	var t: int = clampi(int(h["tier"]), 1, 3)
+	return {Economy.RATION: int(hc.get("pacify_rations", 1)) * t, Economy.COIN: int(hc.get("pacify_coin", 2)) * t}
+
+## Settles a holding: stability +pacify_stab, a stability floor and no revolt for pacify_days. Paid from the holding's own store. Shared by the command and the AI.
+static func pacify(state: MatchState, fid: int, hid: int, events: Array, actor_id: int = -1) -> String:
+	var h: Dictionary = state.holdings.get(hid, {})
+	if h.is_empty():
+		return "unknown_holding"
+	if int(h["owner"]) != fid:
+		return "not_yours"
+	if pacified(state, h):
+		return "already_pacified"
+	var cost: Dictionary = pacify_cost(h)
+	# paid from the faction's stores, the capital first (a freshly won holding has nothing of its own to spend)
+	var have_r: int = 0
+	var have_c: int = 0
+	for oid in state.holdings_of(fid):
+		have_r += Inv.count(state.holdings[oid]["store"], Economy.RATION)
+		have_c += Inv.count(state.holdings[oid]["store"], Economy.COIN)
+	if have_r < int(cost[Economy.RATION]) or have_c < int(cost[Economy.COIN]):
+		return "insufficient_items"
+	var hc: Dictionary = cfg().get("hold", {})
+	_take_item(state, fid, Economy.RATION, int(cost[Economy.RATION]))
+	_take_coin(state, fid, int(cost[Economy.COIN]))
+	h["pacified_until"] = int(state.clock["day"]) + int(hc.get("pacify_days", 6))
+	h["stab"] = mini(100, int(h.get("stab", 100)) + int(hc.get("pacify_stab", 30)))
+	events.append({"type": &"pacified", "holding": hid, "faction": fid, "actor": actor_id, "until": h["pacified_until"], "stab": h["stab"], "ai": bool(state.factions[fid]["is_ai"])})
+	return ""
+
+## Command pacify {holding}: stand within 3 hexes of an own holding.
+static func pacify_cmd(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
+	var hid: int = CmdUtil.parse_id(args.get("holding"))
+	if not state.holdings.has(hid):
+		return "unknown_holding"
+	if int(state.holdings[hid]["owner"]) != int(a["faction"]):
+		return "not_yours"
+	if HexGrid.distance(a["hex"], state.holdings[hid]["hex"]) > 3:
+		return "not_near_own_holding"
+	return pacify(state, int(a["faction"]), hid, events, int(a["id"]))
+
 static func dawn_upkeep(state: MatchState, events: Array) -> void:
 	var c: Dictionary = cfg()
 	var u: Dictionary = c["upkeep"]
@@ -492,10 +538,13 @@ static func dawn_upkeep(state: MatchState, events: Array) -> void:
 			if owed > 0:
 				target -= int(u["stab_unpaid"])
 			target = clampi(target, 0, 100)
+			var calm: bool = pacified(state, h2)
+			if calm:
+				target = maxi(target, int(c.get("hold", {}).get("pacify_floor", 60)))
 			var cur: int = int(h2.get("stab", 100))
 			var step: int = int(sb["step"])
 			h2["stab"] = cur + clampi(target - cur, -step, step)
-			if int(h2["stab"]) <= int(sb["revolt_at"]) and int(hid) != int(home["id"]) and state.rand_f() < float(sb["revolt_chance"]):
+			if not calm and int(h2["stab"]) <= int(sb["revolt_at"]) and int(hid) != int(home["id"]) and state.rand_f() < float(sb["revolt_chance"]):
 				h2["owner"] = -1
 				h2["garrison"] = maxi(0, int(h2["garrison"]) / 2)
 				h2["stab"] = 60

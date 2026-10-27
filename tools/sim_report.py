@@ -140,3 +140,47 @@ print("\n## Per seed")
 print("seed | end_day | conquest | alive@w24 | alive@end | neutral | last change day | leader deaths | winner")
 for d in data:
     print(f"{d['seed']} | {d['end_day']-1} | {d['total_conquest']} | {alive_at(d,169)} | {len(d['alive_final'])} | {d['neutral_holdings']} | {d['last_territory_change_day']} | {sum(d['kill_causes'].values())} | {d['winner']}")
+
+# ================================================================= pass 3 additions
+print("\n## Pass 3: holding many, the hunt, skill pacing, fairness")
+peaks = [v["peak_holdings"] for d in data for v in d["factions"].values()]
+print(f"peak holdings per faction: mean {sum(peaks)/len(peaks):.2f}, max {max(peaks)}; factions that ever held >= 12: {sum(1 for p in peaks if p >= 12)}/{len(peaks)} ({pct(sum(1 for p in peaks if p >= 12), len(peaks)):.1f}%); seeds where someone held >= 12: {sum(1 for d in data if d['peak_holdings_any'] >= 12)}/{n}; >= 20: {sum(1 for d in data if d['peak_holdings_any'] >= 20)}/{n}")
+hd = [d["hunt_day"] for d in data if d["hunt_day"] >= 0]
+print(f"last-rival hunt started in {len(hd)}/{n} seeds (mean day {sum(hd)/len(hd) if hd else 0:.0f}); total conquests {conq}/{n}; conquest days {[d['conquest_day'] for d in data if d['total_conquest']]}; one-survivor-ever {sum(1 for d in data if d['solo_day'] >= 0)}/{n}")
+fin = [(v["tree_done_week"], v["class"]) for d in data for v in d["factions"].values() if v["tree_done_week"] >= 0]
+alive_w25 = len(data) * 14
+print(f"skill trees finished: {len(fin)}/{n*14} factions ever; by week 25: {sum(1 for w, c in fin if w <= 25)}; by week 48: {sum(1 for w, c in fin if w <= 48)}; median finish week {sorted(w for w, c in fin)[len(fin)//2] if fin else '-'}")
+print(f"mean nodes taken {sum(len(v['nodes']) for d in data for v in d['factions'].values())/(n*14):.1f} / 15; mean skill points earned {sum(v['sp_total'] for d in data for v in d['factions'].values())/(n*14):.0f}")
+pk = sum(d["ability_log"].get("pickpocket", {}).get("ok", 0) for d in data)
+pka = sum(sum(d["ability_log"].get("pickpocket", {}).values()) for d in data)
+wd = sum(sum(d["ability_log"].get("ward", {}).values()) for d in data)
+print(f"pickpocket attempts {pka} (ok {pk}); warding aura casts {wd}; leader retreats {sum(v['retreats'] for d in data for v in d['factions'].values())}; stealth steal jobs {sum(v['stealth_jobs'] for d in data for v in d['factions'].values())}; pacify actions {sum(v['pacified'] for d in data for v in d['factions'].values())}; revolts {sum(v['revolts'] for d in data for v in d['factions'].values())}")
+# fairness: per-class share of 'survival days' and of wins, relative to the class mean
+days_alive = collections.defaultdict(list); wins_c = collections.Counter(); peak_c = collections.defaultdict(list); elim_c = collections.defaultdict(list)
+for d in data:
+    end = d["end_day"] - 1
+    for v in d["factions"].values():
+        days_alive[v["class"]].append(v["elim_day"] if v["elim_day"] >= 0 else end)
+        peak_c[v["class"]].append(v["peak_holdings"])
+        elim_c[v["class"]].append(1 if v["elim_day"] >= 0 else 0)
+    if d["total_conquest"]:
+        wins_c[d["winner"]] += 1
+mean_days = sum(sum(x) / len(x) for x in days_alive.values()) / len(days_alive)
+mean_peak = sum(sum(x) / len(x) for x in peak_c.values()) / len(peak_c)
+def alive_cls(d, cls, day):
+    best = None
+    for r in d["timeline"]:
+        if r["day"] <= day:
+            best = r
+    return best is not None and cls in best["holdings"]
+surv = {}
+for k in days_alive:
+    surv[k] = {w: sum(1 for d in data if alive_cls(d, k, day_w)) for w, day_w in [(12, 85), (24, 169)]}
+print("\nclass | mean days alive | vs mean | peak holdings | vs mean | eliminated % | alive@w12 % | alive@w24 % | wins  (alive@: still in the last weekly snapshot at or before that day; a match ended by conquest freezes at its last snapshot)")
+band = 0
+for k in sorted(days_alive, key=lambda c: -sum(days_alive[c]) / len(days_alive[c])):
+    md = sum(days_alive[k]) / len(days_alive[k]); mp = sum(peak_c[k]) / len(peak_c[k])
+    ok = 0.5 <= md / mean_days <= 2.0
+    band += 1 if ok else 0
+    print(f"{k} | {md:.0f} | {md/mean_days:.2f}x{'' if ok else '  OUT'} | {mp:.2f} | {mp/mean_peak:.2f}x | {pct(sum(elim_c[k]), len(elim_c[k])):.0f}% | {pct(surv[k][12], n):.0f}% | {pct(surv[k][24], n):.0f}% | {wins_c[k]}")
+print(f"classes within 0.5x-2x of the mean days alive: {band}/14; classes eliminated more than 60%: {sum(1 for k in elim_c if pct(sum(elim_c[k]), len(elim_c[k])) > 60)}/14; wins by class: {dict(wins_c)}")

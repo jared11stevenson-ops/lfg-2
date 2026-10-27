@@ -116,6 +116,7 @@ func test_cistern_waters_plots_of_neighbouring_holdings_within_range() -> void:
 	check(not bool(s.plots["b"]["watered"]), "6 hexes away is out of range")
 
 func test_fortified_gate_adds_defense_and_garrison_room() -> void:
+	Standing.cfg()["hold"]["last_stand"] = 1.0      # a lone holding gets a last-stand bonus (test_hold_hunt); measure the gate on its own
 	var s: MatchState = quiet()
 	var h: Dictionary = home(s)
 	var d0: float = Conquest.defender_power(s, h)

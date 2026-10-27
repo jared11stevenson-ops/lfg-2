@@ -164,6 +164,7 @@ func test_well_waters_thirsty_plots_at_dawn() -> void:
 	eq(s2.plots[MatchState.plot_key(hx)]["age"], 0, "no well: no growth")
 
 func test_granary_shields_rations_from_looting_and_tower_defends() -> void:
+	Standing.cfg()["hold"]["last_stand"] = 1.0      # the last-stand bonus (test_hold_hunt) would scale these single-holding numbers
 	var results: Array = []
 	for with in [false, true]:
 		var s: MatchState = quiet()

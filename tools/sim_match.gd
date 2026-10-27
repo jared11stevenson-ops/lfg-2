@@ -80,11 +80,15 @@ static func run(seed_v: int, days: int) -> Dictionary:
 		var cd: Dictionary = Content.class_def("lfg:class/" + order[fid])
 		meta[fid] = {"class": order[fid], "persona": st.factions[fid]["persona"], "implemented": bool(cd.get("implemented", false)), "elim_day": -1,
 			"elim_cause": "", "leader_kills": 0, "captures": 0, "steals": 0, "deeds": {}, "max_rank": 0, "rank_weeks": [], "nodes": [], "sp_total": 0,
-			"marked_weeks": 0, "tributes": 0, "levy_unpaid": 0, "starve_days": 0, "revolts": 0, "idle_bleed": 0, "parties": 0, "party_leader": 0, "joined_raids": 0}
+			"marked_weeks": 0, "tributes": 0, "levy_unpaid": 0, "starve_days": 0, "revolts": 0, "idle_bleed": 0, "parties": 0, "party_leader": 0, "joined_raids": 0,
+			"peak_holdings": 0, "tree_done_week": -1, "pacified": 0, "retreats": 0, "stealth_jobs": 0, "hunt_kills": 0}
 	var last_dmg: Dictionary = {}       # actor id -> last damage tag
 	var kill_causes: Dictionary = {}
 	var leader_dmg: Dictionary = {}
 	var timeline: Array = []
+	var hunt_day: int = -1
+	var peak_any: int = 0
+	var peak_any_day: int = 0
 	var last_change_day: int = 0
 	var changes_by_week: Dictionary = {}
 	var last_day: int = 0
@@ -151,6 +155,12 @@ static func run(seed_v: int, days: int) -> Dictionary:
 						meta[cf2]["captures"] += 1
 					last_change_day = day
 					changes_by_week[int((day - 1) / 7)] = int(changes_by_week.get(int((day - 1) / 7), 0)) + 1
+				&"pacified":
+					if meta.has(int(e["faction"])):
+						meta[int(e["faction"])]["pacified"] += 1
+				&"leader_retreated":
+					if meta.has(int(e["faction"])):
+						meta[int(e["faction"])]["retreats"] += 1
 				&"holding_revolted":
 					if meta.has(int(e["faction"])):
 						meta[int(e["faction"])]["revolts"] += 1
@@ -184,12 +194,27 @@ static func run(seed_v: int, days: int) -> Dictionary:
 						meta[pf]["parties"] += 1
 						if int(e.get("leader", -1)) != -1:
 							meta[pf]["joined_raids"] += 1
+						if String(e.get("mission", "")) == "steal" and int(e.get("leader", -1)) != -1:
+							meta[pf]["stealth_jobs"] += 1
 				&"victory":
 					if conquest_day < 0:
 						conquest_day = day
 						winner = int(e["faction"])
 		if day != last_day:
 			last_day = day
+			if hunt_day < 0 and AIFactions.hunting(st):
+				hunt_day = day
+			for fid2 in range(N):
+				if st.factions[fid2]["alive"]:
+					var nh: int = st.holdings_of(fid2).size()
+					if nh > int(meta[fid2]["peak_holdings"]):
+						meta[fid2]["peak_holdings"] = nh
+					if nh > peak_any:
+						peak_any = nh
+						peak_any_day = day
+					var ldr: Dictionary = st.actors[int(st.factions[fid2]["leader"])]
+					if int(meta[fid2]["tree_done_week"]) < 0 and (ldr.get("nodes", []) as Array).size() >= 15:
+						meta[fid2]["tree_done_week"] = int((day - 1) / 7)
 			if day % 7 == 1:
 				var row: Dictionary = {"day": day, "alive": 0, "holdings": {}, "rank": {}, "mark": Standing.mark_of(st)}
 				for fid in range(N):
@@ -243,4 +268,4 @@ static func run(seed_v: int, days: int) -> Dictionary:
 		"winner": order[winner] if winner >= 0 else "", "winner_faction": winner, "solo_day": solo_day, "alive_final": alive_final, "neutral_holdings": neutral,
 		"last_territory_change_day": last_change_day, "territory_changes_by_week": by_week, "factions": meta, "final_holdings": final_h,
 		"kill_causes": kill_causes, "leader_damage": leader_dmg, "ability_log": st.sim_acc.get("ablog", {}), "timeline": timeline,
-		"tick_avg_ms": tick_ms / maxf(1.0, float(tick_n)), "wall_s": float(Time.get_ticks_msec() - t0) / 1000.0, "mark_final": Standing.mark_of(st)}
+		"hunt_day": hunt_day, "peak_holdings_any": peak_any, "peak_holdings_day": peak_any_day, "tick_avg_ms": tick_ms / maxf(1.0, float(tick_n)), "wall_s": float(Time.get_ticks_msec() - t0) / 1000.0, "mark_final": Standing.mark_of(st)}

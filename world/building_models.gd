@@ -198,10 +198,10 @@ static func _greenhouse(k: MeshKit, big: bool) -> void:
 	var w: float = 5.2 if big else 4.4
 	var frame := Color("5a4a6a") if big else Color("7a5a3a")
 	k.box(Vector3(0, 0.2, 0), Vector3(w + 0.4, 0.4, 3.6), Color("8a7a6a"))
-	k.box(Vector3(0, 1.2, 0), Vector3(w, 1.6, 3.2), Color("a8f0e0") if big else Color("9fe8c8"), Color("d8fff6"))
+	k.box(Vector3(0, 1.2, 0), Vector3(w, 1.6, 3.2), Color("a8f0e0") if big else Color("7fd8a8"), Color("d8fff6") if big else Color("b6f5cf"))
 	for i in range(3 if not big else 5):
 		k.box(Vector3(-w * 0.5 + w * float(i) / float(2 if not big else 4), 1.2, -1.62), Vector3(0.14, 1.7, 0.1), frame)
-	k.pyramid(Vector3(0, 2.0, 0), w * 0.5 + 0.2, 1.8, 1.2 if not big else 1.6, Color("c8fff4"), Color("e8fffb"))
+	k.pyramid(Vector3(0, 2.0, 0), w * 0.5 + 0.2, 1.8, 1.2 if not big else 1.6, Color("c8fff4") if big else Color("2f9a6a"), Color("e8fffb") if big else Color("4fc890"))
 	for i in range(4 if not big else 6):
 		k.dome(Vector3(-w * 0.4 + w * 0.8 * float(i) / float(3 if not big else 5), 0.4, 0.3), 0.4, 1.0, 1, 6, Color("ff2fb5"), Color("ffd0f0"))
 	if big:
