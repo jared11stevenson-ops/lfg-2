@@ -21,6 +21,9 @@ func _ready() -> void:
 		if stage != null:
 			stage.apply_options(o))
 	Game.events_emitted.connect(_on_events)
+	if "--smoke" in OS.get_cmdline_user_args():
+		_smoke()
+		return
 	if "--journey" in OS.get_cmdline_user_args():
 		menu.hide_all()
 		_start(LocalSession.new_game(seed_value, &"lfg:class/judd", -1, {}, null))
@@ -202,3 +205,18 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 
 func cmd(type: StringName, args: Dictionary) -> Dictionary:
 	return Game.command(type, args)
+
+## Export smoke test: start a real match, build the world, tick 2 in-world days, print a summary and quit. Works from an exported binary.
+func _smoke() -> void:
+	menu.hide_all()
+	_start(LocalSession.new_game(seed_value, &"lfg:class/judd", -1, {}, null))
+	while stage == null or not stage.started:
+		await get_tree().process_frame
+	var st: MatchState = Game.state
+	var t: float = 0.0
+	while int(st.clock["day"]) < 3 and t < 1200.0:
+		Game.events_emitted.emit(Rules.tick(st, 2.0))
+		t += 2.0
+	var r: Dictionary = Game.command(&"plant", {"crop": "lfg:crop/glowfruit", "hex": HexMath.offset_to_axial(stage.player.current_hex)})
+	print("SMOKE_OK day=%d phase=%s actors=%d holdings=%d plant_ok=%s err=%s" % [int(st.clock["day"]), st.phase, st.actors.size(), st.holdings.size(), r.get("ok"), r.get("error")])
+	get_tree().quit()
