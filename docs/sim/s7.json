@@ -1,0 +1,1147 @@
+{
+  "end_day": 337,
+  "factions": {
+    "0": {
+      "ability_uses": 0,
+      "captures": 0,
+      "class": "oren",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "hoarder",
+      "steals": 0
+    },
+    "1": {
+      "ability_uses": 240,
+      "captures": 0,
+      "class": "halo",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "hoarder",
+      "steals": 0
+    },
+    "2": {
+      "ability_uses": 144,
+      "captures": 0,
+      "class": "rook",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "turtle",
+      "steals": 0
+    },
+    "3": {
+      "ability_uses": 0,
+      "captures": 0,
+      "class": "dune",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "trader",
+      "steals": 0
+    },
+    "4": {
+      "ability_uses": 0,
+      "captures": 0,
+      "class": "forge",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "turtle",
+      "steals": 0
+    },
+    "5": {
+      "ability_uses": 10,
+      "captures": 7,
+      "class": "bram",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "raider",
+      "steals": 0
+    },
+    "6": {
+      "ability_uses": 144,
+      "captures": 0,
+      "class": "sable",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "trader",
+      "steals": 0
+    },
+    "7": {
+      "ability_uses": 0,
+      "captures": 7,
+      "class": "pip",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "raider",
+      "steals": 0
+    },
+    "8": {
+      "ability_uses": 0,
+      "captures": 0,
+      "class": "vex",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "hoarder",
+      "steals": 0
+    },
+    "9": {
+      "ability_uses": 288,
+      "captures": 0,
+      "class": "tavi",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 1,
+      "persona": "trader",
+      "steals": 0
+    },
+    "10": {
+      "ability_uses": 144,
+      "captures": 0,
+      "class": "quill",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "turtle",
+      "steals": 0
+    },
+    "11": {
+      "ability_uses": 288,
+      "captures": 0,
+      "class": "nyx",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "hoarder",
+      "steals": 0
+    },
+    "12": {
+      "ability_uses": 0,
+      "captures": 2,
+      "class": "mira",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "raider",
+      "steals": 0
+    },
+    "13": {
+      "ability_uses": 288,
+      "captures": 0,
+      "class": "judd",
+      "elim_day": -1,
+      "implemented": true,
+      "kills": 0,
+      "persona": "turtle",
+      "steals": 0
+    }
+  },
+  "final_holdings": {
+    "bram": 8,
+    "dune": 1,
+    "forge": 1,
+    "halo": 1,
+    "judd": 1,
+    "mira": 3,
+    "nyx": 1,
+    "oren": 1,
+    "pip": 8,
+    "quill": 1,
+    "rook": 1,
+    "sable": 1,
+    "tavi": 1,
+    "vex": 1
+  },
+  "seed": 7,
+  "solo_last_standing": false,
+  "timeline": [
+    {
+      "alive": 14,
+      "day": 1,
+      "holdings": {
+        "bram": 1,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 1,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 1,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 8,
+      "holdings": {
+        "bram": 2,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 1,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 2,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 15,
+      "holdings": {
+        "bram": 3,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 2,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 3,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 22,
+      "holdings": {
+        "bram": 4,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 2,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 4,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 29,
+      "holdings": {
+        "bram": 5,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 5,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 36,
+      "holdings": {
+        "bram": 6,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 6,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 43,
+      "holdings": {
+        "bram": 7,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 7,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 50,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 57,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 64,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 71,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 78,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 85,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 92,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 99,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 106,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 113,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 120,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 127,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 134,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 141,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 148,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 155,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 162,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 169,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 176,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 183,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 190,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 197,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 204,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 211,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 218,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 225,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 232,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 239,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 246,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 253,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 260,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 267,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 274,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 281,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 288,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 295,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 302,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 309,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 316,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 323,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 330,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    },
+    {
+      "alive": 14,
+      "day": 337,
+      "holdings": {
+        "bram": 8,
+        "dune": 1,
+        "forge": 1,
+        "halo": 1,
+        "judd": 1,
+        "mira": 3,
+        "nyx": 1,
+        "oren": 1,
+        "pip": 8,
+        "quill": 1,
+        "rook": 1,
+        "sable": 1,
+        "tavi": 1,
+        "vex": 1
+      }
+    }
+  ],
+  "winner": "",
+  "winner_faction": -1
+}
