@@ -461,3 +461,17 @@ func test_fourteen_faction_tick_stays_under_three_milliseconds() -> void:
 	var avg: float = float(Time.get_ticks_usec() - t0) / 1000.0 / float(n)
 	check(avg < 3.0, "average tick %.2f ms < 3 ms with 14 factions (%d ticks)" % [avg, n])
 	print("14-faction avg tick ms=", avg)
+
+func test_a_garrisoned_holding_shields_its_leader() -> void:
+	var hp: Array = []
+	for garrison in [0, 24]:
+		var s: MatchState = quiet()
+		_purge(s)
+		var l: Dictionary = _lead(s, 4, "mira")
+		var home_h: Dictionary = s.holdings[int(s.factions[4]["home"])]
+		home_h["garrison"] = garrison
+		var party: Dictionary = _foe_party(s, 7, home_h["hex"] + HexGrid.DIRS[0], 10)
+		party["ai"]["target"] = int(home_h["id"])
+		AIFactions._harass(s, party, [])
+		hp.append(int(l["max_hp"]) - int(l["hp"]))
+	check(hp[1] < hp[0], "the same party hurts a leader less behind a garrison (%d vs %d)" % [hp[1], hp[0]])

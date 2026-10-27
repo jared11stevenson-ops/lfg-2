@@ -399,7 +399,8 @@ static func _strike_ok(state: MatchState, h: Dictionary, commit: int) -> bool:
 	if v.is_empty() or not v["alive"] or HexGrid.distance(v["hex"], h["hex"]) > 1:
 		return false
 	var ticks: float = SIEGE_SECS / (HARASS_PERIOD + 0.5 / tscale(state))
-	var per: float = float(maxi(1, 2 + commit - int(v["def"])))
+	var g: float = float(h["garrison"])
+	var per: float = float(maxi(1, 2 + commit - int(v["def"]))) * (1.0 - clampf(g / (g + 2.0 * float(commit)), 0.0, 0.7))
 	return ticks * per >= 0.9 * float(v["max_hp"])
 
 static func _try(state: MatchState, fid: int, mission: String, home_id: int, events: Array) -> bool:
@@ -436,7 +437,7 @@ static func _try(state: MatchState, fid: int, mission: String, home_id: int, eve
 			var power: float = Conquest.attacker_power(state, {}, commit)
 			if power < 1.3 * est:
 				if _strike_ok(state, h, commit):
-					cands.append([100.0 * bonus, hid, true])      # decapitation strike
+					cands.append([2.5 * bonus, hid, true])      # decapitation strike (ranked like an ordinary raid, not above it)
 				continue
 			var value: float = float(e["val"]) + 6.0 * float(int(e["tier"]) + 1) + (4.0 if int(h["owner"]) >= 0 else 0.0)
 			cands.append([value / maxf(est, 1.0) * bonus, hid, false])
@@ -678,6 +679,14 @@ static func party_step(state: MatchState, events: Array) -> void:
 				else:
 					a["move"] = {"path": rp, "acc": 0.0}
 
+## A leader inside a garrisoned holding is shielded by its troops (up to 70% of the blows); an empty fort leaves it exposed.
+static func _bodyguard(state: MatchState, leader: Dictionary, party: Dictionary) -> float:
+	var hid: int = CmdUtil.holding_at(state, leader["hex"])
+	if hid == -1 or int(state.holdings[hid]["owner"]) != int(leader["faction"]):
+		return 0.0
+	var g: float = float(state.holdings[hid]["garrison"])
+	return clampf(g / (g + 2.0 * float(troops_of(party))), 0.0, 0.7)
+
 static func _party_leader(state: MatchState, a: Dictionary) -> Dictionary:
 	var lid: int = int(a["ai"].get("leader", -1))
 	if lid == -1:
@@ -750,6 +759,7 @@ static func _harass(state: MatchState, a: Dictionary, events: Array) -> void:
 		var dmg: int = maxi(1, 2 + troops_of(a) / 2 - int(Combat.def_of(state, v)))
 		if v["kind"] == "ai_leader":
 			dmg = maxi(1, 2 + troops_of(a) - int(Combat.def_of(state, v)))       # an AI leader stands and fights; it does not kite like a player
+			dmg = maxi(1, int(round(float(dmg) * (1.0 - _bodyguard(state, v, a)))))
 		Combat.hurt(state, int(v["id"]), dmg, int(lead["id"]) if not lead.is_empty() else int(a["id"]), events, "raid_party")
 		if foe.is_empty():
 			foe = v

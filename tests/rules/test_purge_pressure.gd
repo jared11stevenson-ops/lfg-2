@@ -135,14 +135,18 @@ func test_each_purge_is_larger_than_the_last() -> void:
 	check(AIFactions.max_dispatch(b) > AIFactions.max_dispatch(a), "more raid parties are dispatched later")
 	check(AIFactions.party_cap(b) > AIFactions.party_cap(a), "and each is bigger")
 
-func test_waves_also_target_the_marked_faction_for_a_human_mark() -> void:
-	var s: MatchState = mk("lfg:class/judd", 11, {"ai_enabled": false})
-	s.actors[1]["max_hp"] = 100000
-	s.actors[1]["hp"] = 100000
-	s.sim_acc["mark"] = 0
-	warp(s, 7 * 4 + 7, 0.49)
-	var w: Array = tick_all(s, 60.0 * 0.05, 1.0).filter(func(e: Dictionary) -> bool: return String(e["type"]) == "purge_wave")
-	check(w.size() == 1 and w[0]["enemies"].size() >= 2, "waves are sized for the Marked player")
+func test_waves_are_bigger_for_a_marked_player() -> void:
+	var sizes: Array = []
+	for marked in [false, true]:
+		var s: MatchState = mk("lfg:class/judd", 11, {"ai_enabled": false})
+		s.actors[1]["max_hp"] = 100000
+		s.actors[1]["hp"] = 100000
+		s.sim_acc["mark"] = 0 if marked else -1
+		warp(s, 7 * 4 + 7, 0.49)
+		var w: Array = tick_all(s, 60.0 * 0.05, 1.0).filter(func(e: Dictionary) -> bool: return String(e["type"]) == "purge_wave")
+		check(w.size() == 1, "wave spawned")
+		sizes.append(w[0]["enemies"].size())
+	check(sizes[1] > sizes[0], "a Marked player faces more beasts (%d vs %d)" % [sizes[1], sizes[0]])
 
 func test_ai_mark_bleeds_garrisons_at_purge_start() -> void:
 	var s: MatchState = quiet()

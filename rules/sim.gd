@@ -151,10 +151,10 @@ static func _spawn_wave(state: MatchState, events: Array) -> void:
 	var homes: Array[int] = state.holdings_of(0)
 	var n: int = mini(int(esc.get("wave_base", 2)) + state.week(), int(esc.get("wave_cap", 14)))
 	var targets: Array = []     # [holding ids, count]
-	targets.append([homes, n])
 	var mk: int = Standing.mark_of(state)
-	if mk > 0 and state.factions.has(mk) and state.factions[mk]["alive"]:
-		targets.append([state.holdings_of(mk), int(Standing.cfg()["mark"]["wave_extra"]) + state.week() / 2])
+	if mk == 0:
+		n += int(Standing.cfg()["mark"]["wave_extra"]) + state.week() / 2      # the Purge targets a Marked player: bigger waves
+	targets.append([homes, n])
 	var kinds: Array = Content.enemies().keys()
 	kinds.sort()
 	var spawned: Array[int] = []
