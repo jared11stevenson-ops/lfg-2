@@ -1,20 +1,20 @@
 {
 "schema": 1,
-"_notes": "stealth: the thief joins steal parties unseen. escape.slip: chance a raiding blow misses the leader; escape.flee: with no other holding to fall back to, the wounded leader hides in open ground until dawn. (pass 3) How AI/bot faction leaders use their class kit (rules/ai_leaders.gd). role: bruiser|striker|thief|support|builder|diplomat|skirmisher|shaman|warlord|tinker|pilgrim. peace: dawn routine. cast: Purge ability trigger. joins_raid: the leader marches with capture/steal parties (and so can die). bias: extra mission weights on top of persona. Personas bias, class decides the kit.",
+"_notes": "dividend: what the class's peace perk is worth to a bot realm per dawn, deposited in the home store (pass 3b: Vex fence, Sable game, Dune and Pip fees, Forge smithing, Quill ledger fees; cooks, farmers and shamans already have a farming edge). stealth: the thief joins steal parties unseen. escape.slip: chance a raiding blow misses the leader; escape.flee: with no other holding to fall back to, the wounded leader hides in open ground until dawn. (pass 3) How AI/bot faction leaders use their class kit (rules/ai_leaders.gd). role: bruiser|striker|thief|support|builder|diplomat|skirmisher|shaman|warlord|tinker|pilgrim. peace: dawn routine. cast: Purge ability trigger. joins_raid: the leader marches with capture/steal parties (and so can die). bias: extra mission weights on top of persona. Personas bias, class decides the kit.",
 "classes": {
-"lfg:class/judd":  {"role": "bruiser",    "peace": "yield",   "cast": "guard",          "joins_raid": false, "bias": {"supply": 1}},
-"lfg:class/mira":  {"role": "striker",    "peace": "tonic",   "cast": "plague_cloud",   "joins_raid": true,  "escape": {"slip": 0.25, "flee": true}, "bias": {"capture": 1}},
-"lfg:class/bram":  {"role": "bruiser",    "peace": "forage",  "cast": "rage",           "joins_raid": true,  "bias": {"capture": 2}},
-"lfg:class/tavi":  {"role": "builder",    "peace": "mine",    "cast": "sentinel_post",  "joins_raid": false, "bias": {"supply": 1}},
-"lfg:class/pip":   {"role": "skirmisher", "peace": "none",    "cast": "dash",           "joins_raid": true,  "bias": {"supply": 2, "scout": 1}},
-"lfg:class/oren":  {"role": "support",    "peace": "ration",  "cast": "field_dressing", "joins_raid": false, "bias": {"supply": 1}},
-"lfg:class/vex":   {"role": "thief",      "peace": "trade",   "cast": "pickpocket",     "joins_raid": true,  "stealth": true, "escape": {"slip": 0.6, "flee": true}, "bias": {"steal": 3}},
-"lfg:class/sable": {"role": "thief",      "peace": "hunt",    "cast": "snare",          "joins_raid": true,  "bias": {"steal": 1, "scout": 2}},
-"lfg:class/quill": {"role": "diplomat",   "peace": "trade",   "cast": "none",           "joins_raid": false, "escape": {"slip": 0.4, "flee": true}, "bias": {"broker": 3}},
-"lfg:class/forge": {"role": "warlord",    "peace": "build",   "cast": "siege_ram",      "joins_raid": true,  "bias": {"capture": 2}},
-"lfg:class/nyx":   {"role": "shaman",     "peace": "grove",   "cast": "spore_swarm",    "joins_raid": true,  "bias": {"capture": 1}},
-"lfg:class/rook":  {"role": "warlord",    "peace": "none",    "cast": "rally",          "joins_raid": true,  "bias": {"capture": 3}},
-"lfg:class/dune":  {"role": "tinker",     "peace": "gadgets", "cast": "cache",          "joins_raid": false, "escape": {"slip": 0.25, "flee": true}, "bias": {"steal": 1, "supply": 1}},
-"lfg:class/halo":  {"role": "pilgrim",    "peace": "bless",   "cast": "ward",           "joins_raid": false, "bias": {"scout": 2, "broker": 1}}
+"lfg:class/judd":  {"role": "bruiser",    "peace": "yield",   "cast": "guard",          "joins_raid": false, "escape": {"evac": 0.4}, "bias": {"supply": 1}},
+"lfg:class/mira":  {"role": "striker",    "peace": "tonic",   "cast": "plague_cloud",   "joins_raid": true,  "dividend": {"lfg:item/coin": 4}, "escape": {"evac": 0.65, "slip": 0.25, "flee": true}, "bias": {"capture": 1}},
+"lfg:class/bram":  {"role": "bruiser",    "peace": "forage",  "cast": "rage",           "joins_raid": true,  "escape": {"evac": 0.3}, "bias": {"capture": 2}},
+"lfg:class/tavi":  {"role": "builder",    "peace": "mine",    "cast": "sentinel_post",  "joins_raid": false, "escape": {"evac": 0.5}, "bias": {"supply": 1}},
+"lfg:class/pip":   {"role": "skirmisher", "peace": "none",    "cast": "dash",           "joins_raid": true,  "join_only": ["steal"], "escape": {"evac": 0.7}, "dividend": {"lfg:item/coin": 4, "lfg:item/ration": 1}, "bias": {"supply": 2, "scout": 1}},
+"lfg:class/oren":  {"role": "support",    "peace": "ration",  "cast": "field_dressing", "joins_raid": false, "escape": {"evac": 0.45}, "bias": {"supply": 1}},
+"lfg:class/vex":   {"role": "thief",      "peace": "trade",   "cast": "pickpocket",     "joins_raid": true,  "stealth": true, "escape": {"evac": 0.8, "slip": 0.6, "flee": true}, "dividend": {"lfg:item/coin": 6}, "bias": {"steal": 3}},
+"lfg:class/sable": {"role": "thief",      "peace": "hunt",    "cast": "snare",          "joins_raid": true,  "join_only": ["steal"], "escape": {"evac": 0.6}, "dividend": {"lfg:item/ration": 2}, "bias": {"steal": 1, "scout": 2}},
+"lfg:class/quill": {"role": "diplomat",   "peace": "trade",   "cast": "truce",          "joins_raid": false, "escape": {"evac": 0.75, "slip": 0.4, "flee": true}, "dividend": {"lfg:item/coin": 4}, "bias": {"broker": 3}},
+"lfg:class/forge": {"role": "warlord",    "peace": "build",   "cast": "siege_ram",      "joins_raid": true,  "escape": {"evac": 0.35}, "dividend": {"lfg:item/coin": 3}, "bias": {"capture": 2}},
+"lfg:class/nyx":   {"role": "shaman",     "peace": "grove",   "cast": "spore_swarm",    "joins_raid": true,  "escape": {"evac": 0.65}, "bias": {"capture": 1}},
+"lfg:class/rook":  {"role": "warlord",    "peace": "none",    "cast": "rally",          "joins_raid": true,  "escape": {"evac": 0.3}, "bias": {"capture": 2}},
+"lfg:class/dune":  {"role": "tinker",     "peace": "gadgets", "cast": "cache",          "joins_raid": false, "escape": {"evac": 0.7, "slip": 0.25, "flee": true}, "dividend": {"lfg:item/coin": 4}, "bias": {"steal": 1, "supply": 1}},
+"lfg:class/halo":  {"role": "pilgrim",    "peace": "bless",   "cast": "ward",           "joins_raid": false, "escape": {"evac": 0.6}, "bias": {"scout": 2, "broker": 1}}
 }
 }

@@ -244,6 +244,8 @@ static func _bless(state: MatchState, a: Dictionary, ab: Dictionary, args: Dicti
 	if not state.holdings.has(hid):
 		return "unknown_holding"
 	var h: Dictionary = state.holdings[hid]
+	if int(h["owner"]) == -1 and int(Combat.class_mod(a, "settle", 0)) > 0:
+		return _settle(state, a, ab, h, events)
 	if int(h["owner"]) != int(a["faction"]):
 		return "not_yours"
 	if HexGrid.distance(a["hex"], h["hex"]) > BLESS_RANGE:
@@ -252,6 +254,24 @@ static func _bless(state: MatchState, a: Dictionary, ab: Dictionary, args: Dicti
 		return "already_blessed"
 	h["blessed_day"] = int(state.clock["day"]) + int(ab["days"])
 	events.append({"type": &"ability_used", "actor": a["id"], "ability": ab["id"], "holding": hid, "until_day": h["blessed_day"]})
+	return ""
+
+## Pilgrim's hamlets (Halo, mods.settle = holdings it may hold this way): blessing an unowned village in reach makes it a hamlet of the Warden's, once a calendar week.
+## Nobody is attacked or robbed; the folk simply take the blessing (the pacifist's only way to grow).
+static func _settle(state: MatchState, a: Dictionary, ab: Dictionary, h: Dictionary, events: Array) -> String:
+	if HexGrid.distance(a["hex"], h["hex"]) > BLESS_RANGE:
+		return "too_far"
+	var fid: int = int(a["faction"])
+	if state.holdings_of(fid).size() >= int(Combat.class_mod(a, "settle", 0)):
+		return "hamlet_limit"
+	if int(a.get("settle_week", -1)) == state.week():
+		return "settled_this_week"
+	a["settle_week"] = state.week()
+	h["owner"] = fid
+	h["stab"] = maxi(int(h.get("stab", 100)), 80)
+	h["blessed_day"] = int(state.clock["day"]) + int(ab["days"])
+	events.append({"type": &"holding_settled", "holding": int(h["id"]), "by": fid, "actor": a["id"], "ai": bool(state.factions[fid]["is_ai"]), "faction_name": state.factions[fid]["name"]})
+	events.append({"type": &"ability_used", "actor": a["id"], "ability": ab["id"], "holding": int(h["id"]), "until_day": h["blessed_day"], "settled": true})
 	return ""
 
 static func _ward(state: MatchState, a: Dictionary, ab: Dictionary, events: Array) -> String:

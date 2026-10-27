@@ -3,8 +3,7 @@ extends RulesTestBase
 ## signature unlocks, and the owner rules: every step is solo-completable from content data; nothing depends on trade or other players.
 
 const SIG_UNLOCKS: Array[String] = ["lfg:unlock/sun_terrace", "lfg:unlock/draught", "lfg:unlock/hearty_stew", "lfg:unlock/anvil_hall"]
-const LINES: Array[String] = ["judd", "mira", "bram", "tavi", "pip", "oren", "sable", "forge"]
-const STUBS: Array[String] = ["vex", "quill", "nyx", "rook", "dune", "halo"]
+const LINES: Array[String] = ["judd", "mira", "bram", "tavi", "pip", "oren", "sable", "forge", "vex", "quill", "nyx", "rook", "dune", "halo"]
 const REQUIRED_FIELDS: Dictionary = {"gather": ["item"], "craft": ["recipe"], "build": ["building"], "deliver": ["item", "to"], "visit_poi": ["poi"], "claim_poi": ["poi"],
 	"defeat": ["enemy"], "purge_deed": ["deeds"], "survive_purge": [], "harvest": ["crop"], "plant": ["crop"], "ability": ["ability"]}
 
@@ -277,17 +276,45 @@ func test_questlines_have_six_to_eight_steps_and_a_signature_unlock() -> void:
 				found += 1
 		eq(found, 1, "%s gates exactly one recipe or building" % u)
 
-func test_other_classes_have_a_stub_first_step_flagged_unimplemented() -> void:
-	for c in STUBS:
-		var q: Dictionary = Content.quest("lfg:quest/%s_1" % c)
-		check(not q.is_empty(), "%s has a stub quest" % c)
-		check(not bool(q.get("implemented", true)), "%s stub is flagged implemented:false" % c)
-		eq((q["steps"] as Array).size(), 1, "%s stub has one step" % c)
-		check(not bool(q["steps"][0].get("implemented", true)), "%s stub step flagged" % c)
-		var s: MatchState = quiet("lfg:class/%s" % c)
-		var r: Dictionary = cmd(s, "accept_quest", {"quest": "lfg:quest/%s_1" % c})
-		check(not r["ok"] and r["error"] == "not_implemented", "%s: cannot accept a stub (%s)" % [c, r["error"]])
-		eq(Quests.journal(s, s.actors[1])["soon"].size(), 1, "%s journal shows it as coming soon" % c)
+func test_all_fourteen_classes_have_a_full_line_and_no_stub_is_left() -> void:
+	for c in Content.classes().keys():
+		var short: String = String(c).get_slice("/", 1)
+		check(LINES.has(short), "%s has a questline" % short)
+		var q: Dictionary = Content.quest("lfg:quest/%s_1" % short)
+		check(not q.is_empty() and bool(q.get("implemented", true)), "%s chapter 1 is implemented" % short)
+		var s: MatchState = quiet(String(c))
+		var r: Dictionary = cmd(s, "accept_quest", {"quest": "lfg:quest/%s_1" % short})
+		check(r["ok"], "%s: chapter 1 can be accepted (%s)" % [short, r["error"]])
+		eq(Quests.journal(s, s.actors[1])["soon"].size(), 0, "%s: nothing is marked coming soon" % short)
+	for q in _all_quests():
+		check(bool(q.get("implemented", true)), "%s is implemented" % q["id"])
+
+func test_new_signature_upgrades_are_real_class_effects() -> void:
+	# every upgrade key must change a number the rules actually read
+	var s: MatchState = quiet("lfg:class/vex")
+	var b0: float = float(Combat.class_mod(s.actors[1], "steal_bonus", 0.0))
+	Quests.grant(s, s.actors[1], {"ability_upgrade": {"steal_bonus": 0.1}})
+	check(float(Combat.class_mod(s.actors[1], "steal_bonus", 0.0)) > b0 + 0.09, "Vex: steal bonus")
+	var q: MatchState = quiet("lfg:class/quill")
+	var ab: Dictionary = Skills.tune_ability(q.actors[1], Content.class_def("lfg:class/quill")["ability"])
+	Quests.grant(q, q.actors[1], {"ability_upgrade": {"ab_duration": 10}})
+	eq(float(Skills.tune_ability(q.actors[1], Content.class_def("lfg:class/quill")["ability"])["duration"]), float(ab["duration"]) + 10.0, "Quill: Truce Flag lasts 10s longer")
+	var h: MatchState = quiet("lfg:class/halo")
+	Quests.grant(h, h.actors[1], {"ability_upgrade": {"ab_duration": 10}})
+	eq(float(Skills.tune_ability(h.actors[1], Content.class_def("lfg:class/halo")["ability"])["duration"]), 25.0, "Halo: Warding Aura 25s")
+	var r: MatchState = quiet("lfg:class/rook")
+	Quests.grant(r, r.actors[1], {"ability_upgrade": {"ab_cd_pct": 20}})
+	eq(float(Skills.tune_ability(r.actors[1], Content.class_def("lfg:class/rook")["ability"])["cooldown"]), 48.0, "Rook: Rally cooldown 60 -> 48")
+	var d: MatchState = quiet("lfg:class/dune")
+	Quests.grant(d, d.actors[1], {"ability_upgrade": {"dmg_taken_mult": -0.15}})
+	check(absf(float(Combat.class_mod(d.actors[1], "dmg_taken_mult", 1.0)) - 1.1) < 0.001, "Dune: takes 1.10x instead of 1.25x")
+	var n: MatchState = quiet("lfg:class/nyx")
+	Quests.grant(n, n.actors[1], {"ability_upgrade": {"offgrove_mult": 0.1}})
+	check(absf(float(Combat.class_mod(n.actors[1], "offgrove_mult", 1.0)) - 0.85) < 0.001, "Nyx: 85% outside groves")
+	for line in ["vex", "quill", "nyx", "rook", "dune", "halo"]:
+		var last: Dictionary = Content.quest("lfg:quest/%s_3" % line)
+		check(bool(last.get("signature", false)) and not (last["reward"].get("ability_upgrade", {}) as Dictionary).is_empty(), "%s: signature upgrade on the last chapter" % line)
+		check(not (last["reward"].get("title", "") as String).is_empty(), "%s: a title" % line)
 
 func test_at_least_two_lines_converge_on_another_classes_theme_and_stay_solo() -> void:
 	var converging: Dictionary = {}

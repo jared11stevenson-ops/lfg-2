@@ -1,0 +1,115 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/quill_1",
+   "class": "lfg:class/quill",
+   "line": "quill",
+   "chapter": 1,
+   "title": "A Fair Hand",
+   "intro": "Quill keeps ledgers the way others keep gardens. Begin with a full purse and a copied page.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Count out a purse of twenty-five coin.",
+     "item": "lfg:item/coin",
+     "qty": 25
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Copy the lamp-order of a wayside shrine into the ledger.",
+     "poi": "lfg:poi/shrine",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 6
+    },
+    "text": "A fresh quire of paper"
+   }
+  },
+  {
+   "id": "lfg:quest/quill_2",
+   "class": "lfg:class/quill",
+   "line": "quill",
+   "chapter": 2,
+   "title": "Ink and Amber",
+   "intro": "Good ink wants amber, good pens want reed, and a ledger wants somewhere dry to sleep.",
+   "requires": [
+    "lfg:quest/quill_1"
+   ],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Gather two lumps of amber resin for ink.",
+     "item": "lfg:item/amber_resin",
+     "qty": 2
+    },
+    {
+     "kind": "gather",
+     "text": "Gather three bundles of reed fibre for pens.",
+     "item": "lfg:item/reed_fibre",
+     "qty": 3
+    },
+    {
+     "kind": "build",
+     "text": "Build a storehouse to keep the ledgers.",
+     "building": "lfg:building/storehouse"
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 3,
+     "lfg:item/coin": 6
+    },
+    "text": "Ink and a pen"
+   }
+  },
+  {
+   "id": "lfg:quest/quill_3",
+   "class": "lfg:class/quill",
+   "line": "quill",
+   "chapter": 3,
+   "title": "The Flag and the Ledger",
+   "intro": "Raise the Truce Flag once in the quiet to learn how it hangs, then write down a promise a rival will keep through a Purge.",
+   "requires": [
+    "lfg:quest/quill_2"
+   ],
+   "steps": [
+    {
+     "kind": "ability",
+     "text": "Raise the Truce Flag.",
+     "ability": "lfg:ability/truce",
+     "qty": 1
+    },
+    {
+     "kind": "purge_deed",
+     "text": "Settle a truce with a rival before a Purge.",
+     "deeds": [
+      "broker"
+     ],
+     "qty": 1
+    },
+    {
+     "kind": "survive_purge",
+     "text": "Keep the ledgers dry through a Purge.",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 15
+    },
+    "ability_upgrade": {
+     "ab_duration": 10
+    },
+    "title": "Keeper of Promises",
+    "text": "Truce Flag lasts 10s longer (signature upgrade)",
+    "unlock": "lfg:unlock/truce_ledger"
+   },
+   "signature": true
+  }
+ ]
+}

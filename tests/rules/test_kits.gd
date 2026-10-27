@@ -367,7 +367,7 @@ func test_rook_upkeep_discount_and_marked_weakness() -> void:
 	for s in [r, j]:
 		s.holdings[1]["garrison"] = 10
 	eq(Economy.persons(j, 0), 11, "Judd 1+10")
-	eq(Economy.persons(r, 0), 8, "Rook 1+round(7.0)")
+	eq(Economy.persons(r, 0), 10, "Rook 1+round(9.0): upkeep 0.9 since pass 3b")
 	var at9: int = Setup.spawn_enemy(r, "lfg:enemy/sporeling", r.actors[1]["hex"] + Vector2i(9, 0), false)
 	var at10: int = Setup.spawn_enemy(r, "lfg:enemy/sporeling", r.actors[1]["hex"] + Vector2i(10, 0), false)
 	check(not EnemyAI._nearest_target(r, r.actors[at9], 7).is_empty(), "marked: aggro 7 reaches 9")
@@ -485,7 +485,8 @@ func test_halo_bless_boosts_yield_feeds_garrison_and_expires() -> void:
 	var plain: MatchState = quiet("lfg:class/judd")
 	plain.plots[MatchState.plot_key(hx)] = {"crop": "lfg:crop/glowfruit", "age": 2, "watered": false, "dry_days": 0, "holding": 1}
 	var base_yield: int = int(Content.crop("lfg:crop/glowfruit")["yield"]) + int(Content.crop("lfg:crop/glowfruit")["biome_bonus"].get(WorldGen.biome_at(s.world, hx), 0))
-	eq(cmd(s, "use_ability", {"ability": "lfg:ability/bless", "holding": 5})["error"], "not_yours", "only own holdings")
+	eq(cmd(s, "use_ability", {"ability": "lfg:ability/bless", "holding": s.holdings_of(1)[0]})["error"], "not_yours", "only own holdings (a rival's stays theirs)")
+	eq(cmd(s, "use_ability", {"ability": "lfg:ability/bless", "holding": 5})["error"], "too_far", "an unowned village must be in reach (pass 3b: Halo's hamlets)")
 	eq(Economy.persons(s, 0), 4, "1 + garrison 3 before blessing")
 	var r: Dictionary = cmd(s, "use_ability", {"ability": "lfg:ability/bless", "holding": 1})
 	check(r["ok"], "bless: %s" % r["error"])

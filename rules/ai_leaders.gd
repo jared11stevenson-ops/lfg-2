@@ -45,6 +45,11 @@ static func cast(state: MatchState, l: Dictionary, args: Dictionary, events: Arr
 		row[rk] = int(row.get(rk, 0)) + 1
 		lg[key] = row
 		state.sim_acc["ablog"] = lg
+		var lf: Dictionary = state.sim_acc.get("ablog_f", {})
+		var fr: Dictionary = lf.get(int(l["faction"]), {})
+		fr[key] = int(fr.get(key, 0)) + (1 if res == "" else 0)
+		lf[int(l["faction"])] = fr
+		state.sim_acc["ablog_f"] = lf
 	return res
 
 # ------------------------------------------------------------------ peace (dawn)
@@ -82,6 +87,13 @@ static func _deposit_gain(l: Dictionary, before: Dictionary, home: Dictionary, m
 
 static func _peace_routine(state: MatchState, fid: int, l: Dictionary, home: Dictionary, events: Array) -> void:
 	var k: Dictionary = kit(l)
+	var dv: Dictionary = k.get("dividend", {})
+	if not dv.is_empty():
+		var bundle: Dictionary = {}
+		for it in dv.keys():
+			bundle[String(it)] = int(dv[it])
+		if Inv.room_for(home["store"], bundle):
+			Inv.add_all(home["store"], bundle)
 	match String(k.get("peace", "none")):
 		"mine":
 			var b: Dictionary = (l["inv"] as Dictionary).duplicate()
@@ -98,6 +110,8 @@ static func _peace_routine(state: MatchState, fid: int, l: Dictionary, home: Dic
 					if not Economy.blessed(state, h) and HexGrid.distance(l["hex"], h["hex"]) <= ClassKits.BLESS_RANGE:
 						cast(state, l, {"ability": "lfg:ability/bless", "holding": hid}, events)
 						break
+			else:
+				_pilgrimage(state, fid, l, home, events)
 		"tonic":
 			var st: Dictionary = home["store"]
 			var n: int = mini(3, mini(Inv.count(st, "lfg:item/mushroom"), Inv.count(st, "lfg:item/glowfruit")))
@@ -110,10 +124,11 @@ static func _peace_routine(state: MatchState, fid: int, l: Dictionary, home: Dic
 					Inv.add_all(st, {Economy.COIN: 6 * n})      # the rest are sold to the NPC markets
 		"gadgets":
 			var st2: Dictionary = home["store"]
-			if Inv.count(st2, "lfg:item/gadget") < 4 and Inv.has_all(st2, {"lfg:item/timber": 1, "lfg:item/stone": 1}):
+			if Inv.count(st2, "lfg:item/gadget") < Conquest.GADGET_CAP and Inv.has_all(st2, {"lfg:item/timber": 1, "lfg:item/stone": 1}):
 				Inv.remove_all(st2, {"lfg:item/timber": 1, "lfg:item/stone": 1})
 				Inv.add_all(st2, {"lfg:item/gadget": 3})
 		"hunt":
+			cast(state, l, {"ability": "lfg:ability/track"}, events)      # the hunter reads the game trails around home (a real Track; earns the scout deed when game is near)
 			var meat: int = 2 * int(Combat.class_mod(l, "hunt_meat", 0))
 			if meat > 0 and Inv.room_for(home["store"], {"lfg:item/game_meat": meat}):
 				Inv.add_all(home["store"], {"lfg:item/game_meat": meat})
@@ -121,6 +136,28 @@ static func _peace_routine(state: MatchState, fid: int, l: Dictionary, home: Dic
 			var fence: int = int(round((float(Combat.class_mod(l, "sell_mult", 1.0)) - 1.0) * 10.0))
 			if fence > 0 and Inv.room_for(home["store"], {Economy.COIN: fence}):
 				Inv.add_all(home["store"], {Economy.COIN: fence})
+
+## Halo's pilgrimage: walks to the nearest unowned village within PILGRIM_RANGE of its realm and blesses it a hamlet (a real Bless through Abilities.use), then walks home.
+const PILGRIM_RANGE := 10
+static func _pilgrimage(state: MatchState, fid: int, l: Dictionary, home: Dictionary, events: Array) -> void:
+	if int(Combat.class_mod(l, "settle", 0)) <= 0 or state.holdings_of(fid).size() >= int(Combat.class_mod(l, "settle", 0)) or int(l.get("settle_week", -1)) == state.week():
+		return
+	var best: int = -1
+	var bd: int = 1 << 30
+	for hid in state.holdings.keys():
+		var t: Dictionary = state.holdings[hid]
+		if int(t["owner"]) != -1:
+			continue
+		var d: int = HexGrid.distance(t["hex"], home["hex"])
+		if d <= PILGRIM_RANGE and (d < bd or (d == bd and int(hid) < best)):
+			bd = d
+			best = int(hid)
+	if best == -1:
+		return
+	var away: Vector2i = l["hex"]
+	l["hex"] = state.holdings[best]["hex"]
+	cast(state, l, {"ability": "lfg:ability/bless", "holding": best}, events)
+	l["hex"] = away
 
 # ------------------------------------------------------------------ Purge start: tribute, caches
 static func purge_start(state: MatchState, events: Array) -> void:
@@ -215,6 +252,9 @@ static func wants_to_join(state: MatchState, fid: int, l: Dictionary, mission: S
 	var k: Dictionary = kit(l)
 	if bool(k.get("stealth", false)) and mission == "steal":
 		return float(l["hp"]) >= 0.6 * float(l["max_hp"])      # thieves go on stealth jobs even when brittle: unseen, they are not the raiders' target
+	var only: Array = k.get("join_only", [])
+	if not only.is_empty() and not only.has(mission):
+		return false
 	if fragile(l):
 		return false
 	if not bool(k.get("joins_raid", false)) or mission == "scout" or mission == "supply":
@@ -334,6 +374,13 @@ static func try_escape(state: MatchState, l: Dictionary, party: Dictionary, even
 		return true
 	if float(l["hp"]) >= RETREAT_HP * float(l["max_hp"]):
 		return false
+	# a wounded leader gets out only if its kit can (escape.evac, the same number as at the start of a siege); the sturdy ones are caught more often
+	if state.rand_f() >= float(esc.get("evac", EVAC_CHANCE)) * float(Standing.cfg().get("furlough", {}).get("evac_scale", 1.0)):
+		return false
+	return fall_back(state, l, true, events)
+
+## The leader leaves its post: to another own holding within RETREAT_RANGE that is not under siege, else (allow_hide) into open ground until dawn.
+static func fall_back(state: MatchState, l: Dictionary, allow_hide: bool, events: Array) -> bool:
 	var fid: int = int(l["faction"])
 	var here: int = CmdUtil.holding_at(state, l["hex"])
 	var best: int = -1
@@ -348,7 +395,7 @@ static func try_escape(state: MatchState, l: Dictionary, party: Dictionary, even
 		best = hid
 	if best == -1:
 		# no other holding to fall back to: a leader whose kit can flee slips out the back and hides in the open ground until dawn
-		if not bool(esc.get("flee", false)):
+		if not allow_hide:
 			return false
 		var hide: Variant = _hiding_hex(state, l["hex"])
 		if hide == null:
@@ -383,7 +430,8 @@ static func _besieged(state: MatchState, hid: int) -> bool:
 			return true
 	return false
 
-## A siege of one of our holdings has begun: a Warding Aura leader (Halo) casts it at once, whether or not a foe is adjacent (its duration covers the siege).
+## A siege of one of our holdings has begun. Halo casts the Warding Aura and Quill raises the Truce Flag at once (their durations cover the siege); then a leader
+## standing at a holding that cannot be held (the party out-powers it) slips away instead of waiting for the blows (pass 3b: the decapitation deaths).
 static func on_siege_begin(state: MatchState, party: Dictionary, events: Array) -> void:
 	var t: Dictionary = state.holdings.get(int(party["ai"].get("target", -1)), {})
 	if t.is_empty() or int(t["owner"]) < 0:
@@ -391,8 +439,21 @@ static func on_siege_begin(state: MatchState, party: Dictionary, events: Array) 
 	var l: Dictionary = leader_of(state, int(t["owner"]))
 	if l.is_empty() or not bool(state.factions[int(t["owner"])]["is_ai"]):
 		return
-	if String(kit(l).get("cast", "")) == "ward" and HexGrid.distance(l["hex"], t["hex"]) <= 3:
+	var near: bool = HexGrid.distance(l["hex"], t["hex"]) <= 3
+	var which: String = String(kit(l).get("cast", ""))
+	if which == "ward" and near:
 		cast(state, l, {"ability": "lfg:ability/ward"}, events)
+	elif which == "truce" and near:
+		cast(state, l, {"ability": "lfg:ability/truce"}, events)
+	if HexGrid.distance(l["hex"], t["hex"]) > 1 or Combat.has_effect(state, l, "truce") or int(l["ai"].get("party", -1)) != -1:
+		return
+	var att: float = Conquest.attacker_power(state, {}, AIFactions.troops_of(party))
+	var strike: bool = bool(party["ai"].get("strike", false))      # a decapitation raid comes for the leader, not the walls: fragile leaders were its default victims
+	if (strike or att * EVAC_RATIO > Conquest.defender_power(state, t)) and state.rand_f() < float((kit(l).get("escape", {}) as Dictionary).get("evac", EVAC_CHANCE)) * float(Standing.cfg().get("furlough", {}).get("evac_scale", 1.0)):
+		fall_back(state, l, true, events)      # fragile kits get out more often than sturdy ones; a leader can still be caught and killed
+
+const EVAC_RATIO := 0.85
+const EVAC_CHANCE := 0.5
 
 ## Stealth job resolution: the thief picks the pocket of the holding's leader if it stands at the door (a real Pickpocket through Abilities.use).
 static func pickpocket_job(state: MatchState, party: Dictionary, target_hid: int, events: Array) -> void:

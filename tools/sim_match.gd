@@ -15,6 +15,7 @@ func _init() -> void:
 		if a.begins_with("--seed="): seed_v = int(a.get_slice("=", 1))
 		elif a.begins_with("--days="): days = int(a.get_slice("=", 1))
 		elif a.begins_with("--out="): out = a.get_slice("=", 1)
+		elif a.begins_with("--over="): apply_overrides(a.get_slice("=", 1))
 	var res: Dictionary = run(seed_v, days)
 	var txt: String = JSON.stringify(res, "  ")
 	if out != "":
@@ -23,6 +24,27 @@ func _init() -> void:
 	else:
 		print(txt)
 	quit()
+
+## Experiment overrides (tuning runs only, never shipped data): a JSON file {"ranks": {section: {key: v}}, "mods": {"judd": {key: v}}, "kits": {"judd": {key: v}}}
+## is merged onto the loaded content before the match is built, so a variant can be measured without touching data/.
+static func apply_overrides(path: String) -> void:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (parsed is Dictionary):
+		return
+	var over: Dictionary = parsed
+	for sec in (over.get("ranks", {}) as Dictionary).keys():
+		var tgt: Dictionary = Content.ranks_cfg().get(sec, {})
+		for k in (over["ranks"][sec] as Dictionary).keys():
+			tgt[k] = over["ranks"][sec][k]
+	for c in (over.get("mods", {}) as Dictionary).keys():
+		var cd: Dictionary = Content.class_def("lfg:class/" + String(c))
+		for k in (over["mods"][c] as Dictionary).keys():
+			if cd.has("mods"):
+				(cd["mods"] as Dictionary)[k] = over["mods"][c][k]
+	for c2 in (over.get("kits", {}) as Dictionary).keys():
+		var kd: Dictionary = Content.ai_kit("lfg:class/" + String(c2))
+		for k in (over["kits"][c2] as Dictionary).keys():
+			kd[k] = over["kits"][c2][k]
 
 static func build_world(seed_v: int, rng: RandomNumberGenerator) -> Dictionary:
 	var st: MatchState = Setup.build(seed_v, &"lfg:class/judd", {"ai_log": true, "ai_classes": false})
@@ -66,6 +88,9 @@ static func build_world(seed_v: int, rng: RandomNumberGenerator) -> Dictionary:
 		order[j] = t
 	for fid in range(N):
 		Setup.set_leader_class(st.actors[int(st.factions[fid]["leader"])], "lfg:class/" + order[fid])
+		# (pass 3b) persona is a Latin-square over class and seed, so every class meets every persona equally often and persona noise cancels out of the class table
+		if not bool(OS.get_cmdline_user_args().has("--random-personas")):
+			st.factions[fid]["persona"] = personas[(seed_v + CLASSES.find(order[fid])) % 4]
 	Standing.init_state(st)
 	return {"state": st, "order": order}
 
@@ -81,8 +106,10 @@ static func run(seed_v: int, days: int) -> Dictionary:
 		meta[fid] = {"class": order[fid], "persona": st.factions[fid]["persona"], "implemented": bool(cd.get("implemented", false)), "elim_day": -1,
 			"elim_cause": "", "leader_kills": 0, "captures": 0, "steals": 0, "deeds": {}, "max_rank": 0, "rank_weeks": [], "nodes": [], "sp_total": 0,
 			"marked_weeks": 0, "tributes": 0, "levy_unpaid": 0, "starve_days": 0, "revolts": 0, "idle_bleed": 0, "parties": 0, "party_leader": 0, "joined_raids": 0,
-			"peak_holdings": 0, "tree_done_week": -1, "pacified": 0, "retreats": 0, "stealth_jobs": 0, "hunt_kills": 0}
+			"peak_holdings": 0, "tree_done_week": -1, "deaths": [], "famine": [], "kit": {}, "hold_series": [], "pacified": 0, "retreats": 0, "stealth_jobs": 0, "hunt_kills": 0}
 	var last_dmg: Dictionary = {}       # actor id -> last damage tag
+	var last_pct: Dictionary = {}       # leader actor id -> hp fraction after its previous wound (what it had before the killing blow)
+	var last_src: Dictionary = {}       # leader actor id -> source actor id of the last wound
 	var kill_causes: Dictionary = {}
 	var leader_dmg: Dictionary = {}
 	var timeline: Array = []
@@ -102,6 +129,7 @@ static func run(seed_v: int, days: int) -> Dictionary:
 	var tick_ms: float = 0.0
 	var tick_n: int = 0
 	var leader_of: Dictionary = {}
+	var day_snap: Dictionary = {}       # faction id -> state of its larder at the last day change (the state at a famine collapse is already wiped)
 	for fid in range(N):
 		leader_of[int(st.factions[fid]["leader"])] = fid
 	while int(st.clock["day"]) <= days and guard < 5000000:
@@ -119,6 +147,11 @@ static func run(seed_v: int, days: int) -> Dictionary:
 						var dtag: String = String(e.get("tag", ""))
 						leader_dmg[dtag] = int(leader_dmg.get(dtag, 0)) + int(e.get("amount", 0))
 					last_dmg[int(e["actor"])] = String(e.get("tag", "")) + ":" + str(int(e.get("source", -1)))
+					if leader_of.has(int(e["actor"])):
+						var va: Dictionary = st.actors[int(e["actor"])]
+						last_src[int(e["actor"])] = int(e.get("source", -1))
+						if int(e.get("hp", 0)) > 0:
+							last_pct[int(e["actor"])] = float(e.get("hp", 0)) / maxf(1.0, float(va["max_hp"]))
 				&"faction_eliminated":
 					var ef: int = int(e["faction"])
 					if meta.has(ef):
@@ -128,7 +161,12 @@ static func run(seed_v: int, days: int) -> Dictionary:
 					last_change_day = day
 				&"famine_collapse":
 					if meta.has(int(e["faction"])):
-						meta[int(e["faction"])]["elim_cause"] = "famine"
+						var ffid: int = int(e["faction"])
+						meta[ffid]["elim_cause"] = "famine"
+						var sn: Dictionary = (day_snap.get(ffid, {}) as Dictionary).duplicate()
+						sn["day"] = day
+						sn["persona"] = String(st.factions[ffid]["persona"])
+						(meta[ffid].get("famine", []) as Array).append(sn)
 				&"actor_died":
 					var vid: int = int(e["actor"])
 					if leader_of.has(vid):
@@ -144,6 +182,17 @@ static func run(seed_v: int, days: int) -> Dictionary:
 						kill_causes[key] = int(kill_causes.get(key, 0)) + 1
 						if meta[vf]["elim_cause"] != "famine":
 							meta[vf]["elim_cause"] = key
+						var vl: Dictionary = st.actors[vid]
+						var hid_at: int = CmdUtil.holding_at(st, e.get("hex", vl["hex"]))
+						var src_a: Dictionary = st.actors.get(int(last_src.get(vid, -1)), {})
+						var kcls: String = ""
+						var kfac: int = -1
+						if not src_a.is_empty():
+							kfac = int(src_a.get("faction", -1))
+							if meta.has(kfac):
+								kcls = String(meta[kfac]["class"])
+						(meta[vf]["deaths"] as Array).append({"day": day, "tag": tag, "src": cf, "killer_class": kcls, "killer_faction": kfac, "at": ("home" if hid_at == int(st.factions[vf]["home"]) else ("own" if hid_at != -1 and int(st.holdings[hid_at]["owner"]) == vf else ("open" if hid_at == -1 else "foreign"))),
+							"hp_before": snappedf(float(last_pct.get(vid, 1.0)), 0.01), "holdings": st.holdings_of(vf).size(), "garrison": (int(st.holdings[hid_at]["garrison"]) if hid_at != -1 else 0)})
 						var kid: int = int(e.get("killer", -1))
 						if st.actors.has(kid) and st.actors[kid]["kind"] != "enemy" and int(st.actors[kid]["faction"]) != vf:
 							var kf: int = int(st.actors[kid]["faction"])
@@ -207,6 +256,10 @@ static func run(seed_v: int, days: int) -> Dictionary:
 			for fid2 in range(N):
 				if st.factions[fid2]["alive"]:
 					var nh: int = st.holdings_of(fid2).size()
+					var gar: int = 0
+					for hh2 in st.holdings_of(fid2):
+						gar += int(st.holdings[hh2]["garrison"])
+					day_snap[fid2] = {"holdings": nh, "garrison": gar, "persons": Economy.persons(st, fid2), "rations": Economy.rations_available(st, fid2), "hunger": int(st.factions[fid2].get("hunger_days", 0))}
 					if nh > int(meta[fid2]["peak_holdings"]):
 						meta[fid2]["peak_holdings"] = nh
 					if nh > peak_any:
@@ -215,6 +268,9 @@ static func run(seed_v: int, days: int) -> Dictionary:
 					var ldr: Dictionary = st.actors[int(st.factions[fid2]["leader"])]
 					if int(meta[fid2]["tree_done_week"]) < 0 and (ldr.get("nodes", []) as Array).size() >= 15:
 						meta[fid2]["tree_done_week"] = int((day - 1) / 7)
+			if day % 14 == 1:
+				for fid3 in range(N):
+					(meta[fid3]["hold_series"] as Array).append(st.holdings_of(fid3).size() if st.factions[fid3]["alive"] else -1)
 			if day % 7 == 1:
 				var row: Dictionary = {"day": day, "alive": 0, "holdings": {}, "rank": {}, "mark": Standing.mark_of(st)}
 				for fid in range(N):
@@ -252,6 +308,8 @@ static func run(seed_v: int, days: int) -> Dictionary:
 		meta[fid]["deed_counts"] = (st.factions[fid].get("dcount", {}) as Dictionary).duplicate()
 		meta[fid]["alive"] = bool(st.factions[fid]["alive"])
 		meta[fid]["final_holdings"] = final_h[order[fid]]
+	for fid in range(N):
+		meta[fid]["kit"] = (st.sim_acc.get("ablog_f", {}) as Dictionary).get(fid, {})
 	var alive_final: Array = []
 	for fid in range(N):
 		if st.factions[fid]["alive"]:

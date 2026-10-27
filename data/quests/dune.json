@@ -1,0 +1,113 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/dune_1",
+   "class": "lfg:class/dune",
+   "line": "dune",
+   "chapter": 1,
+   "title": "Odds and Ends",
+   "intro": "Dune sees a gadget in every offcut. Make a handful and go find what else is lying about.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "craft",
+     "text": "Knock together three gadgets.",
+     "recipe": "lfg:recipe/gadget",
+     "qty": 1
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Replant a derelict farm's furrow and keep what it gives.",
+     "poi": "lfg:poi/derelict_farm",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/gadget": 2
+    },
+    "text": "Spare gadgets"
+   }
+  },
+  {
+   "id": "lfg:quest/dune_2",
+   "class": "lfg:class/dune",
+   "line": "dune",
+   "chapter": 2,
+   "title": "Buried Things",
+   "intro": "The best hiding place is the one nobody wants to dig. Bury something once, and bring back some iron from a wreck.",
+   "requires": [
+    "lfg:quest/dune_1"
+   ],
+   "steps": [
+    {
+     "kind": "ability",
+     "text": "Bury a Smuggler Cache.",
+     "ability": "lfg:ability/cache",
+     "qty": 1
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Pry open a stranded wreck.",
+     "poi": "lfg:poi/wreck",
+     "qty": 1
+    },
+    {
+     "kind": "gather",
+     "text": "Hold four bog iron.",
+     "item": "lfg:item/bog_iron",
+     "qty": 4
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/timber": 4,
+     "lfg:item/stone": 4
+    },
+    "text": "Spare parts"
+   }
+  },
+  {
+   "id": "lfg:quest/dune_3",
+   "class": "lfg:class/dune",
+   "line": "dune",
+   "chapter": 3,
+   "title": "The Better Latch",
+   "intro": "A good latch is mostly iron fittings and a stubborn gate.",
+   "requires": [
+    "lfg:quest/dune_2"
+   ],
+   "steps": [
+    {
+     "kind": "build",
+     "text": "Raise a workbench.",
+     "building": "lfg:building/workbench"
+    },
+    {
+     "kind": "craft",
+     "text": "Make two iron fittings.",
+     "recipe": "lfg:recipe/iron_fittings",
+     "qty": 2
+    },
+    {
+     "kind": "build",
+     "text": "Fit a fortified gate.",
+     "building": "lfg:building/fortified_gate"
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/gadget": 3
+    },
+    "ability_upgrade": {
+     "dmg_taken_mult": -0.15
+    },
+    "title": "Latch-Wright",
+    "text": "Takes 15% less damage (signature upgrade)",
+    "unlock": "lfg:unlock/latch_wright"
+   },
+   "signature": true
+  }
+ ]
+}

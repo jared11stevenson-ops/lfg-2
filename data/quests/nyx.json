@@ -1,0 +1,115 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/nyx_1",
+   "class": "lfg:class/nyx",
+   "line": "nyx",
+   "chapter": 1,
+   "title": "Under the Caps",
+   "intro": "Nyx listens to the grove the way other people listen to rain. Start by visiting the caves that hum back.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Drive the sporelings out of a fungal cave and take what is left.",
+     "poi": "lfg:poi/fungal_cave",
+     "qty": 1
+    },
+    {
+     "kind": "gather",
+     "text": "Keep five mushrooms from the cave floor.",
+     "item": "lfg:item/mushroom",
+     "qty": 5
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/sporebean_seed": 3,
+     "lfg:item/glowfruit_seed": 2
+    },
+    "text": "Seed for the grove"
+   }
+  },
+  {
+   "id": "lfg:quest/nyx_2",
+   "class": "lfg:class/nyx",
+   "line": "nyx",
+   "chapter": 2,
+   "title": "Grove Tending",
+   "intro": "The grove grows crops twice as fast; it only asks that you keep it company and keep the noisy things away.",
+   "requires": [
+    "lfg:quest/nyx_1"
+   ],
+   "steps": [
+    {
+     "kind": "plant",
+     "text": "Plant three seeds.",
+     "crop": "any",
+     "qty": 3
+    },
+    {
+     "kind": "harvest",
+     "text": "Bring in four harvests.",
+     "crop": "any",
+     "qty": 4
+    },
+    {
+     "kind": "defeat",
+     "text": "Chase off three sporelings.",
+     "enemy": "lfg:enemy/sporeling",
+     "qty": 3
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/mushroom": 4,
+     "lfg:item/spore_sac": 2
+    },
+    "text": "A basket of caps"
+   }
+  },
+  {
+   "id": "lfg:quest/nyx_3",
+   "class": "lfg:class/nyx",
+   "line": "nyx",
+   "chapter": 3,
+   "title": "The Quiet Choir",
+   "intro": "Spores sing in threads. Weave a few, and call the swarm once so it learns your voice.",
+   "requires": [
+    "lfg:quest/nyx_2"
+   ],
+   "steps": [
+    {
+     "kind": "ability",
+     "text": "Call a Spore Swarm.",
+     "ability": "lfg:ability/spore_swarm",
+     "qty": 1
+    },
+    {
+     "kind": "build",
+     "text": "Build a loom.",
+     "building": "lfg:building/loom"
+    },
+    {
+     "kind": "craft",
+     "text": "Weave a bolt of silk cloth.",
+     "recipe": "lfg:recipe/silk_cloth",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/spore_silk": 2
+    },
+    "ability_upgrade": {
+     "offgrove_mult": 0.1
+    },
+    "title": "Choir-Keeper",
+    "text": "Less sickly outside groves (signature upgrade)",
+    "unlock": "lfg:unlock/choir_voice"
+   },
+   "signature": true
+  }
+ ]
+}

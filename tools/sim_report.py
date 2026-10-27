@@ -184,3 +184,52 @@ for k in sorted(days_alive, key=lambda c: -sum(days_alive[c]) / len(days_alive[c
     band += 1 if ok else 0
     print(f"{k} | {md:.0f} | {md/mean_days:.2f}x{'' if ok else '  OUT'} | {mp:.2f} | {mp/mean_peak:.2f}x | {pct(sum(elim_c[k]), len(elim_c[k])):.0f}% | {pct(surv[k][12], n):.0f}% | {pct(surv[k][24], n):.0f}% | {wins_c[k]}")
 print(f"classes within 0.5x-2x of the mean days alive: {band}/14; classes eliminated more than 60%: {sum(1 for k in elim_c if pct(sum(elim_c[k]), len(elim_c[k])) > 60)}/14; wins by class: {dict(wins_c)}")
+
+# ================================================================= pass 3b: per-class summary table and the fairness verdicts
+def snap_hold(d, cls, day):
+    best = None
+    for r in d["timeline"]:
+        if r["day"] <= day:
+            best = r
+    return 0 if best is None else best["holdings"].get(cls, 0)
+
+rows = {}
+for k in days_alive:
+    rows[k] = dict(n=0, alive=0, elim=0, days=0, deeds=0, lk=0, kr=0, caps=0, hold=0, hold_nc=0, n_nc=0, peak=0, nodes=0, sp=0, h24=0, h36=0, retreat=0)
+for d in data:
+    for v in d["factions"].values():
+        r = rows[v["class"]]
+        r["n"] += 1; r["alive"] += 1 if v["alive"] else 0; r["elim"] += 1 if v["elim_day"] >= 0 else 0
+        r["days"] += v["elim_day"] if v["elim_day"] >= 0 else d["end_day"] - 1
+        r["deeds"] += sum(v["deeds"].values()); r["lk"] += v["leader_kills"]; r["kr"] += v["deeds"].get("kill_raider", 0)
+        r["caps"] += v["captures"]; r["hold"] += v["final_holdings"]; r["peak"] += v["peak_holdings"]; r["nodes"] += len(v["nodes"]); r["sp"] += v["sp_total"]
+        r["retreat"] += v["retreats"]
+        if not d["total_conquest"]:
+            r["hold_nc"] += v["final_holdings"]; r["n_nc"] += 1
+        r["h24"] += snap_hold(d, v["class"], 169); r["h36"] += snap_hold(d, v["class"], 253)
+mean_hold = sum(r["hold"] / r["n"] for r in rows.values()) / len(rows)
+mean_hold_nc = sum(r["hold_nc"] / max(r["n_nc"], 1) for r in rows.values()) / len(rows)
+mean_h24 = sum(r["h24"] / r["n"] for r in rows.values()) / len(rows)
+mean_h36 = sum(r["h36"] / r["n"] for r in rows.values()) / len(rows)
+total_wins = sum(wins_c.values())
+fair = total_wins / 14.0
+print("\n## Pass 3b per-class summary (markdown)")
+print("| class | survive to end | eliminated | mean days alive | deeds | kills (leader/raider) | captures | final holdings (x mean) | final excl. conquest seeds (x mean) | holdings wk24 (x mean) | holdings wk36 (x mean) | peak | nodes | wins (x fair) |")
+print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+out_land = out_land_nc = out_w24 = out_w36 = 0
+for k in sorted(rows, key=lambda c: -rows[c]["hold"]):
+    r = rows[k]; m = r["n"]
+    x = (r["hold"] / m) / max(mean_hold, 1e-9); xn = (r["hold_nc"] / max(r["n_nc"], 1)) / max(mean_hold_nc, 1e-9)
+    x24 = (r["h24"] / m) / max(mean_h24, 1e-9); x36 = (r["h36"] / m) / max(mean_h36, 1e-9)
+    out_land += 0 if 0.5 <= x <= 2.0 else 1; out_land_nc += 0 if 0.5 <= xn <= 2.0 else 1
+    out_w24 += 0 if 0.5 <= x24 <= 2.0 else 1; out_w36 += 0 if 0.5 <= x36 <= 2.0 else 1
+    wx = (wins_c[k] / fair) if fair > 0 else 0
+    print(f"| {k} | {pct(r['alive'], m):.0f}% | {pct(r['elim'], m):.0f}% | {r['days']/m:.0f} | {r['deeds']/m:.1f} | {r['lk']}/{r['kr']} | {r['caps']/m:.1f} | {r['hold']/m:.2f} ({x:.2f}x) | {r['hold_nc']/max(r['n_nc'],1):.2f} ({xn:.2f}x) | {r['h24']/m:.2f} ({x24:.2f}x) | {r['h36']/m:.2f} ({x36:.2f}x) | {r['peak']/m:.2f} | {r['nodes']/m:.1f} | {wins_c[k]} ({wx:.1f}x) |")
+worst = max(rows, key=lambda c: rows[c]["elim"] / rows[c]["n"])
+print(f"\nVERDICT (seeds={n}): max class elimination {worst} {pct(rows[worst]['elim'], rows[worst]['n']):.0f}% (target <= 75%); classes above 75%: {sum(1 for r in rows.values() if pct(r['elim'], r['n']) > 75)}/14")
+print(f"VERDICT land outside 0.5x-2x of the mean: final holdings {out_land}/14, final holdings excluding conquest seeds {out_land_nc}/14, holdings at week 24 {out_w24}/14, at week 36 {out_w36}/14")
+wl = [k for k in rows if wins_c[k] > 0]
+print(f"VERDICT wins: {total_wins} conquests, {len(wl)} classes won at least once; fair share {fair:.2f}; classes with wins outside 0.5x-2x of fair: {sum(1 for k in wl if not 0.5 <= wins_c[k] / fair <= 2.0) if fair > 0 else 0}/{len(wl)}")
+tb = sum(d["ability_log"].get("track", {}).get("ok", 0) for d in data); tba = sum(sum(d["ability_log"].get("track", {}).values()) for d in data)
+tr = sum(d["ability_log"].get("truce", {}).get("ok", 0) for d in data); tra = sum(sum(d["ability_log"].get("truce", {}).values()) for d in data)
+print(f"VERDICT bot triggers: track {tba} attempts ({tb} ok), truce flag {tra} attempts ({tr} ok), leader retreats {sum(r['retreat'] for r in rows.values())}")

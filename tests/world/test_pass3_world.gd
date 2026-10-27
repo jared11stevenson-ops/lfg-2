@@ -131,19 +131,17 @@ func test_quest_panel_tabs_cards_and_signals() -> void:
 	eq(_got[-1], "abandon:lfg:quest/mira_1", "abandon signal")
 	eq(UiKit.small_buttons(p).size(), 0, "touch-sized buttons")
 	p.show_tab("later")
-	eq(p.rows_for("later").size() >= 2, true, "locked chapters and the coming-soon stub are listed under LATER")
+	eq(p.rows_for("later").size() >= 2, true, "locked chapters are listed under LATER")
 	check(p.tab_buttons["later"].text.begins_with("LATER ("), "tab counts: %s" % p.tab_buttons["later"].text)
 	p.free()
 	var v: MatchState = _state("lfg:class/vex")
 	var pv := QuestPanel.new()
 	pv.set_model(Quests.journal(v, v.actors[1]))
+	pv.show_tab("available")
+	check(pv.buttons.has("accept:lfg:quest/vex_1"), "Vex's finished first chapter can be accepted")
 	pv.show_tab("later")
-	var stub_ok: bool = false
 	for r in pv.rows_for("later"):
-		if String(r["id"]) == "lfg:quest/vex_1" and not bool(r["implemented"]):
-			stub_ok = true
-	check(stub_ok, "Vex's stub shows as coming soon")
-	check(not pv.buttons.has("accept:lfg:quest/vex_1"), "and cannot be accepted")
+		check(bool(r["implemented"]), "nothing in LATER is a stub any more (%s)" % r["id"])
 	pv.free()
 
 func test_quest_panel_steps_progress_and_theme_nod() -> void:

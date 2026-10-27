@@ -253,6 +253,22 @@ func test_decapitation_candidates_use_the_lower_power_ratio_in_a_hunt() -> void:
 	check(int(Standing.cfg()["hunt"]["muster_range"]) >= 30, "and muster the whole realm")
 
 # ------------------------------------------------------------ leader escape, stealth, ward
+## Wounded-leader escape is a roll against the kit's escape.evac (pass 3b); the old tests want it certain.
+func _sure_escape() -> void:
+	for cid in Content.classes().keys():
+		var k: Dictionary = Content.ai_kit(String(cid))
+		if not k.has("escape"):
+			k["escape"] = {}
+		(k["escape"] as Dictionary)["evac_saved"] = (k["escape"] as Dictionary).get("evac", 0.5)
+		(k["escape"] as Dictionary)["evac"] = 1.0
+
+func _restore_escape() -> void:
+	for cid in Content.classes().keys():
+		var e: Dictionary = Content.ai_kit(String(cid))["escape"]
+		if e.has("evac_saved"):
+			e["evac"] = e["evac_saved"]
+			e.erase("evac_saved")
+
 func _classed_ai(s: MatchState, fid: int, cls: String) -> Dictionary:
 	var l: Dictionary = Standing.leader_of(s, fid)
 	Setup.set_leader_class(l, "lfg:class/" + cls)
@@ -266,6 +282,7 @@ func _party_at(s: MatchState, fid: int, hex: Vector2i, target: int, state_name: 
 	return p
 
 func test_wounded_leader_falls_back_to_another_holding() -> void:
+	_sure_escape()
 	var s: MatchState = _ai()
 	_purge(s)
 	var l: Dictionary = _classed_ai(s, 3, "judd")
@@ -292,14 +309,21 @@ func test_wounded_leader_falls_back_to_another_holding() -> void:
 	for hid in s.holdings_of(3):
 		if hid != int(s.factions[3]["home"]):
 			s.holdings[hid]["owner"] = -1
-	check(not AILeaders.try_escape(s, l, party, []), "no other holding: it stays")
+	l["hex"] = s.holdings[int(s.factions[3]["home"])]["hex"]
+	var ev0: Array = []
+	check(AILeaders.try_escape(s, l, party, ev0), "no other holding: every leader slips out into the open (pass 3b)")
+	eq(int(ev0[0]["to"]), -1, "hid, did not fall back")
 	# a besieged neighbour is no refuge
+	l["hex"] = s.holdings[int(s.factions[3]["home"])]["hex"]
 	fine["owner"] = 3
 	var p2: Dictionary = _party_at(s, 6, fine["hex"] + HexGrid.DIRS[2], int(fine["id"]))
-	check(not AILeaders.try_escape(s, l, party, []), "a holding under siege is no refuge")
+	var ev1: Array = []
+	check(AILeaders.try_escape(s, l, party, ev1) and int(ev1[0]["to"]) == -1, "a holding under siege is no refuge: it hides instead")
 	check(p2["alive"], "setup")
+	_restore_escape()
 
 func test_a_brittle_leader_with_nowhere_to_go_hides_in_the_open_until_dawn() -> void:
+	_sure_escape()
 	var s: MatchState = _ai()
 	_purge(s)
 	var vex: Dictionary = _classed_ai(s, 3, "vex")
@@ -316,11 +340,12 @@ func test_a_brittle_leader_with_nowhere_to_go_hides_in_the_open_until_dawn() -> 
 	eq(int(r["to"]), -1, "the event says it hid in the open")
 	AILeaders.dawn(s, [])
 	eq(vex["hex"], home_hex, "back at the holding at dawn")
-	# a class without the trick has nowhere to go
+	# every class can hide now (pass 3b), but only the slippery ones also dodge blows
 	var j: Dictionary = _classed_ai(s, 4, "judd")
 	j["hp"] = 5
 	var p2: Dictionary = _party_at(s, 6, j["hex"] + HexGrid.DIRS[2], int(s.factions[4]["home"]))
-	check(not AILeaders.try_escape(s, j, p2, []), "Judd stands and fights")
+	check(AILeaders.try_escape(s, j, p2, []), "Judd, wounded, hides too")
+	_restore_escape()
 
 func test_slippery_classes_dodge_some_blows() -> void:
 	var s: MatchState = _ai()

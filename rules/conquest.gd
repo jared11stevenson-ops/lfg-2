@@ -5,6 +5,8 @@ const MAX_COMMIT := 30
 const STEAL_CAP := 5
 const CAPTURE_RANGE := 1
 const SUPPLY_RANGE := 14
+const GADGET_DEFENCE := 1.5
+const GADGET_CAP := 10
 
 static func _active(state: MatchState, h: Dictionary, key: String) -> bool:
 	return float(h.get(key, 0.0)) > float(state.clock["elapsed"])
@@ -15,6 +17,7 @@ static func defender_power(state: MatchState, h: Dictionary) -> float:
 	if not breached:
 		for b in h["buildings"]:
 			p += float(Content.building(String(b)).get("defense", 0))
+		p += GADGET_DEFENCE * float(mini(Inv.count(h["store"], "lfg:item/gadget"), GADGET_CAP))      # trip-wires and clackers: the Tinker's stock of gadgets is a defence in itself
 	var of: int = int(h["owner"])
 	if of >= 0:
 		var l: Dictionary = state.actors.get(int(state.factions[of]["leader"]), {})
@@ -22,6 +25,10 @@ static func defender_power(state: MatchState, h: Dictionary) -> float:
 			p += float(l["atk"]) * 2.0
 	if breached:
 		p *= 0.75
+	if of >= 0:
+		var hl: Dictionary = state.actors.get(int(state.factions[of]["leader"]), {})
+		if not hl.is_empty() and hl["alive"]:
+			p *= float(Combat.class_mod(hl, "home_def", 1.0))      # class home ground: lookouts, snares, hideouts (data/classes.json mods)
 	if of >= 0 and state.holdings_of(of).size() == 1:
 		p *= float(Standing.cfg().get("hold", {}).get("last_stand", 1.0))      # a faction down to its last holding fights for its life
 	if _active(state, h, "rally"):

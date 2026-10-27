@@ -291,6 +291,10 @@ func test_personas_behave_differently_over_a_purge() -> void:
 	var traded: int = 0
 	var hired: int = 0
 	var missions: Dictionary = {}
+	var owner0: Dictionary = {}
+	for hid in s.holdings.keys():
+		owner0[int(hid)] = int(s.holdings[hid]["owner"])
+	var rival_raids: Dictionary = {"trader": 0, "turtle": 0}
 	var all: Array = tick_all(s, DAY * 6.0, 5.0)           # through peace and into the warning
 	for e in all:
 		if String(e["type"]) == "ai_built":
@@ -305,13 +309,15 @@ func test_personas_behave_differently_over_a_purge() -> void:
 			var per: String = s.factions[int(e["by"])]["persona"]
 			by_persona[per] += 1
 			missions[per] = String(e["mission"])
-	eq(int(by_persona["trader"]), 0, "traders never raid")
-	eq(int(by_persona["turtle"]), 0, "turtles never raid")
+			if rival_raids.has(per) and int(owner0.get(int(e["target"]), -1)) >= 0 and e["mission"] != "supply" and e["mission"] != "scout":
+				rival_raids[per] += 1
+	eq(int(rival_raids["trader"]), 0, "traders never raid a rival (they may settle unowned villages since pass 3b)")
+	eq(int(rival_raids["turtle"]), 0, "turtles never raid a rival")
 	check(int(by_persona["raider"]) + int(by_persona["hoarder"]) > 0, "raiders/hoarders send parties (%s)" % str(by_persona))
 	if missions.has("raider"):
 		eq(missions["raider"], "capture", "raiders capture")
 	if missions.has("hoarder"):
-		eq(missions["hoarder"], "steal", "hoarders steal")
+		check(missions["hoarder"] == "steal" or missions["hoarder"] == "capture", "hoarders steal, or settle an unowned village first (pass 3b)")
 	check(int(built["turtle"]) > 0, "turtles fortify in peace (%s)" % str(built))
 	check(traded > 0, "traders trade in peace (%d)" % traded)
 	check(hired > 0, "traders hire mercenaries on the warning day (%d)" % hired)

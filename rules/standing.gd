@@ -557,7 +557,9 @@ static func dawn_upkeep(state: MatchState, events: Array) -> void:
 			if idle > float(ib["idle_days"]) * state.day_seconds and not is_marked(state, int(fid)):
 				var amt: int = mini(int(ib["cap"]), int(ib["ration_base"]) + wk / int(ib["week_div"]))
 				var hh: Dictionary = state.holdings[hs[0]]
-				var short: int = _take_item(state, int(fid), Economy.RATION, amt) + _take_coin(state, int(fid), amt)
+				# (pass 3b) the bleed only takes the surplus: it nudges idle holders to act, it no longer starves them to death (43 famine collapses in 24 matches)
+				var amt_r: int = mini(amt, maxi(0, Economy.rations_available(state, int(fid)) - Economy.persons(state, int(fid))))
+				var short: int = _take_item(state, int(fid), Economy.RATION, amt_r) + _take_coin(state, int(fid), amt)
 				if short > 0 and int(hh["garrison"]) > 0:
 					hh["garrison"] = int(hh["garrison"]) - 1
 				events.append({"type": &"idle_bleed", "faction": fid, "ai": bool(f["is_ai"]), "amount": amt, "short": short})

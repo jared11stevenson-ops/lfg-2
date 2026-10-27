@@ -56,7 +56,8 @@
    "implemented": true,
    "mods": {
     "max_hp_mult": 0.7,
-    "alchemist": 1
+    "alchemist": 1,
+    "home_def": 1.2
    },
    "ability": {
     "id": "lfg:ability/plague_cloud",
@@ -89,7 +90,8 @@
    },
    "implemented": true,
    "mods": {
-    "ration_need": 2
+    "ration_need": 2,
+    "home_def": 1.1
    },
    "ability": {
     "id": "lfg:ability/rage",
@@ -130,7 +132,8 @@
    "mods": {
     "steal_bonus": 0.35,
     "sell_mult": 1.2,
-    "max_hp_mult": 0.75
+    "max_hp_mult": 0.75,
+    "home_def": 1.45
    },
    "ability": {
     "id": "lfg:ability/pickpocket",
@@ -164,7 +167,8 @@
    "implemented": true,
    "mods": {
     "ration_bonus": 1,
-    "atk_mult": 0.5
+    "atk_mult": 0.5,
+    "home_def": 0.9
    },
    "ability": {
     "id": "lfg:ability/field_dressing",
@@ -197,7 +201,8 @@
    "implemented": true,
    "mods": {
     "walk_mult": 1.35,
-    "mine_bonus": 1
+    "mine_bonus": 1,
+    "home_def": 1.3
    },
    "ability": {
     "id": "lfg:ability/sentinel_post",
@@ -240,7 +245,8 @@
    "mods": {
     "walk_mult": 0.9,
     "road_mult": 0.6,
-    "carry_cap": 30
+    "carry_cap": 30,
+    "home_def": 1.3
    },
    "ability": {
     "id": "lfg:ability/dash",
@@ -274,7 +280,8 @@
    "implemented": true,
    "mods": {
     "noise": 3,
-    "hunt_meat": 1
+    "hunt_meat": 1,
+    "home_def": 1.4
    },
    "ability": {
     "id": "lfg:ability/snare",
@@ -319,7 +326,8 @@
    "mods": {
     "buy_mult": 0.85,
     "sell_mult": 1.25,
-    "dmg_taken_mult": 1.25
+    "dmg_taken_mult": 1.25,
+    "home_def": 1.25
    },
    "ability": {
     "id": "lfg:ability/truce",
@@ -355,7 +363,8 @@
    "mods": {
     "build_cost_mult": 0.75,
     "walk_mult": 1.25,
-    "siege_mult": 1.5
+    "siege_mult": 1.5,
+    "home_def": 1.1
    },
    "ability": {
     "id": "lfg:ability/siege_ram",
@@ -388,7 +397,8 @@
    "mods": {
     "grove_growth": 1,
     "offgrove_mult": 0.75,
-    "offgrove_regen": 0.5
+    "offgrove_regen": 0.5,
+    "home_def": 1.2
    },
    "ability": {
     "id": "lfg:ability/spore_swarm",
@@ -404,7 +414,7 @@
   {
    "id": "lfg:class/rook",
    "name": "Banner/Warlord",
-   "peace_perk": "Banner: garrison ration upkeep is 30% lower.",
+   "peace_perk": "Banner: garrison ration upkeep is 10% lower.",
    "purge_kit": "Rally Banner: for 20s every holding of yours within 8 hexes defends at +40% and sends out troops at +25%; you hit 25% harder.",
    "weakness": "Marked leader: wild creatures notice you from 2 hexes further and rivals favour targets near you.",
    "stats": {
@@ -422,8 +432,9 @@
    },
    "implemented": true,
    "mods": {
-    "upkeep_mult": 0.7,
-    "marked": 2
+    "upkeep_mult": 0.9,
+    "marked": 2,
+    "home_def": 0.85
    },
    "ability": {
     "id": "lfg:ability/rally",
@@ -458,7 +469,8 @@
    "mods": {
     "tinker": 1,
     "gadget_build_mult": 0.5,
-    "dmg_taken_mult": 1.25
+    "dmg_taken_mult": 1.25,
+    "home_def": 1.5
    },
    "ability": {
     "id": "lfg:ability/cache",
@@ -472,7 +484,7 @@
   {
    "id": "lfg:class/halo",
    "name": "Pilgrim/Warden",
-   "peace_perk": "Pilgrim: Bless an owned holding; for 2 days its crops yield +1 and its garrison eats nothing.",
+   "peace_perk": "Pilgrim: Bless an owned holding; for 2 days its crops yield +1 and its garrison eats nothing. Blessing an unowned village in reach (once a week, up to six holdings) makes it a hamlet of yours.",
    "purge_kit": "Warding Aura: for 15s you and allies within 3 take 40% less damage; holdings within 3 defend +50% and resist theft.",
    "weakness": "Pacifist: cannot attack people, capture or steal (only wild creatures).",
    "stats": {
@@ -491,7 +503,8 @@
    "implemented": true,
    "mods": {
     "pacifist": 1,
-    "bless": 1
+    "bless": 1,
+    "settle": 6
    },
    "ability": {
     "id": "lfg:ability/ward",

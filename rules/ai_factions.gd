@@ -57,7 +57,7 @@ static func route(state: MatchState, from: Vector2i, to: Vector2i) -> Array[Vect
 		c.assign(_routes[key])
 		return c
 	var w: Dictionary = state.world
-	var p: Array[Vector2i] = HexGrid.find_path(from, to, func(h: Vector2i) -> float: return WorldGen.move_cost(w, h), 4600 if hunting(state) else 2500)
+	var p: Array[Vector2i] = HexGrid.find_path(from, to, func(h: Vector2i) -> float: return WorldGen.move_cost(w, h), 4600 if state.week() >= int(Standing.cfg().get("hunt", {}).get("min_week", 12)) else 2500)
 	if _routes.size() > 400:
 		_routes.clear()
 	_routes[key] = p.duplicate()
@@ -79,6 +79,8 @@ static func dawn(state: MatchState, events: Array) -> void:
 		var weak_st: int = int(Standing.cfg()["stability"]["weak"])
 		var ai_below: int = int(Standing.cfg().get("hold", {}).get("ai_below", 75))
 		var can_pay: bool = int(f.get("hunger_days", 0)) == 0 and Economy.rations_available(state, int(fid)) >= 2 * Economy.persons(state, int(fid))      # never spend the last rations
+		var levy_on: bool = hunting(state, int(fid)) and Economy.rations_available(state, int(fid)) >= 3 * Economy.persons(state, int(fid))
+		var fed: bool = int(f.get("hunger_days", 0)) == 0 and float(Economy.rations_available(state, int(fid))) >= float(Economy.persons(state, int(fid))) * float(Standing.cfg().get("furlough", {}).get("recruit_days", 1.5))
 		for hid in state.holdings_of(fid):
 			var h: Dictionary = state.holdings[hid]
 			if can_pay and int(h.get("stab", 100)) < ai_below and not Standing.pacified(state, h):
@@ -105,10 +107,15 @@ static func dawn(state: MatchState, events: Array) -> void:
 				var per: int = 3 if item == "lfg:item/saltroot" else 2
 				var out: int = 2 if item == "lfg:item/saltroot" else 1
 				var batches: int = Inv.count(h["store"], item) / per
-				if batches > 0 and Inv.room_for(h["store"], {"lfg:item/ration": batches * (out + cbonus)}):
+				var made: int = batches * out + (batches * cbonus) / 2      # (pass 3b) a cook's bonus is worth half a ration per batch in the abstract kitchen: x2 food made Oren the surest conqueror
+				if batches > 0 and Inv.room_for(h["store"], {"lfg:item/ration": made}):
 					Inv.remove_all(h["store"], {item: batches * per})
-					Inv.add_all(h["store"], {"lfg:item/ration": batches * (out + cbonus)})
-					cooked += batches * (out + cbonus)
+					Inv.add_all(h["store"], {"lfg:item/ration": made})
+					cooked += made
+			var kg: int = int(Standing.cfg().get("subsist", {}).get("per_holding", 0)) - cooked
+			if kg > 0 and Inv.room_for(h["store"], {"lfg:item/ration": kg}):
+				Inv.add_all(h["store"], {"lfg:item/ration": kg})      # the commoners' kitchen gardens: no holding starves its own garrison out on the scarcity curve (pass 3b)
+				cooked += kg
 			if cooked > 0:
 				events.append({"type": &"ai_farmed", "faction": fid, "ai": true, "holding": hid, "rations": cooked})
 			salvage(state, h)
@@ -117,16 +124,29 @@ static func dawn(state: MatchState, events: Array) -> void:
 			var comfy: bool = persona != "hoarder" or Inv.count(h["store"], "lfg:item/ration") >= 3 * maxi(1, int(h["garrison"]))
 			if persona == "trader" and Inv.count(h["store"], "lfg:item/coin") < 3 * rec + 8:
 				comfy = false          # traders keep a coin reserve for the warning-day hiring
+			if not fed:
+				comfy = false          # no recruiting on an empty larder (pass 3b: the famine collapses came from garrisons nobody could feed)
 			var reserve: int = 9 if (persona != "raider" and state.day_of_week() >= 4 and int(hid) == int(f["home"])) else 0      # tribute money for the Purge
 			if comfy and int(h["garrison"]) < cap and Inv.count(h["store"], "lfg:item/coin") >= 3 * rec + reserve:
 				Inv.remove_all(h["store"], {"lfg:item/coin": 3 * rec})
 				h["garrison"] = mini(cap, int(h["garrison"]) + rec)
+			if levy_on and int(h["garrison"]) < cap:
+				var lc: Dictionary = Standing.cfg()["hunt"]
+				var want: int = mini(cap - int(h["garrison"]), int(lc.get("levy_per_day", 2)))
+				var cost_r: int = int(lc.get("levy_rations", 2))
+				want = mini(want, maxi(0, Inv.count(h["store"], "lfg:item/ration") - 4) / maxi(1, cost_r))
+				if want > 0:
+					Inv.remove_all(h["store"], {"lfg:item/ration": want * cost_r})
+					h["garrison"] = int(h["garrison"]) + want      # a realm that cannot pay in coin raises its army from the granaries
 			if persona == "turtle" or int(state.clock["day"]) % 2 == 0:
 				_build(state, int(fid), persona, int(hid), events)
 		if persona == "trader" or String(lead.get("class_id", "")) == "lfg:class/quill":
 			_trade(state, int(fid), events)
 			if state.day_of_week() == 6 and persona == "trader":
 				_hire(state, int(fid), events)
+		elif not fed:
+			_trade(state, int(fid), events, false)       # any hungry governor buys food at the nearest market
+		_furlough(state, int(fid), events)
 		scout(state, int(fid))
 	AILeaders.dawn(state, events)
 
@@ -189,7 +209,26 @@ static func _build(state: MatchState, fid: int, persona: String, hid: int, event
 		events.append({"type": &"ai_built", "faction": fid, "ai": true, "holding": hid, "building": b["id"]})
 		return
 
-static func _trade(state: MatchState, fid: int, events: Array) -> void:
+## A governor with less than a day of food sends a share of every garrison home (they stop eating); the leader and the last few troops stay.
+static func _furlough(state: MatchState, fid: int, events: Array) -> void:
+	var fc: Dictionary = Standing.cfg().get("furlough", {})
+	if fc.is_empty():
+		return
+	var need: int = Economy.persons(state, fid)
+	if need <= 0 or float(Economy.rations_available(state, fid)) >= float(fc["below_days"]) * float(need):
+		return
+	var sent: int = 0
+	for hid in state.holdings_of(fid):
+		var h: Dictionary = state.holdings[hid]
+		var g: int = int(h["garrison"])
+		var n: int = mini(g - int(fc["keep"]), int(ceil(float(g) * float(fc["share"]))))
+		if n > 0:
+			h["garrison"] = g - n
+			sent += n
+	if sent > 0:
+		events.append({"type": &"furlough", "faction": fid, "ai": true, "count": sent})
+
+static func _trade(state: MatchState, fid: int, events: Array, sell_goods: bool = true) -> void:
 	var home: Dictionary = state.holdings.get(int(state.factions[fid]["home"]), {})
 	if home.is_empty() or int(home["owner"]) != fid:
 		return
@@ -211,7 +250,7 @@ static func _trade(state: MatchState, fid: int, events: Array) -> void:
 		tl = {}
 	# sell surplus goods
 	var sold: int = 0
-	for item in ["lfg:item/saltroot", "lfg:item/timber", "lfg:item/stone", "lfg:item/glowfruit"]:
+	for item in (["lfg:item/saltroot", "lfg:item/timber", "lfg:item/stone", "lfg:item/glowfruit"] if sell_goods else []):
 		var keep: int = 10 if item == "lfg:item/glowfruit" else 4
 		var q: int = Inv.count(st, item) - keep
 		if q <= 0:
@@ -244,7 +283,7 @@ static func _trade(state: MatchState, fid: int, events: Array) -> void:
 
 # ---------------------------------------------------------------- fog / intel
 static func vision_of(state: MatchState, h: Dictionary) -> int:
-	var v: int = VISION + 2 * mini(state.week(), 8) + (int(Standing.cfg()["hunt"]["range_bonus"]) if hunting(state) else 0)      # factions learn the map as the weeks pass
+	var v: int = VISION + 2 * mini(state.week(), 8) + (int(Standing.cfg()["hunt"]["range_bonus"]) if hunting(state, int(h["owner"])) else 0)      # factions learn the map as the weeks pass
 	for b in h["buildings"]:
 		v = maxi(v, int(Content.building(String(b)).get("vision", 0)) + 4)
 	return v
@@ -295,9 +334,34 @@ static func _marked_near(state: MatchState, hex: Vector2i) -> bool:
 
 ## The last-rival hunt (data/ranks.json "hunt"): once few factions live, every survivor that can raid does, bigger and farther, and the weakest
 ## survivor's home (where its leader sits) becomes the prize. Without it the anti-snowball brakes leave the map in a permanent stalemate.
-static func hunting(state: MatchState) -> bool:
+static func hunting(state: MatchState, fid: int = -1) -> bool:
 	var hc: Dictionary = Standing.cfg().get("hunt", {})
-	return not hc.is_empty() and state.week() >= int(hc["min_week"]) and Standing.live_count(state) <= int(hc["live_at"])
+	if hc.is_empty() or state.week() < int(hc["min_week"]):
+		return false
+	if Standing.live_count(state) <= int(hc["live_at"]) or state.week() >= int(hc.get("late_week", 1 << 20)):      # late_week: the Reckoning comes whatever the head count
+		return true
+	return fid >= 0 and conqueror(state, fid)
+
+static var _dom: Dictionary = {}      # holdings per owner, refreshed every 10 s of game time (tests call reset_dominance after editing ownership)
+
+static func reset_dominance() -> void:
+	_dom = {}
+
+## A faction that has outgrown the map (hunt.conquer_at holdings, or hunt.conquer_share of all of them) plays the last-rival hunt for itself, whoever else is alive:
+## the way a runaway leader turns into a Total Conquest without waiting for the field to thin out.
+static func conqueror(state: MatchState, fid: int) -> bool:
+	var hc: Dictionary = Standing.cfg().get("hunt", {})
+	if hc.is_empty() or not hc.has("conquer_at"):
+		return false
+	var key: String = "%d:%d:%d" % [state.get_instance_id(), state.seed, int(float(state.clock["elapsed"]) / 10.0)]
+	if String(_dom.get("key", "")) != key:
+		var cnt: Dictionary = {}
+		for h in state.holdings.values():
+			if int(h["owner"]) >= 0:
+				cnt[int(h["owner"])] = int(cnt.get(int(h["owner"]), 0)) + 1
+		_dom = {"key": key, "cnt": cnt, "total": state.holdings.size()}
+	var n: int = int((_dom["cnt"] as Dictionary).get(fid, 0))
+	return n >= int(hc["conquer_at"]) or float(n) >= float(hc["conquer_share"]) * float(_dom["total"])
 
 ## The living faction (other than `except`) with the least land and garrison: the hunters' quarry.
 static func weakest_survivor(state: MatchState, except: int) -> int:
@@ -319,19 +383,19 @@ static func weakest_survivor(state: MatchState, except: int) -> int:
 			best = int(fid)
 	return best
 
-static func max_parties(state: MatchState) -> int:
-	return mini(4, MAX_PARTIES + state.week() / 12) + (2 if hunting(state) else 0)
+static func max_parties(state: MatchState, fid: int = -1) -> int:
+	return mini(4, MAX_PARTIES + state.week() / 12) + (2 if hunting(state, fid) else 0)
 
-static func max_dispatch(state: MatchState) -> int:
+static func max_dispatch(state: MatchState, fid: int = -1) -> int:
 	var e: Dictionary = Standing.cfg()["escalation"]
 	var d: int = mini(int(e["dispatch_cap"]), int(e["dispatch_base"]) + state.week() / int(e["dispatch_week_div"]))
-	return d + (int(Standing.cfg()["hunt"]["dispatch_extra"]) if hunting(state) else 0)
+	return d + (int(Standing.cfg()["hunt"]["dispatch_extra"]) if hunting(state, fid) else 0)
 
 ## Party size grows with the weeks (each Purge is larger than the last).
-static func party_cap(state: MatchState) -> int:
+static func party_cap(state: MatchState, fid: int = -1) -> int:
 	var e: Dictionary = Standing.cfg()["escalation"]
 	var c: int = mini(int(e["party_cap"]), int(e["party_cap_base"]) + state.week() / int(e["party_week_div"]))
-	return c * (int(Standing.cfg()["hunt"]["party_mult"]) if hunting(state) else 1)
+	return c * (int(Standing.cfg()["hunt"]["party_mult"]) if hunting(state, fid) else 1)
 
 ## The persona the faction acts as: passive personas that have grown strong turn ambitious later (the way out of a permanent stalemate).
 static func effective_persona(state: MatchState, fid: int) -> String:
@@ -340,7 +404,7 @@ static func effective_persona(state: MatchState, fid: int) -> String:
 	var l: Dictionary = Standing.leader_of(state, fid)
 	if not l.is_empty() and int(Combat.class_mod(l, "pacifist", 0)) > 0:
 		return "turtle"          # a pacifist class never raids, whatever the persona says
-	if hunting(state):
+	if hunting(state, fid):
 		return "raider"
 	if p != "raider" and state.week() >= 6 and Standing.rank_of(state, fid) >= 3:
 		return "raider"
@@ -360,10 +424,9 @@ static func purge_round(state: MatchState, events: Array) -> int:
 	# rotate the start so the same faction does not always get the dispatch slots
 	var rot: int = int(now / maxf(period(state), 0.01)) % maxi(1, fids.size())
 	fids = fids.slice(rot) + fids.slice(0, rot)
-	var limit: int = max_dispatch(state)
 	for fid in fids:
-		if acted >= limit:
-			break
+		if acted >= max_dispatch(state, int(fid)):
+			continue
 		var f: Dictionary = state.factions[fid]
 		if not f["is_ai"] or not f["alive"]:
 			continue
@@ -371,7 +434,7 @@ static func purge_round(state: MatchState, events: Array) -> int:
 		if float(f.get("next_act", 0.0)) > now:
 			continue
 		var np: int = parties_of(state, int(fid)).size()
-		var raid_cap: int = 1 if persona == "hoarder" else max_parties(state)
+		var raid_cap: int = 1 if persona == "hoarder" else max_parties(state, int(fid))
 		if persona != "raider" and persona != "hoarder":
 			raid_cap = 0
 		var lead0: Dictionary = Standing.leader_of(state, int(fid))
@@ -380,7 +443,9 @@ static func purge_round(state: MatchState, events: Array) -> int:
 			raid_cap = 0
 		elif raid_cap == 0 and state.week() >= 3 and (_bias(state, int(fid), "capture") >= 2 or _bias(state, int(fid), "steal") >= 2):
 			raid_cap = 1       # the class, not the persona, decides: a warlord or a thief raids even in a trader's or turtle's cloak
-		if np >= max_parties(state):
+		elif raid_cap == 0 and state.week() >= 1:
+			raid_cap = 1       # settlers (pass 3b): every faction may take unowned villages whatever its persona; only raiders and warlords take land from rivals
+		if np >= max_parties(state, int(fid)):
 			continue
 		var home_id: int = int(f["home"])
 		if not state.holdings.has(home_id) or int(state.holdings[home_id]["owner"]) != fid:
@@ -406,10 +471,11 @@ static func _bias(state: MatchState, fid: int, key: String) -> int:
 	return int((AILeaders.kit(l).get("bias", {}) as Dictionary).get(key, 0))
 
 static func _plan(state: MatchState, fid: int, persona: String, home_id: int, events: Array) -> bool:
-	var order: Array = ["capture", "steal"] if persona == "raider" else ["steal", "capture"]
+	var settler: bool = persona != "raider" and _bias(state, fid, "capture") < 2      # takes unowned villages only
+	var order: Array = ["capture", "steal"] if (persona == "raider" or settler) else ["steal", "capture"]      # settlers look for open land before they look for pockets
 	# staging holdings: the home plus the best-garrisoned holdings (a raider with six holdings does not raid from its weakest)
 	var stage: Array[int] = [home_id]
-	var hunt: bool = hunting(state)
+	var hunt: bool = hunting(state, fid)
 	for hid in state.holdings_of(fid):
 		if hid != home_id and int(state.holdings[hid]["garrison"]) >= (3 if hunt else 5) and stage.size() < (14 if hunt else 7):
 			stage.append(hid)          # the last-rival hunt also marches from small outposts (the troops are mustered from the realm)
@@ -419,9 +485,7 @@ static func _plan(state: MatchState, fid: int, persona: String, home_id: int, ev
 				continue        # raiders only fall back on theft when their class is a thief's
 			if m == "steal" and persona != "raider" and persona != "hoarder" and _bias(state, fid, "steal") < 2:
 				continue
-			if m == "capture" and persona != "raider" and _bias(state, fid, "capture") < 2:
-				continue        # thieving personas only take holdings when their class is a warlord's
-			if _try(state, fid, m, sid, events):
+			if _try(state, fid, m, sid, events, m == "capture" and settler):
 				return true
 	return false
 
@@ -443,7 +507,7 @@ const MUSTER_RANGE := 10      # the last-rival hunt musters from the whole realm
 ## Troops a staging holding can field: its own spare garrison, plus (in the last-rival hunt) the spare garrisons of own holdings within MUSTER_RANGE.
 static func musterable(state: MatchState, fid: int, home: Dictionary) -> int:
 	var t: int = int(home["garrison"]) - 2
-	if not hunting(state):
+	if not hunting(state, fid):
 		return t
 	for hid in state.holdings_of(fid):
 		var h: Dictionary = state.holdings[hid]
@@ -454,7 +518,7 @@ static func musterable(state: MatchState, fid: int, home: Dictionary) -> int:
 ## Takes `troops` out of the staging holding, then (hunt only) the nearest own holdings, each left with at least 2.
 static func take_troops(state: MatchState, fid: int, home: Dictionary, troops: int) -> void:
 	var left: int = troops
-	if hunting(state):
+	if hunting(state, fid):
 		var t0: int = mini(left, maxi(0, int(home["garrison"]) - 2))
 		home["garrison"] = int(home["garrison"]) - t0
 		left -= t0
@@ -472,7 +536,20 @@ static func take_troops(state: MatchState, fid: int, home: Dictionary, troops: i
 			left -= t1
 	home["garrison"] = int(home["garrison"]) - left
 
-static func _try(state: MatchState, fid: int, mission: String, home_id: int, events: Array) -> bool:
+## Purge targeting scale for a rival with `n` holdings when the average holder has `avg` (data/ranks.json "mercy"): 0 = leave it alone.
+static func mercy(n: int, avg: float) -> float:
+	var mc: Dictionary = Standing.cfg().get("mercy", {})
+	if mc.is_empty():
+		return 1.0
+	if n <= 1:
+		return float(mc["last_roof"])
+	if n == 2:
+		return float(mc["two_roofs"])
+	if n == 3:
+		return float(mc["three_roofs"])
+	return float(mc["big_mult"]) if float(n) > float(mc["big_ratio"]) * avg else 1.0
+
+static func _try(state: MatchState, fid: int, mission: String, home_id: int, events: Array, neutral_only: bool = false) -> bool:
 	var f: Dictionary = state.factions[fid]
 	var home: Dictionary = state.holdings[home_id]
 	var now: float = float(state.clock["elapsed"])
@@ -482,19 +559,30 @@ static func _try(state: MatchState, fid: int, mission: String, home_id: int, eve
 	var ids: Array = intel.keys()
 	ids.sort()
 	var spare: int = musterable(state, fid, home)
-	var pc: int = party_cap(state)
+	var pc: int = party_cap(state, fid)
 	var mk: float = float(Standing.cfg()["mark"]["ai_target_mult"])
+	var roofs: Dictionary = {}          # owner -> holdings (mercy: Purge targeting scale)
+	var avg_roofs: float = 1.0
+	if mission == "capture" and not hunting(state, fid) and state.week() < int(Standing.cfg().get("mercy", {}).get("until_week", 0)):
+		var owned: int = 0
+		for hh in state.holdings.values():
+			if int(hh["owner"]) >= 0:
+				roofs[int(hh["owner"])] = int(roofs.get(int(hh["owner"]), 0)) + 1
+				owned += 1
+		avg_roofs = float(owned) / maxf(1.0, float(roofs.size()))
 	for hid in ids:
 		var e: Dictionary = intel[hid]
 		var h: Dictionary = state.holdings.get(hid, {})
 		if h.is_empty() or int(h["owner"]) == fid:
 			continue
-		var hunt: bool = hunting(state)
+		var hunt: bool = hunting(state, fid)
 		var dist_h: int = HexGrid.distance(h["hex"], home["hex"])
 		if dist_h > RANGE + 2 * mini(state.week(), 8) + (int(Standing.cfg()["hunt"]["range_bonus"]) if hunt else 0):
 			continue
 		if state.phase == &"PURGE_ACTIVE" and float(dist_h) * 1.1 * tscale(state) > (1.0 - state.tod()) * state.day_seconds:
 			continue          # cannot be reached before the Purge ends
+		if neutral_only and not hunt and int(h["owner"]) >= 0:
+			continue          # a settler passes by rivals' villages
 		if truced and int(h["owner"]) == 0:
 			continue
 		if int(h["owner"]) >= 0 and Standing.truced(state, fid, int(h["owner"])):
@@ -504,6 +592,11 @@ static func _try(state: MatchState, fid: int, mission: String, home_id: int, eve
 			bonus *= mk
 		if hunt and int(h["owner"]) >= 0 and int(state.factions[int(h["owner"])]["home"]) == int(hid):
 			bonus *= float(Standing.cfg()["hunt"]["target_mult"]) if int(h["owner"]) == weakest_survivor(state, fid) else 1.5      # a rival's home is where its leader sits
+		if mission == "capture" and not hunt and not roofs.is_empty() and int(h["owner"]) >= 0:
+			var mf: float = mercy(int(roofs.get(int(h["owner"]), 1)), avg_roofs)
+			if mf <= 0.0:
+				continue          # nobody takes a rival's last roof before the Reckoning
+			bonus *= mf
 		if mission == "capture":
 			var commit: int = mini(spare, pc)
 			if commit < 2:
@@ -527,7 +620,7 @@ static func _try(state: MatchState, fid: int, mission: String, home_id: int, eve
 	var tries: int = 0
 	for c in cands:
 		tries += 1
-		if tries > (6 if hunting(state) else 3):
+		if tries > (6 if hunting(state, fid) else 3):
 			break
 		var hid2: int = int(c[1])
 		var e2: Dictionary = intel[hid2]
@@ -612,7 +705,7 @@ static func _dispatch(state: MatchState, fid: int, home_id: int, target_id: int,
 	if troops < 1:
 		return false
 	var path: Array[Vector2i] = route(state, home["hex"], target["hex"])
-	if path.is_empty() or path.size() > (int(Standing.cfg()["hunt"]["path_max"]) if hunting(state) else MAX_PATH_LEN + 4 * mini(state.week(), 8)):
+	if path.is_empty() or path.size() > (int(Standing.cfg()["hunt"]["path_max"]) if hunting(state, fid) else MAX_PATH_LEN + 4 * mini(state.week(), 8)):
 		return false
 	var f: Dictionary = state.factions[fid]
 	var now: float = float(state.clock["elapsed"])

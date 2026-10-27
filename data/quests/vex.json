@@ -1,0 +1,116 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/vex_1",
+   "class": "lfg:class/vex",
+   "line": "vex",
+   "chapter": 1,
+   "title": "Light Fingers",
+   "intro": "Vex says the first rule of borrowing is to look before you lean. Start with places that no longer have an owner.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "visit_poi",
+     "text": "Case a derelict farm.",
+     "poi": "lfg:poi/derelict_farm",
+     "qty": 1
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Leave a ration at a hermit's hut and see what he hands back.",
+     "poi": "lfg:poi/hermit_hut",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 6,
+     "lfg:item/ration": 2
+    },
+    "text": "A little pocket money"
+   }
+  },
+  {
+   "id": "lfg:quest/vex_2",
+   "class": "lfg:class/vex",
+   "line": "vex",
+   "chapter": 2,
+   "title": "Borrowed Time",
+   "intro": "A good lock is a conversation. Wrecks and workbenches are where you learn the vocabulary.",
+   "requires": [
+    "lfg:quest/vex_1"
+   ],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Pry open a stranded wreck.",
+     "poi": "lfg:poi/wreck",
+     "qty": 1
+    },
+    {
+     "kind": "build",
+     "text": "Raise a workbench for your picks and files.",
+     "building": "lfg:building/workbench"
+    },
+    {
+     "kind": "craft",
+     "text": "Twist two lengths of rope.",
+     "recipe": "lfg:recipe/rope",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/rope": 1,
+     "lfg:item/coin": 8
+    },
+    "text": "A coil for the road"
+   }
+  },
+  {
+   "id": "lfg:quest/vex_3",
+   "class": "lfg:class/vex",
+   "line": "vex",
+   "chapter": 3,
+   "title": "The Long Quiet",
+   "intro": "The last lesson is patience: crack the old vault, lift one thing from a rival while the Purge rolls overhead, and be home before the dust settles.",
+   "requires": [
+    "lfg:quest/vex_2"
+   ],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Crack the three plates of a ruin vault.",
+     "poi": "lfg:poi/ruin_vault",
+     "qty": 1
+    },
+    {
+     "kind": "purge_deed",
+     "text": "Lift something from a rival store during a Purge.",
+     "deeds": [
+      "steal"
+     ],
+     "qty": 1
+    },
+    {
+     "kind": "survive_purge",
+     "text": "Be somewhere sensible when the Purge ends.",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 15
+    },
+    "ability_upgrade": {
+     "steal_bonus": 0.1
+    },
+    "title": "Nimble",
+    "text": "Steal chance +10% (signature upgrade)",
+    "unlock": "lfg:unlock/nimble_fingers"
+   },
+   "signature": true
+  }
+ ]
+}

@@ -10,7 +10,12 @@
   "oren.json",
   "sable.json",
   "forge.json",
-  "stubs.json"
+  "vex.json",
+  "quill.json",
+  "nyx.json",
+  "rook.json",
+  "dune.json",
+  "halo.json"
  ],
  "_notes": "Quest data (docs/COMMUNITY_RPG.md). Every step is solo-completable; validated by tests/rules/test_quests.gd. implemented:false = stub."
 }

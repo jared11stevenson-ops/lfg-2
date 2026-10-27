@@ -1,0 +1,115 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/halo_1",
+   "class": "lfg:class/halo",
+   "line": "halo",
+   "chapter": 1,
+   "title": "First Steps on the Road",
+   "intro": "A pilgrimage begins with a single shrine, and ends with whoever you shared the lamp with.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "visit_poi",
+     "text": "Find two wayside shrines.",
+     "poi": "lfg:poi/shrine",
+     "qty": 2
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Light the lamps of a shrine.",
+     "poi": "lfg:poi/shrine",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 3,
+     "lfg:item/rime_salt": 1
+    },
+    "text": "A pilgrim's pack"
+   }
+  },
+  {
+   "id": "lfg:quest/halo_2",
+   "class": "lfg:class/halo",
+   "line": "halo",
+   "chapter": 2,
+   "title": "Alms and Blessings",
+   "intro": "The road is kinder to those who feed it. Leave bread, bless the fields, share the harvest.",
+   "requires": [
+    "lfg:quest/halo_1"
+   ],
+   "steps": [
+    {
+     "kind": "deliver",
+     "text": "Leave three rations at a hermit's hut.",
+     "item": "lfg:item/ration",
+     "qty": 3,
+     "to": "poi:lfg:poi/hermit_hut"
+    },
+    {
+     "kind": "ability",
+     "text": "Bless one of your holdings.",
+     "ability": "lfg:ability/bless",
+     "qty": 1
+    },
+    {
+     "kind": "harvest",
+     "text": "Bring in three harvests.",
+     "crop": "any",
+     "qty": 3
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/glowfruit_seed": 3,
+     "lfg:item/ration": 2
+    },
+    "text": "Seed for the next season"
+   }
+  },
+  {
+   "id": "lfg:quest/halo_3",
+   "class": "lfg:class/halo",
+   "line": "halo",
+   "chapter": 3,
+   "title": "The Long Vigil",
+   "intro": "A warden's whole craft is staying put while the world moves. Draw a well, raise the aura once, keep the vigil.",
+   "requires": [
+    "lfg:quest/halo_2"
+   ],
+   "steps": [
+    {
+     "kind": "build",
+     "text": "Dig a well.",
+     "building": "lfg:building/well"
+    },
+    {
+     "kind": "ability",
+     "text": "Raise the Warding Aura.",
+     "ability": "lfg:ability/ward",
+     "qty": 1
+    },
+    {
+     "kind": "survive_purge",
+     "text": "Keep the vigil through two Purges.",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 5
+    },
+    "ability_upgrade": {
+     "ab_duration": 10
+    },
+    "title": "Warden of the Vigil",
+    "text": "Warding Aura lasts 10s longer (signature upgrade)",
+    "unlock": "lfg:unlock/long_vigil"
+   },
+   "signature": true
+  }
+ ]
+}

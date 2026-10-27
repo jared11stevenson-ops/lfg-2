@@ -1,0 +1,117 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/rook_1",
+   "class": "lfg:class/rook",
+   "line": "rook",
+   "chapter": 1,
+   "title": "Raise the Banner",
+   "intro": "A banner is just cloth until there is a wall and a pile of timber behind it.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "build",
+     "text": "Raise a wall.",
+     "building": "lfg:building/wall"
+    },
+    {
+     "kind": "gather",
+     "text": "Stack ten timber.",
+     "item": "lfg:item/timber",
+     "qty": 10
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/stone": 6,
+     "lfg:item/ration": 2
+    },
+    "text": "Stone for the next wall"
+   }
+  },
+  {
+   "id": "lfg:quest/rook_2",
+   "class": "lfg:class/rook",
+   "line": "rook",
+   "chapter": 2,
+   "title": "Muster the Road",
+   "intro": "Roads belong to whoever keeps them clear. Clear them, and take back the old salt spire while you are at it.",
+   "requires": [
+    "lfg:quest/rook_1"
+   ],
+   "steps": [
+    {
+     "kind": "defeat",
+     "text": "Drive off three wild creatures.",
+     "enemy": "any",
+     "qty": 3
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Take the salt from a salt spire.",
+     "poi": "lfg:poi/salt_spire",
+     "qty": 1
+    },
+    {
+     "kind": "gather",
+     "text": "Stack twelve stones.",
+     "item": "lfg:item/stone",
+     "qty": 12
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/timber": 6,
+     "lfg:item/ration": 3
+    },
+    "text": "Supplies for the muster"
+   }
+  },
+  {
+   "id": "lfg:quest/rook_3",
+   "class": "lfg:class/rook",
+   "line": "rook",
+   "chapter": 3,
+   "title": "Hold the Line",
+   "intro": "Show the banner once to the quiet, once to the Purge, and see everyone you have home again.",
+   "requires": [
+    "lfg:quest/rook_2"
+   ],
+   "steps": [
+    {
+     "kind": "ability",
+     "text": "Wave the Rally Banner.",
+     "ability": "lfg:ability/rally",
+     "qty": 1
+    },
+    {
+     "kind": "purge_deed",
+     "text": "Turn back a raid on one of your holdings.",
+     "deeds": [
+      "defend",
+      "kill_raider"
+     ],
+     "qty": 1
+    },
+    {
+     "kind": "survive_purge",
+     "text": "Stand your ground through a Purge.",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 4
+    },
+    "ability_upgrade": {
+     "ab_cd_pct": 20
+    },
+    "title": "Standard-Bearer",
+    "text": "Rally Banner cooldown -20% (signature upgrade)",
+    "unlock": "lfg:unlock/standard_bearer"
+   },
+   "signature": true
+  }
+ ]
+}
