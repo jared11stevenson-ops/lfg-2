@@ -1,0 +1,111 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/judd_1",
+   "class": "lfg:class/judd",
+   "line": "judd",
+   "chapter": 1,
+   "title": "Quiet Hands",
+   "intro": "The Way of the Staff begins with soil, not strikes. Judd's old teacher kept a furrow that never failed.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "harvest",
+     "text": "Bring in four harvests.",
+     "crop": "any",
+     "qty": 4
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Mend an abandoned furrow at a derelict farm.",
+     "poi": "lfg:poi/derelict_farm",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/glowfruit_seed": 3,
+     "lfg:item/reed_fibre": 2
+    },
+    "text": "Seed from the old furrow"
+   }
+  },
+  {
+   "id": "lfg:quest/judd_2",
+   "class": "lfg:class/judd",
+   "line": "judd",
+   "chapter": 2,
+   "title": "Staff and Soil",
+   "intro": "Rope ties a sheaf; a bench holds a staff steady. Learn the small crafts.",
+   "requires": [
+    "lfg:quest/judd_1"
+   ],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Gather six reed fibres from old farms.",
+     "item": "lfg:item/reed_fibre",
+     "qty": 6
+    },
+    {
+     "kind": "build",
+     "text": "Raise a workbench at your holding.",
+     "building": "lfg:building/workbench"
+    },
+    {
+     "kind": "craft",
+     "text": "Twist a length of rope.",
+     "recipe": "lfg:recipe/rope",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/timber": 4,
+     "lfg:item/rope": 1
+    },
+    "text": "Tools for the terrace"
+   }
+  },
+  {
+   "id": "lfg:quest/judd_3",
+   "class": "lfg:class/judd",
+   "line": "judd",
+   "chapter": 3,
+   "title": "The Terrace Plan",
+   "intro": "A terrace catches the sun that a flat field wastes. It needs fired brick, and brick needs a kiln.",
+   "requires": [
+    "lfg:quest/judd_2"
+   ],
+   "steps": [
+    {
+     "kind": "craft",
+     "text": "Beat out iron fittings for the kiln door.",
+     "recipe": "lfg:recipe/iron_fittings",
+     "qty": 1
+    },
+    {
+     "kind": "build",
+     "text": "Build a kiln.",
+     "building": "lfg:building/kiln"
+    },
+    {
+     "kind": "craft",
+     "text": "Fire two bricks.",
+     "recipe": "lfg:recipe/fired_brick",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/kiln_clay": 1
+    },
+    "unlock": "lfg:unlock/sun_terrace",
+    "title": "Terrace Keeper",
+    "text": "Unlocks the Sun Terrace (building)"
+   },
+   "signature": true
+  }
+ ]
+}

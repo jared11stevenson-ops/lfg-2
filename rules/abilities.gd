@@ -64,7 +64,7 @@ static func use(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 			if int(state.world["terrain"][idx]) != WorldGen.T_GROUND:
 				return "bad_terrain"
 			var b: String = WorldGen.biome_at(state.world, a["hex"])
-			var gain: Dictionary = {"lfg:item/mushroom": 1 + state.rand_i(2)}
+			var gain: Dictionary = {"lfg:item/mushroom": 1 + state.rand_i(2) + int(Combat.class_mod(a, "forage_bonus", 0))}
 			if (b == "fungal_grove" or b == "bog") and state.rand_f() < 0.4:
 				gain["lfg:item/spore_sac"] = 1
 			if not Inv.can_carry(a, gain):

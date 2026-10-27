@@ -221,6 +221,107 @@
    "tags": [
     "ration"
    ]
+  },
+  {
+   "id": "lfg:recipe/rope",
+   "name": "Twisted Rope",
+   "inputs": {
+    "lfg:item/reed_fibre": 3
+   },
+   "outputs": {
+    "lfg:item/rope": 2
+   },
+   "station": "lfg:building/workbench"
+  },
+  {
+   "id": "lfg:recipe/iron_fittings",
+   "name": "Iron Fittings",
+   "inputs": {
+    "lfg:item/bog_iron": 2,
+    "lfg:item/timber": 1
+   },
+   "outputs": {
+    "lfg:item/iron_fittings": 2
+   },
+   "station": "lfg:building/workbench"
+  },
+  {
+   "id": "lfg:recipe/fired_brick",
+   "name": "Fired Brick",
+   "inputs": {
+    "lfg:item/kiln_clay": 1,
+    "lfg:item/stone": 2
+   },
+   "outputs": {
+    "lfg:item/fired_brick": 2
+   },
+   "station": "lfg:building/kiln"
+  },
+  {
+   "id": "lfg:recipe/glass_pane",
+   "name": "Glass Pane",
+   "inputs": {
+    "lfg:item/ruin_glass": 2,
+    "lfg:item/rime_salt": 1
+   },
+   "outputs": {
+    "lfg:item/glass_pane": 2
+   },
+   "station": "lfg:building/kiln"
+  },
+  {
+   "id": "lfg:recipe/silk_cloth",
+   "name": "Silk Cloth",
+   "inputs": {
+    "lfg:item/spore_silk": 2,
+    "lfg:item/reed_fibre": 1
+   },
+   "outputs": {
+    "lfg:item/silk_cloth": 1
+   },
+   "station": "lfg:building/loom"
+  },
+  {
+   "id": "lfg:recipe/spore_tonic",
+   "name": "Spore-forged Tonic",
+   "inputs": {
+    "lfg:item/mushroom": 3,
+    "lfg:item/spore_silk": 1
+   },
+   "outputs": {
+    "lfg:item/tonic": 3
+   },
+   "station": "lfg:building/spore_forge"
+  },
+  {
+   "id": "lfg:recipe/draught",
+   "name": "Healing Draught",
+   "inputs": {
+    "lfg:item/mushroom": 2,
+    "lfg:item/amber_resin": 1,
+    "lfg:item/glowfruit": 1
+   },
+   "outputs": {
+    "lfg:item/healing_draught": 2
+   },
+   "requires_tag": "alchemist",
+   "requires_unlock": "lfg:unlock/draught"
+  },
+  {
+   "id": "lfg:recipe/hearty_stew",
+   "name": "Hearty Stew",
+   "inputs": {
+    "lfg:item/sporebean": 2,
+    "lfg:item/glowfruit": 1,
+    "lfg:item/rime_salt": 1
+   },
+   "outputs": {
+    "lfg:item/ration": 4
+   },
+   "tags": [
+    "ration"
+   ],
+   "requires_unlock": "lfg:unlock/hearty_stew"
   }
  ]
 }

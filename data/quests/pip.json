@@ -1,0 +1,111 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/pip_1",
+   "class": "lfg:class/pip",
+   "line": "pip",
+   "chapter": 1,
+   "title": "Footsteps",
+   "intro": "A courier who does not know the road is only a person with a parcel. Walk it first.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "visit_poi",
+     "text": "Find two wayside shrines.",
+     "poi": "lfg:poi/shrine",
+     "qty": 2
+    },
+    {
+     "kind": "visit_poi",
+     "text": "Find a derelict farm.",
+     "poi": "lfg:poi/derelict_farm",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 10,
+     "lfg:item/ration": 2
+    },
+    "text": "Road money"
+   }
+  },
+  {
+   "id": "lfg:quest/pip_2",
+   "class": "lfg:class/pip",
+   "line": "pip",
+   "chapter": 2,
+   "title": "Parcels",
+   "intro": "A good pack is rope, reed and patience (the farmers' fibres, Judd's trade). Pip makes her own.",
+   "requires": [
+    "lfg:quest/pip_1"
+   ],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Collect six reed fibres from old farms.",
+     "item": "lfg:item/reed_fibre",
+     "qty": 6,
+     "theme": "lfg:class/judd"
+    },
+    {
+     "kind": "build",
+     "text": "Raise a workbench.",
+     "building": "lfg:building/workbench"
+    },
+    {
+     "kind": "craft",
+     "text": "Twist two lengths of rope.",
+     "recipe": "lfg:recipe/rope",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/reed_fibre": 2,
+     "lfg:item/timber": 3
+    },
+    "text": "Pack straps"
+   }
+  },
+  {
+   "id": "lfg:quest/pip_3",
+   "class": "lfg:class/pip",
+   "line": "pip",
+   "chapter": 3,
+   "title": "The Messenger's Pack",
+   "intro": "The hermit asked for rope and gave no reason. Pip delivered, and found a vault on the way.",
+   "requires": [
+    "lfg:quest/pip_2"
+   ],
+   "steps": [
+    {
+     "kind": "deliver",
+     "text": "Bring two ropes to a hermit's hut.",
+     "item": "lfg:item/rope",
+     "qty": 2,
+     "to": "poi:lfg:poi/hermit_hut"
+    },
+    {
+     "kind": "visit_poi",
+     "text": "Find a ruin vault.",
+     "poi": "lfg:poi/ruin_vault",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/rope": 1
+    },
+    "ability_upgrade": {
+     "carry_cap": 10
+    },
+    "unlock": "lfg:unlock/deep_pack",
+    "title": "Packhorse",
+    "text": "Carry ten more"
+   },
+   "signature": true
+  }
+ ]
+}

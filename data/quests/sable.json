@@ -1,0 +1,115 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/sable_1",
+   "class": "lfg:class/sable",
+   "line": "sable",
+   "chapter": 1,
+   "title": "Tracks in Moss",
+   "intro": "Sable reads a forest the way others read a face.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "ability",
+     "text": "Track twice.",
+     "ability": "lfg:ability/track",
+     "qty": 2
+    },
+    {
+     "kind": "defeat",
+     "text": "Bring down two wild creatures.",
+     "enemy": "any",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/game_meat": 2
+    },
+    "text": "A clean first haul"
+   }
+  },
+  {
+   "id": "lfg:quest/sable_2",
+   "class": "lfg:class/sable",
+   "line": "sable",
+   "chapter": 2,
+   "title": "Hide and Hearth",
+   "intro": "A hunter is only as good as her larder.",
+   "requires": [
+    "lfg:quest/sable_1"
+   ],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Keep four game meat.",
+     "item": "lfg:item/game_meat",
+     "qty": 4
+    },
+    {
+     "kind": "craft",
+     "text": "Cook two game rations.",
+     "recipe": "lfg:recipe/ration_game",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/rope": 1,
+     "lfg:item/ration": 2
+    },
+    "text": "Snare cord"
+   }
+  },
+  {
+   "id": "lfg:quest/sable_3",
+   "class": "lfg:class/sable",
+   "line": "sable",
+   "chapter": 3,
+   "title": "Shared Fire",
+   "intro": "The wreck on the shore has cord worth keeping. Sable sets one more snare, and stays out to see the Purge pass from the treeline.",
+   "requires": [
+    "lfg:quest/sable_2"
+   ],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Pry open a stranded wreck.",
+     "poi": "lfg:poi/wreck",
+     "qty": 1
+    },
+    {
+     "kind": "ability",
+     "text": "Set a snare.",
+     "ability": "lfg:ability/snare",
+     "qty": 1
+    },
+    {
+     "kind": "purge_deed",
+     "text": "Earn any deed during a Purge (scout, defend, or fell a beast).",
+     "deeds": [
+      "scout",
+      "defend",
+      "kill_wild",
+      "kill_raider",
+      "escort"
+     ],
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/game_meat": 3
+    },
+    "ability_upgrade": {
+     "hunt_meat": 1
+    },
+    "unlock": "lfg:unlock/keen_eye",
+    "title": "Quiet Tracker",
+    "text": "Kills yield one more game meat"
+   },
+   "signature": true
+  }
+ ]
+}

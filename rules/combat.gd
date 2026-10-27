@@ -8,9 +8,12 @@ static func class_mod(a: Dictionary, key: String, default: Variant) -> Variant:
 		return default
 	var base: Variant = cd.get("mods", {}).get(key, default)
 	var fx: Variant = a.get("skill_fx")
-	if fx == null or not (fx as Dictionary).has(key):
+	var qf: Variant = a.get("quest_fx")      # signature quest upgrades (rules/quests.gd), not subject to the skill-tree caps
+	var has_s: bool = fx != null and (fx as Dictionary).has(key)
+	var has_q: bool = qf != null and (qf as Dictionary).has(key)
+	if not has_s and not has_q:
 		return base
-	var d: float = float(fx[key])
+	var d: float = (float(fx[key]) if has_s else 0.0) + (float(qf[key]) if has_q else 0.0)
 	if typeof(base) == TYPE_INT and d == floorf(d):
 		return int(base) + int(d)
 	return float(base) + d

@@ -1,0 +1,137 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/vex_1",
+   "class": "lfg:class/vex",
+   "line": "vex",
+   "chapter": 1,
+   "title": "Light Fingers",
+   "intro": "Vex has promised to tell you how to borrow things politely. Not yet.",
+   "requires": [],
+   "implemented": false,
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "(coming in a later update)",
+     "item": "lfg:item/coin",
+     "qty": 1,
+     "implemented": false
+    }
+   ],
+   "reward": {
+    "text": "Coming soon"
+   }
+  },
+  {
+   "id": "lfg:quest/quill_1",
+   "class": "lfg:class/quill",
+   "line": "quill",
+   "chapter": 1,
+   "title": "A Fair Hand",
+   "intro": "Quill's ledgers are still being tidied.",
+   "requires": [],
+   "implemented": false,
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "(coming in a later update)",
+     "item": "lfg:item/coin",
+     "qty": 1,
+     "implemented": false
+    }
+   ],
+   "reward": {
+    "text": "Coming soon"
+   }
+  },
+  {
+   "id": "lfg:quest/nyx_1",
+   "class": "lfg:class/nyx",
+   "line": "nyx",
+   "chapter": 1,
+   "title": "Under the Caps",
+   "intro": "Nyx whispers to something in the grove. It has not answered yet.",
+   "requires": [],
+   "implemented": false,
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "(coming in a later update)",
+     "item": "lfg:item/coin",
+     "qty": 1,
+     "implemented": false
+    }
+   ],
+   "reward": {
+    "text": "Coming soon"
+   }
+  },
+  {
+   "id": "lfg:quest/rook_1",
+   "class": "lfg:class/rook",
+   "line": "rook",
+   "chapter": 1,
+   "title": "Raise the Banner",
+   "intro": "Rook is still arguing about which colour.",
+   "requires": [],
+   "implemented": false,
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "(coming in a later update)",
+     "item": "lfg:item/coin",
+     "qty": 1,
+     "implemented": false
+    }
+   ],
+   "reward": {
+    "text": "Coming soon"
+   }
+  },
+  {
+   "id": "lfg:quest/dune_1",
+   "class": "lfg:class/dune",
+   "line": "dune",
+   "chapter": 1,
+   "title": "Spare Parts",
+   "intro": "Dune's workshop is a pile of promising piles.",
+   "requires": [],
+   "implemented": false,
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "(coming in a later update)",
+     "item": "lfg:item/coin",
+     "qty": 1,
+     "implemented": false
+    }
+   ],
+   "reward": {
+    "text": "Coming soon"
+   }
+  },
+  {
+   "id": "lfg:quest/halo_1",
+   "class": "lfg:class/halo",
+   "line": "halo",
+   "chapter": 1,
+   "title": "The Open Road",
+   "intro": "Halo has not decided which road is the open one.",
+   "requires": [],
+   "implemented": false,
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "(coming in a later update)",
+     "item": "lfg:item/coin",
+     "qty": 1,
+     "implemented": false
+    }
+   ],
+   "reward": {
+    "text": "Coming soon"
+   }
+  }
+ ]
+}

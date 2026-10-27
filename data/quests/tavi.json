@@ -1,0 +1,109 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/tavi_1",
+   "class": "lfg:class/tavi",
+   "line": "tavi",
+   "chapter": 1,
+   "title": "Ring of Stones",
+   "intro": "Tavi counts the stones of a wall before trusting it. Start by making your own wall's worth.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "ability",
+     "text": "Mine four times.",
+     "ability": "lfg:ability/mine",
+     "qty": 4
+    },
+    {
+     "kind": "gather",
+     "text": "Stack twelve stones.",
+     "item": "lfg:item/stone",
+     "qty": 12
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/timber": 4
+    },
+    "text": "Good handles for tools"
+   }
+  },
+  {
+   "id": "lfg:quest/tavi_2",
+   "class": "lfg:class/tavi",
+   "line": "tavi",
+   "chapter": 2,
+   "title": "Salt and Slate",
+   "intro": "The singing spires on the flats hold salt as pure as a bell. A thorn slinger nests at each foot.",
+   "requires": [
+    "lfg:quest/tavi_1"
+   ],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Win the salt from a spire.",
+     "poi": "lfg:poi/salt_spire",
+     "qty": 1
+    },
+    {
+     "kind": "gather",
+     "text": "Hold two rime salts.",
+     "item": "lfg:item/rime_salt",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/stone": 6,
+     "lfg:item/rime_salt": 1
+    },
+    "text": "A day's labour saved"
+   }
+  },
+  {
+   "id": "lfg:quest/tavi_3",
+   "class": "lfg:class/tavi",
+   "line": "tavi",
+   "chapter": 3,
+   "title": "The Keystone",
+   "intro": "Every arch hangs on one stone and the iron that pins it. A smith's fittings (Forge's trade) hold the keystone true.",
+   "requires": [
+    "lfg:quest/tavi_2"
+   ],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Pry open a stranded wreck for bog iron.",
+     "poi": "lfg:poi/wreck",
+     "qty": 1
+    },
+    {
+     "kind": "build",
+     "text": "Raise a workbench.",
+     "building": "lfg:building/workbench"
+    },
+    {
+     "kind": "craft",
+     "text": "Make two iron fittings.",
+     "recipe": "lfg:recipe/iron_fittings",
+     "qty": 2,
+     "theme": "lfg:class/forge"
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/stone": 8
+    },
+    "ability_upgrade": {
+     "mine_bonus": 1
+    },
+    "unlock": "lfg:unlock/deep_seam",
+    "title": "Keystone-Setter",
+    "text": "Mine finds one more of a rich resource"
+   },
+   "signature": true
+  }
+ ]
+}

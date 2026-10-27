@@ -1,5 +1,5 @@
 {
- "schema": 2,
+ "schema": 3,
  "buildings": [
   {
    "id": "lfg:building/wall",
@@ -182,8 +182,7 @@
    "max": 1,
    "group": "shrine",
    "rank": 2,
-   "levy_cut": 0.25,
-   "model_pending": true
+   "levy_cut": 0.25
   },
   {
    "id": "lfg:building/greenhouse",
@@ -196,8 +195,7 @@
    "max": 1,
    "group": "greenhouse",
    "rank": 3,
-   "yield_bonus": 1,
-   "model_pending": true
+   "yield_bonus": 1
   },
   {
    "id": "lfg:building/forge",
@@ -215,8 +213,216 @@
     "outputs": {
      "lfg:item/gadget": 1
     }
+   }
+  },
+  {
+   "id": "lfg:building/workbench",
+   "name": "Workbench",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/stone": 2
    },
-   "model_pending": true
+   "max": 1,
+   "group": "workbench",
+   "station": true,
+   "note": "Crafting station: rope, iron fittings"
+  },
+  {
+   "id": "lfg:building/kiln",
+   "name": "Kiln",
+   "cost": {
+    "lfg:item/stone": 6,
+    "lfg:item/timber": 2,
+    "lfg:item/iron_fittings": 2
+   },
+   "max": 1,
+   "group": "kiln",
+   "station": true,
+   "note": "Crafting station: bricks, glass panes"
+  },
+  {
+   "id": "lfg:building/loom",
+   "name": "Loom",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/rope": 3
+   },
+   "max": 1,
+   "group": "loom",
+   "station": true,
+   "note": "Crafting station: silk cloth"
+  },
+  {
+   "id": "lfg:building/spore_forge",
+   "name": "Spore Forge",
+   "cost": {
+    "lfg:item/fired_brick": 4,
+    "lfg:item/iron_fittings": 3,
+    "lfg:item/spore_silk": 2,
+    "lfg:item/kiln_clay": 2
+   },
+   "max": 1,
+   "group": "spore_forge",
+   "station": true,
+   "note": "Crafting station: spore-forged goods"
+  },
+  {
+   "id": "lfg:building/brew_vat",
+   "name": "Brew Vat",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/fired_brick": 2,
+    "lfg:item/iron_fittings": 1,
+    "lfg:item/amber_resin": 2
+   },
+   "max": 1,
+   "group": "brew_vat",
+   "work": {
+    "min_garrison": 1,
+    "inputs": {
+     "lfg:item/mushroom": 2,
+     "lfg:item/glowfruit": 1
+    },
+    "outputs": {
+     "lfg:item/tonic": 2
+    }
+   }
+  },
+  {
+   "id": "lfg:building/smokehouse",
+   "name": "Smokehouse",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/fired_brick": 3,
+    "lfg:item/rime_salt": 2
+   },
+   "max": 1,
+   "group": "smokehouse",
+   "spoil_cut": 0.5,
+   "work": {
+    "min_garrison": 1,
+    "inputs": {
+     "lfg:item/sporebean": 4
+    },
+    "outputs": {
+     "lfg:item/ration": 3
+    }
+   }
+  },
+  {
+   "id": "lfg:building/cistern",
+   "name": "Cistern",
+   "cost": {
+    "lfg:item/fired_brick": 4,
+    "lfg:item/rope": 2,
+    "lfg:item/iron_fittings": 2
+   },
+   "max": 1,
+   "group": "well",
+   "upgrade_of": "lfg:building/well",
+   "work": {
+    "waters": true,
+    "waters_range": 3
+   }
+  },
+  {
+   "id": "lfg:building/fortified_gate",
+   "name": "Fortified Gate",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/stone": 4,
+    "lfg:item/iron_fittings": 4,
+    "lfg:item/bog_iron": 2
+   },
+   "max": 1,
+   "group": "gate",
+   "defense": 10,
+   "garrison_cap": 2
+  },
+  {
+   "id": "lfg:building/glasshouse",
+   "name": "Glasshouse",
+   "cost": {
+    "lfg:item/glass_pane": 4,
+    "lfg:item/iron_fittings": 2,
+    "lfg:item/timber": 4
+   },
+   "max": 1,
+   "group": "greenhouse",
+   "upgrade_of": "lfg:building/greenhouse",
+   "yield_bonus": 2,
+   "rank": 3
+  },
+  {
+   "id": "lfg:building/lantern_mast",
+   "name": "Lantern Mast",
+   "cost": {
+    "lfg:item/glass_pane": 2,
+    "lfg:item/rope": 2,
+    "lfg:item/timber": 3
+   },
+   "max": 1,
+   "group": "lantern",
+   "vision": 8
+  },
+  {
+   "id": "lfg:building/trophy_hall",
+   "name": "Trophy Hall",
+   "cost": {
+    "lfg:item/fired_brick": 4,
+    "lfg:item/glass_pane": 2,
+    "lfg:item/silk_cloth": 2,
+    "lfg:item/amber_resin": 3
+   },
+   "max": 1,
+   "group": "trophy",
+   "standing_bonus": 3,
+   "rank": 1
+  },
+  {
+   "id": "lfg:building/infirmary",
+   "name": "Infirmary",
+   "cost": {
+    "lfg:item/timber": 5,
+    "lfg:item/silk_cloth": 2,
+    "lfg:item/amber_resin": 2,
+    "lfg:item/fired_brick": 2
+   },
+   "max": 1,
+   "group": "infirmary",
+   "heal_leader": 0.3
+  },
+  {
+   "id": "lfg:building/sun_terrace",
+   "name": "Sun Terrace",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/fired_brick": 2,
+    "lfg:item/reed_fibre": 3
+   },
+   "max": 1,
+   "group": "terrace",
+   "yield_bonus": 1,
+   "requires_unlock": "lfg:unlock/sun_terrace"
+  },
+  {
+   "id": "lfg:building/anvil_hall",
+   "name": "Anvil Hall",
+   "cost": {
+    "lfg:item/stone": 8,
+    "lfg:item/iron_fittings": 4,
+    "lfg:item/fired_brick": 3
+   },
+   "max": 1,
+   "group": "anvil",
+   "requires_unlock": "lfg:unlock/anvil_hall",
+   "work": {
+    "min_garrison": 2,
+    "outputs": {
+     "lfg:item/gadget": 2,
+     "lfg:item/iron_fittings": 1
+    }
+   }
   }
  ]
 }

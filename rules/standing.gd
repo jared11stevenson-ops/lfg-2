@@ -74,6 +74,8 @@ static func yield_bonus(state: MatchState, hold: Dictionary) -> int:
 
 static func garrison_cap(state: MatchState, h: Dictionary) -> int:
 	var cap: int = 4 + 4 * int(h["tier"])
+	for b in h["buildings"]:
+		cap += int(Content.building(String(b)).get("garrison_cap", 0))
 	var of: int = int(h["owner"])
 	if of >= 0:
 		cap += int(rank_def(eff_rank(state, of)).get("garrison", 0)) + int(skill_fx(state, of, "garrison_cap"))
@@ -129,6 +131,8 @@ static func holdings_score(state: MatchState, fid: int) -> float:
 		var h: Dictionary = state.holdings[hid]
 		var ti: int = _tier_idx(h)
 		s += float(hw[ti]) + rw * float(mini(Inv.count(h["store"], Economy.RATION), int(rc[ti])))
+		for b in h["buildings"]:
+			s += float(Content.building(String(b)).get("standing_bonus", 0))
 	return s
 
 static func score(state: MatchState, fid: int) -> float:
@@ -512,7 +516,11 @@ static func dawn_upkeep(state: MatchState, events: Array) -> void:
 		var rate: float = minf(float(sc["spoil_cap"]), float(sc["spoil_base"]) * float(wk + 1))
 		for hid in state.holdings_of(int(fid)):
 			var h3: Dictionary = state.holdings[hid]
-			var r: float = rate * (float(sc["granary_cut"]) if (h3["buildings"] as Array).has("lfg:building/granary") else 1.0)
+			var r: float = rate
+			for sbd in h3["buildings"]:
+				if (sbd == "lfg:building/granary") or float(Content.building(String(sbd)).get("spoil_cut", 0.0)) > 0.0:
+					r = rate * float(sc["granary_cut"])
+					break
 			for item in PERISHABLE:
 				var cnt: int = Inv.count(h3["store"], item)
 				var over: int = cnt - int(sc["spoil_floor"])

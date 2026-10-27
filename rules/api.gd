@@ -3,7 +3,7 @@ extends RefCounted
 ## Public Rules API (frozen contract). Everything is deterministic given (seed, command stream, tick stream).
 const COMMAND_TYPES: Array[StringName] = [&"move_intent", &"plant", &"water", &"harvest", &"craft", &"build", &"demolish", &"trade", &"eat",
 	&"attack", &"use_ability", &"capture", &"steal", &"set_policy", &"rest", &"move_to_pos", &"sync_position",
-	&"unlock_skill", &"scout", &"escort", &"truce", &"ransom", &"sabotage"]
+	&"unlock_skill", &"scout", &"escort", &"truce", &"ransom", &"sabotage", &"interact_poi", &"accept_quest", &"abandon_quest", &"turn_in"]
 const MAX_PATH := 160
 
 static func new_match(seed: int, class_id: StringName, opts: Dictionary = {}) -> MatchState:
@@ -53,6 +53,8 @@ static func apply(state: MatchState, cmd: Dictionary) -> Dictionary:
 		return _fail(err)
 	a["last_seq"] = seq
 	Standing.observe(state, events, 0)
+	Pois.observe(state, events, 0)
+	Quests.observe(state, events, 0, int(a["id"]))
 	var out: Array[Dictionary] = []
 	for e in events:
 		out.append(e)
@@ -83,6 +85,10 @@ static func _dispatch(state: MatchState, a: Dictionary, t: StringName, args: Dic
 		&"truce": return PurgeActions.truce(state, a, args, events)
 		&"ransom": return PurgeActions.ransom(state, a, args, events)
 		&"sabotage": return PurgeActions.sabotage(state, a, args, events)
+		&"interact_poi": return Pois.interact(state, a, args, events)
+		&"accept_quest": return Quests.accept(state, a, args, events)
+		&"abandon_quest": return Quests.abandon(state, a, args, events)
+		&"turn_in": return Quests.turn_in(state, a, args, events)
 	return "unknown_command"
 
 static func _move(state: MatchState, a: Dictionary, args: Dictionary) -> String:

@@ -138,6 +138,10 @@ static func branch_pref(persona: String, class_id: String) -> Array:
 ## Scales an ability's numbers by the leader's ab_* skill effects. Returns the same dict when there is nothing to apply.
 static func tune_ability(a: Dictionary, ab: Dictionary) -> Dictionary:
 	var fx: Dictionary = a.get("skill_fx", {})
+	if a.has("quest_fx"):
+		fx = fx.duplicate()
+		for k0 in (a["quest_fx"] as Dictionary).keys():
+			fx[k0] = float(fx.get(k0, 0.0)) + float(a["quest_fx"][k0])
 	if fx.is_empty():
 		return ab
 	var any: bool = false

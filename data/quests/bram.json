@@ -1,0 +1,110 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/bram_1",
+   "class": "lfg:class/bram",
+   "line": "bram",
+   "chapter": 1,
+   "title": "Know Your Mushrooms",
+   "intro": "Bram eats first and asks later, which is how he learned. This time, ask.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "ability",
+     "text": "Forage three times.",
+     "ability": "lfg:ability/forage",
+     "qty": 3
+    },
+    {
+     "kind": "gather",
+     "text": "Fill a sack with six mushrooms.",
+     "item": "lfg:item/mushroom",
+     "qty": 6
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 2
+    },
+    "text": "A pocket of bread"
+   }
+  },
+  {
+   "id": "lfg:quest/bram_2",
+   "class": "lfg:class/bram",
+   "line": "bram",
+   "chapter": 2,
+   "title": "Beast and Bounty",
+   "intro": "Some things in the grove bite back. Bram does not mind a scrap if the larder is better for it.",
+   "requires": [
+    "lfg:quest/bram_1"
+   ],
+   "steps": [
+    {
+     "kind": "defeat",
+     "text": "Drive off two wild creatures.",
+     "enemy": "any",
+     "qty": 2
+    },
+    {
+     "kind": "gather",
+     "text": "Have two spore sacs on hand.",
+     "item": "lfg:item/spore_sac",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/mushroom": 3,
+     "lfg:item/spore_sac": 1
+    },
+    "text": "Spoils of the grove"
+   }
+  },
+  {
+   "id": "lfg:quest/bram_3",
+   "class": "lfg:class/bram",
+   "line": "bram",
+   "chapter": 3,
+   "title": "Feast of the Hungry",
+   "intro": "Bram's table is never empty, and a good cook (Oren has the knack) makes it a feast. Cook, then share with the hermit.",
+   "requires": [
+    "lfg:quest/bram_2"
+   ],
+   "steps": [
+    {
+     "kind": "craft",
+     "text": "Cook a pot of sporebean rations.",
+     "recipe": "lfg:recipe/ration_sporebean",
+     "qty": 2,
+     "theme": "lfg:class/oren"
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Share a ration with a hermit and take what he offers.",
+     "poi": "lfg:poi/hermit_hut",
+     "qty": 1
+    },
+    {
+     "kind": "plant",
+     "text": "Plant three sporebean seeds in the grove.",
+     "crop": "lfg:crop/sporebean",
+     "qty": 3
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 3
+    },
+    "ability_upgrade": {
+     "forage_bonus": 1
+    },
+    "unlock": "lfg:unlock/forage_lore",
+    "title": "Larder-Lord",
+    "text": "Forage finds one more mushroom each time"
+   },
+   "signature": true
+  }
+ ]
+}

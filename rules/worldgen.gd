@@ -113,6 +113,7 @@ static func _try(seed_value: int, attempt: int, force: bool = false) -> Dictiona
 	world["start"] = start
 	world["sites"] = sites
 	_build_roads(world, sites)
+	world["pois"] = Pois.place(world, start, comp, sites, s)      # pass 3: points of interest (own RNG stream: holdings/roads are unchanged)
 	return world
 
 static func _pick_start(world: Dictionary, rng: Rng) -> Vector2i:

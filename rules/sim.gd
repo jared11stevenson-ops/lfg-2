@@ -75,6 +75,8 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 	Fx.step(state, events)
 	EnemyAI.step(state, events)
 	Standing.observe(state, events, ev0)
+	Pois.observe(state, events, ev0)
+	Quests.observe(state, events, ev0)
 
 static func dawn(state: MatchState, events: Array) -> void:
 	Economy.dawn_buildings(state, events)

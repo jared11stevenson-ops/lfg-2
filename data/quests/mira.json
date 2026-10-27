@@ -1,0 +1,110 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/mira_1",
+   "class": "lfg:class/mira",
+   "line": "mira",
+   "chapter": 1,
+   "title": "Spore and Salt",
+   "intro": "Every remedy begins with something that grows where it should not. Mira keeps a cold cellar of oddities.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Gather four wild mushrooms.",
+     "item": "lfg:item/mushroom",
+     "qty": 4
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Draw spore silk from a fungal cave, if the sporelings allow it.",
+     "poi": "lfg:poi/fungal_cave",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/mushroom": 2,
+     "lfg:item/glowfruit": 2
+    },
+    "text": "Fresh stock"
+   }
+  },
+  {
+   "id": "lfg:quest/mira_2",
+   "class": "lfg:class/mira",
+   "line": "mira",
+   "chapter": 2,
+   "title": "Amber Remedies",
+   "intro": "Resin keeps the sweetness in. A shrine lamp-keeper never lets the bowl run dry.",
+   "requires": [
+    "lfg:quest/mira_1"
+   ],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Light a wayside shrine and take the amber.",
+     "poi": "lfg:poi/shrine",
+     "qty": 1
+    },
+    {
+     "kind": "gather",
+     "text": "Hold two amber resins.",
+     "item": "lfg:item/amber_resin",
+     "qty": 2
+    },
+    {
+     "kind": "craft",
+     "text": "Brew two tonics.",
+     "recipe": "lfg:recipe/tonic",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/tonic": 1,
+     "lfg:item/amber_resin": 1
+    },
+    "text": "A steady hand"
+   }
+  },
+  {
+   "id": "lfg:quest/mira_3",
+   "class": "lfg:class/mira",
+   "line": "mira",
+   "chapter": 3,
+   "title": "A Bowl for the Hermit",
+   "intro": "The hermit in the bog knows an old draught, but only talks over a meal. A cook's art is half the cure (a line that runs beside Oren's).",
+   "requires": [
+    "lfg:quest/mira_2"
+   ],
+   "steps": [
+    {
+     "kind": "craft",
+     "text": "Cook two sporebean rations to carry.",
+     "recipe": "lfg:recipe/ration_sporebean",
+     "qty": 2,
+     "theme": "lfg:class/oren"
+    },
+    {
+     "kind": "deliver",
+     "text": "Leave two rations at a hermit's hut.",
+     "item": "lfg:item/ration",
+     "qty": 2,
+     "to": "poi:lfg:poi/hermit_hut",
+     "theme": "lfg:class/oren"
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/amber_resin": 2
+    },
+    "unlock": "lfg:unlock/draught",
+    "title": "Draught-Mother",
+    "text": "Unlocks the Healing Draught recipe"
+   },
+   "signature": true
+  }
+ ]
+}

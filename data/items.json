@@ -141,6 +141,91 @@
    "name": "Ash Elixir",
    "value": 14,
    "heal": 60
+  },
+  {
+   "id": "lfg:item/bog_iron",
+   "name": "Bog Iron",
+   "value": 5,
+   "tier": 2,
+   "note": "T2 regional: hermit huts and wrecks"
+  },
+  {
+   "id": "lfg:item/reed_fibre",
+   "name": "Reed Fibre",
+   "value": 4,
+   "tier": 2,
+   "note": "T2 regional: derelict farms"
+  },
+  {
+   "id": "lfg:item/rime_salt",
+   "name": "Rime Salt",
+   "value": 5,
+   "tier": 2,
+   "note": "T2 regional: shrines and salt spires"
+  },
+  {
+   "id": "lfg:item/amber_resin",
+   "name": "Amber Resin",
+   "value": 6,
+   "tier": 2,
+   "note": "T2 regional: shrines, caves and hermits"
+  },
+  {
+   "id": "lfg:item/ruin_glass",
+   "name": "Ruin Glass",
+   "value": 10,
+   "tier": 3,
+   "note": "T3 rare: ruin vaults and salt spires"
+  },
+  {
+   "id": "lfg:item/spore_silk",
+   "name": "Spore Silk",
+   "value": 12,
+   "tier": 3,
+   "note": "T3 rare: fungal caves"
+  },
+  {
+   "id": "lfg:item/kiln_clay",
+   "name": "Kiln Clay",
+   "value": 9,
+   "tier": 3,
+   "note": "T3 rare: derelict farms"
+  },
+  {
+   "id": "lfg:item/rope",
+   "name": "Rope",
+   "value": 6,
+   "tier": 2
+  },
+  {
+   "id": "lfg:item/iron_fittings",
+   "name": "Iron Fittings",
+   "value": 8,
+   "tier": 2
+  },
+  {
+   "id": "lfg:item/fired_brick",
+   "name": "Fired Brick",
+   "value": 7,
+   "tier": 3
+  },
+  {
+   "id": "lfg:item/glass_pane",
+   "name": "Glass Pane",
+   "value": 14,
+   "tier": 3
+  },
+  {
+   "id": "lfg:item/silk_cloth",
+   "name": "Silk Cloth",
+   "value": 18,
+   "tier": 3
+  },
+  {
+   "id": "lfg:item/healing_draught",
+   "name": "Healing Draught",
+   "value": 12,
+   "heal": 50
   }
  ]
 }

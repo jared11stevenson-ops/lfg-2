@@ -3,7 +3,7 @@ extends RefCounted
 ## Authoritative match state. Plain data only. Hex values are Vector2i in memory, {"_v":[q,r]} in to_dict().
 const SCHEMA_VERSION := 1
 const SAVE_FIELDS: Array[String] = ["schema_version", "seed", "rng_state", "clock", "phase", "day_seconds", "actors", "holdings",
-	"factions", "plots", "drops", "player_id", "next_id", "settled_week", "over", "result", "won", "ai_t", "opts", "sim_acc", "fx"]
+	"factions", "plots", "drops", "player_id", "next_id", "settled_week", "over", "result", "won", "ai_t", "opts", "sim_acc", "fx", "poi_state"]
 ## Keys whose numbers are ALWAYS floats in memory (JSON turns 0.0 into 0; _dec restores the type). Add new float fields here.
 const FLOAT_KEYS: Array[String] = ["energy", "until", "next", "acc", "t_hit", "t_end", "t_rec", "next_move", "next_act", "truce_until", "breach",
 	"rally", "ward", "elapsed", "day_t", "time_of_day", "ai_t", "day_seconds", "seen_t", "mult", "arm_at", "slack_t", "sync_t", "born", "stalled", "siege_end", "sortie_t", "hit_t", "scout_t", "speed_mult", "alert",
@@ -33,6 +33,7 @@ var ai_t: float = 0.0
 var sim_acc: Dictionary = {}    # misc timers
 var opts: Dictionary = {}
 var fx: Array = []              # world effects: sentinel posts, snares, spore zones, caches (see rules/fx.gd)
+var poi_state: Dictionary = {}  # poi id -> {claimed_week, week, prog, guards[]} (pass 3; old saves load it empty). Quests live on the actor: a["quests"]
 
 ## Quantise floats to 1e-6 so JSON round trips are bit-exact.
 static func q(x: float) -> float:

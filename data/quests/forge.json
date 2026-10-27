@@ -1,0 +1,112 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/forge_1",
+   "class": "lfg:class/forge",
+   "line": "forge",
+   "chapter": 1,
+   "title": "Cold Iron",
+   "intro": "Forge does not trust iron she has not carried. The wrecks wash it up; the bog hides more.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Pry open a stranded wreck.",
+     "poi": "lfg:poi/wreck",
+     "qty": 1
+    },
+    {
+     "kind": "gather",
+     "text": "Hold three bog iron.",
+     "item": "lfg:item/bog_iron",
+     "qty": 3
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/stone": 6,
+     "lfg:item/timber": 4
+    },
+    "text": "A start on the forge"
+   }
+  },
+  {
+   "id": "lfg:quest/forge_2",
+   "class": "lfg:class/forge",
+   "line": "forge",
+   "chapter": 2,
+   "title": "First Fittings",
+   "intro": "A bench, a hammer, a pot of patience.",
+   "requires": [
+    "lfg:quest/forge_1"
+   ],
+   "steps": [
+    {
+     "kind": "build",
+     "text": "Raise a workbench.",
+     "building": "lfg:building/workbench"
+    },
+    {
+     "kind": "craft",
+     "text": "Make two iron fittings.",
+     "recipe": "lfg:recipe/iron_fittings",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/iron_fittings": 1,
+     "lfg:item/timber": 3
+    },
+    "text": "Spare fittings"
+   }
+  },
+  {
+   "id": "lfg:quest/forge_3",
+   "class": "lfg:class/forge",
+   "line": "forge",
+   "chapter": 3,
+   "title": "Ember and Stone",
+   "intro": "A forge needs a hearth built to last, and a hearth takes stone by the cartload (Tavi's trade) and brick by the kiln.",
+   "requires": [
+    "lfg:quest/forge_2"
+   ],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Stack fifteen stones.",
+     "item": "lfg:item/stone",
+     "qty": 15,
+     "theme": "lfg:class/tavi"
+    },
+    {
+     "kind": "gather",
+     "text": "Find two lumps of kiln clay.",
+     "item": "lfg:item/kiln_clay",
+     "qty": 2
+    },
+    {
+     "kind": "build",
+     "text": "Build a kiln.",
+     "building": "lfg:building/kiln"
+    },
+    {
+     "kind": "craft",
+     "text": "Fire two bricks.",
+     "recipe": "lfg:recipe/fired_brick",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/iron_fittings": 2
+    },
+    "unlock": "lfg:unlock/anvil_hall",
+    "title": "Anvil-Keeper",
+    "text": "Unlocks the Anvil Hall (building)"
+   },
+   "signature": true
+  }
+ ]
+}

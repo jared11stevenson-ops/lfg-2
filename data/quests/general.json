@@ -1,0 +1,96 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/settle_in",
+   "class": "",
+   "line": "general",
+   "chapter": 1,
+   "title": "Settling In",
+   "intro": "A homestead is a promise to the soil. Start small: put a seed down, then watch it come up.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "plant",
+     "text": "Plant two seeds near your holding.",
+     "crop": "any",
+     "qty": 2
+    },
+    {
+     "kind": "harvest",
+     "text": "Bring in two harvests.",
+     "crop": "any",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 10,
+     "lfg:item/sporebean_seed": 2
+    },
+    "text": "A little seed money"
+   }
+  },
+  {
+   "id": "lfg:quest/lay_of_the_land",
+   "class": "",
+   "line": "general",
+   "chapter": 1,
+   "title": "Lay of the Land",
+   "intro": "The world is bigger than the fence. Walk out and find a wayside shrine; someone keeps the lamps lit.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "visit_poi",
+     "text": "Find a wayside shrine.",
+     "poi": "lfg:poi/shrine",
+     "qty": 1
+    },
+    {
+     "kind": "claim_poi",
+     "text": "Light the shrine lamps in the pattern on its bowl.",
+     "poi": "lfg:poi/shrine",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 8,
+     "lfg:item/amber_resin": 1
+    },
+    "text": "A blessing in amber"
+   }
+  },
+  {
+   "id": "lfg:quest/warm_pot",
+   "class": "",
+   "line": "general",
+   "chapter": 2,
+   "title": "A Warm Pot",
+   "intro": "Food first, always. Cook for the week and keep a little back for the long night.",
+   "requires": [
+    "lfg:quest/settle_in"
+   ],
+   "steps": [
+    {
+     "kind": "craft",
+     "text": "Cook rations from glowfruit.",
+     "recipe": "lfg:recipe/ration_glowfruit",
+     "qty": 2
+    },
+    {
+     "kind": "survive_purge",
+     "text": "Weather a Purge with the pot still warm.",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 4,
+     "lfg:item/glowfruit_seed": 2
+    },
+    "text": "The neighbours' gratitude, in rations"
+   }
+  }
+ ]
+}

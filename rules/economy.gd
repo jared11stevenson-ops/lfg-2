@@ -196,6 +196,8 @@ static func build(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 	var bl: Array = h["buildings"]
 	if not Standing.rank_ok(state, int(a["faction"]), int(b.get("rank", 0))):
 		return "rank_required"
+	if not Quests.unlocked(a, String(b.get("requires_unlock", ""))):
+		return "locked_building"
 	var cost: Dictionary = build_cost(a, b)
 	if b.has("upgrade_of"):
 		# Upgrade: replaces the base building in place (keeps its site).
@@ -438,23 +440,38 @@ static func dawn_buildings(state: MatchState, events: Array) -> void:
 			continue
 		for bid in h["buildings"]:
 			var b: Dictionary = Content.building(String(bid))
+			if b.has("heal_leader"):
+				var hl: Dictionary = Standing.leader_of(state, int(h["owner"]))
+				if not hl.is_empty() and hl["alive"] and HexGrid.distance(hl["hex"], h["hex"]) <= 3 and int(hl["hp"]) < int(hl["max_hp"]):
+					var got: int = Combat.heal(hl, int(ceil(float(hl["max_hp"]) * float(b["heal_leader"]))))
+					events.append({"type": &"infirmary_healed", "holding": hid, "actor": hl["id"], "healed": got})
 			var w: Dictionary = b.get("work", {})
 			if w.is_empty() or not working(state, h, w):
 				continue
 			if w.has("waters"):
 				var n: int = 0
+				var wr: int = int(w.get("waters_range", 0))
 				var keys: Array = state.plots.keys()
 				keys.sort()
 				for k in keys:
 					var p: Dictionary = state.plots[k]
-					if int(p["holding"]) == int(hid) and not bool(p["watered"]) and bool(Content.crop(String(p["crop"]))["needs_water"]):
+					var ph: int = int(p["holding"])
+					var near_ok: bool = ph == int(hid)
+					if not near_ok and wr > 0 and state.holdings.has(ph) and int(state.holdings[ph]["owner"]) == int(h["owner"]):
+						near_ok = HexGrid.distance(state.holdings[ph]["hex"], h["hex"]) <= wr
+					if near_ok and not bool(p["watered"]) and bool(Content.crop(String(p["crop"]))["needs_water"]):
 						p["watered"] = true
 						n += 1
 				if n > 0:
 					events.append({"type": &"well_watered", "holding": hid, "plots": n})
 			if w.has("outputs"):
 				var out: Dictionary = w["outputs"]
+				var inp: Dictionary = w.get("inputs", {})
+				if not inp.is_empty() and not Inv.has_all(h["store"], inp):
+					continue
 				if Inv.room_for(h["store"], out):
+					if not inp.is_empty():
+						Inv.remove_all(h["store"], inp)
 					Inv.add_all(h["store"], out)
 					Standing.note_output(state, int(h["owner"]), out)
 					events.append({"type": &"produced", "holding": hid, "building": bid, "items": out})

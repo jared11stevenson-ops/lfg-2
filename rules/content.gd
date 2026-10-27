@@ -72,6 +72,61 @@ static func ai_kit(class_id: String) -> Dictionary:
 		_cache["ai_kits"] = out
 	return _cache["ai_kits"].get(class_id, {})
 
+## data/pois.json: {discover_radius, min_gap, holding_gap, types:[...]}. poi_types() is id-keyed (file order kept in poi_type_order()).
+static func poi_cfg() -> Dictionary:
+	if _cache.has("poi_cfg"):
+		return _cache["poi_cfg"]
+	var out: Dictionary = {"types": []}
+	var f := FileAccess.open("res://data/pois.json", FileAccess.READ)
+	if f != null:
+		var parsed: Variant = JSON.parse_string(f.get_as_text())
+		if parsed is Dictionary:
+			out = parsed
+	_cache["poi_cfg"] = out
+	return out
+
+static func poi_types() -> Dictionary:
+	if not _cache.has("poi_types"):
+		var d: Dictionary = {}
+		for t in poi_cfg().get("types", []):
+			d[String(t["id"])] = t
+		_cache["poi_types"] = d
+	return _cache["poi_types"]
+
+static func poi_type_order() -> Array:
+	var out: Array = []
+	for t in poi_cfg().get("types", []):
+		out.append(String(t["id"]))
+	return out
+
+## data/quests/index.json lists the quest files ({"files": ["judd.json", ...]}); each file is {"quests": [...]}. Quest order = file order.
+static func quests() -> Dictionary:
+	if not _cache.has("quests"):
+		var d: Dictionary = {}
+		var order: Array = []
+		var idx := FileAccess.open("res://data/quests/index.json", FileAccess.READ)
+		if idx != null:
+			var ip: Variant = JSON.parse_string(idx.get_as_text())
+			if ip is Dictionary:
+				for fn in ip.get("files", []):
+					var f := FileAccess.open("res://data/quests/%s" % String(fn), FileAccess.READ)
+					if f == null:
+						continue
+					var parsed: Variant = JSON.parse_string(f.get_as_text())
+					if parsed is Dictionary:
+						for q in parsed.get("quests", []):
+							d[String(q["id"])] = q
+							order.append(String(q["id"]))
+		_cache["quests"] = d
+		_cache["quest_order"] = order
+	return _cache["quests"]
+
+static func quest_order() -> Array:
+	quests()
+	return _cache.get("quest_order", [])
+
+static func quest(id: String) -> Dictionary: return quests().get(id, {})
+
 static func item(id: String) -> Dictionary: return items().get(id, {})
 static func crop(id: String) -> Dictionary: return crops().get(id, {})
 static func recipe(id: String) -> Dictionary: return recipes().get(id, {})

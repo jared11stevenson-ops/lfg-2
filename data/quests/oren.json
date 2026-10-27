@@ -1,0 +1,107 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/oren_1",
+   "class": "lfg:class/oren",
+   "line": "oren",
+   "chapter": 1,
+   "title": "Soup for the Road",
+   "intro": "Oren says no problem is so large that a bowl cannot reach it.",
+   "requires": [],
+   "steps": [
+    {
+     "kind": "craft",
+     "text": "Cook three glowfruit rations.",
+     "recipe": "lfg:recipe/ration_glowfruit",
+     "qty": 3
+    },
+    {
+     "kind": "harvest",
+     "text": "Bring in three harvests.",
+     "crop": "any",
+     "qty": 3
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/glowfruit_seed": 3,
+     "lfg:item/sporebean_seed": 2
+    },
+    "text": "Seed for the pot"
+   }
+  },
+  {
+   "id": "lfg:quest/oren_2",
+   "class": "lfg:class/oren",
+   "line": "oren",
+   "chapter": 2,
+   "title": "Salt of the Earth",
+   "intro": "Salt is what turns a meal into a memory. The shrines keep a pinch in the lamp bowl.",
+   "requires": [
+    "lfg:quest/oren_1"
+   ],
+   "steps": [
+    {
+     "kind": "claim_poi",
+     "text": "Light a shrine and take its salt.",
+     "poi": "lfg:poi/shrine",
+     "qty": 1
+    },
+    {
+     "kind": "gather",
+     "text": "Hold two rime salts.",
+     "item": "lfg:item/rime_salt",
+     "qty": 2
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 3
+    },
+    "text": "Seasoned"
+   }
+  },
+  {
+   "id": "lfg:quest/oren_3",
+   "class": "lfg:class/oren",
+   "line": "oren",
+   "chapter": 3,
+   "title": "The Healer's Table",
+   "intro": "A healer feeds first and bandages second (Mira would agree). A hermit's cough needs resin and a hot bowl.",
+   "requires": [
+    "lfg:quest/oren_2"
+   ],
+   "steps": [
+    {
+     "kind": "gather",
+     "text": "Gather two amber resins.",
+     "item": "lfg:item/amber_resin",
+     "qty": 2,
+     "theme": "lfg:class/mira"
+    },
+    {
+     "kind": "deliver",
+     "text": "Leave three rations at a hermit's hut.",
+     "item": "lfg:item/ration",
+     "qty": 3,
+     "to": "poi:lfg:poi/hermit_hut"
+    },
+    {
+     "kind": "survive_purge",
+     "text": "Keep the pot warm through a Purge.",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/ration": 4
+    },
+    "unlock": "lfg:unlock/hearty_stew",
+    "title": "Keeper of the Table",
+    "text": "Unlocks the Hearty Stew recipe"
+   },
+   "signature": true
+  }
+ ]
+}

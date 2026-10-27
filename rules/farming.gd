@@ -142,8 +142,13 @@ static func craft(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 	var tag: String = String(r.get("requires_tag", ""))
 	if tag != "" and int(Combat.class_mod(a, tag, 0)) < 1:
 		return "class_required"
-	if CmdUtil.nearest_owned_holding(state, int(a["faction"]), a["hex"], 3) == -1:
+	if not Quests.unlocked(a, String(r.get("requires_unlock", ""))):
+		return "locked_recipe"
+	var near_h: int = CmdUtil.nearest_owned_holding(state, int(a["faction"]), a["hex"], 3)
+	if near_h == -1:
 		return "not_near_own_holding"
+	if String(r.get("station", "")) != "" and not (state.holdings[near_h]["buildings"] as Array).has(String(r["station"])):
+		return "needs_station"
 	var cost: Dictionary = {}
 	for k in (r["inputs"] as Dictionary).keys():
 		cost[k] = int(r["inputs"][k]) * n
