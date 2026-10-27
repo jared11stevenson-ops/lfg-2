@@ -53,13 +53,13 @@ func _init() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	toolbar = VBoxContainer.new()
-	toolbar.position = Vector2(20, 140)
-	toolbar.add_theme_constant_override("separation", 6)
+	toolbar.position = Vector2(20, 178)
+	toolbar.add_theme_constant_override("separation", 3)
 	root.add_child(toolbar)
 	for k in KINDS:
 		if not LABELS.has(k):
 			continue      # the point-of-interest panel opens from the world, not from the toolbar
-		var b: Button = UiKit.button(String(LABELS[k]), UiStyle.PURPLE, Vector2(132, 56), 20)
+		var b: Button = UiKit.button(String(LABELS[k]), UiStyle.PURPLE, Vector2(132, 40), 17)
 		b.pressed.connect(toggle.bind(k))
 		toolbar.add_child(b)
 		toolbar_buttons[k] = b

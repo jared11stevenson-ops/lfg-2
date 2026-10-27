@@ -13,7 +13,7 @@ func _ready() -> void:
 			seed_value = int(a.get_slice("=", 1))
 	menu = MenuFlow.new()
 	add_child(menu)
-	menu.new_match_requested.connect(func(cid: String, sd: int) -> void: _start(LocalSession.new_game(sd, StringName(cid), _slot, MenuApi.new_match_opts(), MenuApi.meta())))
+	menu.new_match_requested.connect(func(cid: String, sd: int) -> void: _start(LocalSession.new_game(sd, StringName(cid), _slot, MenuApi.new_match_opts().merged({"tutorial": true}), MenuApi.meta())))
 	menu.continue_requested.connect(_continue)
 	menu.endless_requested.connect(func() -> void: _over = false)
 	menu.quit_requested.connect(func() -> void: get_tree().quit())
@@ -26,7 +26,7 @@ func _ready() -> void:
 		return
 	if "--journey" in OS.get_cmdline_user_args():
 		menu.hide_all()
-		_start(LocalSession.new_game(seed_value, &"lfg:class/judd", -1, {}, null))
+		_start(LocalSession.new_game(seed_value, &"lfg:class/judd", -1, {"tutorial": true}, null))
 		var j: Node = load("res://main/journey.gd").new()
 		add_child(j)
 		j.run(self)
@@ -66,6 +66,12 @@ func _start(s: GameSession) -> void:
 	p.quest_abandon_requested.connect(func(q: String) -> void: _send(UiCommands.abandon_quest(q), "Quest abandoned"))
 	p.quest_turn_in_requested.connect(func(q: String) -> void: _send(UiCommands.turn_in(q), "Quest complete"))
 	p.poi_action_requested.connect(func(pid: int, pick: int) -> void: _send(UiCommands.interact_poi(pid, pick), "Done"))
+	stage.item_use_requested.connect(func(id: String) -> void: _send(UiCommands.eat(id), "Used"))
+	p.companion_adopt_requested.connect(func(k: String) -> void: _send(UiCommands.adopt_companion(k), "Companion adopted"))
+	p.companion_feed_requested.connect(func(k: String, it: String) -> void: _send(UiCommands.feed_companion(k, it), "Fed"))
+	p.companion_assign_requested.connect(func(k: String, m: String, h: int) -> void: _send(UiCommands.assign_companion(k, m, h), "Assigned"))
+	p.companion_dismiss_requested.connect(func(k: String) -> void: _send(UiCommands.dismiss_companion(k), "Dismissed"))
+	p.tutorial_ack_requested.connect(func(t: String) -> void: _send(UiCommands.ack_tutorial(t), "Got it"))
 	await stage.start_from_state(Game.state)
 	stage.player.hex_changed.connect(_on_hex)
 	stage.hud.toast("Feed your people. Survive the Purge.", UiStyle.GOOD, 5.0)
@@ -92,10 +98,10 @@ func _build_progress_ui() -> void:
 		_report(Game.command(&"unlock_skill", {"node": node_id}), "Skill learned")
 		skill_panel.set_model(Skills.panel_model(Game.state.actors[Game.state.player_id])))
 	var box := VBoxContainer.new()
-	box.position = Vector2(162, 104)
+	box.position = Vector2(1128, 96)
 	box.add_theme_constant_override("separation", 6)
 	_prog_layer.add_child(box)
-	var b1: Button = UiKit.button("RANK", UiStyle.PURPLE, Vector2(132, 48), 18)
+	var b1: Button = UiKit.button("RANK", UiStyle.PURPLE, Vector2(132, 40), 17)
 	b1.pressed.connect(_open_standing)
 	box.add_child(b1)
 
@@ -209,7 +215,7 @@ func cmd(type: StringName, args: Dictionary) -> Dictionary:
 ## Export smoke test: start a real match, build the world, tick 2 in-world days, print a summary and quit. Works from an exported binary.
 func _smoke() -> void:
 	menu.hide_all()
-	_start(LocalSession.new_game(seed_value, &"lfg:class/judd", -1, {}, null))
+	_start(LocalSession.new_game(seed_value, &"lfg:class/judd", -1, {"tutorial": true}, null))
 	while stage == null or not stage.started:
 		await get_tree().process_frame
 	var st: MatchState = Game.state

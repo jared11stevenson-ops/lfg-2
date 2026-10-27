@@ -27,3 +27,9 @@
 
 ## v0.4.1 — Pass 3b (balance, questlines)
 - Class-balance work (mercy, settlers, conquerors, escape, home ground, ration discipline), six more full questlines (14/14 lines), death-log harness, killer-faction heir rule (AI that kills a leader inherits its realm). 48 suites / 481 tests green.
+
+## v0.5.0 — Passes 4 and 5
+- Pass 4: 6 creature companions, 7 region guardians with telegraphed phases, T4 materials, 3 stations, 10 buildables (zero-trade tech tree verified), first-10-minutes tutorial chain, bag EAT/USE.
+- Pass 5 Grand Simulation (40 seeds x 336d + 10 x 700d): found convergence regression (Total Conquest 1/40). Applied fixes: mercy rule ends week 24, final hunt from week 40 at 7 live factions, fewer revolts for big empires.
+- Re-run on the same 20 seeds: survivors at week 48 8.8 -> 3.0; single-survivor matches 3/20 -> 6/20; Total Conquest 1/20 -> 2/20. Cost: more eliminations (most classes now >75% eliminated by week 48, which is inherent when matches converge); Vex/Judd/Tavi/Forge land is low.
+- Export presets (Linux/Windows) and `--smoke` mode.

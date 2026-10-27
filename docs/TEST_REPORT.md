@@ -39,3 +39,7 @@ Missing: meshes for shrine/greenhouse/forge (fallback hut), HUD standing strip (
 ## Pass 3 integrated run (lead)
 47 suites, 456 tests, 25019 checks, 0 failures. Journey (software GL, 8 captures incl. quest journal, standing, skills) no script errors.
 Agent-run sim (24 seeds x 336 days): Total Conquest 7/24; Vex eliminated 96%; 11 of 14 classes eliminated >60%; class land spread outside 0.5x-2x; Track/Truce unused by bots. Not a human playtest.
+
+## Pass 4/5 integrated run (lead)
+54 suites, 577 tests, 31590 checks, 0 failures. Journey (software GL, 9 captures) no script errors. Exported Linux binary: `--smoke` started a match, ticked 2 days, no script errors.
+Sim after pass-5 fixes (20 seeds, 336d): survivors@wk48 3.0 (was 8.8), one-alive-ever 6/20 (was 3/20), Total Conquest 2/20 (was 1/20), CPU 1.37 ms/tick. Elimination rates up (bram/forge/rook/tavi 90%, judd/oren/vex 95%): the 'no class eliminated >75%' criterion conflicts with convergence and should be replaced by survival-time and win-share bands. Not a human playtest.

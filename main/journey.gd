@@ -29,6 +29,9 @@ func run(main: Node) -> void:
 	m.stage.panels.open(&"quests")
 	await _shot("03a_quest_journal")
 	m.stage.panels.close_all()
+	m.stage.panels.open(&"companions")
+	await _shot("03d_companions")
+	m.stage.panels.close_all()
 	m._open_standing()
 	await _shot("03b_standing_panel")
 	m.standing_panel.visible = false
