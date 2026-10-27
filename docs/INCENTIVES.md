@@ -30,3 +30,11 @@ Standing Rank 0–5 (Settler, Steader, Holder, Baron, Warlord-class naming per t
 ## Testing (Grand Simulation hooks)
 - Per-class deed counts, rank curves over time, share of factions at each rank, share that participate in the Purge, fraction of pacifist-persona factions that still earn deeds.
 - Fail the sim if: any persona sits at Rank 0 for >8 weeks with 0 deeds and no penalty, or the top rank holder is never challenged.
+
+## Class skill trees (owner suggestion, adopted with changes)
+- 14 original trees (~15 nodes, 3 branches: Economy / Purge / Hybrid-utility) in data/skill_trees.json. Reset each match (permadeath); only cosmetic unlocks persist.
+- **Skill points come only from Purge deeds** (kill > capture > steal > defend > heal/broker/scout/escort), weighted: leaders and the Marked count more than wild enemies. Nothing earns points in PEACE, so no tree progress without engaging the Purge, yet pacifist deeds still count.
+- Economy-branch nodes (yield, plot slots, recipes) are also Purge-gated: a pure farmer hits a ceiling.
+- Nodes mostly add options and tradeoffs; each tree has costed drawback nodes; flat stat nodes are small and capped, so a fight is never decided by tree alone.
+- Interaction with Standing: points are per-leader power-of-choice; Standing is per-faction access/production. Both feed from deeds.
+- Tests: no node reachable without points; points only granted via deed events (never in PEACE); each tree has >=1 viable pacifist-deed route; Grand Simulation tracks nodes taken per class and win/survival by build.
