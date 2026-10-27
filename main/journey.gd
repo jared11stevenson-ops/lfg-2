@@ -1,12 +1,12 @@
 extends Node
-## Scripted integrated journey (visual position set per hex step; ALL game effects go through Rules commands).
+## Scripted integrated journey. Position is walked visually; ALL game effects go through Rules commands via the session.
 ## Run: xvfb-run -a godot --path . --rendering-driver opengl3 -- --journey
 var m: Node
 func run(main: Node) -> void:
 	m = main
-	await get_tree().create_timer(6.0).timeout
 	while m.stage == null or not m.stage.started:
 		await get_tree().process_frame
+	await get_tree().create_timer(3.0).timeout
 	var st: MatchState = Game.state
 	var log: PackedStringArray = []
 	await _shot("01_start")
@@ -20,20 +20,24 @@ func run(main: Node) -> void:
 			n += 1
 			m.cmd(&"water", {"hex": h})
 	m.stage.farm.sync_from_state(st)
-	await _shot("02_planted")
-	var pid: int = st.player_id
-	var day0: int = int(st.clock["day"])
-	var phases: Dictionary = {}
+	m.stage.panels.open(&"build")
+	await _shot("02_build_panel")
+	m.stage.panels.close_all()
+	m.stage.panels.open(&"holdings")
+	await _shot("03_holding_panel")
+	m.stage.panels.close_all()
+	var ab: Dictionary = m.cmd(&"use_ability", {"ability": "lfg:ability/guard"})
+	log.append("ability guard -> %s %s" % [ab.get("ok"), ab.get("error")])
 	var t: float = 0.0
 	while st.phase != &"WARNING" and t < 4000.0:
 		Game.events_emitted.emit(Rules.tick(st, 1.0)); t += 1.0
 	m.stage.set_hud_model(HudBinder.model_from_state(st))
-	await _shot("03_warning_day%d" % int(st.clock["day"]))
+	await _shot("04_warning")
 	while st.phase != &"PURGE_ACTIVE" and t < 8000.0:
 		Game.events_emitted.emit(Rules.tick(st, 1.0)); t += 1.0
 	m.stage.set_hud_model(HudBinder.model_from_state(st))
-	await _shot("04_purge")
-	log.append("day %d -> %d, phase %s, over=%s, rations=%s" % [day0, int(st.clock["day"]), st.phase, st.over, str(Economy.rations_available(st, int(st.actors[pid]["faction"])))])
+	await _shot("05_purge")
+	log.append("day %d, phase %s, over=%s" % [int(st.clock["day"]), st.phase, st.over])
 	print("JOURNEY:\n  ", "\n  ".join(log))
 	get_tree().quit()
 func _shot(n: String) -> void:

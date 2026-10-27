@@ -69,7 +69,7 @@ func _send(c: Dictionary, ok_text: String) -> void:
 		stage.panels.refresh()
 
 func _on_hex(offset_hex: Vector2i) -> void:
-	Game.command(&"move_intent", {"to": HexMath.offset_to_axial(offset_hex)})
+	Game.command(&"sync_position", {"hex": HexMath.offset_to_axial(offset_hex)})
 
 func _on_interact(kind: StringName, data: Dictionary) -> void:
 	if kind == &"plot":
@@ -78,7 +78,7 @@ func _on_interact(kind: StringName, data: Dictionary) -> void:
 		var t: StringName = &"harvest" if st == FarmLayer.Stage.RIPE or st == FarmLayer.Stage.WILTED else &"water"
 		_report(Game.command(t, {"hex": hx}), String(data["label"]))
 	elif kind == &"holding":
-		stage.panels.open(&"holding")
+		stage.panels.open(&"holdings")
 	else:
 		_report(Game.command(&"plant", {"crop": "lfg:crop/glowfruit", "hex": HexMath.offset_to_axial(stage.player.current_hex)}), "Planted glowfruit")
 

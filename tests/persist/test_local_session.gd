@@ -7,7 +7,8 @@ func before_each() -> void:
 	for s in range(0, 4):
 		Persist.clear_slot(s)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://t_localsess/meta.json"))
-	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://t_localsess/meta.json.bak1"))
+	for suffix in ["meta.json.bak1", "meta.json.bak2", "meta.json.tmp"]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://t_localsess/" + suffix))
 
 func _meta() -> MetaStore:
 	return MetaStore.load_from()

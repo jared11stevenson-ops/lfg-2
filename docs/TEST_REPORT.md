@@ -24,3 +24,9 @@ Run: `/tmp/claude-0/godot --headless --path . -s tests/run_all.gd [-- <path subs
 24 suites, 187 tests, 12175 checks, 0 failures. Journey: `xvfb-run ... -- --journey` planted 4 plots via Rules, ran to Purge day 7 (software GL, not a perf benchmark).
 Not verified: human fun, Android/device, real online players, hosting. Only 5 of 14 classes have mechanics; 9 are data-only.
 Known gaps: player-to-rules movement is hex-step sync (rules actor lags visual player); AI factions abstract; net snapshots unfiltered.
+
+## Pass 1 integrated run (lead)
+37 suites, 296 tests, 16025 checks, 0 failures (Godot 4.4.1 headless). Fixed a non-hermetic persist test (stale meta.json.bak2).
+Journey (xvfb, software GL): plant x4 via session commands, build/holdings panels, class ability, Warning and Purge phases; no script errors. Captures in art/captures/integrated/.
+Not verified: human play feel, touch on a real device, Android, real online players, hosting. Stream reports for pass 1 never arrived; contents verified from commits/tests only.
+Still open: Dominion/Crowned wins still in rules (replace with Total Conquest), Standing/rank and skill trees unbuilt, AI factions class-agnostic, no match convergence (see docs/SIM_REPORT_0.md).
