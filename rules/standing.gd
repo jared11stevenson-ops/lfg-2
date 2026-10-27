@@ -564,6 +564,22 @@ static func charge_levy(state: MatchState, events: Array) -> void:
 		f["scouted"] = []
 		f["escorted"] = []
 
+## The Purge targets the Marked: beasts and raiders bleed the garrisons of a Marked AI faction (a human Mark gets bigger waves instead).
+static func mark_pressure(state: MatchState, events: Array) -> void:
+	var m: int = mark_of(state)
+	var f: Dictionary = fac(state, m)
+	if f.is_empty() or not f["alive"] or not f["is_ai"]:
+		return
+	var lost: int = 0
+	for hid in state.holdings_of(m):
+		var h: Dictionary = state.holdings[hid]
+		var d: int = mini(int(h["garrison"]) - 1, maxi(1, int(h["garrison"]) / 8))
+		if d > 0:
+			h["garrison"] = int(h["garrison"]) - d
+			lost += d
+	if lost > 0:
+		events.append({"type": &"mark_pressure", "faction": m, "troops_lost": lost})
+
 # ------------------------------------------------------------------ HUD model (the lead wires this into the HUD / standing panel)
 static func next_unlock(r: int) -> String:
 	return String(rank_def(r + 1).get("unlock", "")) if r < (cfg().get("ranks", []) as Array).size() - 1 else ""

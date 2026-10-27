@@ -1,13 +1,15 @@
 extends SceneTree
-## Grand Simulation: all 14 classes as competing faction leaders in ONE world until one remains (or the day cap).
-## Real Rules module; harness only (a) converts the 12 AI faction leaders + the player faction into class leaders and adds a 14th faction,
-## then (b) ticks the sim and lets each leader try its class ability during the Purge via ordinary use_ability commands.
-## Usage: godot --headless --path . -s tools/sim_match.gd -- --seed=1 --days=168 --out=/path/result.json
+## Grand Simulation harness (pass 2): all 14 classes as competing bot-run faction leaders in ONE 84x54 world until Total Conquest (or the day cap).
+## Real Rules module only. The harness converts the player faction and the 12 AI factions into class leaders and adds a 14th faction; after that it
+## ONLY ticks. Every leader acts through its class kit via rules/ai_leaders.gd (the same Abilities.use path as a player's use_ability command),
+## personas bias the mission mix (rules/ai_factions.gd). No direct state edits during play.
+## Usage: godot --headless --path . -s tools/sim_match.gd -- --seed=1 --days=336 --out=/path/result.json
 const CLASSES: Array[String] = ["judd", "mira", "bram", "tavi", "pip", "oren", "vex", "sable", "quill", "forge", "nyx", "rook", "dune", "halo"]
+const N := 14
 
 func _init() -> void:
 	var seed_v: int = 1
-	var days: int = 168
+	var days: int = 336
 	var out: String = ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--seed="): seed_v = int(a.get_slice("=", 1))
@@ -22,10 +24,8 @@ func _init() -> void:
 		print(txt)
 	quit()
 
-static func run(seed_v: int, days: int) -> Dictionary:
-	var st: MatchState = Setup.build(seed_v, &"lfg:class/judd", {})
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_v * 7919 + 13
+static func build_world(seed_v: int, rng: RandomNumberGenerator) -> Dictionary:
+	var st: MatchState = Setup.build(seed_v, &"lfg:class/judd", {"ai_log": true, "ai_classes": false})
 	# 14th faction on the neutral holding farthest from every owned holding.
 	var best_h: int = -1
 	var best_d: int = -1
@@ -64,84 +64,175 @@ static func run(seed_v: int, days: int) -> Dictionary:
 		var t: String = order[i]
 		order[i] = order[j]
 		order[j] = t
+	for fid in range(N):
+		Setup.set_leader_class(st.actors[int(st.factions[fid]["leader"])], "lfg:class/" + order[fid])
+	Standing.init_state(st)
+	return {"state": st, "order": order}
+
+static func run(seed_v: int, days: int) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v * 7919 + 13
+	var w: Dictionary = build_world(seed_v, rng)
+	var st: MatchState = w["state"]
+	var order: Array = w["order"]
 	var meta: Dictionary = {}
-	for fid in range(14):
-		var cid: String = "lfg:class/" + order[fid]
-		var cd: Dictionary = Content.class_def(cid)
-		var l: Dictionary = st.actors[int(st.factions[fid]["leader"])]
-		var s: Dictionary = cd["stats"]
-		l["class_id"] = cid
-		l["max_hp"] = int(round(float(s["hp"]) * float(cd.get("mods", {}).get("max_hp_mult", 1.0))))
-		l["hp"] = l["max_hp"]
-		l["atk"] = int(s["atk"])
-		l["def"] = int(s["def"])
-		l["max_energy"] = int(s["energy"])
-		l["energy"] = float(s["energy"])
-		l["inv"] = {}
-		for k in (cd["start_kit"] as Dictionary).keys():
-			l["inv"][k] = int(cd["start_kit"][k])
-		meta[fid] = {"class": order[fid], "persona": st.factions[fid]["persona"], "implemented": bool(cd.get("implemented", false)),
-			"elim_day": -1, "kills": 0, "captures": 0, "steals": 0, "ability_uses": 0}
-	var abil: Dictionary = {}
-	for fid in range(14):
-		var cd2: Dictionary = Content.class_def("lfg:class/" + order[fid])
-		abil[fid] = String(cd2.get("ability", {}).get("id", ""))
+	for fid in range(N):
+		var cd: Dictionary = Content.class_def("lfg:class/" + order[fid])
+		meta[fid] = {"class": order[fid], "persona": st.factions[fid]["persona"], "implemented": bool(cd.get("implemented", false)), "elim_day": -1,
+			"elim_cause": "", "leader_kills": 0, "captures": 0, "steals": 0, "deeds": {}, "max_rank": 0, "rank_weeks": [], "nodes": [], "sp_total": 0,
+			"marked_weeks": 0, "tributes": 0, "levy_unpaid": 0, "starve_days": 0, "revolts": 0, "idle_bleed": 0, "parties": 0, "party_leader": 0, "joined_raids": 0}
+	var last_dmg: Dictionary = {}       # actor id -> last damage tag
+	var kill_causes: Dictionary = {}
 	var timeline: Array = []
+	var last_change_day: int = 0
+	var changes_by_week: Dictionary = {}
 	var last_day: int = 0
 	var step: float = 2.0
-	var bot_t: float = 0.0
 	var winner: int = -1
+	var conquest_day: int = -1
+	var solo_day: int = -1
+	var wins: Dictionary = {}
 	var guard: int = 0
+	var t0: int = Time.get_ticks_msec()
+	var tick_ms: float = 0.0
+	var tick_n: int = 0
+	var leader_of: Dictionary = {}
+	for fid in range(N):
+		leader_of[int(st.factions[fid]["leader"])] = fid
 	while int(st.clock["day"]) <= days and guard < 5000000:
 		guard += 1
+		var ta: int = Time.get_ticks_usec()
 		var evs: Array = Rules.tick(st, step)
+		tick_ms += float(Time.get_ticks_usec() - ta) / 1000.0
+		tick_n += 1
 		var day: int = int(st.clock["day"])
 		for e in evs:
 			var ty: StringName = e.get("type", &"")
-			if ty == &"faction_eliminated":
-				meta[int(e["faction"])]["elim_day"] = day
-			elif ty == &"actor_died":
-				var kid: int = int(e.get("killer", -1))
-				if st.actors.has(kid) and int(st.actors[kid]["faction"]) >= 0 and st.actors[kid]["kind"] != "enemy" and int(e["faction"]) != int(st.actors[kid]["faction"]):
-					var kf: int = int(st.actors[kid]["faction"])
-					if meta.has(kf):
-						meta[kf]["kills"] += 1
-			elif ty == &"holding_captured":
-				var cf: int = int(e.get("faction", e.get("by", -1)))
-				if meta.has(cf):
-					meta[cf]["captures"] += 1
-			elif ty == &"steal_resolved" or ty == &"item_stolen":
-				var sf: int = int(e.get("faction", -1))
-				if meta.has(sf):
-					meta[sf]["steals"] += 1
-		bot_t += step
-		if st.phase == &"PURGE_ACTIVE" and bot_t >= 10.0:
-			bot_t = 0.0
-			for fid in range(14):
-				if not st.factions[fid]["alive"] or abil[fid] == "":
-					continue
-				var a: Dictionary = st.actors[int(st.factions[fid]["leader"])]
-				var r: Dictionary = Rules.apply(st, {"type": &"use_ability", "actor": a["id"], "seq": int(a["last_seq"]) + 1, "args": {"ability": abil[fid]}})
-				if r.get("ok", false):
-					meta[fid]["ability_uses"] += 1
+			match ty:
+				&"actor_damaged":
+					last_dmg[int(e["actor"])] = String(e.get("tag", "")) + ":" + str(int(e.get("source", -1)))
+				&"faction_eliminated":
+					var ef: int = int(e["faction"])
+					if meta.has(ef):
+						meta[ef]["elim_day"] = day
+						if meta[ef]["elim_cause"] == "":
+							meta[ef]["elim_cause"] = "holdings_lost"
+					last_change_day = day
+				&"actor_died":
+					var vid: int = int(e["actor"])
+					if leader_of.has(vid):
+						var vf: int = int(leader_of[vid])
+						var cause: String = String(last_dmg.get(vid, "unknown"))
+						var tag: String = cause.get_slice(":", 0)
+						var src: int = int(cause.get_slice(":", 1))
+						var cf: String = ""
+						if st.actors.has(src):
+							var sa: Dictionary = st.actors[src]
+							cf = "party" if sa["kind"] == "party" else ("leader" if sa["kind"] != "enemy" else "beast")
+						var key: String = tag + ("/" + cf if cf != "" else "")
+						kill_causes[key] = int(kill_causes.get(key, 0)) + 1
+						meta[vf]["elim_cause"] = key
+						var kid: int = int(e.get("killer", -1))
+						if st.actors.has(kid) and st.actors[kid]["kind"] != "enemy" and int(st.actors[kid]["faction"]) != vf:
+							var kf: int = int(st.actors[kid]["faction"])
+							if meta.has(kf):
+								meta[kf]["leader_kills"] += 1
+				&"holding_captured":
+					var cf2: int = int(e.get("by", -1))
+					if meta.has(cf2):
+						meta[cf2]["captures"] += 1
+					last_change_day = day
+					changes_by_week[int((day - 1) / 7)] = int(changes_by_week.get(int((day - 1) / 7), 0)) + 1
+				&"holding_revolted":
+					if meta.has(int(e["faction"])):
+						meta[int(e["faction"])]["revolts"] += 1
+					last_change_day = day
+					changes_by_week[int((day - 1) / 7)] = int(changes_by_week.get(int((day - 1) / 7), 0)) + 1
+				&"item_stolen":
+					var sf: int = int(e.get("by", -1))
+					if meta.has(sf):
+						meta[sf]["steals"] += 1
+				&"deed":
+					var df: int = int(e["faction"])
+					if meta.has(df):
+						var dd: Dictionary = meta[df]["deeds"]
+						dd[e["kind"]] = int(dd.get(e["kind"], 0)) + 1
+				&"truce_signed":
+					var tf: int = int(e.get("by", -1))
+					if meta.has(tf):
+						meta[tf]["tributes"] += 1
+				&"levy_paid":
+					if meta.has(int(e["faction"])) and (int(e["unpaid_rations"]) > 0 or int(e["unpaid_coin"]) > 0):
+						meta[int(e["faction"])]["levy_unpaid"] += 1
+				&"starving":
+					if meta.has(int(e["faction"])):
+						meta[int(e["faction"])]["starve_days"] += 1
+				&"idle_bleed":
+					if meta.has(int(e["faction"])):
+						meta[int(e["faction"])]["idle_bleed"] += 1
+				&"party_dispatched":
+					var pf: int = int(e["by"])
+					if meta.has(pf):
+						meta[pf]["parties"] += 1
+						if int(e.get("leader", -1)) != -1:
+							meta[pf]["joined_raids"] += 1
+				&"victory":
+					if conquest_day < 0:
+						conquest_day = day
+						winner = int(e["faction"])
 		if day != last_day:
 			last_day = day
 			if day % 7 == 1:
-				var row: Dictionary = {"day": day, "alive": 0, "holdings": {}}
-				for fid in range(14):
+				var row: Dictionary = {"day": day, "alive": 0, "holdings": {}, "rank": {}, "mark": Standing.mark_of(st)}
+				for fid in range(N):
 					if st.factions[fid]["alive"]:
 						row["alive"] += 1
 						row["holdings"][order[fid]] = st.holdings_of(fid).size()
+						var rk: int = int(st.factions[fid].get("rank", 0))
+						row["rank"][order[fid]] = rk
+						meta[fid]["max_rank"] = maxi(int(meta[fid]["max_rank"]), rk)
+						(meta[fid]["rank_weeks"] as Array).append(rk)
+				var mk: int = Standing.mark_of(st)
+				if mk >= 0 and meta.has(mk):
+					meta[mk]["marked_weeks"] += 1
 				timeline.append(row)
-		var alive: Array[int] = []
-		for fid in range(14):
+		if conquest_day >= 0:
+			break
+		var alive_n: int = 0
+		for fid in range(N):
 			if st.factions[fid]["alive"]:
-				alive.append(fid)
-		if alive.size() <= 1:
-			winner = alive[0] if alive.size() == 1 else -2
+				alive_n += 1
+		if alive_n <= 1 and solo_day < 0:
+			solo_day = day
+		if alive_n == 0:
 			break
 	var final_h: Dictionary = {}
-	for fid in range(14):
+	var final_standing: Dictionary = {}
+	for fid in range(N):
 		final_h[order[fid]] = st.holdings_of(fid).size() if st.factions[fid]["alive"] else 0
-	return {"seed": seed_v, "end_day": int(st.clock["day"]), "winner": order[winner] if winner >= 0 else "", "winner_faction": winner,
-		"solo_last_standing": winner >= 0, "factions": meta, "final_holdings": final_h, "timeline": timeline}
+		var l: Dictionary = st.actors[int(st.factions[fid]["leader"])]
+		meta[fid]["nodes"] = (l.get("nodes", []) as Array).duplicate()
+		meta[fid]["sp_total"] = int(l.get("sp_total", 0))
+		meta[fid]["final_rank"] = int(st.factions[fid].get("rank", 0))
+		meta[fid]["final_standing"] = float(st.factions[fid].get("standing", 0.0))
+		meta[fid]["prosperity"] = (st.factions[fid].get("prosperity", {}) as Dictionary).duplicate()
+		meta[fid]["deed_counts"] = (st.factions[fid].get("dcount", {}) as Dictionary).duplicate()
+		meta[fid]["alive"] = bool(st.factions[fid]["alive"])
+		meta[fid]["final_holdings"] = final_h[order[fid]]
+	var alive_final: Array = []
+	for fid in range(N):
+		if st.factions[fid]["alive"]:
+			alive_final.append(order[fid])
+	var neutral: int = 0
+	for h in st.holdings.values():
+		if int(h["owner"]) == -1:
+			neutral += 1
+	var by_week: Array = []
+	var wk_n: int = int((int(st.clock["day"]) - 1) / 7) + 1
+	for wk in range(wk_n):
+		by_week.append(int(changes_by_week.get(wk, 0)))
+	return {"seed": seed_v, "end_day": int(st.clock["day"]), "total_conquest": conquest_day >= 0, "conquest_day": conquest_day,
+		"winner": order[winner] if winner >= 0 else "", "winner_faction": winner, "solo_day": solo_day, "alive_final": alive_final, "neutral_holdings": neutral,
+		"last_territory_change_day": last_change_day, "territory_changes_by_week": by_week, "factions": meta, "final_holdings": final_h,
+		"kill_causes": kill_causes, "ability_log": st.sim_acc.get("ablog", {}), "timeline": timeline,
+		"tick_avg_ms": tick_ms / maxf(1.0, float(tick_n)), "wall_s": float(Time.get_ticks_msec() - t0) / 1000.0, "mark_final": Standing.mark_of(st)}

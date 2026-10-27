@@ -19,7 +19,6 @@ const SIEGE_SECS := 14.0
 const SORTIE_PERIOD := 3.0
 const HARASS_PERIOD := 2.0
 const MAX_PARTIES := 2
-const MAX_DISPATCH := 3
 const MAX_PATH_LEN := 36
 const BUILD_ORDER: Dictionary = {
 	"raider": ["lfg:building/wall", "lfg:building/barracks", "lfg:building/watchtower", "lfg:building/storehouse"],
@@ -68,34 +67,48 @@ static func route(state: MatchState, from: Vector2i, to: Vector2i) -> Array[Vect
 static func dawn(state: MatchState, events: Array) -> void:
 	var fids: Array = state.factions.keys()
 	fids.sort()
+	var scarce: float = Standing.prod_mult(state)
 	for fid in fids:
 		var f: Dictionary = state.factions[fid]
 		if not f["is_ai"] or not f["alive"]:
 			continue
 		var persona: String = String(f["persona"])
+		var lead: Dictionary = Standing.leader_of(state, int(fid))
+		if not lead.is_empty() and not lead["alive"]:
+			lead = {}
+		var weak_st: int = int(Standing.cfg()["stability"]["weak"])
 		for hid in state.holdings_of(fid):
 			var h: Dictionary = state.holdings[hid]
 			var n: int = 3 + 2 * int(h["garrison"]) + int(h["tier"]) + (2 if persona == "hoarder" else 0)
+			if not lead.is_empty():
+				n += 2 * int(Combat.class_mod(lead, "yield_bonus", 0))
+				if int(Combat.class_mod(lead, "grove_growth", 0)) > 0 and WorldGen.biome_at(state.world, h["hex"]) == "fungal_grove":
+					n = int(float(n) * 1.5)
+			n += Standing.yield_bonus(state, h) * 2
+			n = maxi(1, int(float(n) * scarce * (0.5 if int(h.get("stab", 100)) < weak_st else 1.0)))
 			var crop: String = "lfg:item/saltroot" if int(h["tier"]) >= 2 else "lfg:item/glowfruit"
 			if Inv.room_for(h["store"], {crop: n}):
 				Inv.add_all(h["store"], {crop: n})
+				Standing.note_output(state, int(fid), {crop: n})
 			var mats: Dictionary = {"lfg:item/timber": 3 if persona == "trader" else 1}
 			if int(h["tier"]) >= 1 or persona == "turtle" or persona == "trader":
 				mats["lfg:item/stone"] = 2 if persona == "trader" else 1
 			if Inv.room_for(h["store"], mats):
 				Inv.add_all(h["store"], mats)
 			var cooked: int = 0
-			for item in ["lfg:item/glowfruit", "lfg:item/saltroot"]:
-				var per: int = 2 if item == "lfg:item/glowfruit" else 3
-				var out: int = 1 if item == "lfg:item/glowfruit" else 2
+			var cbonus: int = int(Combat.class_mod(lead, "ration_bonus", 0)) if not lead.is_empty() else 0
+			for item in ["lfg:item/glowfruit", "lfg:item/saltroot", "lfg:item/game_meat"]:
+				var per: int = 3 if item == "lfg:item/saltroot" else 2
+				var out: int = 2 if item == "lfg:item/saltroot" else 1
 				var batches: int = Inv.count(h["store"], item) / per
-				if batches > 0 and Inv.room_for(h["store"], {"lfg:item/ration": batches * out}):
+				if batches > 0 and Inv.room_for(h["store"], {"lfg:item/ration": batches * (out + cbonus)}):
 					Inv.remove_all(h["store"], {item: batches * per})
-					Inv.add_all(h["store"], {"lfg:item/ration": batches * out})
-					cooked += batches * out
+					Inv.add_all(h["store"], {"lfg:item/ration": batches * (out + cbonus)})
+					cooked += batches * (out + cbonus)
 			if cooked > 0:
 				events.append({"type": &"ai_farmed", "faction": fid, "ai": true, "holding": hid, "rations": cooked})
-			var cap: int = 4 + 4 * int(h["tier"])
+			salvage(state, h)
+			var cap: int = Standing.garrison_cap(state, h)
 			var rec: int = 2 if persona == "turtle" else 1
 			var comfy: bool = persona != "hoarder" or Inv.count(h["store"], "lfg:item/ration") >= 3 * maxi(1, int(h["garrison"]))
 			if persona == "trader" and Inv.count(h["store"], "lfg:item/coin") < 3 * rec + 8:
@@ -105,16 +118,38 @@ static func dawn(state: MatchState, events: Array) -> void:
 				h["garrison"] = mini(cap, int(h["garrison"]) + rec)
 			if persona == "turtle" or int(state.clock["day"]) % 2 == 0:
 				_build(state, int(fid), persona, int(hid), events)
-		if persona == "trader":
+		if persona == "trader" or String(lead.get("class_id", "")) == "lfg:class/quill":
 			_trade(state, int(fid), events)
-			if state.day_of_week() == 6:
+			if state.day_of_week() == 6 and persona == "trader":
 				_hire(state, int(fid), events)
 		scout(state, int(fid))
+	AILeaders.dawn(state, events)
+
+## AI factions pick up anything left lying near their holdings (loot of beaten raiders, ashmarrow).
+static func salvage(state: MatchState, h: Dictionary) -> void:
+	if state.drops.is_empty():
+		return
+	for k in state.drops.keys().duplicate():
+		var parts: PackedStringArray = (k as String).split(",")
+		if HexGrid.distance(Vector2i(int(parts[0]), int(parts[1])), h["hex"]) <= 3:
+			Conquest.move_fitting(state.drops[k], h["store"], state.drops[k].duplicate())
+			if (state.drops[k] as Dictionary).is_empty():
+				state.drops.erase(k)
 
 static func _build(state: MatchState, fid: int, persona: String, hid: int, events: Array) -> void:
 	var h: Dictionary = state.holdings[hid]
-	for bid in BUILD_ORDER.get(persona, []):
+	var lead: Dictionary = Standing.leader_of(state, fid)
+	if not lead.is_empty() and not lead["alive"]:
+		lead = {}
+	var order: Array = (BUILD_ORDER.get(persona, []) as Array).duplicate()
+	if Standing.rank_of(state, fid) >= 2:
+		order.append_array(["lfg:building/shrine"])
+	if Standing.rank_of(state, fid) >= 3:
+		order.append_array(["lfg:building/greenhouse"])
+	for bid in order:
 		var b: Dictionary = Content.building(String(bid))
+		if not Standing.rank_ok(state, fid, int(b.get("rank", 0))):
+			continue
 		var bl: Array = h["buildings"]
 		if b.has("upgrade_of"):
 			if not bl.has(b["upgrade_of"]):
@@ -126,7 +161,7 @@ static func _build(state: MatchState, fid: int, persona: String, hid: int, event
 					have += 1
 			if have >= int(b["max"]):
 				continue
-		var cost: Dictionary = Economy.build_cost({}, b)
+		var cost: Dictionary = Economy.build_cost(lead, b)
 		if not Inv.has_all(h["store"], cost):
 			continue
 		if b.has("upgrade_of"):
@@ -166,6 +201,9 @@ static func _trade(state: MatchState, fid: int, events: Array) -> void:
 		return
 	var mer: Dictionary = state.holdings[best]
 	var st: Dictionary = home["store"]
+	var tl: Dictionary = Standing.leader_of(state, fid)
+	if not tl.is_empty() and not tl["alive"]:
+		tl = {}
 	# sell surplus goods
 	var sold: int = 0
 	for item in ["lfg:item/saltroot", "lfg:item/timber", "lfg:item/stone", "lfg:item/glowfruit"]:
@@ -174,7 +212,7 @@ static func _trade(state: MatchState, fid: int, events: Array) -> void:
 		if q <= 0:
 			continue
 		var pm: float = Economy.price_mult(mer, item)
-		var unit: int = Economy.sell_price({}, item, pm)
+		var unit: int = Economy.sell_price(tl, item, pm)
 		q = mini(q, Inv.count(mer["store"], "lfg:item/coin") / maxi(1, unit))
 		q = mini(q, 12)
 		if q > 0 and Inv.room_for(mer["store"], {item: q}) and Inv.room_for(st, {"lfg:item/coin": q * unit}):
@@ -188,7 +226,7 @@ static func _trade(state: MatchState, fid: int, events: Array) -> void:
 	var have: int = Economy.rations_available(state, fid)
 	if have < need:
 		var pm2: float = Economy.price_mult(mer, "lfg:item/ration")
-		var unit2: int = Economy.buy_price("lfg:item/ration", pm2)
+		var unit2: int = Economy.buy_price("lfg:item/ration", pm2, tl)
 		var q2: int = mini(mini(need - have, 8), Inv.count(st, "lfg:item/coin") / unit2)
 		q2 = mini(q2, Inv.count(mer["store"], "lfg:item/ration"))
 		if q2 > 0 and Inv.room_for(st, {"lfg:item/ration": q2}):
@@ -250,8 +288,25 @@ static func _marked_near(state: MatchState, hex: Vector2i) -> bool:
 	var p: Dictionary = state.player()
 	return not p.is_empty() and p["alive"] and int(Combat.class_mod(p, "marked", 0)) > 0 and HexGrid.distance(p["hex"], hex) <= 8
 
+static func max_dispatch(state: MatchState) -> int:
+	var e: Dictionary = Standing.cfg()["escalation"]
+	return mini(int(e["dispatch_cap"]), int(e["dispatch_base"]) + state.week() / int(e["dispatch_week_div"]))
+
+## Party size grows with the weeks (each Purge is larger than the last).
+static func party_cap(state: MatchState) -> int:
+	var e: Dictionary = Standing.cfg()["escalation"]
+	return mini(int(e["party_cap"]), int(e["party_cap_base"]) + state.week() / int(e["party_week_div"]))
+
+## The persona the faction acts as: passive personas that have grown strong turn ambitious later (the way out of a permanent stalemate).
+static func effective_persona(state: MatchState, fid: int) -> String:
+	var f: Dictionary = state.factions[fid]
+	var p: String = String(f["persona"])
+	if p != "raider" and state.week() >= 6 and Standing.rank_of(state, fid) >= 3:
+		return "raider"
+	return p
+
 # ---------------------------------------------------------------- purge: decisions
-## One decision round. Returns the number of parties dispatched (<= MAX_DISPATCH). Called at purge start and every period().
+## One decision round. Returns the number of parties dispatched (<= max_dispatch). Called at purge start and every period().
 static func purge_round(state: MatchState, events: Array) -> int:
 	var acted: int = 0
 	var now: float = float(state.clock["elapsed"])
@@ -260,16 +315,21 @@ static func purge_round(state: MatchState, events: Array) -> int:
 	# rotate the start so the same faction does not always get the dispatch slots
 	var rot: int = int(now / maxf(period(state), 0.01)) % maxi(1, fids.size())
 	fids = fids.slice(rot) + fids.slice(0, rot)
+	var limit: int = max_dispatch(state)
 	for fid in fids:
-		if acted >= MAX_DISPATCH:
+		if acted >= limit:
 			break
 		var f: Dictionary = state.factions[fid]
 		if not f["is_ai"] or not f["alive"]:
 			continue
-		var persona: String = String(f["persona"])
-		if persona != "raider" and persona != "hoarder":
+		var persona: String = effective_persona(state, int(fid))
+		if float(f.get("next_act", 0.0)) > now:
 			continue
-		if float(f.get("next_act", 0.0)) > now or parties_of(state, int(fid)).size() >= (1 if persona == "hoarder" else MAX_PARTIES):
+		var np: int = parties_of(state, int(fid)).size()
+		var raid_cap: int = 1 if persona == "hoarder" else MAX_PARTIES
+		if persona != "raider" and persona != "hoarder":
+			raid_cap = 0
+		if np >= MAX_PARTIES:
 			continue
 		var home_id: int = int(f["home"])
 		if not state.holdings.has(home_id) or int(state.holdings[home_id]["owner"]) != fid:
@@ -279,11 +339,33 @@ static func purge_round(state: MatchState, events: Array) -> int:
 			home_id = mine[0]
 			f["home"] = home_id
 		scout(state, int(fid))
-		if _plan(state, int(fid), persona, home_id, events):
+		var did: bool = false
+		if np < raid_cap:
+			did = _plan(state, int(fid), persona, home_id, events)
+		if not did and np == 0:
+			did = _plan_support(state, int(fid), persona, home_id, events)
+		if did:
 			acted += 1
 	return acted
 
+static func _bias(state: MatchState, fid: int, key: String) -> int:
+	var l: Dictionary = Standing.leader_of(state, fid)
+	if l.is_empty():
+		return 0
+	return int((AILeaders.kit(l).get("bias", {}) as Dictionary).get(key, 0))
+
 static func _plan(state: MatchState, fid: int, persona: String, home_id: int, events: Array) -> bool:
+	var order: Array = ["capture", "steal"] if persona == "raider" else ["steal", "capture"]
+	for m in order:
+		if m == "steal" and persona == "raider" and _bias(state, fid, "steal") < 1:
+			continue        # raiders only fall back on theft when their class is a thief's
+		if m == "capture" and persona != "raider" and _bias(state, fid, "capture") < 2:
+			continue        # thieving personas only take holdings when their class is a warlord's
+		if _try(state, fid, m, home_id, events):
+			return true
+	return false
+
+static func _try(state: MatchState, fid: int, mission: String, home_id: int, events: Array) -> bool:
 	var f: Dictionary = state.factions[fid]
 	var home: Dictionary = state.holdings[home_id]
 	var now: float = float(state.clock["elapsed"])
@@ -293,6 +375,8 @@ static func _plan(state: MatchState, fid: int, persona: String, home_id: int, ev
 	var ids: Array = intel.keys()
 	ids.sort()
 	var spare: int = int(home["garrison"]) - 2
+	var pc: int = party_cap(state)
+	var mk: float = float(Standing.cfg()["mark"]["ai_target_mult"])
 	for hid in ids:
 		var e: Dictionary = intel[hid]
 		var h: Dictionary = state.holdings.get(hid, {})
@@ -302,9 +386,13 @@ static func _plan(state: MatchState, fid: int, persona: String, home_id: int, ev
 			continue
 		if truced and int(h["owner"]) == 0:
 			continue
+		if int(h["owner"]) >= 0 and Standing.truced(state, fid, int(h["owner"])):
+			continue
 		var bonus: float = 1.25 if _marked_near(state, h["hex"]) else 1.0
-		if persona == "raider":
-			var commit: int = mini(spare, 8)
+		if int(h["owner"]) >= 0 and Standing.is_marked(state, int(h["owner"])):
+			bonus *= mk
+		if mission == "capture":
+			var commit: int = mini(spare, pc)
 			if commit < 2:
 				continue
 			var est: float = float(e["def"])
@@ -328,16 +416,60 @@ static func _plan(state: MatchState, fid: int, persona: String, home_id: int, ev
 			break
 		var hid2: int = int(c[1])
 		var e2: Dictionary = intel[hid2]
-		if persona == "raider":
-			var commit2: int = mini(spare, 8)
-			if _dispatch(state, fid, home_id, hid2, "capture", commit2, "", 0, events):
+		if mission == "capture":
+			if _dispatch(state, fid, home_id, hid2, "capture", mini(spare, pc), "", 0, events):
 				return true
 		else:
 			if _dispatch(state, fid, home_id, hid2, "steal", mini(2, spare), String(e2["item"]), int(e2["qty"]), events):
 				return true
 	return false
 
-## Traders (warning day) pay a merchant town to hire up to 3 mercenaries per holding. The wage is transferred, not destroyed.
+## Non-raiding Purge routes (these earn deeds, which is how passive personas avoid the idle bleed): resupply an outlying holding, or scout a rival.
+static func _plan_support(state: MatchState, fid: int, persona: String, home_id: int, events: Array) -> bool:
+	var f: Dictionary = state.factions[fid]
+	var home: Dictionary = state.holdings[home_id]
+	var spare: int = int(home["garrison"]) - 2
+	if spare < 1:
+		return false
+	var pcap: Dictionary = f.get("pcap", {})
+	var sup_w: int = _bias(state, fid, "supply") + (2 if persona == "turtle" or persona == "hoarder" else 1)
+	var scout_w: int = _bias(state, fid, "scout") + (2 if persona == "trader" else 1) + _bias(state, fid, "broker")
+	var order: Array = ["supply", "scout"] if sup_w >= scout_w else ["scout", "supply"]
+	for m in order:
+		if m == "supply" and int(pcap.get("escort", 0)) < int(Standing.deed_def("escort")["cap"]):
+			var best: int = -1
+			var bd: int = 1 << 30
+			for hid in state.holdings_of(fid):
+				var h: Dictionary = state.holdings[hid]
+				var d: int = HexGrid.distance(h["hex"], home["hex"])
+				if int(hid) == home_id or d < PurgeActions.ESCORT_MIN_DIST or d > 18 or (f.get("escorted", []) as Array).has(hid):
+					continue
+				if d < bd:
+					bd = d
+					best = int(hid)
+			if best != -1 and Inv.count(home["store"], "lfg:item/ration") >= 10:
+				if _dispatch(state, fid, home_id, best, "supply", 1, "lfg:item/ration", 6, events):
+					return true
+		elif m == "scout" and int(pcap.get("scout", 0)) < int(Standing.deed_def("scout")["cap"]):
+			var intel: Dictionary = f.get("intel", {})
+			var ids: Array = intel.keys()
+			ids.sort()
+			var best2: int = -1
+			var bd2: int = 1 << 30
+			for hid in ids:
+				var h2: Dictionary = state.holdings.get(hid, {})
+				if h2.is_empty() or int(h2["owner"]) < 0 or int(h2["owner"]) == fid or (f.get("scouted", []) as Array).has(hid):
+					continue
+				if Standing.truced(state, fid, int(h2["owner"])):
+					continue
+				var d2: int = HexGrid.distance(h2["hex"], home["hex"])
+				if d2 <= 18 and d2 < bd2:
+					bd2 = d2
+					best2 = int(hid)
+			if best2 != -1 and _dispatch(state, fid, home_id, best2, "scout", 1, "", 0, events):
+				return true
+	return false
+
 static func _hire(state: MatchState, fid: int, events: Array) -> void:
 	var home: Dictionary = state.holdings.get(int(state.factions[fid]["home"]), {})
 	if home.is_empty():
@@ -352,7 +484,7 @@ static func _hire(state: MatchState, fid: int, events: Array) -> void:
 		return
 	for hid in state.holdings_of(fid):
 		var h: Dictionary = state.holdings[hid]
-		var cap: int = 4 + 4 * int(h["tier"])
+		var cap: int = Standing.garrison_cap(state, h)
 		var n: int = mini(mini(3, cap - int(h["garrison"])), Inv.count(h["store"], "lfg:item/coin") / 4)
 		if n > 0 and Inv.room_for(mer["store"], {"lfg:item/coin": 4 * n}):
 			Inv.transfer(h["store"], mer["store"], {"lfg:item/coin": 4 * n})
@@ -371,18 +503,25 @@ static func _dispatch(state: MatchState, fid: int, home_id: int, target_id: int,
 	var now: float = float(state.clock["elapsed"])
 	home["garrison"] = int(home["garrison"]) - troops
 	var pid: int = state.new_id()
-	var p: Dictionary = Setup.make_actor(pid, "party", fid, "%s %s" % [f["name"], "Raiders" if mission == "capture" else "Thieves"], home["hex"], troops * HP_PER_TROOP, 2, 1, 0)
+	var label: String = "Raiders" if mission == "capture" else ("Thieves" if mission == "steal" else ("Scouts" if mission == "scout" else "Supply Train"))
+	var p: Dictionary = Setup.make_actor(pid, "party", fid, "%s %s" % [f["name"], label], home["hex"], troops * HP_PER_TROOP, 2, 1, 0)
 	p["speed_mult"] = MatchState.q(tscale(state))
 	p["ai"] = {"state": "march", "mission": mission, "target": target_id, "home": home_id, "troops": troops, "item": item, "qty": qty,
-		"warned": false, "retry": 0, "scout_t": now + 3.0, "hit_t": 0.0, "sortie_t": 0.0, "siege_end": 0.0}
+		"warned": false, "retry": 0, "scout_t": now + 3.0, "hit_t": 0.0, "sortie_t": 0.0, "siege_end": 0.0, "leader": -1}
+	if mission == "supply":
+		var cargo: Dictionary = {item: mini(qty, Inv.count(home["store"], item))}
+		Inv.transfer(home["store"], p["inv"], cargo)
 	p["move"] = {"path": path, "acc": 0.0}
 	state.actors[pid] = p
 	f["next_act"] = MatchState.q(now + ACT_COOLDOWN * tscale(state))
+	var lead: Dictionary = AILeaders.leader_of(state, fid)
+	if (mission == "capture" or mission == "steal") and AILeaders.wants_to_join(state, fid, lead, mission, troops) and HexGrid.distance(lead["hex"], home["hex"]) <= 1:
+		AILeaders.join(state, lead, p)
 	var eta: float = 0.0
 	for h in path:
 		eta += Movement.step_secs(state, p, h)
 	events.append({"type": &"party_dispatched", "party": pid, "by": fid, "ai": true, "faction_name": f["name"], "from": home_id, "target": target_id,
-		"mission": mission, "troops": troops, "eta": MatchState.q(eta), "hex": home["hex"]})
+		"mission": mission, "troops": troops, "eta": MatchState.q(eta), "hex": home["hex"], "leader": int(p["ai"]["leader"])})
 	return true
 
 # ---------------------------------------------------------------- purge: parties each tick
@@ -404,6 +543,7 @@ static func party_step(state: MatchState, events: Array) -> void:
 	for id in ids:
 		var a: Dictionary = state.actors[id]
 		if not a["alive"]:
+			_release_leader(state, a)
 			state.actors.erase(id)
 			continue
 		var ai: Dictionary = a["ai"]
@@ -411,21 +551,48 @@ static func party_step(state: MatchState, events: Array) -> void:
 		if state.phase != &"PURGE_ACTIVE" or not state.factions[fid]["alive"]:
 			_disband(state, a, events, "recalled")
 			continue
+		if int(ai.get("leader", -1)) != -1:
+			AILeaders.follow(state, a)
 		if now >= float(ai["scout_t"]):
 			ai["scout_t"] = MatchState.q(now + 3.0 * ts + 0.5)
 			scout(state, fid)
 		var st: String = ai["state"]
 		if st == "march":
 			var t: Dictionary = state.holdings[int(ai["target"])]
-			if int(t["owner"]) == fid:
+			var mission: String = String(ai["mission"])
+			if int(t["owner"]) == fid and mission != "supply":
+				_go_home(state, a, events)
+				continue
+			if int(t["owner"]) >= 0 and int(t["owner"]) != fid and Standing.truced(state, fid, int(t["owner"])):
 				_go_home(state, a, events)
 				continue
 			var d: int = HexGrid.distance(a["hex"], t["hex"])
-			if not bool(ai["warned"]) and int(t["owner"]) == 0 and d <= warn_radius(t):
+			if mission == "scout":
+				if d <= PurgeActions.SCOUT_RANGE:
+					var sc: Array = state.factions[fid].get("scouted", [])
+					if not sc.has(int(t["id"])):
+						sc.append(int(t["id"]))
+					state.factions[fid]["scouted"] = sc
+					events.append({"type": &"scouted", "faction": fid, "actor": id, "holding": t["id"], "owner": t["owner"], "garrison": t["garrison"],
+						"defense": int(round(Conquest.defender_power(state, t))), "ai": true})
+					_go_home(state, a, events)
+					continue
+			elif mission == "supply":
+				if int(t["owner"]) != fid:
+					_go_home(state, a, events)
+					continue
+				if d <= 1:
+					events.append({"type": &"escorted", "faction": fid, "actor": id, "holding": t["id"], "qty": Inv.count(a["inv"], "lfg:item/ration"), "ai": true})
+					ai["home"] = int(t["id"])
+					ai["state"] = "return"
+					ai["troops"] = troops_of(a)
+					_disband(state, a, events, "delivered")
+					continue
+			if not bool(ai["warned"]) and int(t["owner"]) == 0 and d <= warn_radius(t) and (mission == "capture" or mission == "steal"):
 				ai["warned"] = true
 				events.append({"type": &"raid_warning", "party": id, "holding": t["id"], "by": fid, "ai": true, "mission": ai["mission"], "troops": troops_of(a),
 					"hex": a["hex"], "distance": d})
-			if d <= 1:
+			if d <= 1 and (mission == "capture" or mission == "steal"):
 				ai["state"] = "siege"
 				ai["siege_end"] = MatchState.q(now + SIEGE_SECS * ts)
 				a["move"] = {}
@@ -442,10 +609,13 @@ static func party_step(state: MatchState, events: Array) -> void:
 			if int(t2["owner"]) == fid:
 				_go_home(state, a, events)
 				continue
+			if int(t2["owner"]) >= 0 and Standing.truced(state, fid, int(t2["owner"])):
+				_go_home(state, a, events)
+				continue
 			_defend(state, a, events, now, ts)
 			if not a["alive"]:
 				continue
-			if now >= float(ai["siege_end"]):
+			if st == "siege" and ai["state"] == "siege" and now >= float(ai["siege_end"]):
 				_resolve(state, a, events)
 		else: # return
 			var home: Dictionary = state.holdings.get(int(ai["home"]), {})
@@ -466,13 +636,30 @@ static func party_step(state: MatchState, events: Array) -> void:
 				else:
 					a["move"] = {"path": rp, "acc": 0.0}
 
-## Garrison sorties from every holding within 2 hexes (except the party's own) wound the party; the party harasses a nearby hostile leader.
+static func _party_leader(state: MatchState, a: Dictionary) -> Dictionary:
+	var lid: int = int(a["ai"].get("leader", -1))
+	if lid == -1:
+		return {}
+	var l: Dictionary = state.actors.get(lid, {})
+	return l if (not l.is_empty() and l["alive"]) else {}
+
+static func _release_leader(state: MatchState, a: Dictionary) -> void:
+	if int(a["ai"].get("leader", -1)) == -1:
+		return
+	var home: Dictionary = state.holdings.get(int(a["ai"].get("home", -1)), {})
+	AILeaders.release(state, a, home["hex"] if not home.is_empty() else a["hex"])
+
+## Garrison sorties from every holding within 2 hexes (except the party's own) wound the party (and the leader marching with it);
+## leaders on both sides trade blows and use their class kit; the party also harasses any hostile leader next to it.
 static func _defend(state: MatchState, a: Dictionary, events: Array, now: float, ts: float) -> void:
 	var ai: Dictionary = a["ai"]
 	var fid: int = int(a["faction"])
+	var lead: Dictionary = _party_leader(state, a)
 	if now >= float(ai["sortie_t"]):
 		ai["sortie_t"] = MatchState.q(now + SORTIE_PERIOD * ts + 0.5)
 		var total: int = 0
+		var best_f: int = -1
+		var best_c: int = 0
 		for h in state.holdings.values():
 			if int(h["owner"]) == fid or int(h["garrison"]) < 2 or HexGrid.distance(h["hex"], a["hex"]) > 2:
 				continue
@@ -481,18 +668,56 @@ static func _defend(state: MatchState, a: Dictionary, events: Array, now: float,
 				per = 2.0
 			if Conquest._active(state, h, "rally"):
 				per *= 1.4
-			total += int(float(h["garrison"]) * per)
+			var c: int = int(float(h["garrison"]) * per)
+			total += c
+			if c > best_c and int(h["owner"]) >= 0:
+				best_c = c
+				best_f = int(h["owner"])
 		if total > 0:
 			events.append({"type": &"sortie", "party": a["id"], "damage": total, "by": fid})
+			if not lead.is_empty():
+				var src: int = int(state.factions[best_f]["leader"]) if best_f >= 0 else -1
+				Combat.hurt(state, int(lead["id"]), maxi(1, total / 4), src, events, "sortie")
 			Combat.hurt(state, int(a["id"]), total, -1, events, "sortie")
 			if not a["alive"]:
 				return
 	if now >= float(ai["hit_t"]):
 		ai["hit_t"] = MatchState.q(now + HARASS_PERIOD * ts + 0.5)
-		var p: Dictionary = state.player()
-		if not p.is_empty() and p["alive"] and int(p["faction"]) != fid and HexGrid.distance(p["hex"], a["hex"]) <= 1 and not Combat.has_effect(state, p, "truce"):
-			var dmg: int = maxi(1, 2 + troops_of(a) / 2 - int(Combat.def_of(state, p)))
-			Combat.hurt(state, int(p["id"]), dmg, int(a["id"]), events, "raid_party")
+		_harass(state, a, events)
+		if not a["alive"]:
+			return
+		lead = _party_leader(state, a)
+		if not lead.is_empty() and float(lead["hp"]) < 0.4 * float(lead["max_hp"]):
+			_go_home(state, a, events)
+
+static func _harass(state: MatchState, a: Dictionary, events: Array) -> void:
+	var ai: Dictionary = a["ai"]
+	var fid: int = int(a["faction"])
+	var lead: Dictionary = _party_leader(state, a)
+	var foe: Dictionary = {}
+	var fkeys: Array = state.factions.keys()
+	fkeys.sort()
+	for f2 in fkeys:
+		if int(f2) == fid or not state.factions[f2]["alive"] or Standing.truced(state, fid, int(f2)):
+			continue
+		var v: Dictionary = state.actors.get(int(state.factions[f2]["leader"]), {})
+		if v.is_empty() or not v["alive"] or (v["kind"] != "leader" and v["kind"] != "ai_leader"):
+			continue
+		if HexGrid.distance(v["hex"], a["hex"]) > 1 or Combat.has_effect(state, v, "truce"):
+			continue
+		var dmg: int = maxi(1, 2 + troops_of(a) / 2 - int(Combat.def_of(state, v)))
+		Combat.hurt(state, int(v["id"]), dmg, int(lead["id"]) if not lead.is_empty() else int(a["id"]), events, "raid_party")
+		if foe.is_empty():
+			foe = v
+		if v["alive"] and v["kind"] == "ai_leader":
+			Combat.hurt(state, int(a["id"]), Combat.calc_damage(state, v, a), int(v["id"]), events, "leader_defence")
+			AILeaders.siege_cast(state, v, a, {}, events)
+			if not a["alive"]:
+				return
+		if v["alive"] and not lead.is_empty():
+			AILeaders.melee(state, lead, v, events)
+	if not lead.is_empty() and lead["alive"]:
+		AILeaders.siege_cast(state, lead, foe, {"holding": int(ai["target"])}, events)
 
 static func _resolve(state: MatchState, a: Dictionary, events: Array) -> void:
 	var ai: Dictionary = a["ai"]
@@ -581,5 +806,6 @@ static func _disband(state: MatchState, a: Dictionary, events: Array, reason: St
 		Inv.add_all(cur, rest)
 		state.drops[k] = cur
 		a["inv"] = {}
+	AILeaders.release(state, a, dest["hex"] if not dest.is_empty() else a["hex"])
 	state.actors.erase(int(a["id"]))
 	events.append({"type": &"party_returned", "party": a["id"], "by": fid, "ai": true, "reason": reason, "troops": troops, "loot": stored})

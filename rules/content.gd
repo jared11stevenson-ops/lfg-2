@@ -60,6 +60,18 @@ static func skill_data() -> Dictionary:
 	_cache["skill_data"] = out
 	return out
 
+## data/ai_kits.json: how AI leaders use their class (rules/ai_leaders.gd).
+static func ai_kit(class_id: String) -> Dictionary:
+	if not _cache.has("ai_kits"):
+		var out: Dictionary = {}
+		var f := FileAccess.open("res://data/ai_kits.json", FileAccess.READ)
+		if f != null:
+			var parsed: Variant = JSON.parse_string(f.get_as_text())
+			if parsed is Dictionary:
+				out = parsed.get("classes", {})
+		_cache["ai_kits"] = out
+	return _cache["ai_kits"].get(class_id, {})
+
 static func item(id: String) -> Dictionary: return items().get(id, {})
 static func crop(id: String) -> Dictionary: return crops().get(id, {})
 static func recipe(id: String) -> Dictionary: return recipes().get(id, {})

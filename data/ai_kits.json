@@ -1,0 +1,20 @@
+{
+"schema": 1,
+"_notes": "How AI/bot faction leaders use their class kit (rules/ai_leaders.gd). role: bruiser|striker|thief|support|builder|diplomat|skirmisher|shaman|warlord|tinker|pilgrim. peace: dawn routine. cast: Purge ability trigger. joins_raid: the leader marches with capture/steal parties (and so can die). bias: extra mission weights on top of persona. Personas bias, class decides the kit.",
+"classes": {
+"lfg:class/judd":  {"role": "bruiser",    "peace": "yield",   "cast": "guard",          "joins_raid": false, "bias": {"supply": 1}},
+"lfg:class/mira":  {"role": "striker",    "peace": "tonic",   "cast": "plague_cloud",   "joins_raid": true,  "bias": {"capture": 1}},
+"lfg:class/bram":  {"role": "bruiser",    "peace": "forage",  "cast": "rage",           "joins_raid": true,  "bias": {"capture": 2}},
+"lfg:class/tavi":  {"role": "builder",    "peace": "mine",    "cast": "sentinel_post",  "joins_raid": false, "bias": {"supply": 1}},
+"lfg:class/pip":   {"role": "skirmisher", "peace": "none",    "cast": "dash",           "joins_raid": true,  "bias": {"supply": 2, "scout": 1}},
+"lfg:class/oren":  {"role": "support",    "peace": "ration",  "cast": "field_dressing", "joins_raid": false, "bias": {"supply": 1}},
+"lfg:class/vex":   {"role": "thief",      "peace": "trade",   "cast": "pickpocket",     "joins_raid": true,  "bias": {"steal": 3}},
+"lfg:class/sable": {"role": "thief",      "peace": "hunt",    "cast": "snare",          "joins_raid": true,  "bias": {"steal": 1, "scout": 2}},
+"lfg:class/quill": {"role": "diplomat",   "peace": "trade",   "cast": "none",           "joins_raid": false, "bias": {"broker": 3}},
+"lfg:class/forge": {"role": "warlord",    "peace": "build",   "cast": "siege_ram",      "joins_raid": true,  "bias": {"capture": 2}},
+"lfg:class/nyx":   {"role": "shaman",     "peace": "grove",   "cast": "spore_swarm",    "joins_raid": true,  "bias": {"capture": 1}},
+"lfg:class/rook":  {"role": "warlord",    "peace": "none",    "cast": "rally",          "joins_raid": true,  "bias": {"capture": 3}},
+"lfg:class/dune":  {"role": "tinker",     "peace": "gadgets", "cast": "cache",          "joins_raid": false, "bias": {"steal": 1, "supply": 1}},
+"lfg:class/halo":  {"role": "pilgrim",    "peace": "bless",   "cast": "ward",           "joins_raid": false, "bias": {"scout": 2, "broker": 1}}
+}
+}

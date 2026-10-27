@@ -56,6 +56,8 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 		if np == &"PURGE_ACTIVE":
 			_spawn_wave(state, events)
 			if state.opts.get("ai_enabled", true):
+				Standing.mark_pressure(state, events)
+				AILeaders.purge_start(state, events)
 				AIFactions.purge_round(state, events)
 		elif np == &"RESOLUTION":
 			settle(state, events)
@@ -197,5 +199,6 @@ static func settle(state: MatchState, events: Array) -> void:
 	var p: Dictionary = state.player()
 	if not p.is_empty() and p["alive"]:
 		Combat.heal(p, int(int(p["max_hp"]) * 0.3))
+	AILeaders.recover(state)
 	events.append({"type": &"purge_resolved", "week": done_week, "holdings": counts, "enemies_removed": removed})
 	Economy.check_victory(state, events)
