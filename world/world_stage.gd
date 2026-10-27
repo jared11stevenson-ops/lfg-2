@@ -26,6 +26,8 @@ var actors: ActorLayer
 var roads: RoadLayer
 var holding_layer: HoldingLayer
 var pois: PoiLayer
+var companions: CompanionLayer
+var boss_bar: BossBar
 var panels: UiPanels
 var combat_hud: CombatHud
 var state_ref: Object
@@ -57,6 +59,8 @@ func _init() -> void:
 	add_child(farm)
 	actors = ActorLayer.new()
 	add_child(actors)
+	companions = CompanionLayer.new()
+	add_child(companions)
 	preview = BuildPreview.new()
 	add_child(preview)
 	telegraphs = Telegraphs.new()
@@ -71,6 +75,12 @@ func _init() -> void:
 	add_child(hud)
 	combat_hud = CombatHud.new()
 	add_child(combat_hud)
+	var boss_layer := CanvasLayer.new()
+	boss_layer.name = "BossLayer"
+	boss_layer.layer = 5
+	boss_bar = BossBar.new()
+	boss_layer.add_child(boss_bar)
+	add_child(boss_layer)
 	touch = TouchControls.new()
 	add_child(touch)
 	panels = UiPanels.new()
@@ -131,6 +141,8 @@ func _prepare(seed_value: int, world_override: WorldData) -> void:
 	actors.world = world
 	actors.fog = fog
 	actors.player = player
+	companions.world = world
+	companions.player = player
 	combat_hud.danger.camera = cam
 	preview.world = world
 	preview.extra_validator = func(h: Vector2i) -> bool: return not farm.hex_has_plot(h)
@@ -175,6 +187,7 @@ func _apply_state(state: Object) -> void:
 		combat_hud.abilities.set_class(String(pa["class_id"]))
 	actors.player_id = pid
 	actors.bind_state(state)
+	companions.bind_state(state)
 	holding_layer.sync_from_state(state)
 	_sync_pois(state)
 	panels.bind_state(state)
@@ -188,7 +201,9 @@ func _sync_pois(state: Object) -> void:
 		map.set_poi_markers(Pois.markers(state as MatchState, pa))
 
 const POI_VERBS: Dictionary = {"farm": "Tend the old farm", "cave": "Peer into the cave", "shrine": "Visit the shrine", "vault": "Study the vault door", "wreck": "Search the wreck",
-	"hut": "Knock at the hut", "spire": "Approach the spire"}
+	"hut": "Knock at the hut", "spire": "Approach the spire", "arena_meadow": "Enter the Gourdmother's hollow", "arena_shore": "Step onto Brinecrown's reef",
+	"arena_fungal_grove": "Enter the Elder ring", "arena_ruins": "Approach the Warden's gate", "arena_salt_flats": "Wade into the Heron's mirror",
+	"arena_highlands": "Climb to the Thunder Crown", "arena_bog": "Wade into the Matriarch's mire"}
 const TOAST_COLORS: Dictionary = {"good": UiStyle.GOOD, "warn": UiStyle.WARN, "bad": UiStyle.BAD, "info": UiStyle.TEXT}
 
 ## Quest and point-of-interest events become HUD toasts (only the player's own).
@@ -199,6 +214,10 @@ func _toast_for(e: Dictionary) -> void:
 		t = Pois.toast_for(e)
 	elif ty.begins_with("quest_"):
 		t = Quests.toast_for(e)
+	elif ty.begins_with("companion_"):
+		t = Companions.toast_for(e)
+	elif ty == "boss_phase" or ty == "guardian_defeated":
+		t = Guardians.toast_for(e)
 	if t.is_empty() or (e.has("actor") and int(e["actor"]) != actors.player_id):
 		return
 	var col: Color = TOAST_COLORS.get(String(t.get("kind", "info")), UiStyle.TEXT)
@@ -213,6 +232,7 @@ func on_events(events: Array, state: Object = null) -> void:
 	var holdings_dirty := false
 	var pois_dirty := false
 	actors.on_events(events)
+	companions.on_events(events)
 	for e in events:
 		match e.get("type", &""):
 			&"enemy_telegraph": telegraphs.handle_event(e)
@@ -222,6 +242,10 @@ func on_events(events: Array, state: Object = null) -> void:
 				pois_dirty = true
 				_toast_for(e)
 			&"quest_accepted", &"quest_step", &"quest_ready", &"quest_done": _toast_for(e)
+			&"companion_adopted", &"companion_hungry", &"companion_work", &"boss_phase": _toast_for(e)
+			&"guardian_defeated":
+				pois_dirty = true
+				_toast_for(e)
 			&"phase_changed":
 				match e.get("to", &""):
 					&"PURGE_ACTIVE": hud.toast("THE PURGE BEGINS", UiStyle.BAD, 4.0)
@@ -335,6 +359,9 @@ func _update_ui() -> void:
 	if state_ref != null:
 		combat_hud.abilities.update_from_state(state_ref)
 		panels.set_merchant(PanelModels.merchant_near(state_ref))
+		if state_ref is MatchState:
+			var pa: Dictionary = (state_ref as MatchState).player()
+			boss_bar.set_model(Guardians.nearest_boss(state_ref as MatchState, pa) if not pa.is_empty() else {})
 	var rects: Array[Rect2] = [combat_hud.abilities.get_global_rect()]
 	rects.append_array(panels.toolbar_rects())
 	touch.blockers = rects
