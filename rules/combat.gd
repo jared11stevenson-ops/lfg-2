@@ -146,15 +146,29 @@ static func kill(state: MatchState, target_id: int, killer_id: int, events: Arra
 	if target_id == state.player_id:
 		end_match(state, "leader_died", events)
 	elif t["kind"] == "ai_leader" or (t["kind"] == "leader" and int(t["faction"]) >= 0):
-		eliminate_faction(state, int(t["faction"]), events)
+		eliminate_faction(state, int(t["faction"]), events, _heir_of(state, int(t["faction"]), killer_id))
 
-static func eliminate_faction(state: MatchState, fid: int, events: Array) -> void:
+## The AI faction that struck a leader down inherits its leaderless realm (pass 3b: the holdings used to fall to neutral, and the last survivor of a hunt could never
+## retake 20+ unowned villages before the match ended). A player's kill, an unknown source, famine or revolt still leave the holdings unowned.
+static func _heir_of(state: MatchState, fid: int, killer_id: int) -> int:
+	var k: Dictionary = state.actors.get(killer_id, {})
+	if k.is_empty():
+		return -1
+	var kf: int = int(k.get("faction", -1))
+	if kf < 0 or kf == fid or not state.factions.has(kf) or not state.factions[kf]["alive"] or not bool(state.factions[kf]["is_ai"]):
+		return -1
+	return kf
+
+static func eliminate_faction(state: MatchState, fid: int, events: Array, heir: int = -1) -> void:
 	var f: Dictionary = state.factions.get(fid, {})
 	if f.is_empty() or not f["alive"]:
 		return
 	f["alive"] = false
 	for hid in state.holdings_of(fid):
-		state.holdings[hid]["owner"] = -1
+		state.holdings[hid]["owner"] = heir
+		if heir >= 0:
+			state.holdings[hid]["stab"] = 60
+			state.holdings[hid]["pacified_until"] = int(state.clock["day"]) + 3
 		state.holdings[hid]["garrison"] = maxi(1, int(state.holdings[hid]["garrison"]) / 3)      # a leaderless garrison routs
 		var keep: Array = []
 		for b in state.holdings[hid]["buildings"]:
@@ -165,7 +179,7 @@ static func eliminate_faction(state: MatchState, fid: int, events: Array) -> voi
 			if not keep.has(sites[k]):
 				sites.erase(k)
 		state.holdings[hid]["buildings"] = keep      # its walls and towers fall with it
-	events.append({"type": &"faction_eliminated", "faction": fid, "ai": bool(f["is_ai"])})
+	events.append({"type": &"faction_eliminated", "faction": fid, "ai": bool(f["is_ai"]), "heir": heir})
 	Economy.check_victory(state, events)
 
 static func end_match(state: MatchState, reason: String, events: Array) -> void:

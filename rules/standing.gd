@@ -475,11 +475,19 @@ static func pacify(state: MatchState, fid: int, hid: int, events: Array, actor_i
 	for oid in state.holdings_of(fid):
 		have_r += Inv.count(state.holdings[oid]["store"], Economy.RATION)
 		have_c += Inv.count(state.holdings[oid]["store"], Economy.COIN)
-	if have_r < int(cost[Economy.RATION]) or have_c < int(cost[Economy.COIN]):
-		return "insufficient_items"
 	var hc: Dictionary = cfg().get("hold", {})
-	_take_item(state, fid, Economy.RATION, int(cost[Economy.RATION]))
-	_take_coin(state, fid, int(cost[Economy.COIN]))
+	var pay_r: int = int(cost[Economy.RATION])
+	var pay_c: int = int(cost[Economy.COIN])
+	if have_c < pay_c:
+		# (pass 3b) an empire out of coin keeps the peace with grain: the missing coin is paid in rations at hold.pacify_ration_per_coin
+		var swap: int = (pay_c - have_c) * int(hc.get("pacify_ration_per_coin", 0))
+		if swap > 0:
+			pay_r += swap
+			pay_c = have_c
+	if have_r < pay_r or have_c < pay_c:
+		return "insufficient_items"
+	_take_item(state, fid, Economy.RATION, pay_r)
+	_take_coin(state, fid, pay_c)
 	h["pacified_until"] = int(state.clock["day"]) + int(hc.get("pacify_days", 6))
 	h["stab"] = mini(100, int(h.get("stab", 100)) + int(hc.get("pacify_stab", 30)))
 	events.append({"type": &"pacified", "holding": hid, "faction": fid, "actor": actor_id, "until": h["pacified_until"], "stab": h["stab"], "ai": bool(state.factions[fid]["is_ai"])})
@@ -521,6 +529,15 @@ static func dawn_upkeep(state: MatchState, events: Array) -> void:
 		# upkeep
 		var cost: int = upkeep_cost(state, int(fid))
 		var owed: int = _take_coin(state, int(fid), cost) if cost > 0 else 0
+		if owed > 0 and bool(f["is_ai"]):
+			# (pass 3b) an AI governor with empty coffers pays the rest in kind, at hold.upkeep_ration_per_coin rations a coin, from what is left after the garrison eats
+			var per: int = int(c.get("hold", {}).get("upkeep_ration_per_coin", 0))
+			if per > 0:
+				var spare: int = maxi(0, Economy.rations_available(state, int(fid)) - Economy.persons(state, int(fid)))
+				var pay: int = mini(owed, spare / per)
+				if pay > 0:
+					_take_item(state, int(fid), Economy.RATION, pay * per)
+					owed -= pay
 		f["upkeep_unpaid"] = owed > 0
 		if cost > 0:
 			events.append({"type": &"upkeep_paid", "faction": fid, "ai": bool(f["is_ai"]), "cost": cost, "unpaid": owed})

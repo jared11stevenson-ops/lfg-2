@@ -470,3 +470,64 @@ func test_a_stock_of_gadgets_is_a_defence_with_a_cap() -> void:
 	h["store"] = {"lfg:item/gadget": 10}
 	var ten: float = Conquest.defender_power(s, h)
 	eq(forty, ten, "capped at %d" % Conquest.GADGET_CAP)
+
+# ------------------------------------------------------------ heirs and pacifying in kind
+func test_an_ai_that_strikes_a_leader_down_inherits_the_realm_but_a_player_or_famine_does_not() -> void:
+	var s: MatchState = _ai()
+	var victim_hs: Array[int] = s.holdings_of(4)
+	check(victim_hs.size() >= 1, "setup")
+	var killer: Dictionary = Standing.leader_of(s, 3)
+	var ev: Array = []
+	Combat.kill(s, int(s.factions[4]["leader"]), int(killer["id"]), ev)
+	for hid in victim_hs:
+		eq(int(s.holdings[hid]["owner"]), 3, "holding %d passes to the killer's faction" % hid)
+		check(Standing.pacified(s, s.holdings[hid]), "and is calm for a few days")
+	var fe: Dictionary = {}
+	for e in ev:
+		if String(e["type"]) == "faction_eliminated":
+			fe = e
+	eq(int(fe.get("heir", -2)), 3, "the event names the heir")
+	# the player's kill leaves them unowned (the player takes them one by one)
+	var s2: MatchState = _ai()
+	var hs2: Array[int] = s2.holdings_of(4)
+	Combat.kill(s2, int(s2.factions[4]["leader"]), 1, [])
+	for hid in hs2:
+		eq(int(s2.holdings[hid]["owner"]), -1, "a player's kill: unowned")
+	# an unknown source (famine, revolt) too
+	var s3: MatchState = _ai()
+	var hs3: Array[int] = s3.holdings_of(4)
+	Combat.kill(s3, int(s3.factions[4]["leader"]), -1, [])
+	for hid in hs3:
+		eq(int(s3.holdings[hid]["owner"]), -1, "famine: unowned")
+
+func test_an_empire_out_of_coin_pacifies_and_pays_upkeep_in_grain() -> void:
+	var s: MatchState = _ai()
+	var h: Dictionary = s.holdings[s.holdings_of(3)[0]]
+	h["store"] = {"lfg:item/ration": 100}
+	h["stab"] = 30
+	var ev: Array = []
+	eq(Standing.pacify(s, 3, int(h["id"]), ev), "", "pacify without a single coin")
+	check(Inv.count(h["store"], "lfg:item/ration") < 100 - int(h["tier"]), "more grain than the ration price went")
+	var s2: MatchState = _ai()
+	s2.holdings[s2.holdings_of(3)[0]]["store"] = {}
+	eq(Standing.pacify(s2, 3, s2.holdings_of(3)[0], []), "insufficient_items", "nothing at all: still refused")
+	# upkeep in kind (AI only)
+	var s3: MatchState = _ai()
+	for hid in s3.holdings.keys():
+		if int(s3.holdings[hid]["owner"]) == 3 and hid != s3.holdings_of(3)[0]:
+			continue
+	var extra: int = 0
+	for hid in s3.holdings.keys():
+		if int(s3.holdings[hid]["owner"]) == -1 and extra < 8:
+			s3.holdings[hid]["owner"] = 3
+			extra += 1
+	for hid in s3.holdings_of(3):
+		s3.holdings[hid]["store"] = {"lfg:item/ration": 300}
+		s3.holdings[hid]["garrison"] = 1
+	var ev3: Array = []
+	Standing.dawn_upkeep(s3, ev3)
+	var unpaid: bool = false
+	for e in ev3:
+		if String(e["type"]) == "upkeep_paid" and int(e["faction"]) == 3 and int(e["unpaid"]) > 0:
+			unpaid = true
+	check(not unpaid, "upkeep was settled in grain when the coin ran out")

@@ -249,7 +249,7 @@ func test_a_siege_can_kill_an_ai_leader_which_eliminates_the_faction() -> void:
 	Standing.observe(s, ev, 0)
 	var deeds: Array = ev.filter(func(e: Dictionary) -> bool: return String(e["type"]) == "deed")
 	check(deeds.any(func(e: Dictionary) -> bool: return e["kind"] == "kill_leader" and int(e["faction"]) == 7), "the raiders earned a kill_leader deed")
-	eq(home_h["owner"], -1, "holding neutral")
+	eq(home_h["owner"], 7, "the AI faction that struck the leader down inherits the holding (pass 3b heir rule)")
 	check(int(home_h["garrison"]) <= 4, "a leaderless garrison routs")
 	check(not (home_h["buildings"] as Array).has("lfg:building/wall") and (home_h["buildings"] as Array).has("lfg:building/storehouse"), "its walls fall, its storehouse stands")
 
