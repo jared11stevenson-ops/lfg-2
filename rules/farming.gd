@@ -106,7 +106,7 @@ static func harvest(state: MatchState, a: Dictionary, args: Dictionary, events: 
 			yield_n += 1
 		yield_n = maxi(1, yield_n)
 		var gain: Dictionary = {String(crop["item"]): yield_n}
-		Inv.add_all(gain, {String(crop["seed"]): 1})
+		Inv.add_all(gain, {String(crop["seed"]): 1 + int(Economy.bsum(hold, "seed_return"))})      # Seed Bank: every harvest returns another seed
 		if not Inv.can_carry(a, gain):
 			return "no_room"
 		Inv.add_all(a["inv"], gain)
@@ -170,7 +170,7 @@ static func craft(state: MatchState, a: Dictionary, args: Dictionary, events: Ar
 static func eat(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
 	var item: String = CmdUtil.s(args.get("item", "lfg:item/ration"))
 	var def: Dictionary = Content.item(item)
-	if def.is_empty() or not def.has("food"):
+	if def.is_empty() or not (def.has("food") or def.has("heal") or def.has("buff")):
 		return "not_food"
 	var n: int = 1
 	if args.has("qty"):
@@ -180,7 +180,9 @@ static func eat(state: MatchState, a: Dictionary, args: Dictionary, events: Arra
 	if not Inv.has_all(a["inv"], {item: n}):
 		return "insufficient_items"
 	Inv.remove_all(a["inv"], {item: n})
-	var healed: int = Combat.heal(a, int(def["food"]) * n)
+	var healed: int = Combat.heal(a, int(def.get("food", def.get("heal", 0))) * n)
+	if def.has("buff"):
+		Combat.add_buff(state, a, def["buff"])      # Battle Stew / Bark Salve: a short, small, capped edge for a boss fight
 	if bool(def.get("ration", false)):
 		var f: Dictionary = state.factions[int(a["faction"])]
 		f["hunger_days"] = maxi(0, int(f["hunger_days"]) - n)
@@ -216,6 +218,13 @@ static func dawn_crops(state: MatchState, events: Array) -> void:
 					p["gx"] = float(p.get("gx", 0.0)) + gf
 					if float(p["gx"]) >= 1.0:
 						p["gx"] = float(p["gx"]) - 1.0
+						p["age"] = int(p["age"]) + 1
+			if int(p["age"]) < int(crop["grow_days"]):
+				var cf: float = Economy.bsum(state.holdings[int(p["holding"])], "grow_frac")      # Compost Heap: a third of a day extra, every dawn
+				if cf > 0.0:
+					p["cx"] = float(p.get("cx", 0.0)) + cf
+					if float(p["cx"]) >= 1.0:
+						p["cx"] = float(p["cx"]) - 1.0
 						p["age"] = int(p["age"]) + 1
 			if int(p["age"]) >= int(crop["grow_days"]):
 				var parts: PackedStringArray = (k as String).split(",")

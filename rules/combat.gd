@@ -35,6 +35,20 @@ static func add_effect(a: Dictionary, id: String, until: float, extra: Dictionar
 	e2.merge(extra, true)
 	a["effects"].append(e2)
 
+const BUFF_CAP := 3
+
+## Consumable boons ({kind:"atk"|"def", amount, secs}); one per kind, never stacking past BUFF_CAP.
+static func add_buff(state: MatchState, a: Dictionary, spec: Dictionary) -> void:
+	var id: String = "boon_" + String(spec["kind"])
+	add_effect(a, id, MatchState.q(float(state.clock["elapsed"]) + float(spec["secs"])), {"amt": mini(int(spec["amount"]), BUFF_CAP)})
+
+static func buff_amt(state: MatchState, a: Dictionary, kind: String) -> float:
+	var now: float = float(state.clock["elapsed"])
+	for e in a["effects"]:
+		if e["id"] == "boon_" + kind and float(e["until"]) > now:
+			return float(e.get("amt", 0))
+	return 0.0
+
 static func hungry(state: MatchState, a: Dictionary) -> bool:
 	var f: Dictionary = state.factions.get(int(a["faction"]), {})
 	return int(f.get("hunger_days", 0)) >= 1 and a["kind"] != "enemy"
@@ -60,7 +74,7 @@ static func atk_of(state: MatchState, a: Dictionary) -> float:
 		v *= 1.25
 	if hungry(state, a):
 		v *= 0.8
-	return v
+	return v + buff_amt(state, a, "atk")
 
 static func def_of(state: MatchState, a: Dictionary) -> float:
 	var v: float = float(a["def"]) * offgrove_mult(state, a)
@@ -68,7 +82,7 @@ static func def_of(state: MatchState, a: Dictionary) -> float:
 		v *= 0.7
 	if hungry(state, a):
 		v *= 0.8
-	return v
+	return v + buff_amt(state, a, "def")
 
 static func calc_damage(state: MatchState, attacker: Dictionary, target: Dictionary, base_atk_override: float = -1.0) -> int:
 	var atk: float = atk_of(state, attacker) if base_atk_override < 0.0 else base_atk_override

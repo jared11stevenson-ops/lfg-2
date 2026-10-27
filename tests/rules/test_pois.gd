@@ -40,7 +40,7 @@ func test_placement_is_deterministic_per_biome_and_well_spaced() -> void:
 			if int(o["id"]) != int(p["id"]):
 				check(HexGrid.distance(p["hex"], o["hex"]) >= 6, "points of interest keep a gap")
 	check(types.size() >= 5, "at least five distinct types (%d)" % types.size())
-	eq(types.size(), 7, "all seven types")
+	eq(types.size(), 14, "all fourteen types (7 regular + 7 guardian arenas)")
 	var farm: Dictionary = {}
 	for p in w1["pois"]:
 		if p["type"] == "lfg:poi/derelict_farm":

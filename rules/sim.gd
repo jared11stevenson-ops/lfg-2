@@ -54,6 +54,7 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 		state.phase = np
 		events.append({"type": &"phase_changed", "from": old, "to": np, "day": state.clock["day"]})
 		if np == &"PURGE_ACTIVE":
+			Companions.purge_start(state, events)
 			_spawn_wave(state, events)
 			if state.opts.get("ai_enabled", true):
 				Standing.mark_pressure(state, events)
@@ -80,6 +81,7 @@ static func advance(state: MatchState, step: float, events: Array) -> void:
 
 static func dawn(state: MatchState, events: Array) -> void:
 	Economy.dawn_buildings(state, events)
+	Companions.dawn(state, events)
 	Economy.drift_prices(state)
 	Farming.dawn_crops(state, events)
 	if state.opts.get("ai_enabled", true):
@@ -156,6 +158,7 @@ static func _spawn_wave(state: MatchState, events: Array) -> void:
 	var mk: int = Standing.mark_of(state)
 	if mk == 0:
 		n += int(Standing.cfg()["mark"]["wave_extra"]) + state.week() / 2      # the Purge targets a Marked player: bigger waves
+	n = maxi(1, n - Economy.wave_cut(state, 0))      # Ward Stones turn some beasts away (never below one)
 	targets.append([homes, n])
 	var kinds: Array = Content.enemies().keys()
 	kinds.sort()

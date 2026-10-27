@@ -46,6 +46,8 @@ static func build_class(class_id: String) -> CharacterRig:
 	return rig
 
 static func build_enemy(archetype: String) -> CharacterRig:
+	if GuardianModels.has_model(archetype):
+		return GuardianModels.build(archetype)      # the seven region guardians (world/guardian_models.gd)
 	var rig := CharacterRig.new()
 	rig.look_id = archetype
 	match archetype:

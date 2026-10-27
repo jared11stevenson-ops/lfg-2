@@ -43,6 +43,26 @@ static func interact_poi(poi_id: int, pick: int = -1) -> Dictionary:
 		args["pick"] = pick
 	return {"type": &"interact_poi", "args": args}
 
+static func adopt_companion(kind: String) -> Dictionary:
+	return {"type": &"adopt_companion", "args": {"companion": kind}}
+
+static func feed_companion(kind: String, item: String) -> Dictionary:
+	return {"type": &"feed_companion", "args": {"companion": kind, "item": item}}
+
+## mode: "follow" | "rest" | "hold" (hold needs the holding id).
+static func assign_companion(kind: String, mode: String, holding_id: int = -1) -> Dictionary:
+	var args: Dictionary = {"companion": kind, "mode": mode}
+	if mode == "hold":
+		args["holding"] = holding_id
+	return {"type": &"assign_companion", "args": args}
+
+static func dismiss_companion(kind: String) -> Dictionary:
+	return {"type": &"dismiss_companion", "args": {"companion": kind}}
+
+## topic: one of Quests.TUTORIAL_TOPICS (the card the player just read).
+static func ack_tutorial(topic: String) -> Dictionary:
+	return {"type": &"ack_tutorial", "args": {"topic": topic}}
+
 ## Wrap with actor + seq for Game.submit().
 static func wrap(cmd: Dictionary, actor: int, seq: int) -> Dictionary:
 	return {"type": cmd["type"], "actor": actor, "seq": seq, "args": cmd["args"]}

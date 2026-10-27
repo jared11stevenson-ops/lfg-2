@@ -35,6 +35,8 @@ static func defender_power(state: MatchState, h: Dictionary) -> float:
 		p *= 1.4
 	if _active(state, h, "ward"):
 		p *= 1.5
+	if not breached:
+		p += Companions.defense_bonus(state, h)      # a fed companion steadies the garrison: flat, added AFTER every multiplier, capped, 0 for every AI faction
 	return p
 
 static func attacker_power(state: MatchState, actor: Dictionary, commit: int, boost: float = 1.0) -> float:

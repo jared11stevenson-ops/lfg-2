@@ -322,6 +322,129 @@
     "ration"
    ],
    "requires_unlock": "lfg:unlock/hearty_stew"
+  },
+  {
+   "id": "lfg:recipe/battle_stew",
+   "name": "Battle Stew",
+   "inputs": {
+    "lfg:item/mushroom": 2,
+    "lfg:item/saltroot": 1,
+    "lfg:item/amber_resin": 1
+   },
+   "outputs": {
+    "lfg:item/battle_stew": 2
+   },
+   "station": "lfg:building/alembic"
+  },
+  {
+   "id": "lfg:recipe/bark_salve",
+   "name": "Bark Salve",
+   "inputs": {
+    "lfg:item/amber_resin": 2,
+    "lfg:item/reed_fibre": 1,
+    "lfg:item/rime_salt": 1
+   },
+   "outputs": {
+    "lfg:item/bark_salve": 2
+   },
+   "station": "lfg:building/alembic"
+  },
+  {
+   "id": "lfg:recipe/greatbrew",
+   "name": "Greatbrew",
+   "inputs": {
+    "lfg:item/fen_gland": 1,
+    "lfg:item/amber_resin": 2,
+    "lfg:item/glowfruit": 1
+   },
+   "outputs": {
+    "lfg:item/greatbrew": 1
+   },
+   "station": "lfg:building/alembic"
+  },
+  {
+   "id": "lfg:recipe/guardian_alloy",
+   "name": "Guardian Alloy",
+   "inputs": {
+    "lfg:item/vault_sigil": 1,
+    "lfg:item/bog_iron": 2,
+    "lfg:item/iron_fittings": 2
+   },
+   "outputs": {
+    "lfg:item/guardian_alloy": 1
+   },
+   "station": "lfg:building/rift_anvil"
+  },
+  {
+   "id": "lfg:recipe/fittings_bulk",
+   "name": "Bulk Fittings",
+   "inputs": {
+    "lfg:item/bog_iron": 3
+   },
+   "outputs": {
+    "lfg:item/iron_fittings": 4
+   },
+   "station": "lfg:building/rift_anvil"
+  },
+  {
+   "id": "lfg:recipe/press_glowfruit",
+   "name": "Press Glowfruit Seed",
+   "inputs": {
+    "lfg:item/glowfruit": 2
+   },
+   "outputs": {
+    "lfg:item/glowfruit_seed": 3
+   },
+   "station": "lfg:building/seed_press"
+  },
+  {
+   "id": "lfg:recipe/press_sporebean",
+   "name": "Press Sporebean Seed",
+   "inputs": {
+    "lfg:item/sporebean": 2
+   },
+   "outputs": {
+    "lfg:item/sporebean_seed": 3
+   },
+   "station": "lfg:building/seed_press"
+  },
+  {
+   "id": "lfg:recipe/press_saltroot",
+   "name": "Press Saltroot Seed",
+   "inputs": {
+    "lfg:item/saltroot": 1
+   },
+   "outputs": {
+    "lfg:item/saltroot_seed": 2
+   },
+   "station": "lfg:building/seed_press"
+  },
+  {
+   "id": "lfg:recipe/ration_honey",
+   "name": "Honey Ration",
+   "inputs": {
+    "lfg:item/honey": 2,
+    "lfg:item/sporebean": 1
+   },
+   "outputs": {
+    "lfg:item/ration": 2
+   },
+   "tags": [
+    "ration"
+   ]
+  },
+  {
+   "id": "lfg:recipe/ration_egg",
+   "name": "Egg Ration",
+   "inputs": {
+    "lfg:item/egg": 2
+   },
+   "outputs": {
+    "lfg:item/ration": 1
+   },
+   "tags": [
+    "ration"
+   ]
   }
  ]
 }

@@ -226,6 +226,109 @@
    "name": "Healing Draught",
    "value": 12,
    "heal": 50
+  },
+  {
+   "id": "lfg:item/mother_seed",
+   "name": "Mother Seed",
+   "value": 24,
+   "tier": 4,
+   "note": "T4: dropped by the Gourdmother (meadow guardian)"
+  },
+  {
+   "id": "lfg:item/tide_pearl",
+   "name": "Tide Pearl",
+   "value": 26,
+   "tier": 4,
+   "note": "T4: dropped by Brinecrown (shore guardian)"
+  },
+  {
+   "id": "lfg:item/heart_cap",
+   "name": "Heartcap",
+   "value": 22,
+   "tier": 4,
+   "note": "T4: dropped by the Sporecap Elder (grove guardian)"
+  },
+  {
+   "id": "lfg:item/vault_sigil",
+   "name": "Vault Sigil",
+   "value": 28,
+   "tier": 4,
+   "note": "T4: dropped by the Vaultwarden (ruins guardian)"
+  },
+  {
+   "id": "lfg:item/rime_plume",
+   "name": "Rime Plume",
+   "value": 24,
+   "tier": 4,
+   "note": "T4: dropped by the Rime Heron (salt flats guardian)"
+  },
+  {
+   "id": "lfg:item/thunder_horn",
+   "name": "Thunder Horn",
+   "value": 26,
+   "tier": 4,
+   "note": "T4: dropped by the Thunderhorn Ram (highlands guardian)"
+  },
+  {
+   "id": "lfg:item/fen_gland",
+   "name": "Fen Gland",
+   "value": 22,
+   "tier": 4,
+   "note": "T4: dropped by the Bogtoad Matriarch (bog guardian)"
+  },
+  {
+   "id": "lfg:item/guardian_alloy",
+   "name": "Guardian Alloy",
+   "value": 40,
+   "tier": 4,
+   "note": "Rift Anvil: vault sigil + bog iron + fittings"
+  },
+  {
+   "id": "lfg:item/greatbrew",
+   "name": "Greatbrew",
+   "value": 30,
+   "heal": 90,
+   "tier": 4,
+   "note": "Alembic: fen gland brew, heals 90"
+  },
+  {
+   "id": "lfg:item/battle_stew",
+   "name": "Battle Stew",
+   "value": 12,
+   "food": 3,
+   "buff": {
+    "kind": "atk",
+    "amount": 2,
+    "secs": 150
+   },
+   "tier": 3,
+   "note": "Alembic: +2 attack for 150 s"
+  },
+  {
+   "id": "lfg:item/bark_salve",
+   "name": "Bark Salve",
+   "value": 10,
+   "buff": {
+    "kind": "def",
+    "amount": 2,
+    "secs": 150
+   },
+   "tier": 3,
+   "note": "Alembic: +2 defence for 150 s"
+  },
+  {
+   "id": "lfg:item/egg",
+   "name": "Spore Egg",
+   "value": 3,
+   "food": 3,
+   "note": "Brindlehen, one a day"
+  },
+  {
+   "id": "lfg:item/honey",
+   "name": "Glowhoney",
+   "value": 4,
+   "food": 3,
+   "note": "Apiary, one a day"
   }
  ]
 }

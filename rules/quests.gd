@@ -6,7 +6,10 @@ extends RefCounted
 ## Step kinds (see STEP_KINDS): gather (possession), build (state), visit_poi (state), craft/harvest/plant/ability/defeat/claim_poi/purge_deed/survive_purge (events),
 ## deliver (consumed by turn_in). Rewards are granted exactly once, at completion. Every step is solo-completable (tests/rules/test_quests.gd validates the data).
 const MAX_ACTIVE := 6
-const STEP_KINDS: Array[String] = ["gather", "craft", "build", "deliver", "visit_poi", "claim_poi", "defeat", "purge_deed", "survive_purge", "harvest", "plant", "ability"]
+const STEP_KINDS: Array[String] = ["gather", "craft", "build", "deliver", "visit_poi", "claim_poi", "defeat", "purge_deed", "survive_purge", "harvest", "plant", "ability",
+	"water", "eat", "ack", "adopt", "guardian"]      # pass 4: the first-days chapters (water/eat/ack) and the creature/guardian chapters (adopt/guardian)
+## Topics the UI may acknowledge with `ack_tutorial` (data/tutorial.json holds their text). A quest step of kind "ack" waits for one.
+const TUTORIAL_TOPICS: Array[String] = ["purge_preview", "controls", "journal", "companions"]
 const STATE_KINDS: Array[String] = ["gather", "build", "visit_poi"]       # satisfied by looking at the state, not by an event
 const TURN_IN_RANGE := 3
 
@@ -76,7 +79,60 @@ static func accept(state: MatchState, a: Dictionary, args: Dictionary, events: A
 		a["quests"] = {}
 	a["quests"][qid] = {"st": "active", "step": 0, "prog": 0, "ready": false, "day": int(state.clock["day"]), "rewarded": false}
 	events.append({"type": &"quest_accepted", "actor": a["id"], "quest": qid, "title": q.get("title", qid)})
+	_on_accept(state, a, q, events)
 	settle(state, a, qid, events)
+	return ""
+
+## on_accept {items:{...}, plot:{crop, ready}}: a gift to get the chapter going (a basket, a ripe patch waiting by the gate). Never trade; nothing is taken.
+static func _on_accept(state: MatchState, a: Dictionary, q: Dictionary, events: Array) -> void:
+	var oa: Dictionary = q.get("on_accept", {})
+	if oa.is_empty():
+		return
+	if (a.get("gifted", []) as Array).has(String(q["id"])):
+		return      # abandon and re-accept does not pay the gift twice
+	if not a.has("gifted"):
+		a["gifted"] = []
+	(a["gifted"] as Array).append(String(q["id"]))
+	if oa.has("items"):
+		grant(state, a, {"items": oa["items"]})
+	if oa.has("plot"):
+		var hid: int = CmdUtil.nearest_owned_holding(state, int(a["faction"]), a["hex"], 6)
+		if hid == -1:
+			hid = int(state.holdings_of(int(a["faction"]))[0]) if not state.holdings_of(int(a["faction"])).is_empty() else -1
+		if hid != -1:
+			var spot: Variant = free_plot_hex(state, state.holdings[hid])
+			var crop: Dictionary = Content.crop(String(oa["plot"].get("crop", "")))
+			if spot != null and not crop.is_empty():
+				var age: int = int(crop["grow_days"]) if bool(oa["plot"].get("ready", false)) else 0
+				state.plots[MatchState.plot_key(spot)] = {"crop": crop["id"], "age": age, "watered": false, "dry_days": 0, "holding": hid}
+				events.append({"type": &"crop_planted", "actor": -1, "hex": spot, "crop": crop["id"], "gift": true})
+
+## A hex next to a holding where a gifted plot can stand (ground, free of plots, holdings and buildings). null when the ring is full.
+static func free_plot_hex(state: MatchState, hold: Dictionary) -> Variant:
+	var cands: Array[Vector2i] = HexGrid.ring_within(hold["hex"], 2)
+	cands.sort_custom(func(x: Vector2i, y: Vector2i) -> bool:
+		var dx: int = HexGrid.distance(x, hold["hex"])
+		var dy: int = HexGrid.distance(y, hold["hex"])
+		return dx < dy or (dx == dy and HexGrid.index(x) < HexGrid.index(y)))
+	for c in cands:
+		if HexGrid.distance(c, hold["hex"]) < 1:
+			continue
+		if Economy.site_free(state, hold, c) == "" and not state.plots.has(MatchState.plot_key(c)) and not state.drops.has(MatchState.plot_key(c)):
+			return c
+	return null
+
+## ack_tutorial {topic}: the UI says the player has read a tutorial card. Credits "ack" steps; harmless otherwise.
+static func ack_tutorial(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
+	if not is_player(a):
+		return "unknown_actor"
+	var topic: String = CmdUtil.s(args.get("topic", ""))
+	if not TUTORIAL_TOPICS.has(topic):
+		return "unknown_topic"
+	if not a.has("tutorial_seen"):
+		a["tutorial_seen"] = []
+	if not (a["tutorial_seen"] as Array).has(topic):
+		(a["tutorial_seen"] as Array).append(topic)
+	events.append({"type": &"tutorial_ack", "actor": a["id"], "topic": topic})
 	return ""
 
 static func abandon(state: MatchState, a: Dictionary, args: Dictionary, events: Array) -> String:
@@ -216,6 +272,21 @@ static func _matches(step: Dictionary, e: Dictionary, state: MatchState) -> int:
 		"survive_purge":
 			if ty == "purge_resolved":
 				return 1
+		"water":
+			if ty == "crop_watered" and not bool(e.get("tended", false)):
+				return 1
+		"eat":
+			if ty == "ate" and (String(step.get("item", "any")) == "any" or String(e.get("item", "")) == String(step["item"])):
+				return maxi(1, int(e.get("qty", 1)))
+		"ack":
+			if ty == "tutorial_ack" and String(e.get("topic", "")) == String(step["topic"]):
+				return 1
+		"adopt":
+			if ty == "companion_adopted" and (String(step.get("companion", "any")) == "any" or String(e.get("companion", "")) == String(step["companion"])):
+				return 1
+		"guardian":
+			if ty == "guardian_defeated" and (String(step.get("guardian", "any")) == "any" or String(e.get("guardian", "")) == String(step["guardian"])):
+				return 1
 	return 0
 
 ## Event hook: credits the leaders' active quests. `from` = first event of this step/command. Cheap when nothing relevant happened.
@@ -229,7 +300,7 @@ static func observe(state: MatchState, events: Array, from: int, actor_hint: int
 		var e: Dictionary = events[i]
 		var ty: String = String(e.get("type", ""))
 		match ty:
-			"item_crafted", "crop_harvested", "crop_planted", "ability_used", "poi_claimed", "poi_discovered", "built":
+			"item_crafted", "crop_harvested", "crop_planted", "ability_used", "poi_claimed", "poi_discovered", "built", "crop_watered", "ate", "tutorial_ack", "companion_adopted", "guardian_defeated":
 				touched[int(e.get("actor", -1))] = true
 				credits.append([int(e.get("actor", -1)), e])
 			"actor_died":
@@ -284,6 +355,8 @@ static func complete(state: MatchState, a: Dictionary, qid: String, events: Arra
 	r["ready"] = false
 	var rw: Dictionary = q.get("reward", {})
 	grant(state, a, rw)
+	if String(rw.get("companion", "")) != "":
+		Companions.give(state, a, String(rw["companion"]), events, "quest")
 	events.append({"type": &"quest_done", "actor": a["id"], "quest": qid, "title": q.get("title", qid), "reward": rw.duplicate(true), "line": q.get("line", ""),
 		"signature": bool(q.get("signature", false))})
 	return ""
@@ -333,7 +406,8 @@ static func _step_row(state: MatchState, a: Dictionary, q: Dictionary, r: Dictio
 	if not r.is_empty() and idx == cur and not done:
 		prog = _state_progress(state, a, s) if STATE_KINDS.has(String(s.get("kind", ""))) else int(r.get("prog", 0))
 	return {"index": idx, "text": String(s.get("text", "")), "kind": String(s.get("kind", "")), "done": done, "current": (not r.is_empty()) and idx == cur and not done,
-		"progress": mini(prog, qty_of(s)), "qty": qty_of(s), "theme": String(s.get("theme", "")), "item": String(s.get("item", ""))}
+		"progress": mini(prog, qty_of(s)), "qty": qty_of(s), "theme": String(s.get("theme", "")), "item": String(s.get("item", "")),
+		"prompt": String(s.get("prompt", "")), "ui": String(s.get("ui", "")), "topic": String(s.get("topic", ""))}
 
 static func reward_text(rw: Dictionary) -> String:
 	var parts: Array[String] = []
@@ -384,6 +458,67 @@ static func tracker(state: MatchState, a: Dictionary) -> Dictionary:
 				return {"quest": qid, "title": q.get("title", ""), "text": "Return to a holding and hand in the quest.", "ready": true}
 			var rw: Dictionary = _step_row(state, a, q, r, int(r["step"]))
 			return {"quest": qid, "title": q.get("title", ""), "text": "%s (%d/%d)" % [rw["text"], rw["progress"], rw["qty"]] if rw["qty"] > 1 else rw["text"], "ready": false}
+	return {}
+
+# ------------------------------------------------------------------ first-days tutorial (line "welcome"; ui/tutorial_overlay.gd renders this)
+static func tutorial_cfg() -> Dictionary:
+	if not Content._cache.has("tutorial_cfg"):
+		var out: Dictionary = {"topics": {}}
+		var f := FileAccess.open("res://data/tutorial.json", FileAccess.READ)
+		if f != null:
+			var parsed: Variant = JSON.parse_string(f.get_as_text())
+			if parsed is Dictionary:
+				out = parsed
+		Content._cache["tutorial_cfg"] = out
+	return Content._cache["tutorial_cfg"]
+
+static func tutorial_quests() -> Array:
+	var out: Array = []
+	for qid in Content.quest_order():
+		if String(Content.quest(String(qid)).get("line", "")) == "welcome":
+			out.append(String(qid))
+	return out
+
+## What the tutorial overlay should show now: {} when the chapters are finished (or the player skipped them), else
+## {phase:"offer"|"active"|"ready", quest, title, intro, text, prompt, ui, index, steps, progress, qty, topic, card:{title,lines,button}, chapter, chapters}.
+static func tutorial_model(state: MatchState, a: Dictionary) -> Dictionary:
+	if bool(a.get("tutorial_off", false)):
+		return {}
+	var ids: Array = tutorial_quests()
+	for i in range(ids.size()):
+		var qid: String = String(ids[i])
+		var st: String = state_of(a, qid)
+		if st == "done":
+			continue
+		var q: Dictionary = def(qid)
+		var m: Dictionary = {"quest": qid, "title": String(q.get("title", "")), "intro": String(q.get("intro", "")), "chapter": i + 1, "chapters": ids.size(), "phase": "offer",
+			"text": "", "prompt": "", "ui": "", "index": 0, "steps": (q.get("steps", []) as Array).size(), "progress": 0, "qty": 1, "topic": "", "card": {}}
+		if st == "available":
+			m["text"] = String(q.get("intro", ""))
+			m["prompt"] = "Open the JOURNAL and accept the chapter, or press Begin."
+			m["ui"] = "journal"
+			return m
+		if st != "active":
+			return {}
+		var r: Dictionary = rec_of(a, qid)
+		if bool(r.get("ready", false)):
+			m["phase"] = "ready"
+			m["text"] = "Chapter finished."
+			m["prompt"] = "Walk back to a holding and open the JOURNAL to hand it in."
+			m["ui"] = "journal"
+			return m
+		var row: Dictionary = _step_row(state, a, q, r, int(r["step"]))
+		m["phase"] = "active"
+		m["index"] = int(r["step"])
+		m["text"] = String(row["text"])
+		m["prompt"] = String(row["prompt"])
+		m["ui"] = String(row["ui"])
+		m["progress"] = int(row["progress"])
+		m["qty"] = int(row["qty"])
+		m["topic"] = String(row["topic"])
+		if m["topic"] != "":
+			m["card"] = (tutorial_cfg().get("topics", {}) as Dictionary).get(m["topic"], {})
+		return m
 	return {}
 
 static func toast_for(e: Dictionary) -> Dictionary:

@@ -87,6 +87,12 @@ func test_every_recipe_and_crop_is_completable_without_trade_or_other_players() 
 			have[k] = true
 	have["lfg:item/ashmarrow"] = true      # Purge raiders / wave beasts
 	have["lfg:item/gadget"] = true
+	for b in Content.buildings().values():      # pass 4: buildings that make things (apiary honey ...) and creatures that lay or haul (Brindlehen's eggs)
+		for k in ((b.get("work", {}) as Dictionary).get("outputs", {}) as Dictionary).keys():
+			have[String(k)] = true
+	for cp in Content.companions().values():
+		for k in (cp.get("post", {}).get("produce", {}) as Dictionary).keys():
+			have[String(k)] = true
 	for t in Content.poi_types().values():      # points of interest pay weekly, to anyone who walks there (data/pois.json)
 		for k in (t["loot"] as Dictionary).keys():
 			if int(t["loot"][k][1]) > 0:

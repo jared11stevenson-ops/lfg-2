@@ -1,0 +1,719 @@
+{
+ "schema": 1,
+ "_notes": "Pass 4 region guardians. enemies = boss archetypes (not in the wave/wild pool; Content.enemy() finds them). arenas = POI types appended to data/pois.json types by Content.poi_cfg(). A boss spawns at the arena on the first visit of the week; the claim pays a weekly loot roll; the FIRST defeat per leader also pays guardian.first (a guaranteed T4 material, an unlock that gates the next tier, a title).",
+ "enemies": [
+  {
+   "id": "lfg:enemy/guardian_meadow",
+   "name": "Gourdmother",
+   "role": "boss",
+   "boss": true,
+   "guardian": "meadow",
+   "hp": 100,
+   "def": 0,
+   "sec_per_hex": 3.0,
+   "aggro": 7,
+   "leash": 8,
+   "biomes": [],
+   "loot": {
+    "lfg:item/timber": 3
+   },
+   "attacks": [
+    {
+     "id": "seed_spit",
+     "windup": 1.2,
+     "hit": 0.2,
+     "recovery": 2.0,
+     "damage": 7,
+     "range": 4,
+     "radius": 0,
+     "shape": "single"
+    },
+    {
+     "id": "gourd_slam",
+     "windup": 1.6,
+     "hit": 0.3,
+     "recovery": 2.6,
+     "damage": 12,
+     "range": 1,
+     "radius": 1,
+     "shape": "aoe"
+    },
+    {
+     "id": "rolling_crush",
+     "windup": 2.0,
+     "hit": 0.4,
+     "recovery": 3.0,
+     "damage": 14,
+     "range": 2,
+     "radius": 2,
+     "shape": "aoe",
+     "min_phase": 1
+    }
+   ],
+   "phases": [
+    {
+     "hp_frac": 0.5,
+     "adds": {
+      "lfg:enemy/sporeling": 2
+     },
+     "text": "The Gourdmother splits and sporelings tumble out."
+    }
+   ]
+  },
+  {
+   "id": "lfg:enemy/guardian_shore",
+   "name": "Brinecrown",
+   "role": "boss",
+   "boss": true,
+   "guardian": "shore",
+   "hp": 110,
+   "def": 0,
+   "sec_per_hex": 2.6,
+   "aggro": 7,
+   "leash": 8,
+   "biomes": [],
+   "loot": {
+    "lfg:item/rope": 1
+   },
+   "attacks": [
+    {
+     "id": "pincer_snap",
+     "windup": 1.1,
+     "hit": 0.2,
+     "recovery": 1.8,
+     "damage": 10,
+     "range": 1,
+     "radius": 0,
+     "shape": "single"
+    },
+    {
+     "id": "tide_surge",
+     "windup": 1.8,
+     "hit": 0.4,
+     "recovery": 2.8,
+     "damage": 9,
+     "range": 2,
+     "radius": 2,
+     "shape": "self_aoe"
+    },
+    {
+     "id": "brine_volley",
+     "windup": 1.3,
+     "hit": 0.2,
+     "recovery": 2.0,
+     "damage": 8,
+     "range": 5,
+     "radius": 0,
+     "shape": "single",
+     "min_phase": 1
+    }
+   ],
+   "phases": [
+    {
+     "hp_frac": 0.5,
+     "adds": {},
+     "text": "Brinecrown rears up; the tide answers."
+    }
+   ]
+  },
+  {
+   "id": "lfg:enemy/guardian_fungal_grove",
+   "name": "Sporecap Elder",
+   "role": "boss",
+   "boss": true,
+   "guardian": "fungal_grove",
+   "hp": 105,
+   "def": 0,
+   "sec_per_hex": 3.0,
+   "aggro": 7,
+   "leash": 8,
+   "biomes": [],
+   "loot": {
+    "lfg:item/mushroom": 3
+   },
+   "attacks": [
+    {
+     "id": "cap_burst",
+     "windup": 1.6,
+     "hit": 0.3,
+     "recovery": 2.4,
+     "damage": 8,
+     "range": 2,
+     "radius": 2,
+     "shape": "self_aoe",
+     "poison_dps": 1,
+     "poison_secs": 4
+    },
+    {
+     "id": "root_lash",
+     "windup": 1.2,
+     "hit": 0.2,
+     "recovery": 2.0,
+     "damage": 9,
+     "range": 3,
+     "radius": 0,
+     "shape": "single"
+    },
+    {
+     "id": "spore_storm",
+     "windup": 2.0,
+     "hit": 0.4,
+     "recovery": 3.0,
+     "damage": 7,
+     "range": 3,
+     "radius": 3,
+     "shape": "self_aoe",
+     "poison_dps": 1,
+     "poison_secs": 4,
+     "min_phase": 1
+    }
+   ],
+   "phases": [
+    {
+     "hp_frac": 0.5,
+     "adds": {
+      "lfg:enemy/sporeling": 2
+     },
+     "text": "The Elder shakes its cap and the grove wakes."
+    }
+   ]
+  },
+  {
+   "id": "lfg:enemy/guardian_ruins",
+   "name": "Vaultwarden",
+   "role": "boss",
+   "boss": true,
+   "guardian": "ruins",
+   "hp": 110,
+   "def": 0,
+   "sec_per_hex": 3.2,
+   "aggro": 6,
+   "leash": 7,
+   "biomes": [],
+   "loot": {
+    "lfg:item/stone": 4
+   },
+   "attacks": [
+    {
+     "id": "stone_fist",
+     "windup": 1.5,
+     "hit": 0.3,
+     "recovery": 2.6,
+     "damage": 14,
+     "range": 1,
+     "radius": 1,
+     "shape": "aoe"
+    },
+    {
+     "id": "glyph_beam",
+     "windup": 1.4,
+     "hit": 0.2,
+     "recovery": 2.2,
+     "damage": 9,
+     "range": 5,
+     "radius": 0,
+     "shape": "single"
+    },
+    {
+     "id": "sundering_quake",
+     "windup": 2.2,
+     "hit": 0.4,
+     "recovery": 3.2,
+     "damage": 10,
+     "range": 3,
+     "radius": 3,
+     "shape": "self_aoe",
+     "min_phase": 1
+    }
+   ],
+   "phases": [
+    {
+     "hp_frac": 0.5,
+     "adds": {
+      "lfg:enemy/gloomwing": 1
+     },
+     "text": "Glyphs flare along the Vaultwarden's arms."
+    }
+   ]
+  },
+  {
+   "id": "lfg:enemy/guardian_salt_flats",
+   "name": "Rime Heron",
+   "role": "boss",
+   "boss": true,
+   "guardian": "salt_flats",
+   "hp": 80,
+   "def": 0,
+   "sec_per_hex": 1.8,
+   "aggro": 8,
+   "leash": 9,
+   "biomes": [],
+   "loot": {
+    "lfg:item/stone": 2
+   },
+   "attacks": [
+    {
+     "id": "rime_dart",
+     "windup": 1.0,
+     "hit": 0.2,
+     "recovery": 1.8,
+     "damage": 7,
+     "range": 6,
+     "radius": 0,
+     "shape": "single"
+    },
+    {
+     "id": "wing_gust",
+     "windup": 1.2,
+     "hit": 0.3,
+     "recovery": 2.0,
+     "damage": 6,
+     "range": 1,
+     "radius": 1,
+     "shape": "self_aoe"
+    },
+    {
+     "id": "blizzard_dive",
+     "windup": 1.5,
+     "hit": 0.3,
+     "recovery": 2.6,
+     "damage": 12,
+     "range": 3,
+     "radius": 1,
+     "shape": "aoe",
+     "min_phase": 1
+    }
+   ],
+   "phases": [
+    {
+     "hp_frac": 0.5,
+     "adds": {},
+     "text": "The Rime Heron shrieks; the salt wind rises."
+    }
+   ]
+  },
+  {
+   "id": "lfg:enemy/guardian_highlands",
+   "name": "Thunderhorn Ram",
+   "role": "boss",
+   "boss": true,
+   "guardian": "highlands",
+   "hp": 105,
+   "def": 0,
+   "sec_per_hex": 2.8,
+   "aggro": 7,
+   "leash": 8,
+   "biomes": [],
+   "loot": {
+    "lfg:item/timber": 2
+   },
+   "attacks": [
+    {
+     "id": "horn_charge",
+     "windup": 1.7,
+     "hit": 0.3,
+     "recovery": 2.8,
+     "damage": 13,
+     "range": 3,
+     "radius": 1,
+     "shape": "aoe"
+    },
+    {
+     "id": "stomp_ring",
+     "windup": 1.5,
+     "hit": 0.3,
+     "recovery": 2.4,
+     "damage": 8,
+     "range": 2,
+     "radius": 2,
+     "shape": "self_aoe"
+    },
+    {
+     "id": "thunder_crack",
+     "windup": 2.0,
+     "hit": 0.4,
+     "recovery": 3.0,
+     "damage": 12,
+     "range": 4,
+     "radius": 2,
+     "shape": "aoe",
+     "min_phase": 1
+    }
+   ],
+   "phases": [
+    {
+     "hp_frac": 0.5,
+     "adds": {
+      "lfg:enemy/gloomwing": 1
+     },
+     "text": "Thunder rolls off the Ram's horns."
+    }
+   ]
+  },
+  {
+   "id": "lfg:enemy/guardian_bog",
+   "name": "Bogtoad Matriarch",
+   "role": "boss",
+   "boss": true,
+   "guardian": "bog",
+   "hp": 95,
+   "def": 0,
+   "sec_per_hex": 3.0,
+   "aggro": 7,
+   "leash": 8,
+   "biomes": [],
+   "loot": {
+    "lfg:item/spore_sac": 2
+   },
+   "attacks": [
+    {
+     "id": "tongue_lash",
+     "windup": 1.1,
+     "hit": 0.2,
+     "recovery": 2.0,
+     "damage": 8,
+     "range": 3,
+     "radius": 0,
+     "shape": "single",
+     "poison_dps": 1,
+     "poison_secs": 4
+    },
+    {
+     "id": "belly_flop",
+     "windup": 1.6,
+     "hit": 0.3,
+     "recovery": 2.6,
+     "damage": 11,
+     "range": 1,
+     "radius": 1,
+     "shape": "aoe"
+    },
+    {
+     "id": "croak_cloud",
+     "windup": 1.9,
+     "hit": 0.4,
+     "recovery": 3.0,
+     "damage": 6,
+     "range": 2,
+     "radius": 2,
+     "shape": "self_aoe",
+     "poison_dps": 1,
+     "poison_secs": 5,
+     "min_phase": 1
+    }
+   ],
+   "phases": [
+    {
+     "hp_frac": 0.5,
+     "adds": {
+      "lfg:enemy/mire_leech": 2
+     },
+     "text": "The Matriarch croaks and leeches slip from the mud."
+    }
+   ]
+  }
+ ],
+ "arenas": [
+  {
+   "id": "lfg:poi/arena_meadow",
+   "name": "Gourdmother's Hollow",
+   "prop": "arena_meadow",
+   "biomes": [
+    "meadow"
+   ],
+   "count": 1,
+   "arena": true,
+   "flavor": "A ring of striped gourds the size of cottages, and one of them is breathing.",
+   "guardian": {
+    "biome": "meadow",
+    "enemy": "lfg:enemy/guardian_meadow",
+    "first": {
+     "items": {
+      "lfg:item/mother_seed": 2,
+      "lfg:item/coin": 15
+     },
+     "unlock": "lfg:unlock/guardian_meadow",
+     "title": "Gourd Tender"
+    }
+   },
+   "challenge": {
+    "kind": "guard",
+    "guards": [
+     "lfg:enemy/guardian_meadow"
+    ],
+    "text": "Set the hollow right: the Gourdmother will not let you pass."
+   },
+   "loot": {
+    "lfg:item/mother_seed": [
+     1,
+     2
+    ],
+    "lfg:item/coin": [
+     6,
+     12
+    ]
+   },
+   "discover": {
+    "lfg:item/coin": 5
+   }
+  },
+  {
+   "id": "lfg:poi/arena_shore",
+   "name": "Brinecrown's Reef",
+   "prop": "arena_shore",
+   "biomes": [
+    "shore"
+   ],
+   "count": 1,
+   "arena": true,
+   "flavor": "Barnacled arches stand out of the sand, with a crown of claws rising among them.",
+   "guardian": {
+    "biome": "shore",
+    "enemy": "lfg:enemy/guardian_shore",
+    "first": {
+     "items": {
+      "lfg:item/tide_pearl": 2,
+      "lfg:item/coin": 15
+     },
+     "unlock": "lfg:unlock/guardian_shore",
+     "title": "Tide Reader"
+    }
+   },
+   "challenge": {
+    "kind": "guard",
+    "guards": [
+     "lfg:enemy/guardian_shore"
+    ],
+    "text": "Face Brinecrown on its reef."
+   },
+   "loot": {
+    "lfg:item/tide_pearl": [
+     1,
+     2
+    ],
+    "lfg:item/coin": [
+     6,
+     12
+    ]
+   },
+   "discover": {
+    "lfg:item/coin": 5
+   }
+  },
+  {
+   "id": "lfg:poi/arena_fungal_grove",
+   "name": "The Elder Ring",
+   "prop": "arena_fungal_grove",
+   "biomes": [
+    "fungal_grove"
+   ],
+   "count": 1,
+   "arena": true,
+   "flavor": "Toadstools in a perfect circle. The tallest one has a face.",
+   "guardian": {
+    "biome": "fungal_grove",
+    "enemy": "lfg:enemy/guardian_fungal_grove",
+    "first": {
+     "items": {
+      "lfg:item/heart_cap": 2,
+      "lfg:item/coin": 15
+     },
+     "unlock": "lfg:unlock/guardian_fungal_grove",
+     "title": "Grove Friend"
+    }
+   },
+   "challenge": {
+    "kind": "guard",
+    "guards": [
+     "lfg:enemy/guardian_fungal_grove"
+    ],
+    "text": "Calm the Sporecap Elder before it calls the grove."
+   },
+   "loot": {
+    "lfg:item/heart_cap": [
+     1,
+     2
+    ],
+    "lfg:item/coin": [
+     6,
+     12
+    ]
+   },
+   "discover": {
+    "lfg:item/coin": 5
+   }
+  },
+  {
+   "id": "lfg:poi/arena_ruins",
+   "name": "The Warden's Gate",
+   "prop": "arena_ruins",
+   "biomes": [
+    "ruins"
+   ],
+   "count": 1,
+   "arena": true,
+   "flavor": "A broken archway, and between the pillars a stone figure that has not quite finished standing up.",
+   "guardian": {
+    "biome": "ruins",
+    "enemy": "lfg:enemy/guardian_ruins",
+    "first": {
+     "items": {
+      "lfg:item/vault_sigil": 2,
+      "lfg:item/coin": 15
+     },
+     "unlock": "lfg:unlock/guardian_ruins",
+     "title": "Gate Opener"
+    }
+   },
+   "challenge": {
+    "kind": "guard",
+    "guards": [
+     "lfg:enemy/guardian_ruins"
+    ],
+    "text": "Break the Vaultwarden's watch."
+   },
+   "loot": {
+    "lfg:item/vault_sigil": [
+     1,
+     2
+    ],
+    "lfg:item/coin": [
+     6,
+     12
+    ]
+   },
+   "discover": {
+    "lfg:item/coin": 5
+   }
+  },
+  {
+   "id": "lfg:poi/arena_salt_flats",
+   "name": "The Heron's Mirror",
+   "prop": "arena_salt_flats",
+   "biomes": [
+    "salt_flats"
+   ],
+   "count": 1,
+   "arena": true,
+   "flavor": "A shallow mirror of brine, and a long-legged shape standing in it, perfectly still.",
+   "guardian": {
+    "biome": "salt_flats",
+    "enemy": "lfg:enemy/guardian_salt_flats",
+    "first": {
+     "items": {
+      "lfg:item/rime_plume": 2,
+      "lfg:item/coin": 15
+     },
+     "unlock": "lfg:unlock/guardian_salt_flats",
+     "title": "Salt Walker"
+    }
+   },
+   "challenge": {
+    "kind": "guard",
+    "guards": [
+     "lfg:enemy/guardian_salt_flats"
+    ],
+    "text": "Drive the Rime Heron off its mirror."
+   },
+   "loot": {
+    "lfg:item/rime_plume": [
+     1,
+     2
+    ],
+    "lfg:item/coin": [
+     6,
+     12
+    ]
+   },
+   "discover": {
+    "lfg:item/coin": 5
+   }
+  },
+  {
+   "id": "lfg:poi/arena_highlands",
+   "name": "The Thunder Crown",
+   "prop": "arena_highlands",
+   "biomes": [
+    "highlands"
+   ],
+   "count": 1,
+   "arena": true,
+   "flavor": "A ring of standing stones scorched at the tips. Something very large is sleeping in the middle.",
+   "guardian": {
+    "biome": "highlands",
+    "enemy": "lfg:enemy/guardian_highlands",
+    "first": {
+     "items": {
+      "lfg:item/thunder_horn": 2,
+      "lfg:item/coin": 15
+     },
+     "unlock": "lfg:unlock/guardian_highlands",
+     "title": "Cloud Climber"
+    }
+   },
+   "challenge": {
+    "kind": "guard",
+    "guards": [
+     "lfg:enemy/guardian_highlands"
+    ],
+    "text": "Face the Thunderhorn Ram."
+   },
+   "loot": {
+    "lfg:item/thunder_horn": [
+     1,
+     2
+    ],
+    "lfg:item/coin": [
+     6,
+     12
+    ]
+   },
+   "discover": {
+    "lfg:item/coin": 5
+   }
+  },
+  {
+   "id": "lfg:poi/arena_bog",
+   "name": "The Matriarch's Mire",
+   "prop": "arena_bog",
+   "biomes": [
+    "bog"
+   ],
+   "count": 1,
+   "arena": true,
+   "flavor": "A mound in the black water that lifts and settles like a breath.",
+   "guardian": {
+    "biome": "bog",
+    "enemy": "lfg:enemy/guardian_bog",
+    "first": {
+     "items": {
+      "lfg:item/fen_gland": 2,
+      "lfg:item/coin": 15
+     },
+     "unlock": "lfg:unlock/guardian_bog",
+     "title": "Mire Wader"
+    }
+   },
+   "challenge": {
+    "kind": "guard",
+    "guards": [
+     "lfg:enemy/guardian_bog"
+    ],
+    "text": "Confront the Bogtoad Matriarch."
+   },
+   "loot": {
+    "lfg:item/fen_gland": [
+     1,
+     2
+    ],
+    "lfg:item/coin": [
+     6,
+     12
+    ]
+   },
+   "discover": {
+    "lfg:item/coin": 5
+   }
+  }
+ ]
+}

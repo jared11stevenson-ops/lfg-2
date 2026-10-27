@@ -30,6 +30,81 @@ static func _nearest_target(state: MatchState, e: Dictionary, aggro: int) -> Dic
 		best = t
 	return best
 
+## Which attack a creature starts at distance `d`. Single-attack archetypes: always attacks[0] (when in range). Multi-attack (guardians): the next attack in
+## rotation whose range reaches, skipping attacks that need a later phase (`min_phase`).
+static func pick_attack(def: Dictionary, ai: Dictionary, d: int) -> Dictionary:
+	var atks: Array = def["attacks"]
+	if atks.size() == 1:
+		return atks[0] if d <= int(atks[0]["range"]) else {}
+	var phase: int = int(ai.get("phase", 0))
+	var avail: Array = []
+	for a in atks:
+		if int(a.get("min_phase", 0)) <= phase:
+			avail.append(a)
+	var n: int = avail.size()
+	var start: int = int(ai.get("rot", 0))
+	for i in range(n):
+		var cand: Dictionary = avail[(start + i) % n]
+		if d <= int(cand["range"]):
+			ai["rot"] = (start + i + 1) % n
+			return cand
+	return {}
+
+## Guardian phases: crossing an hp fraction fires once (adds join the fight, a message for the HUD) and unlocks `min_phase` attacks.
+static func _boss_phase(state: MatchState, e: Dictionary, def: Dictionary, events: Array) -> void:
+	var phases: Array = def.get("phases", [])
+	var ph: int = int(e["ai"].get("phase", 0))
+	if ph >= phases.size():
+		return
+	var spec: Dictionary = phases[ph]
+	if float(e["hp"]) > float(spec["hp_frac"]) * float(e["max_hp"]):
+		return
+	e["ai"]["phase"] = ph + 1
+	var adds: Array = []
+	var free: Array[Vector2i] = []
+	for n in HexGrid.neighbors(e["hex"]):
+		if WorldGen.move_cost(state.world, n) > 0.0:
+			free.append(n)
+	var gi: int = 0
+	var keys: Array = (spec.get("adds", {}) as Dictionary).keys()
+	keys.sort()
+	for k in keys:
+		for q in range(int(spec["adds"][k])):
+			var hx: Vector2i = free[gi % free.size()] if not free.is_empty() else e["hex"]
+			gi += 1
+			var eid: int = Setup.spawn_enemy(state, String(k), hx, false)
+			if eid != -1:
+				state.actors[eid]["add_of"] = e["id"]
+				adds.append(eid)
+	events.append({"type": &"boss_phase", "enemy": e["id"], "phase": ph + 1, "text": String(spec.get("text", "")), "adds": adds, "name": def.get("name", "")})
+
+## A guardian that has no one to fight within its leash walks home and mends (so it cannot be pulled across the map or farmed with hit-and-run).
+static func _boss_home(state: MatchState, e: Dictionary, def: Dictionary, now: float, events: Array) -> void:
+	var home: Vector2i = e.get("home", e["hex"])
+	if e["hex"] != home:
+		if now >= float(e["ai"]["next_move"]):
+			var best: Vector2i = e["hex"]
+			var bd: int = HexGrid.distance(e["hex"], home)
+			for n in HexGrid.neighbors(e["hex"]):
+				if WorldGen.move_cost(state.world, n) <= 0.0:
+					continue
+				var nd: int = HexGrid.distance(n, home)
+				if nd < bd:
+					bd = nd
+					best = n
+			if best != e["hex"]:
+				e["hex"] = best
+				e["ai"]["next_move"] = MatchState.q(now + float(def["sec_per_hex"]) * 0.6 * WorldGen.move_cost(state.world, best))
+				events.append({"type": &"actor_moved", "actor": e["id"], "hex": best})
+			else:
+				e["ai"]["next_move"] = MatchState.q(now + 1.0)
+	elif int(e["hp"]) < int(e["max_hp"]) and now >= float(e["ai"].get("mend_t", 0.0)):
+		e["ai"]["mend_t"] = MatchState.q(now + 1.0)
+		e["hp"] = mini(int(e["max_hp"]), int(e["hp"]) + maxi(1, int(e["max_hp"]) / 20))
+		if int(e["hp"]) >= int(e["max_hp"]):
+			e["ai"]["phase"] = 0       # a fully mended guardian starts over: phases, adds and rotation reset
+			e["ai"]["rot"] = 0
+
 static func step(state: MatchState, events: Array) -> void:
 	var now: float = float(state.clock["elapsed"])
 	var p: Dictionary = state.player()
@@ -43,17 +118,30 @@ static func step(state: MatchState, events: Array) -> void:
 			continue
 		var def: Dictionary = Content.enemy(String(e["archetype"]))
 		var ai: Dictionary = e["ai"]
+		if e.has("add_of"):
+			var boss: Dictionary = state.actors.get(int(e["add_of"]), {})
+			if boss.is_empty() or not boss["alive"]:
+				e["alive"] = false      # a guardian's summoned helpers vanish with it (erased at the next resolution)
+				e["hp"] = 0
+				continue
+		var is_boss: bool = bool(def.get("boss", false))
+		if is_boss and ai["state"] == "idle":
+			_boss_phase(state, e, def, events)
 		var guard: int = 0
 		while guard < 4:
 			guard += 1
 			var st: String = ai["state"]
 			if st == "idle":
 				var t: Dictionary = _nearest_target(state, e, int(def["aggro"]))
+				if is_boss and not t.is_empty() and HexGrid.distance(t["hex"], e.get("home", e["hex"])) > int(def.get("leash", 8)):
+					t = {}      # beyond the leash the guardian does not give chase
 				if t.is_empty():
+					if is_boss:
+						_boss_home(state, e, def, now, events)
 					break
-				var atk: Dictionary = def["attacks"][0]
 				var d: int = HexGrid.distance(e["hex"], t["hex"])
-				if d <= int(atk["range"]):
+				var atk: Dictionary = pick_attack(def, ai, d)
+				if not atk.is_empty():
 					var th: Vector2i = e["hex"] if atk["shape"] == "self_aoe" else t["hex"]
 					ai["state"] = "windup"
 					ai["attack"] = atk["id"]

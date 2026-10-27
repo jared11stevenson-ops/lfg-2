@@ -1,6 +1,7 @@
 {
  "schema": 1,
  "files": [
+  "tutorial.json",
   "general.json",
   "judd.json",
   "mira.json",

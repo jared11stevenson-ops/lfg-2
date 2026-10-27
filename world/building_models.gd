@@ -17,7 +17,7 @@ static func all_ids() -> Array[String]:
 	return out
 
 static func has_dedicated_model(id: String) -> bool:
-	return KNOWN.has(id)
+	return KNOWN.has(id) or BuildingModelsP4.has_model(id)
 
 static func mesh_for(id: String) -> ArrayMesh:
 	if _cache.has(id):
@@ -53,7 +53,9 @@ static func mesh_for(id: String) -> ArrayMesh:
 		"lfg:building/infirmary": _infirmary(k)
 		"lfg:building/sun_terrace": _terrace(k)
 		"lfg:building/anvil_hall": _anvil_hall(k)
-		_: _generic(k)
+		_:
+			if not BuildingModelsP4.build(id, k):
+				_generic(k)
 	var m: ArrayMesh = k.build()
 	_cache[id] = m
 	return m

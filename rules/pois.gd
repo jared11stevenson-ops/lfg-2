@@ -125,7 +125,7 @@ static func discover_near(state: MatchState, a: Dictionary, events: Array) -> vo
 	var pois: Array = all(state)
 	if pois.is_empty():
 		return
-	var r: int = radius()
+	var r: int = radius() + Companions.discover_bonus(a)
 	for p in pois:
 		var d: int = HexGrid.distance(a["hex"], p["hex"])
 		if d > r or seen(a, int(p["id"])):
@@ -262,7 +262,27 @@ static func interact(state: MatchState, a: Dictionary, args: Dictionary, events:
 	state.poi_state[pid] = st
 	Inv.add_all(a["inv"], loot)
 	events.append({"type": &"poi_claimed", "actor": a["id"], "poi": pid, "poi_type": poi["type"], "name": t.get("name", "?"), "items": loot, "week": week, "ai": false})
+	if t.has("guardian"):
+		_guardian_defeated(state, a, poi, t, events)
 	return ""
+
+## A region guardian was beaten (the arena claim). The FIRST defeat per leader pays guardian.first once: a guaranteed T4 material, the unlock that gates the next
+## tier (stations, buildings) and a title. Later weeks only pay the weekly loot roll above.
+static func _guardian_defeated(state: MatchState, a: Dictionary, poi: Dictionary, t: Dictionary, events: Array) -> void:
+	var g: Dictionary = t["guardian"]
+	var gid: String = String(g["biome"])
+	if not a.has("guardians"):
+		a["guardians"] = []
+	var first: bool = not (a["guardians"] as Array).has(gid)
+	var pay: Dictionary = {}
+	if first:
+		(a["guardians"] as Array).append(gid)
+		var fr: Dictionary = g.get("first", {})
+		for k in (fr.get("items", {}) as Dictionary).keys():
+			pay[String(k)] = int(fr["items"][k])
+		Quests.grant(state, a, {"items": pay, "unlock": String(fr.get("unlock", "")), "title": String(fr.get("title", ""))})
+	events.append({"type": &"guardian_defeated", "actor": a["id"], "poi": int(poi["id"]), "guardian": gid, "name": String(t.get("name", "")), "first": first, "bonus": pay,
+		"unlock": String(g.get("first", {}).get("unlock", "")) if first else "", "week": state.week()})
 
 # ------------------------------------------------------------------ view models (read only)
 ## One POI as the UI needs it: {id, type, name, hex, biome, discovered, available, kind, text, hint, prog, guards_alive, flavor}.

@@ -20,7 +20,7 @@ const REASONS: Dictionary = {
 	"not_near_own_holding": "Craft near one of your holdings",
 	"too_far": "Walk up to the merchant",
 	"market_closed": "The market is closed during the Purge",
-	"locked_building": "Learn it from a class questline first",
+	"locked_building": "Beat a region guardian, or finish a class questline, to learn it",
 	"locked_recipe": "Learn it from a class questline first",
 	"needs_station": "Needs a crafting station at your holding",
 	"rank_required": "Needs a higher Standing rank",

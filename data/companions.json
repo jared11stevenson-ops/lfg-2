@@ -1,0 +1,226 @@
+{
+ "schema": 1,
+ "_notes": "Pass 4 companions: six original fungal/farm creatures. Obtained solo (quest gift, or feeding the creature at its haunt). One of each. follow = travels with the leader (carry, discovery radius); post = lives at an own holding (dawn work); purge = small bounded Purge role (defence at the posted holding, tending Purgebloom); never damage.",
+ "config": {
+  "base_slots": 2,
+  "max_slots": 6,
+  "followers": 2,
+  "feed_days": 3,
+  "fave_days": 6,
+  "max_fed_days": 14,
+  "adopt_range": 2,
+  "purge_defense_cap": 6,
+  "discover_cap": 3,
+  "carry_cap": 14
+ },
+ "companions": [
+  {
+   "id": "lfg:companion/mossbun",
+   "name": "Mossbun",
+   "blurb": "A round, mossy hare that carries more than it should. Follows you with a little hop.",
+   "obtain": [
+    {
+     "kind": "quest",
+     "quest": "lfg:quest/tut_4_dusk",
+     "hint": "A gift for finishing the first-days chapters."
+    },
+    {
+     "kind": "feed",
+     "poi": "lfg:poi/derelict_farm",
+     "item": "lfg:item/sporebean",
+     "qty": 3,
+     "hint": "Feed three sporebeans at a Derelict Farm."
+    }
+   ],
+   "diet": [
+    "lfg:item/sporebean",
+    "lfg:item/glowfruit",
+    "lfg:item/mushroom"
+   ],
+   "fave": "lfg:item/sporebean",
+   "follow": {
+    "carry": 10
+   },
+   "post": {
+    "haul": 1
+   },
+   "purge": {
+    "defense": 1
+   },
+   "colors": [
+    "c8e8a0",
+    "6aa84f",
+    "fff0b0"
+   ]
+  },
+  {
+   "id": "lfg:companion/dewsnail",
+   "name": "Dewsnail",
+   "blurb": "A glossy snail with a shell like a rain-barrel. Waters the rows without being asked.",
+   "obtain": [
+    {
+     "kind": "feed",
+     "poi": "lfg:poi/shrine",
+     "item": "lfg:item/glowfruit",
+     "qty": 2,
+     "hint": "Feed two glowfruit at a Wayside Shrine."
+    }
+   ],
+   "diet": [
+    "lfg:item/glowfruit",
+    "lfg:item/sporebean",
+    "lfg:item/saltroot"
+   ],
+   "fave": "lfg:item/glowfruit",
+   "follow": {
+    "carry": 2
+   },
+   "post": {
+    "tend": 3
+   },
+   "purge": {
+    "tend": 3,
+    "defense": 0
+   },
+   "colors": [
+    "8fd3ff",
+    "3b9fd8",
+    "e8f6ff"
+   ]
+  },
+  {
+   "id": "lfg:companion/truffler",
+   "name": "Truffler",
+   "blurb": "A snuffling, mushroom-capped digger. Brings back whatever the forest floor was hiding.",
+   "obtain": [
+    {
+     "kind": "feed",
+     "poi": "lfg:poi/fungal_cave",
+     "item": "lfg:item/mushroom",
+     "qty": 2,
+     "hint": "Feed two mushrooms at a Fungal Cave."
+    }
+   ],
+   "diet": [
+    "lfg:item/mushroom",
+    "lfg:item/sporebean",
+    "lfg:item/game_meat"
+   ],
+   "fave": "lfg:item/mushroom",
+   "follow": {
+    "carry": 4
+   },
+   "post": {
+    "forage": 1
+   },
+   "purge": {
+    "defense": 1
+   },
+   "colors": [
+    "d8a8ff",
+    "8a4ad0",
+    "ffe0f0"
+   ]
+  },
+  {
+   "id": "lfg:companion/glowmoth",
+   "name": "Glowmoth",
+   "blurb": "A lamp-bellied moth that sees farther than you do. Hovers at your shoulder and spots hidden places.",
+   "obtain": [
+    {
+     "kind": "feed",
+     "poi": "lfg:poi/hermit_hut",
+     "item": "lfg:item/ration",
+     "qty": 1,
+     "hint": "Leave a ration for the hermit's moth at a Hermit's Hut."
+    }
+   ],
+   "diet": [
+    "lfg:item/glowfruit",
+    "lfg:item/honey",
+    "lfg:item/saltroot"
+   ],
+   "fave": "lfg:item/honey",
+   "follow": {
+    "discover": 2
+   },
+   "post": {},
+   "purge": {
+    "defense": 2
+   },
+   "colors": [
+    "fff7a0",
+    "ffd24a",
+    "ffffff"
+   ]
+  },
+  {
+   "id": "lfg:companion/brindlehen",
+   "name": "Brindlehen",
+   "blurb": "A speckled hen that lays spore eggs. A small, reliable kitchen friend.",
+   "obtain": [
+    {
+     "kind": "feed",
+     "poi": "lfg:poi/derelict_farm",
+     "item": "lfg:item/glowfruit",
+     "qty": 3,
+     "hint": "Feed three glowfruit at a Derelict Farm."
+    }
+   ],
+   "diet": [
+    "lfg:item/sporebean",
+    "lfg:item/saltroot",
+    "lfg:item/glowfruit"
+   ],
+   "fave": "lfg:item/saltroot",
+   "follow": {
+    "carry": 2
+   },
+   "post": {
+    "produce": {
+     "lfg:item/egg": 1
+    }
+   },
+   "purge": {
+    "defense": 0
+   },
+   "colors": [
+    "ffcf9f",
+    "c8742e",
+    "fff3e0"
+   ]
+  },
+  {
+   "id": "lfg:companion/bristlepup",
+   "name": "Bristlepup",
+   "blurb": "A thorn-backed pup that bristles when the Purge draws near. Brave for its size, and it stays home to steady the garrison.",
+   "obtain": [
+    {
+     "kind": "feed",
+     "poi": "lfg:poi/salt_spire",
+     "item": "lfg:item/ration",
+     "qty": 2,
+     "hint": "Feed two rations at a Salt Spire."
+    }
+   ],
+   "diet": [
+    "lfg:item/ration",
+    "lfg:item/game_meat",
+    "lfg:item/sporebean"
+   ],
+   "fave": "lfg:item/game_meat",
+   "follow": {
+    "carry": 0
+   },
+   "post": {},
+   "purge": {
+    "defense": 3
+   },
+   "colors": [
+    "f0e0b0",
+    "a8884a",
+    "5a3a22"
+   ]
+  }
+ ]
+}

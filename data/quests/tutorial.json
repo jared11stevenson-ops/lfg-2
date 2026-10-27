@@ -1,0 +1,172 @@
+{
+ "schema": 1,
+ "quests": [
+  {
+   "id": "lfg:quest/tut_1_furrow",
+   "class": "",
+   "line": "welcome",
+   "chapter": 1,
+   "title": "Your First Furrow",
+   "intro": "Welcome home. A neighbour left a ripe patch of glowfruit by your gate. Bring it in, then put something back in the ground.",
+   "requires": [],
+   "on_accept": {
+    "plot": {
+     "crop": "lfg:crop/glowfruit",
+     "ready": true
+    }
+   },
+   "steps": [
+    {
+     "kind": "harvest",
+     "text": "Harvest the ripe glowfruit patch by your gate.",
+     "prompt": "Walk up to the glowing plot and press the action button (or [E]).",
+     "ui": "plot",
+     "crop": "any",
+     "qty": 1
+    },
+    {
+     "kind": "plant",
+     "text": "Plant a glowfruit seed in the empty furrow.",
+     "prompt": "Stand near your holding, pick a free plot and plant a seed.",
+     "ui": "plot",
+     "crop": "any",
+     "qty": 1
+    },
+    {
+     "kind": "water",
+     "text": "Water your seedling.",
+     "prompt": "Glowfruit is thirsty. Walk to the seedling and water it.",
+     "ui": "plot",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 8
+    },
+    "text": "A little coin for the seed jar"
+   }
+  },
+  {
+   "id": "lfg:quest/tut_2_warm",
+   "class": "",
+   "line": "welcome",
+   "chapter": 2,
+   "title": "Something Warm",
+   "intro": "Food keeps a farm standing. Cook what you grew into a ration, then eat: a full belly heals and keeps the garrison loyal.",
+   "requires": [
+    "lfg:quest/tut_1_furrow"
+   ],
+   "on_accept": {
+    "items": {
+     "lfg:item/glowfruit": 2
+    }
+   },
+   "steps": [
+    {
+     "kind": "craft",
+     "text": "Cook a ration from glowfruit.",
+     "prompt": "Open CRAFT and choose Glowfruit Ration (a basket of glowfruit is in your pack).",
+     "ui": "craft",
+     "recipe": "lfg:recipe/ration_glowfruit",
+     "qty": 1
+    },
+    {
+     "kind": "eat",
+     "text": "Eat a ration to restore strength.",
+     "prompt": "Open your bag and eat a ration.",
+     "ui": "bag",
+     "qty": 1
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/coin": 6
+    },
+    "text": "Coin for the larder"
+   }
+  },
+  {
+   "id": "lfg:quest/tut_3_roof",
+   "class": "",
+   "line": "welcome",
+   "chapter": 3,
+   "title": "A Roof Over Us",
+   "intro": "A well means the rows water themselves while you explore. Build one, and keep a few rations in the larder.",
+   "requires": [
+    "lfg:quest/tut_2_warm"
+   ],
+   "on_accept": {
+    "items": {
+     "lfg:item/timber": 3,
+     "lfg:item/stone": 4
+    }
+   },
+   "steps": [
+    {
+     "kind": "build",
+     "text": "Build a well beside your holding.",
+     "prompt": "Open BUILD, choose the Well, and place it near your holding.",
+     "ui": "build",
+     "building": "lfg:building/well"
+    },
+    {
+     "kind": "gather",
+     "text": "Keep four rations in your pack.",
+     "prompt": "Cook or keep four rations: they are your insurance.",
+     "ui": "hold",
+     "item": "lfg:item/ration",
+     "qty": 4
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/timber": 4,
+     "lfg:item/stone": 2
+    },
+    "text": "Timber and stone for what comes next"
+   }
+  },
+  {
+   "id": "lfg:quest/tut_4_dusk",
+   "class": "",
+   "line": "welcome",
+   "chapter": 4,
+   "title": "Before the Dark",
+   "intro": "Every seventh night is the Purge. Nobody likes it and nothing forces you to fight, but the night is lawless and the spoils are rich. Learn what it is, and raise one palisade.",
+   "requires": [
+    "lfg:quest/tut_3_roof"
+   ],
+   "on_accept": {
+    "items": {
+     "lfg:item/timber": 4,
+     "lfg:item/stone": 2
+    }
+   },
+   "steps": [
+    {
+     "kind": "ack",
+     "text": "Read the Purge guide.",
+     "prompt": "Tap 'Got it' once you have read what the Purge is.",
+     "ui": "purge_guide",
+     "topic": "purge_preview"
+    },
+    {
+     "kind": "build",
+     "text": "Raise a palisade at your holding.",
+     "prompt": "Open BUILD and place a Palisade. Walls hold when the night comes.",
+     "ui": "build",
+     "building": "lfg:building/wall"
+    }
+   ],
+   "reward": {
+    "items": {
+     "lfg:item/tonic": 2
+    },
+    "companion": "lfg:companion/mossbun",
+    "title": "Hearth Keeper",
+    "text": "A Mossbun hops after you, and two tonics for the first night"
+   }
+  }
+ ]
+}

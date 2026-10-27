@@ -431,6 +431,21 @@ static func working(state: MatchState, h: Dictionary, work: Dictionary) -> bool:
 		return false      # unstable holdings produce less
 	return int(h["garrison"]) >= int(work.get("min_garrison", 0))
 
+## Sum of a numeric building key over one holding (companion_slots, seed_return, grow_frac, wave_cut ...).
+static func bsum(h: Dictionary, key: String) -> float:
+	var t: float = 0.0
+	for b in h["buildings"]:
+		t += float(Content.building(String(b)).get(key, 0.0))
+	return t
+
+const WAVE_CUT_CAP := 3
+## Purge beasts turned away by a faction's Ward Stones (at most WAVE_CUT_CAP in all, one per holding).
+static func wave_cut(state: MatchState, fid: int) -> int:
+	var n: int = 0
+	for hid in state.holdings_of(fid):
+		n += int(bsum(state.holdings[hid], "wave_cut"))
+	return mini(n, WAVE_CUT_CAP)
+
 static func dawn_buildings(state: MatchState, events: Array) -> void:
 	var ids: Array = state.holdings.keys()
 	ids.sort()
@@ -445,6 +460,14 @@ static func dawn_buildings(state: MatchState, events: Array) -> void:
 				if not hl.is_empty() and hl["alive"] and HexGrid.distance(hl["hex"], h["hex"]) <= 3 and int(hl["hp"]) < int(hl["max_hp"]):
 					var got: int = Combat.heal(hl, int(ceil(float(hl["max_hp"]) * float(b["heal_leader"]))))
 					events.append({"type": &"infirmary_healed", "holding": hid, "actor": hl["id"], "healed": got})
+			if bool(b.get("rest_energy", false)):
+				var rl: Dictionary = Standing.leader_of(state, int(h["owner"]))
+				if not rl.is_empty() and rl["alive"] and HexGrid.distance(rl["hex"], h["hex"]) <= 3:
+					var heal_n: int = Combat.heal(rl, int(ceil(float(rl["max_hp"]) * float(b.get("rest_heal", 0.0)))))
+					var gained: float = float(rl["max_energy"]) - float(rl["energy"])
+					rl["energy"] = float(rl["max_energy"])
+					if heal_n > 0 or gained > 0.5:
+						events.append({"type": &"rest_hall_slept", "holding": hid, "actor": rl["id"], "healed": heal_n, "energy": gained})
 			var w: Dictionary = b.get("work", {})
 			if w.is_empty() or not working(state, h, w):
 				continue

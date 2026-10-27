@@ -61,7 +61,7 @@ static func remove_all(inv: Dictionary, bundle: Dictionary) -> void:
 ## Carry limit (Pip): non-coin units an actor may hold. Classes without "carry_cap" are unlimited.
 static func carry_cap(a: Dictionary) -> int:
 	var base: int = int(Combat.class_mod(a, "carry_cap", 0))
-	return base + Standing.carry_bonus(a) if base > 0 else 0
+	return base + Standing.carry_bonus(a) + Companions.carry_bonus(a) if base > 0 else 0
 
 static func carried(a: Dictionary) -> int:
 	var n: int = 0

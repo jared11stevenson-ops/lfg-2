@@ -13,11 +13,18 @@ signal quest_accept_requested(quest_id: String)
 signal quest_abandon_requested(quest_id: String)
 signal quest_turn_in_requested(quest_id: String)
 signal poi_action_requested(poi_id: int, pick: int)
+signal companion_adopt_requested(kind: String)
+signal companion_feed_requested(kind: String, item: String)
+signal companion_assign_requested(kind: String, mode: String, holding_id: int)
+signal companion_dismiss_requested(kind: String)
+signal tutorial_ack_requested(topic: String)
 signal placement_started(building_id: String)
 signal placement_ended
 signal panel_changed(kind: StringName) # &"" when all closed
-const KINDS: Array[StringName] = [&"build", &"craft", &"trade", &"policy", &"holdings", &"quests", &"poi"]
-const LABELS: Dictionary = {&"build": "BUILD", &"craft": "CRAFT", &"trade": "TRADE", &"policy": "POLICY", &"holdings": "HOLD", &"quests": "JOURNAL"}
+const KINDS: Array[StringName] = [&"build", &"craft", &"trade", &"policy", &"holdings", &"quests", &"companions", &"poi"]
+const LABELS: Dictionary = {&"build": "BUILD", &"craft": "CRAFT", &"trade": "TRADE", &"policy": "POLICY", &"holdings": "HOLD", &"quests": "JOURNAL", &"companions": "PETS"}
+## Tutorial highlight key -> toolbar button (the others, "plot" "bag" "purge_guide", point at the world or a card).
+const HIGHLIGHT_BUTTONS: Dictionary = {"craft": &"craft", "build": &"build", "hold": &"holdings", "journal": &"quests"}
 var state: Object
 var root: Control
 var build: BuildMenu
@@ -26,7 +33,11 @@ var trade: TradePanel
 var policy: PolicyPanel
 var holdings: HoldingPanel
 var quests: QuestPanel
+var companions: CompanionPanel
+var tutorial: TutorialOverlay
 var poi: PoiPanel
+var _pulse: StringName = &""
+var _pulse_t: float = 0.0
 var poi_id: int = -1
 var toolbar: VBoxContainer
 var toolbar_buttons: Dictionary = {}
@@ -59,8 +70,9 @@ func _init() -> void:
 	policy = PolicyPanel.new()
 	holdings = HoldingPanel.new()
 	quests = QuestPanel.new()
+	companions = CompanionPanel.new()
 	poi = PoiPanel.new()
-	for p in [build, craft, trade, policy, holdings, quests, poi]:
+	for p in [build, craft, trade, policy, holdings, quests, companions, poi]:
 		root.add_child(p)
 		(p as PanelBase).closed.connect(_on_panel_closed)
 	build.building_picked.connect(_on_pick)
@@ -76,6 +88,15 @@ func _init() -> void:
 	quests.abandon_requested.connect(func(q: String) -> void: quest_abandon_requested.emit(q))
 	quests.turn_in_requested.connect(func(q: String) -> void: quest_turn_in_requested.emit(q))
 	poi.action_requested.connect(func(i: int, pk: int) -> void: poi_action_requested.emit(i, pk))
+	companions.adopt_requested.connect(func(k: String) -> void: companion_adopt_requested.emit(k))
+	companions.feed_requested.connect(func(k: String, i: String) -> void: companion_feed_requested.emit(k, i))
+	companions.assign_requested.connect(func(k: String, m: String, h: int) -> void: companion_assign_requested.emit(k, m, h))
+	companions.dismiss_requested.connect(func(k: String) -> void: companion_dismiss_requested.emit(k))
+	tutorial = TutorialOverlay.new()
+	root.add_child(tutorial)
+	tutorial.accept_requested.connect(func(q: String) -> void: quest_accept_requested.emit(q))
+	tutorial.ack_requested.connect(func(t: String) -> void: tutorial_ack_requested.emit(t))
+	tutorial.highlight_changed.connect(_on_highlight)
 
 func bind_state(s: Object) -> void:
 	state = s
@@ -89,6 +110,7 @@ func panel_for(kind: StringName) -> PanelBase:
 		&"policy": return policy
 		&"holdings": return holdings
 		&"quests": return quests
+		&"companions": return companions
 		&"poi": return poi
 	return null
 
@@ -157,9 +179,25 @@ func refresh() -> void:
 		&"policy": policy.set_model(PanelModels.policy_model(state))
 		&"holdings": holdings.set_model(PanelModels.holdings_model(state))
 		&"quests": quests.set_model(Quests.journal(state as MatchState, PanelModels._actor(state, -1)))
+		&"companions": companions.set_model(Companions.panel_model(state as MatchState, PanelModels._actor(state, -1)))
 		&"poi":
 			if poi_id >= 0:
 				poi.set_model(Pois.info(state as MatchState, PanelModels._actor(state, -1), poi_id))
+
+	if state is MatchState:
+		tutorial.set_model(Quests.tutorial_model(state as MatchState, PanelModels._actor(state, -1)))
+
+## Pulses the toolbar button the tutorial points at (a gentle glow; cleared when the step moves on).
+func _on_highlight(key: String) -> void:
+	if toolbar_buttons.has(_pulse):
+		(toolbar_buttons[_pulse] as Button).modulate = Color.WHITE
+	_pulse = HIGHLIGHT_BUTTONS.get(key, &"")
+	_pulse_t = 0.0
+
+func _process(dt: float) -> void:
+	if _pulse != &"" and toolbar_buttons.has(_pulse):
+		_pulse_t += dt
+		(toolbar_buttons[_pulse] as Button).modulate = Color(1.0, 1.0, 0.55).lerp(Color.WHITE, 0.5 + 0.5 * sin(_pulse_t * 5.0))
 
 func _on_pick(building_id: String) -> void:
 	placing = true

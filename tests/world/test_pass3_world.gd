@@ -29,12 +29,12 @@ func test_poi_props_are_distinct_readable_and_small() -> void:
 		check(not sigs.has(sig), "%s is not a copy of %s" % [key, sigs.get(sig, "")])
 		sigs[sig] = key
 		check(PoiModels.ACCENT.has(key), "%s has an accent colour" % key)
-	eq(PoiModels.PROPS.size(), 7, "one prop per POI type")
+	eq(PoiModels.PROPS.size(), 14, "one prop per POI type (7 regular + 7 guardian arenas)")
 	var types: Dictionary = {}
 	for t in Content.poi_types().values():
 		types[String(t["prop"])] = true
 		check(PoiModels.PROPS.has(String(t["prop"])), "%s has a prop" % t["id"])
-	eq(types.size(), 7, "all props used")
+	eq(types.size(), 14, "all props used")
 	var on: AABB = PoiModels.mesh_for("beacon_on").get_aabb()
 	var off: AABB = PoiModels.mesh_for("beacon_off").get_aabb()
 	check(on.size.y > off.size.y + 4.0, "the live beacon stands taller than the spent one")

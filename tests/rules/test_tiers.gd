@@ -193,6 +193,9 @@ func test_every_building_cost_is_obtainable_by_a_solo_player() -> void:
 	for t in Content.poi_types().values():
 		for k in (t["loot"] as Dictionary).keys():
 			have[String(k)] = true
+	for e in Content.enemies().values():      # wild beasts drop spore sacs and the like (pass 4 buildings such as the Compost Heap use them)
+		for k in (e.get("loot", {}) as Dictionary).keys():
+			have[String(k)] = true
 	var built: Dictionary = {}
 	var changed: bool = true
 	while changed:

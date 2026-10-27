@@ -1,0 +1,40 @@
+{
+ "schema": 1,
+ "_notes": "First-10-minutes cards (ui/tutorial_overlay.gd). Topics are acknowledged with the ack_tutorial command.",
+ "topics": {
+  "purge_preview": {
+   "title": "The Purge",
+   "button": "Got it",
+   "lines": [
+    "Every seventh night is the Purge. It is lawless: wild beasts and raiders roam, and anyone may fight.",
+    "You never have to fight. Walls, rations and a full garrison are a fine plan.",
+    "The Purge pays: Ashmarrow and spoils, rank, skill points. Staying out entirely means a lower ceiling.",
+    "A Warning arrives the day before. You will have time to prepare."
+   ]
+  },
+  "controls": {
+   "title": "Getting around",
+   "button": "Got it",
+   "lines": [
+    "Drag to walk. Use the action button or [E] beside plots, holdings and places.",
+    "The toolbar on the left opens BUILD, CRAFT and the JOURNAL."
+   ]
+  },
+  "journal": {
+   "title": "Your journal",
+   "button": "Got it",
+   "lines": [
+    "The JOURNAL lists quests. They are all optional and all doable alone."
+   ]
+  },
+  "companions": {
+   "title": "Companions",
+   "button": "Got it",
+   "lines": [
+    "Small creatures can follow you or work at a holding. Open PETS to feed and place them.",
+    "They help in peace, steady the garrison in the Purge, and never fight for you."
+   ]
+  }
+ },
+ "first_quest": "lfg:quest/tut_1_furrow"
+}

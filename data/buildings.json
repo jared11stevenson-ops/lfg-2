@@ -423,6 +423,205 @@
      "lfg:item/iron_fittings": 1
     }
    }
+  },
+  {
+   "id": "lfg:building/alembic",
+   "name": "Alembic",
+   "cost": {
+    "lfg:item/fired_brick": 3,
+    "lfg:item/glass_pane": 3,
+    "lfg:item/iron_fittings": 2,
+    "lfg:item/fen_gland": 2
+   },
+   "max": 1,
+   "group": "alembic",
+   "station": true,
+   "requires_unlock": "lfg:unlock/guardian_bog",
+   "note": "Crafting station: battle stew, bark salve, greatbrew"
+  },
+  {
+   "id": "lfg:building/rift_anvil",
+   "name": "Rift Anvil",
+   "cost": {
+    "lfg:item/stone": 6,
+    "lfg:item/fired_brick": 4,
+    "lfg:item/iron_fittings": 4,
+    "lfg:item/vault_sigil": 2
+   },
+   "max": 1,
+   "group": "rift_anvil",
+   "station": true,
+   "requires_unlock": "lfg:unlock/guardian_ruins",
+   "note": "Crafting station: guardian alloy, bulk fittings"
+  },
+  {
+   "id": "lfg:building/seed_press",
+   "name": "Seed Press",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/iron_fittings": 2,
+    "lfg:item/rope": 2,
+    "lfg:item/mother_seed": 1
+   },
+   "max": 1,
+   "group": "seed_press",
+   "station": true,
+   "requires_unlock": "lfg:unlock/guardian_meadow",
+   "note": "Crafting station: press crops into seed"
+  },
+  {
+   "id": "lfg:building/kennel",
+   "name": "Kennel",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/rope": 2,
+    "lfg:item/amber_resin": 1
+   },
+   "max": 1,
+   "group": "kennel",
+   "companion_slots": 2,
+   "note": "+2 companion places"
+  },
+  {
+   "id": "lfg:building/seed_bank",
+   "name": "Seed Bank",
+   "cost": {
+    "lfg:item/timber": 5,
+    "lfg:item/fired_brick": 2,
+    "lfg:item/rope": 2,
+    "lfg:item/mother_seed": 1
+   },
+   "max": 1,
+   "group": "seed_bank",
+   "seed_return": 1,
+   "note": "Every harvest at this holding returns one more seed"
+  },
+  {
+   "id": "lfg:building/compost_heap",
+   "name": "Compost Heap",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/reed_fibre": 4,
+    "lfg:item/spore_sac": 2
+   },
+   "max": 1,
+   "group": "compost",
+   "grow_frac": 0.34,
+   "note": "Plots at this holding grow an extra third of a day each dawn"
+  },
+  {
+   "id": "lfg:building/spore_bed",
+   "name": "Spore Bed",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/kiln_clay": 2,
+    "lfg:item/spore_sac": 3,
+    "lfg:item/heart_cap": 1
+   },
+   "max": 1,
+   "group": "spore_bed",
+   "work": {
+    "min_garrison": 1,
+    "outputs": {
+     "lfg:item/mushroom": 2
+    }
+   },
+   "note": "Two wild mushrooms every dawn"
+  },
+  {
+   "id": "lfg:building/ward_stones",
+   "name": "Ward Stones",
+   "cost": {
+    "lfg:item/stone": 8,
+    "lfg:item/rime_salt": 3,
+    "lfg:item/amber_resin": 2
+   },
+   "max": 1,
+   "group": "ward_stones",
+   "defense": 5,
+   "wave_cut": 1,
+   "note": "One fewer Purge beast heads for your holdings (at most 3 across all holdings)"
+  },
+  {
+   "id": "lfg:building/rest_hall",
+   "name": "Rest Hall",
+   "cost": {
+    "lfg:item/timber": 6,
+    "lfg:item/silk_cloth": 2,
+    "lfg:item/amber_resin": 2,
+    "lfg:item/tide_pearl": 1
+   },
+   "max": 1,
+   "group": "rest_hall",
+   "rest_energy": true,
+   "rest_heal": 0.15,
+   "note": "At dawn a leader within 3 hexes wakes with full energy and 15% health back"
+  },
+  {
+   "id": "lfg:building/guardian_hall",
+   "name": "Hall of Guardians",
+   "cost": {
+    "lfg:item/fired_brick": 6,
+    "lfg:item/glass_pane": 3,
+    "lfg:item/mother_seed": 1,
+    "lfg:item/tide_pearl": 1,
+    "lfg:item/heart_cap": 1,
+    "lfg:item/vault_sigil": 1,
+    "lfg:item/rime_plume": 1,
+    "lfg:item/thunder_horn": 1,
+    "lfg:item/fen_gland": 1
+   },
+   "max": 1,
+   "group": "guardian_hall",
+   "standing_bonus": 4,
+   "note": "A trophy for every region guardian beaten: Standing +4"
+  },
+  {
+   "id": "lfg:building/bastion",
+   "name": "Bastion",
+   "cost": {
+    "lfg:item/stone": 10,
+    "lfg:item/fired_brick": 4,
+    "lfg:item/guardian_alloy": 3,
+    "lfg:item/thunder_horn": 1
+   },
+   "max": 1,
+   "group": "bastion",
+   "defense": 16,
+   "garrison_cap": 3,
+   "note": "Heavy defence for a holding: +16 defence, +3 garrison cap"
+  },
+  {
+   "id": "lfg:building/foraging_den",
+   "name": "Foraging Den",
+   "cost": {
+    "lfg:item/timber": 5,
+    "lfg:item/rope": 3,
+    "lfg:item/rime_plume": 1
+   },
+   "max": 1,
+   "group": "den",
+   "companion_forage": 1,
+   "note": "Companions posted here bring back one more find each dawn"
+  },
+  {
+   "id": "lfg:building/apiary",
+   "name": "Apiary",
+   "cost": {
+    "lfg:item/timber": 4,
+    "lfg:item/reed_fibre": 2,
+    "lfg:item/amber_resin": 3,
+    "lfg:item/glass_pane": 1
+   },
+   "max": 1,
+   "group": "apiary",
+   "work": {
+    "min_garrison": 1,
+    "outputs": {
+     "lfg:item/honey": 1
+    }
+   },
+   "note": "One jar of glowhoney every dawn"
   }
  ]
 }

@@ -3,7 +3,8 @@ extends RefCounted
 ## Public Rules API (frozen contract). Everything is deterministic given (seed, command stream, tick stream).
 const COMMAND_TYPES: Array[StringName] = [&"move_intent", &"plant", &"water", &"harvest", &"craft", &"build", &"demolish", &"trade", &"eat",
 	&"attack", &"use_ability", &"capture", &"steal", &"set_policy", &"rest", &"move_to_pos", &"sync_position",
-	&"unlock_skill", &"scout", &"escort", &"truce", &"ransom", &"sabotage", &"interact_poi", &"accept_quest", &"abandon_quest", &"turn_in", &"pacify"]
+	&"unlock_skill", &"scout", &"escort", &"truce", &"ransom", &"sabotage", &"interact_poi", &"accept_quest", &"abandon_quest", &"turn_in", &"pacify",
+	&"adopt_companion", &"feed_companion", &"assign_companion", &"dismiss_companion", &"ack_tutorial"]
 const MAX_PATH := 160
 
 static func new_match(seed: int, class_id: StringName, opts: Dictionary = {}) -> MatchState:
@@ -90,6 +91,11 @@ static func _dispatch(state: MatchState, a: Dictionary, t: StringName, args: Dic
 		&"abandon_quest": return Quests.abandon(state, a, args, events)
 		&"turn_in": return Quests.turn_in(state, a, args, events)
 		&"pacify": return Standing.pacify_cmd(state, a, args, events)
+		&"adopt_companion": return Companions.adopt(state, a, args, events)
+		&"feed_companion": return Companions.feed(state, a, args, events)
+		&"assign_companion": return Companions.assign(state, a, args, events)
+		&"dismiss_companion": return Companions.dismiss(state, a, args, events)
+		&"ack_tutorial": return Quests.ack_tutorial(state, a, args, events)
 	return "unknown_command"
 
 static func _move(state: MatchState, a: Dictionary, args: Dictionary) -> String:

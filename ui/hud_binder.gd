@@ -34,4 +34,8 @@ static func model_from_state(state: Object, actor_id: int = -1) -> Dictionary:
 	m["inventory"] = items
 	var trk: Dictionary = Quests.tracker(state as MatchState, a)
 	m["quest_tracker"] = "%s\n%s" % [String(trk["title"]), String(trk["text"])] if not trk.is_empty() else ""
+	# pass 4: companions (one line, "Mossbun, Dewsnail (hungry)"), the first-days guide model, and the nearest region guardian in view
+	m["companions"] = Companions.summary(a)
+	m["tutorial"] = Quests.tutorial_model(state as MatchState, a)
+	m["boss"] = Guardians.nearest_boss(state as MatchState, a)
 	return m

@@ -82,6 +82,11 @@ static func poi_cfg() -> Dictionary:
 		var parsed: Variant = JSON.parse_string(f.get_as_text())
 		if parsed is Dictionary:
 			out = parsed
+	# Pass 4: the region guardians' arenas are POI types appended AFTER the regular seven (worldgen places types in file order from one
+	# RNG stream, so every pre-pass-4 placement is unchanged).
+	var types: Array = (out.get("types", []) as Array).duplicate()
+	types.append_array(guardian_cfg().get("arenas", []))
+	out["types"] = types
 	_cache["poi_cfg"] = out
 	return out
 
@@ -127,11 +132,72 @@ static func quest_order() -> Array:
 
 static func quest(id: String) -> Dictionary: return quests().get(id, {})
 
+## data/guardians.json: {enemies:[boss archetypes], arenas:[POI types]}. Boss archetypes are NOT in enemies() (they never join the wild/wave pool);
+## Content.enemy() finds both.
+static func guardian_cfg() -> Dictionary:
+	if _cache.has("guardian_cfg"):
+		return _cache["guardian_cfg"]
+	var out: Dictionary = {"enemies": [], "arenas": []}
+	var f := FileAccess.open("res://data/guardians.json", FileAccess.READ)
+	if f != null:
+		var parsed: Variant = JSON.parse_string(f.get_as_text())
+		if parsed is Dictionary:
+			out = parsed
+	_cache["guardian_cfg"] = out
+	return out
+
+static func guardians() -> Dictionary:
+	if not _cache.has("guardians"):
+		var d: Dictionary = {}
+		for e in guardian_cfg().get("enemies", []):
+			d[String(e["id"])] = e
+		_cache["guardians"] = d
+	return _cache["guardians"]
+
+## Guardian ids in file order (meadow, shore, grove, ruins, salt flats, highlands, bog).
+static func guardian_order() -> Array:
+	var out: Array = []
+	for e in guardian_cfg().get("enemies", []):
+		out.append(String(e["id"]))
+	return out
+
+## data/companions.json: {config, companions[]}. companions() is id-keyed; companion_order() keeps file order.
+static func companion_cfg() -> Dictionary:
+	if _cache.has("companion_cfg"):
+		return _cache["companion_cfg"]
+	var out: Dictionary = {"config": {}, "companions": []}
+	var f := FileAccess.open("res://data/companions.json", FileAccess.READ)
+	if f != null:
+		var parsed: Variant = JSON.parse_string(f.get_as_text())
+		if parsed is Dictionary:
+			out = parsed
+	_cache["companion_cfg"] = out
+	return out
+
+static func companions() -> Dictionary:
+	if not _cache.has("companions"):
+		var d: Dictionary = {}
+		for c in companion_cfg().get("companions", []):
+			d[String(c["id"])] = c
+		_cache["companions"] = d
+	return _cache["companions"]
+
+static func companion_order() -> Array:
+	var out: Array = []
+	for c in companion_cfg().get("companions", []):
+		out.append(String(c["id"]))
+	return out
+
+static func companion(id: String) -> Dictionary: return companions().get(id, {})
+static func companion_conf(key: String, default: Variant = 0) -> Variant: return companion_cfg().get("config", {}).get(key, default)
+
 static func item(id: String) -> Dictionary: return items().get(id, {})
 static func crop(id: String) -> Dictionary: return crops().get(id, {})
 static func recipe(id: String) -> Dictionary: return recipes().get(id, {})
 static func building(id: String) -> Dictionary: return buildings().get(id, {})
 static func class_def(id: String) -> Dictionary: return classes().get(id, {})
-static func enemy(id: String) -> Dictionary: return enemies().get(id, {})
+static func enemy(id: String) -> Dictionary:
+	var e: Dictionary = enemies().get(id, {})
+	return e if not e.is_empty() else guardians().get(id, {})
 static func item_value(id: String) -> int: return int(item(id).get("value", 0))
 static func biome_index(name: String) -> int: return BIOMES.find(name)

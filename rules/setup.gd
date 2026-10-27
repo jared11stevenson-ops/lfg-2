@@ -157,6 +157,9 @@ static func build(seed_value: int, class_id: StringName, opts: Dictionary) -> Ma
 			spawn_enemy(s, arch, hx, false)
 	s.rng_state = rng.state
 	Standing.init_state(s)
+	if bool(opts.get("tutorial", false)):
+		var tev: Array = []      # opt-in: the first-days chapter starts accepted (ripe patch at the gate)
+		Quests.accept(s, s.actors[1], {"quest": String(Quests.tutorial_cfg().get("first_quest", "lfg:quest/tut_1_furrow"))}, tev)
 	return s
 
 static func spawn_enemy(s: MatchState, archetype: String, hex: Vector2i, wave: bool) -> int:
@@ -167,5 +170,7 @@ static func spawn_enemy(s: MatchState, archetype: String, hex: Vector2i, wave: b
 	e["archetype"] = archetype
 	e["wave"] = wave
 	e["ai"] = {"state": "idle", "attack": "", "target_hex": hex, "t_hit": 0.0, "t_end": 0.0, "hit_done": [], "next_move": 0.0}
+	if bool(d.get("boss", false)):
+		e["home"] = hex      # a region guardian is tied to its arena (EnemyAI leash)
 	s.actors[e["id"]] = e
 	return int(e["id"])
