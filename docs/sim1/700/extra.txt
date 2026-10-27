@@ -1,0 +1,56 @@
+seeds=10
+conquests 3/10; days [364, 378, 686]
+survivors at end: Counter({1: 7, 12: 2, 11: 1}); solo_day>=0: 6
+neutral holdings at end (non-conquest): mean 13.9
+max stall (days w/o territory change): mean 67.9, max 245, seeds >56d: 3; list [21, 28, 28, 28, 35, 126, 133, 245]
+last change day mean 633
+conquest winners {'sable': 1, 'oren': 1, 'rook': 1}
+largest-holder at end (all seeds) {'vex': 1, 'mira': 1, 'pip': 1, 'sable': 3, 'nyx': 1, 'oren': 1, 'tavi': 1, 'rook': 1}
+winner persona {'turtle': 2, 'hoarder': 1}
+
+## leader deaths: victim class -> killer class (top)
+deaths 43 mean day 332; place {'home': 40, 'foreign': 1, 'open': 2}; src {'party': 38, 'leader': 5}; tag {'raid_party': 42, 'spores': 1}
+hp_before killing blow: mean 0.28, share >=0.9 (one-shot-ish) 2%
+killer class share of leader kills: nyx 8, sable 7, oren 6, rook 5, dune 4, pip 4, judd 4, tavi 4, quill 1
+victim class: mira 5, dune 5, halo 5, bram 5, oren 4, judd 4, rook 3, nyx 3, forge 3, pip 2, tavi 2, quill 1, sable 1
+
+## elimination day buckets (share of all 14n factions)
+{'<112': 6, '<140': 8, '<168': 8, '<196': 9, '<224': 4, '<252': 10, '<280': 8, '<308': 3, '<336': 6, '<364': 3, '<392': 4, '<420': 3, '<448': 1, '<476': 6, '<504': 5, '<532': 3, '<560': 3, '<588': 2, '<616': 1, '<644': 1, '<700': 4, 'alive': 42}
+elim causes {'holdings_lost': 55, 'raid_party': 42, 'spores': 1}; famine by class {}
+starve_days total 4975; factions with starve_days>0: 84/140
+
+## snowball vs comeback (leader by holdings at snapshot vs final-largest)
+day 57: leader == final largest in 0/10; leader still alive at end 3/10; mean final rank of snapshot leader 3.3
+day 85: leader == final largest in 1/10; leader still alive at end 3/10; mean final rank of snapshot leader 3.6
+day 169: leader == final largest in 3/10; leader still alive at end 5/10; mean final rank of snapshot leader 1.8
+day 253: leader == final largest in 7/10; leader still alive at end 8/10; mean final rank of snapshot leader 1.3
+
+## mean holdings by class at day (alive or 0)
+class | d8 | d29 | d57 | d85 | d141 | d197 | d253 | d309 | d337
+bram | 1.0 | 2.8 | 2.9 | 2.9 | 2.3 | 1.3 | 1.2 | 1.2 | 0.9
+dune | 1.4 | 3.0 | 3.0 | 3.1 | 3.1 | 3.3 | 3.4 | 3.5 | 3.4
+forge | 1.1 | 2.4 | 2.7 | 3.1 | 2.9 | 2.5 | 1.3 | 1.4 | 1.6
+halo | 1.8 | 2.2 | 2.2 | 2.1 | 2.0 | 2.0 | 1.4 | 1.2 | 1.2
+judd | 1.0 | 3.2 | 2.9 | 2.8 | 3.4 | 3.0 | 2.1 | 2.1 | 2.7
+mira | 1.2 | 2.8 | 2.8 | 2.9 | 2.5 | 2.3 | 2.3 | 1.1 | 1.1
+nyx | 1.3 | 2.5 | 2.5 | 2.2 | 2.8 | 2.4 | 2.3 | 2.7 | 2.6
+oren | 1.2 | 2.5 | 2.4 | 2.3 | 2.3 | 2.5 | 3.7 | 2.9 | 4.1
+pip | 1.5 | 3.3 | 3.4 | 3.1 | 3.3 | 3.0 | 3.2 | 2.9 | 2.9
+quill | 1.4 | 3.0 | 3.1 | 3.3 | 2.6 | 2.1 | 1.9 | 1.3 | 1.1
+rook | 1.1 | 1.6 | 1.5 | 1.7 | 1.7 | 1.8 | 1.8 | 1.5 | 2.5
+sable | 1.4 | 3.4 | 3.4 | 2.9 | 2.3 | 2.7 | 3.3 | 3.5 | 3.0
+tavi | 1.4 | 3.6 | 3.8 | 3.9 | 3.7 | 3.4 | 2.8 | 2.3 | 2.4
+vex | 1.4 | 3.3 | 3.4 | 3.6 | 2.8 | 2.0 | 1.7 | 1.7 | 1.8
+
+## by persona
+hoarder: n 35 elim 74% final hold 1.57 parties 99.8 captures 6.3 days alive 388 wins 1
+raider: n 34 elim 74% final hold 1.15 parties 110.4 captures 12.5 days alive 414 wins 0
+trader: n 36 elim 72% final hold 1.08 parties 67.3 captures 7.6 days alive 413 wins 0
+turtle: n 35 elim 60% final hold 4.86 parties 123.5 captures 20.5 days alive 487 wins 2
+
+## degenerate indicators
+events: {}
+steals total 103; tributes 3613; revolts 617; pacify 3537
+ability attempts: track 5237, mine 4509, forage 4011, bless 1352, truce 313, sentinel_post 266, cache 236, snare 203, dash 178, rage 176, siege_ram 172, rally 124, pickpocket 113, plague_cloud 98, guard 93, spore_swarm 73, ward 44, field_dressing 18
+marked weeks max per faction: 89; mean tick ms 1.38 max 1.51; wall/seed 159s
+alive at end holding <=2: 22; alive at end total 42

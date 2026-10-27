@@ -129,9 +129,6 @@ static func run(seed_v: int, days: int) -> Dictionary:
 	var tick_ms: float = 0.0
 	var tick_n: int = 0
 	var leader_of: Dictionary = {}
-	var ev_counts: Dictionary = {}      # (pass 5) counts of quest/poi/purge/ration events, logged only
-	var change_days: Array = []         # (pass 5) distinct days with a territory change (for the longest stall)
-	var lost_by: Dictionary = {}        # (pass 5) faction -> holdings lost to capture
 	var day_snap: Dictionary = {}       # faction id -> state of its larder at the last day change (the state at a famine collapse is already wiped)
 	for fid in range(N):
 		leader_of[int(st.factions[fid]["leader"])] = fid
