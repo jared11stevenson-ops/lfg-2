@@ -152,6 +152,7 @@ static func eliminate_faction(state: MatchState, fid: int, events: Array) -> voi
 	f["alive"] = false
 	for hid in state.holdings_of(fid):
 		state.holdings[hid]["owner"] = -1
+		state.holdings[hid]["garrison"] = maxi(1, int(state.holdings[hid]["garrison"]) / 3)      # a leaderless garrison routs
 	events.append({"type": &"faction_eliminated", "faction": fid, "ai": bool(f["is_ai"])})
 	Economy.check_victory(state, events)
 

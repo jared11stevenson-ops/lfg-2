@@ -461,8 +461,8 @@ static func dawn_upkeep(state: MatchState, events: Array) -> void:
 		# income (tax) from stable holdings
 		for hid in hs:
 			var h: Dictionary = state.holdings[hid]
-			if int(h.get("stab", 100)) >= int(sb["weak"]) and Inv.room_for(h["store"], {Economy.COIN: 1}):
-				Inv.add_all(h["store"], {Economy.COIN: int(u["income_per_holding"])})
+			if int(h.get("stab", 100)) >= int(sb["weak"]) and Inv.room_for(h["store"], {Economy.COIN: 3}):
+				Inv.add_all(h["store"], {Economy.COIN: int(u["income_per_tier"]) * clampi(int(h["tier"]), 1, 3)})
 		# upkeep
 		var cost: int = upkeep_cost(state, int(fid))
 		var owed: int = _take_coin(state, int(fid), cost) if cost > 0 else 0

@@ -83,6 +83,7 @@ static func run(seed_v: int, days: int) -> Dictionary:
 			"marked_weeks": 0, "tributes": 0, "levy_unpaid": 0, "starve_days": 0, "revolts": 0, "idle_bleed": 0, "parties": 0, "party_leader": 0, "joined_raids": 0}
 	var last_dmg: Dictionary = {}       # actor id -> last damage tag
 	var kill_causes: Dictionary = {}
+	var leader_dmg: Dictionary = {}
 	var timeline: Array = []
 	var last_change_day: int = 0
 	var changes_by_week: Dictionary = {}
@@ -110,6 +111,9 @@ static func run(seed_v: int, days: int) -> Dictionary:
 			var ty: StringName = e.get("type", &"")
 			match ty:
 				&"actor_damaged":
+					if leader_of.has(int(e["actor"])):
+						var dtag: String = String(e.get("tag", ""))
+						leader_dmg[dtag] = int(leader_dmg.get(dtag, 0)) + int(e.get("amount", 0))
 					last_dmg[int(e["actor"])] = String(e.get("tag", "")) + ":" + str(int(e.get("source", -1)))
 				&"faction_eliminated":
 					var ef: int = int(e["faction"])
@@ -118,6 +122,9 @@ static func run(seed_v: int, days: int) -> Dictionary:
 						if meta[ef]["elim_cause"] == "":
 							meta[ef]["elim_cause"] = "holdings_lost"
 					last_change_day = day
+				&"famine_collapse":
+					if meta.has(int(e["faction"])):
+						meta[int(e["faction"])]["elim_cause"] = "famine"
 				&"actor_died":
 					var vid: int = int(e["actor"])
 					if leader_of.has(vid):
@@ -131,7 +138,8 @@ static func run(seed_v: int, days: int) -> Dictionary:
 							cf = "party" if sa["kind"] == "party" else ("leader" if sa["kind"] != "enemy" else "beast")
 						var key: String = tag + ("/" + cf if cf != "" else "")
 						kill_causes[key] = int(kill_causes.get(key, 0)) + 1
-						meta[vf]["elim_cause"] = key
+						if meta[vf]["elim_cause"] != "famine":
+							meta[vf]["elim_cause"] = key
 						var kid: int = int(e.get("killer", -1))
 						if st.actors.has(kid) and st.actors[kid]["kind"] != "enemy" and int(st.actors[kid]["faction"]) != vf:
 							var kf: int = int(st.actors[kid]["faction"])
@@ -234,5 +242,5 @@ static func run(seed_v: int, days: int) -> Dictionary:
 	return {"seed": seed_v, "end_day": int(st.clock["day"]), "total_conquest": conquest_day >= 0, "conquest_day": conquest_day,
 		"winner": order[winner] if winner >= 0 else "", "winner_faction": winner, "solo_day": solo_day, "alive_final": alive_final, "neutral_holdings": neutral,
 		"last_territory_change_day": last_change_day, "territory_changes_by_week": by_week, "factions": meta, "final_holdings": final_h,
-		"kill_causes": kill_causes, "ability_log": st.sim_acc.get("ablog", {}), "timeline": timeline,
+		"kill_causes": kill_causes, "leader_damage": leader_dmg, "ability_log": st.sim_acc.get("ablog", {}), "timeline": timeline,
 		"tick_avg_ms": tick_ms / maxf(1.0, float(tick_n)), "wall_s": float(Time.get_ticks_msec() - t0) / 1000.0, "mark_final": Standing.mark_of(st)}

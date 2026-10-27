@@ -29,7 +29,13 @@ static func home_of(state: MatchState, fid: int) -> Dictionary:
 	return h
 
 ## Ordinary ability use with an optional per-ability attempt/failure log (state.opts.ai_log, used by the simulation harness).
+static func can_cast(state: MatchState, l: Dictionary, ability_id: String) -> bool:
+	var ab: Dictionary = Abilities.ability_for(Content.class_def(String(l.get("class_id", ""))), ability_id)
+	return not ab.is_empty() and Combat.ready(state, l, "ab:" + ability_id) and float(l["energy"]) >= float(ab["energy"])
+
 static func cast(state: MatchState, l: Dictionary, args: Dictionary, events: Array) -> String:
+	if not can_cast(state, l, String(args.get("ability", ""))):
+		return "cooldown"       # a leader checks its cooldown and energy first; it does not spam the command
 	var res: String = Abilities.use(state, l, args, events)
 	if bool(state.opts.get("ai_log", false)):
 		var lg: Dictionary = state.sim_acc.get("ablog", {})
@@ -55,6 +61,7 @@ static func dawn(state: MatchState, events: Array) -> void:
 			continue
 		if int(l["ai"].get("party", -1)) == -1:
 			l["hex"] = home["hex"]
+			l["ai"]["defending"] = -1
 		_recover_cache(state, l, home, events)
 		_peace_routine(state, int(fid), l, home, events)
 
@@ -140,8 +147,8 @@ static func _tribute(state: MatchState, fid: int, l: Dictionary, home: Dictionar
 		return
 	if int(f.get("tribute_week", -1)) == state.week():
 		return
-	var gift: int = 10 if String(k.get("role", "")) == "diplomat" else 15
-	if Inv.count(home["store"], Economy.COIN) < gift + 6:
+	var gift: int = 5 if String(k.get("role", "")) == "diplomat" else 8
+	if Inv.count(home["store"], Economy.COIN) < gift:
 		return
 	var best: int = -1
 	var bd: int = 1 << 30
@@ -306,6 +313,42 @@ static func melee(state: MatchState, attacker: Dictionary, victim: Dictionary, e
 		return
 	Combat.set_cd(state, attacker, "attack", 1.0)
 	Combat.hurt(state, int(victim["id"]), Combat.calc_damage(state, attacker, victim), int(attacker["id"]), events, "leader_duel")
+
+# ------------------------------------------------------------------ defence: the leader reinforces a threatened holding (and can die there)
+const DEFEND_RANGE := 6
+const STAY_HOME: Array[String] = ["support", "builder", "tinker", "diplomat", "pilgrim"]
+
+## A hostile party has begun a siege of one of our holdings: leaders within DEFEND_RANGE march to it (fast march, abstracted), unless their
+## class kit keeps them home. They fight beside the garrison with their kit and are exposed to the party.
+static func defend_call(state: MatchState, party: Dictionary) -> void:
+	var t: Dictionary = state.holdings.get(int(party["ai"]["target"]), {})
+	if t.is_empty() or int(t["owner"]) < 0:
+		return
+	var of: int = int(t["owner"])
+	var f: Dictionary = state.factions[of]
+	if not f["is_ai"] or not f["alive"]:
+		return
+	var l: Dictionary = leader_of(state, of)
+	if l.is_empty() or int(l["ai"].get("party", -1)) != -1 or int(l["ai"].get("defending", -1)) != -1:
+		return
+	if String(f["persona"]) != "turtle" and STAY_HOME.has(String(kit(l).get("role", ""))):
+		return
+	if float(l["hp"]) < 0.5 * float(l["max_hp"]) or HexGrid.distance(l["hex"], t["hex"]) > DEFEND_RANGE:
+		return
+	if l["hex"] == t["hex"]:
+		return
+	l["ai"]["defending"] = int(t["id"])
+	l["ai"]["from_hex"] = l["hex"]
+	l["hex"] = t["hex"]
+
+## The siege of `hid` is over (won, lost, called off): any leader defending it goes back where it came from.
+static func recall(state: MatchState, hid: int) -> void:
+	for f in state.factions.values():
+		var l: Dictionary = state.actors.get(int(f["leader"]), {})
+		if not l.is_empty() and int(l["ai"].get("defending", -1)) == hid:
+			l["ai"]["defending"] = -1
+			if l["alive"]:
+				l["hex"] = l["ai"].get("from_hex", l["hex"])
 
 ## At each settle every living leader recovers a share of its health (the player already did).
 static func recover(state: MatchState) -> void:

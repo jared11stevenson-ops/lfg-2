@@ -5,6 +5,7 @@ const COIN := "lfg:item/coin"
 const RATION := "lfg:item/ration"
 const TRADE_RANGE := 1
 const STARVE_DESERT_DAYS := 3
+const FAMINE_COLLAPSE_DAYS := 28     # an AI/bot faction that starves for four weeks collapses (its leader perishes)
 
 const PRICE_MIN := 0.5
 const PRICE_MAX := 2.5
@@ -360,6 +361,10 @@ static func feed_faction(state: MatchState, fid: int, events: Array) -> void:
 		return
 	f["hunger_days"] = int(f["hunger_days"]) + 1
 	events.append({"type": &"starving", "faction": fid, "ai": bool(f["is_ai"]), "days": f["hunger_days"], "short": need - eaten})
+	if bool(f["is_ai"]) and int(f["hunger_days"]) >= FAMINE_COLLAPSE_DAYS and not leader.is_empty() and leader["alive"]:
+		events.append({"type": &"famine_collapse", "faction": fid, "ai": true, "days": f["hunger_days"]})
+		Combat.kill(state, int(leader["id"]), -1, events)
+		return
 	if int(f["hunger_days"]) >= STARVE_DESERT_DAYS:
 		for hid in state.holdings_of(fid):
 			var h: Dictionary = state.holdings[hid]
