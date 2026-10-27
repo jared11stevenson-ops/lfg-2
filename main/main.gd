@@ -59,6 +59,10 @@ func _start(s: GameSession) -> void:
 	p.policy_requested.connect(func(k: String, v: String, h: int) -> void: _send(UiCommands.policy(k, v, h), "Policy set"))
 	p.demolish_requested.connect(func(h: int, b: String) -> void: _send(UiCommands.demolish(h, b), "Demolished"))
 	_build_progress_ui()
+	p.quest_accept_requested.connect(func(q: String) -> void: _send(UiCommands.accept_quest(q), "Quest accepted"))
+	p.quest_abandon_requested.connect(func(q: String) -> void: _send(UiCommands.abandon_quest(q), "Quest abandoned"))
+	p.quest_turn_in_requested.connect(func(q: String) -> void: _send(UiCommands.turn_in(q), "Quest complete"))
+	p.poi_action_requested.connect(func(pid: int, pick: int) -> void: _send(UiCommands.interact_poi(pid, pick), "Done"))
 	await stage.start_from_state(Game.state)
 	stage.player.hex_changed.connect(_on_hex)
 	stage.hud.toast("Feed your people. Survive the Purge.", UiStyle.GOOD, 5.0)
@@ -85,7 +89,7 @@ func _build_progress_ui() -> void:
 		_report(Game.command(&"unlock_skill", {"node": node_id}), "Skill learned")
 		skill_panel.set_model(Skills.panel_model(Game.state.actors[Game.state.player_id])))
 	var box := VBoxContainer.new()
-	box.position = Vector2(20, 420)
+	box.position = Vector2(162, 104)
 	box.add_theme_constant_override("separation", 6)
 	_prog_layer.add_child(box)
 	var b1: Button = UiKit.button("RANK", UiStyle.PURPLE, Vector2(132, 48), 18)
@@ -116,6 +120,8 @@ func _on_interact(kind: StringName, data: Dictionary) -> void:
 		var st: int = int(data["stage"])
 		var t: StringName = &"harvest" if st == FarmLayer.Stage.RIPE or st == FarmLayer.Stage.WILTED else &"water"
 		_report(Game.command(t, {"hex": hx}), String(data["label"]))
+	elif kind == &"poi":
+		pass
 	elif kind == &"holding":
 		stage.panels.open(&"holdings")
 	else:

@@ -19,3 +19,8 @@
 - Standing/ranks (0-5, no combat stat), deeds with decay, Mark + bounty, Purge Levy, upkeep/stability, thin crown; Purge-only purgebloom/ashmarrow; escalating waves; scout/escort/truce/ransom/sabotage commands.
 - 14 skill trees (15 nodes each) fed only by Purge deeds; Standing and Skills panels wired (RANK button, P/K keys).
 - Class-aware AI leaders; passive personas earn deeds. See docs/SIM_REPORT_pass2.md.
+
+## v0.4.0 — Pass 3
+- Quest engine + 8 class questlines (6 stubs), converging solo-completable steps; quest journal.
+- 40 POIs per world (7 types, weekly respawn, discovery rewards), props and map markers; T2/T3 resources, 4 stations, 14 new buildings with models.
+- Balance: Vex survivability, Halo Ward trigger, costlier skill nodes, empires of 12+ holdings, last-rival hunt. Total Conquest reached in 7/24 sim seeds (was 0/24). See docs/SIM_REPORT_pass3.md.
