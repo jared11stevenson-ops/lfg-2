@@ -1,6 +1,6 @@
 extends SceneTree
 # Headless balance smoke test. Usage: godot --headless --path td --fixed-fps 60 -s tests/sim_waves.gd -- tickindle:500,260 dugloom:420,420 ...
-# Towers are placed free of charge; prints outcome. Exit code 0 if the run is won.
+# Spec: id:x,y[:upgrades] e.g. tickindle:500,260:aab buys A,A,B free. Towers are placed free of charge; prints outcome. Exit code 0 if the run is won.
 var main
 var frames := 0
 func _initialize() -> void:
@@ -13,6 +13,9 @@ func _initialize() -> void:
 		var t = load("res://tower.gd").new()
 		t.def = defs[parts[0]]
 		t.position = Vector2(float(xy[0]), float(xy[1]))
+		if parts.size() > 2:
+			for ch in parts[2]:
+				t.buy(ch)
 		main.add_child(t)
 func _process(_d: float) -> bool:
 	frames += 1

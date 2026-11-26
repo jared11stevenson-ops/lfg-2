@@ -14,8 +14,8 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var f := ThemeDB.fallback_font
-	draw_string_outline(f, Vector2(-40, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 80, 20, 6, Color.BLACK)
-	draw_string(f, Vector2(-40, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 80, 20, color)
+	draw_string_outline(f, Vector2(-70, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 140, 20, 6, Color.BLACK)
+	draw_string(f, Vector2(-70, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 140, 20, color)
 
 static func pop(parent: Node, target: Node2D, mult: float) -> void:
 	if absf(mult - 1.0) < 0.05:

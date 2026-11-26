@@ -1,20 +1,71 @@
 extends Node2D
-# One script, three behaviours keyed by def.id. Designs: docs/creatures_v1.md
-#  tickindle (Ember/Forge): single-target burst, wind-up ramps attack speed, every 10th shot molten (2x).
-#  dugloom   (Tide/Spirit): lantern pulse hits everything in range, slows it.
-#  hutzin    (Verdant/Venom): poison stacks; stacks spread when a poisoned foe dies (see main.gd).
-# TODO: molten burn patch, Spirit stealth reveal, evolutions.
+# One script, three creatures keyed by def.id. Designs: docs/creatures_v1.md. Upgrade data lives in creatures.gd.
+#  tickindle (Ember/Forge): single-target burst, wind-up ramps attack speed, molten shots (2x) can leave burn patches / splash.
+#  dugloom   (Tide/Spirit): lantern pulse hits everything in range: slow, optional stun and drag-back.
+#  hutzin    (Verdant/Venom): poison stacks, splash, vulnerability, stomps; spread on death handled in main.gd.
 const DrawUtil = preload("res://draw_util.gd")
 const TypeChart = preload("res://type_chart.gd")
 const ProjectileScript = preload("res://projectile.gd")
-const MAX_WINDUP := 6
+const PatchScript = preload("res://patch.gd")
+const FxScript = preload("res://fx.gd")
+const MODES := ["first", "last", "strong"]
+const DEFAULTS := {"multishot": 1, "splash": 0.0, "molten_every": 10, "burn_patch": false, "windup_max": 6, "pull": 0.0,
+	"stun": 0.0, "poison_mul": 1.0, "vuln": false, "burst_every": 0, "spread_all": false, "max_stacks": 5, "stacks": 1,
+	"slow": 1.0, "slow_t": 2.0}
 
-var def: Dictionary = {}
+var def: Dictionary = {}:
+	set(v):
+		def = v
+		_rebuild()
+var st: Dictionary = {}
+var tiers := {"a": 0, "b": 0}
+var spent := 0
+var selected := false
+var target_mode := "first"
 var cooldown := 0.0
 var last_target_id := 0
 var windup := 0
 var shots := 0
 var pulse_t := 0.0
+
+func _rebuild() -> void:
+	st = def.duplicate(true)
+	for k in DEFAULTS:
+		if not st.has(k):
+			st[k] = DEFAULTS[k]
+	if def.has("upgrades"):
+		for p in ["a", "b"]:
+			for i in tiers[p]:
+				_apply(def.upgrades[p][i])
+
+func _apply(u: Dictionary) -> void:
+	for k in u.get("add", {}):
+		st[k] = st.get(k, 0) + u.add[k]
+	for k in u.get("mul", {}):
+		st[k] = st.get(k, 1.0) * u.mul[k]
+	for k in u.get("set", {}):
+		st[k] = u.set[k]
+
+func next_upgrade(p: String) -> Dictionary:
+	if not def.has("upgrades") or tiers[p] >= 4:
+		return {}
+	return def.upgrades[p][tiers[p]]
+
+func blocked(p: String) -> bool:
+	var other := "b" if p == "a" else "a"
+	return tiers[p] + 1 >= 3 and tiers[other] >= 3
+
+func buy(p: String) -> int:
+	var u := next_upgrade(p)
+	if u.is_empty() or blocked(p):
+		return -1
+	tiers[p] += 1
+	spent += int(u.cost)
+	_rebuild()
+	return int(u.cost)
+
+func cycle_target() -> void:
+	target_mode = MODES[(MODES.find(target_mode) + 1) % MODES.size()]
 
 func _process(delta: float) -> void:
 	cooldown -= delta
@@ -33,21 +84,27 @@ func _process(delta: float) -> void:
 				last_target_id = t.get_instance_id()
 			if cooldown <= 0.0:
 				_fire(t)
-				var ramp := 1.0 + 0.15 * minf(windup, MAX_WINDUP) if id == "tickindle" else 1.0
-				cooldown = 1.0 / (float(def.rate) * ramp)
+				var ramp := 1.0 + 0.15 * minf(windup, int(st.windup_max)) if id == "tickindle" else 1.0
+				cooldown = 1.0 / (float(st.rate) * ramp)
 	queue_redraw()
 
 func _in_range() -> Array:
 	var out := []
 	for e in get_tree().get_nodes_in_group("enemies"):
-		if not e.dead and not e.is_queued_for_deletion() and position.distance_to(e.position) <= float(def.range):
+		if not e.dead and not e.is_queued_for_deletion() and position.distance_to(e.position) <= float(st.range):
 			out.append(e)
 	return out
 
 func _pick():
 	var best = null
 	for e in _in_range():
-		if best == null or e.travelled > best.travelled:
+		if best == null:
+			best = e
+		elif target_mode == "first" and e.travelled > best.travelled:
+			best = e
+		elif target_mode == "last" and e.travelled < best.travelled:
+			best = e
+		elif target_mode == "strong" and e.hp > best.hp:
 			best = e
 	return best
 
@@ -57,35 +114,65 @@ func _dugloom_tick() -> void:
 	var hit := _in_range()
 	if hit.is_empty():
 		return
-	cooldown = 1.0 / float(def.rate)
+	cooldown = 1.0 / float(st.rate)
 	pulse_t = 0.45
 	for e in hit:
-		e.apply_slow(float(def.slow), float(def.slow_t))
 		var m := TypeChart.best(def.types, e.types)
-		load("res://fx.gd").pop(get_parent(), e, m)
-		e.take_damage(float(def.dmg) * m)
+		FxScript.pop(get_parent(), e, m)
+		e.apply_slow(float(st.slow), float(st.slow_t))
+		if float(st.stun) > 0.0:
+			e.stun(float(st.stun))
+		if float(st.pull) > 0.0:
+			e.rewind(float(st.pull))
+		e.take_damage(float(st.dmg) * m)
 
 func _fire(t) -> void:
 	shots += 1
 	windup += 1
-	var p = ProjectileScript.new()
-	p.target = t
-	p.mult = TypeChart.best(def.types, t.types)
-	p.dmg = float(def.dmg) * p.mult
-	if def.id == "tickindle":
-		p.molten = shots % 10 == 0
-		if p.molten:
-			p.dmg *= 2.0
-	elif def.id == "hutzin":
-		p.color = Color("b44bd8")
-		p.effect = "poison"
-		p.effect_n = int(def.stacks)
-	p.position = position + Vector2(0, -10)
-	get_parent().add_child(p)
+	var molten: bool = def.id == "tickindle" and shots % int(st.molten_every) == 0
+	for i in int(st.multishot):
+		var p = ProjectileScript.new()
+		p.target = t
+		p.tower = self
+		p.molten = molten
+		p.mult = TypeChart.best(def.types, t.types)
+		p.dmg = float(st.dmg) * p.mult * (2.0 if molten else 1.0)
+		if def.id == "hutzin":
+			p.color = Color("b44bd8")
+		p.position = position + Vector2(0, -10) + Vector2(0, i * 6)
+		get_parent().add_child(p)
+
+# Called by the projectile on arrival.
+func resolve_hit(p, t) -> void:
+	FxScript.pop(get_parent(), t, p.mult)
+	if def.id == "hutzin":
+		t.add_poison(int(st.stacks), float(st.poison_mul), int(st.max_stacks), bool(st.spread_all))
+		if bool(st.vuln):
+			t.vuln_t = 4.0
+	t.take_damage(p.dmg)
+	if def.id == "tickindle" and p.molten and bool(st.burn_patch):
+		var patch = PatchScript.new()
+		patch.position = t.position
+		get_parent().add_child(patch)
+	var splash := float(st.splash)
+	if splash > 0.0 and (def.id == "hutzin" or p.molten):
+		for o in get_tree().get_nodes_in_group("enemies"):
+			if o != t and not o.dead and o.position.distance_to(t.position) <= splash:
+				if def.id == "hutzin":
+					o.add_poison(1, float(st.poison_mul), int(st.max_stacks), bool(st.spread_all))
+				o.take_damage(p.dmg * 0.6)
+	if def.id == "hutzin" and int(st.burst_every) > 0 and shots % int(st.burst_every) == 0:
+		for o in get_tree().get_nodes_in_group("enemies"):
+			if not o.dead and o.position.distance_to(t.position) <= 110.0:
+				o.add_poison(3, float(st.poison_mul), int(st.max_stacks), bool(st.spread_all))
+				o.take_damage(12.0)
 
 func _draw() -> void:
-	if get_local_mouse_position().length() < 32.0:
-		draw_arc(Vector2.ZERO, float(def.range), 0, TAU, 64, Color(1, 1, 1, 0.5), 2.0, true)
+	if selected:
+		draw_circle(Vector2.ZERO, float(st.range), Color(1, 1, 1, 0.07))
+		draw_arc(Vector2.ZERO, float(st.range), 0, TAU, 64, Color(1, 1, 1, 0.85), 3.0, true)
+	elif get_local_mouse_position().length() < 32.0:
+		draw_arc(Vector2.ZERO, float(st.range), 0, TAU, 64, Color(1, 1, 1, 0.5), 2.0, true)
 	draw_set_transform(Vector2(0, 24), 0.0, Vector2(1.0, 0.4))
 	draw_circle(Vector2.ZERO, 28, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -93,6 +180,10 @@ func _draw() -> void:
 		"tickindle": _draw_tickindle()
 		"dugloom": _draw_dugloom()
 		"hutzin": _draw_hutzin()
+	for i in tiers.a:
+		draw_circle(Vector2(-14 + i * 8, 34), 3.0, Color("ffb347"))
+	for i in tiers.b:
+		draw_circle(Vector2(6 + i * 8, 34), 3.0, Color("6fd3ff"))
 
 static func draw_icon(ci: CanvasItem, id: String, def_: Dictionary) -> void:
 	# Used by the UI cards: draws the creature into any CanvasItem at its origin.
@@ -116,7 +207,7 @@ func _draw_hutzin() -> void:
 func _draw_tickindle_on(ci: CanvasItem) -> void:
 	var ink := Color("231f2b")
 	var fur := Color("5a5566")
-	var wl := clampf(float(windup) / MAX_WINDUP, 0.0, 1.0)
+	var wl := clampf(float(windup) / float(st.windup_max), 0.0, 1.0)
 	for s in [-1.0, 1.0]:
 		DrawUtil.poly(ci, PackedVector2Array([Vector2(18 * s, -16), Vector2(27 * s, -36), Vector2(7 * s, -24)]), fur, ink, 3.0)
 	DrawUtil.disc(ci, Vector2.ZERO, 26.0, fur, ink, 4.0)
@@ -137,7 +228,7 @@ func _draw_dugloom_on(ci: CanvasItem) -> void:
 	var hide := Color("5f9fb0")
 	if pulse_t > 0.0:
 		var k := 1.0 - pulse_t / 0.45
-		ci.draw_arc(Vector2.ZERO, float(def.range) * k, 0, TAU, 64, Color(1.0, 0.95, 0.5, 0.6 * (1.0 - k)), 5.0, true)
+		ci.draw_arc(Vector2.ZERO, float(st.range) * k, 0, TAU, 64, Color(1.0, 0.95, 0.5, 0.6 * (1.0 - k)), 5.0, true)
 	# tail fluke
 	DrawUtil.poly(ci, PackedVector2Array([Vector2(-18, 12), Vector2(-40, 2), Vector2(-34, 16), Vector2(-40, 30)]), hide, ink, 3.0)
 	# flippers

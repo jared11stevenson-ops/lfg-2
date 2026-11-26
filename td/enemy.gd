@@ -19,6 +19,10 @@ var slow_t := 0.0
 var slow_f := 1.0
 var poison := 0
 var poison_t := 0.0
+var poison_mul := 1.0
+var spread_all := false
+var stun_t := 0.0
+var vuln_t := 0.0
 var heading := 0.0
 var wobble := 0.0
 var dead := false
@@ -45,9 +49,30 @@ func apply_slow(f: float, t: float) -> void:
 	slow_f = minf(slow_f if slow_t > 0.0 else 1.0, f)
 	slow_t = maxf(slow_t, t)
 
-func add_poison(n: int) -> void:
-	poison = mini(poison + n, 5)
+func add_poison(n: int, mul: float = 1.0, cap: int = 5, spread: bool = false) -> void:
+	poison = mini(poison + n, cap)
+	poison_mul = maxf(poison_mul, mul)
+	spread_all = spread_all or spread
 	poison_t = 4.0
+
+func stun(t: float) -> void:
+	stun_t = maxf(stun_t, t)
+
+# Drag the enemy back along its path by px pixels.
+func rewind(px: float) -> void:
+	while px > 0.0:
+		var start := path[seg]
+		var d := position.distance_to(start)
+		if px < d:
+			position += (start - position).normalized() * px
+			travelled -= px
+			return
+		position = start
+		travelled -= d
+		px -= d
+		if seg == 0:
+			return
+		seg -= 1
 
 func _process(delta: float) -> void:
 	if dead:
@@ -55,16 +80,23 @@ func _process(delta: float) -> void:
 	boost_t = maxf(0.0, boost_t - delta)
 	slow_t = maxf(0.0, slow_t - delta)
 	poison_t = maxf(0.0, poison_t - delta)
+	stun_t = maxf(0.0, stun_t - delta)
+	vuln_t = maxf(0.0, vuln_t - delta)
 	if poison_t <= 0.0:
 		poison = 0
+		poison_mul = 1.0
+		spread_all = false
 	if poison > 0:
-		take_damage(2.5 * poison * delta)
+		take_damage(2.5 * poison_mul * poison * delta)
 		if dead:
 			return
 	if seg + 1 >= path.size():
 		dead = true
 		leaked.emit(self)
 		queue_free()
+		return
+	if stun_t > 0.0:
+		queue_redraw()
 		return
 	var target := path[seg + 1]
 	var step := speed * (1.3 if boost_t > 0.0 else 1.0) * (slow_f if slow_t > 0.0 else 1.0) * delta
@@ -83,7 +115,7 @@ func _process(delta: float) -> void:
 func take_damage(amount: float) -> void:
 	if dead:
 		return
-	hp -= amount
+	hp -= amount * (1.2 if vuln_t > 0.0 else 1.0)
 	if hp <= 0.0:
 		dead = true
 		died.emit(self)
