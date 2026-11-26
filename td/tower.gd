@@ -61,14 +61,17 @@ func _dugloom_tick() -> void:
 	pulse_t = 0.45
 	for e in hit:
 		e.apply_slow(float(def.slow), float(def.slow_t))
-		e.take_damage(float(def.dmg) * TypeChart.best(def.types, e.types))
+		var m := TypeChart.best(def.types, e.types)
+		load("res://fx.gd").pop(get_parent(), e.position, m)
+		e.take_damage(float(def.dmg) * m)
 
 func _fire(t) -> void:
 	shots += 1
 	windup += 1
 	var p = ProjectileScript.new()
 	p.target = t
-	p.dmg = float(def.dmg) * TypeChart.best(def.types, t.types)
+	p.mult = TypeChart.best(def.types, t.types)
+	p.dmg = float(def.dmg) * p.mult
 	if def.id == "tickindle":
 		p.molten = shots % 10 == 0
 		if p.molten:

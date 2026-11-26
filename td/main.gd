@@ -10,7 +10,7 @@ var PATH := PackedVector2Array([
 	Vector2(700, 560), Vector2(1000, 560), Vector2(1000, 300), Vector2(1320, 300),
 ])
 const PATH_HALF := 34.0
-const TOTAL_WAVES := 5
+const TOTAL_WAVES := 8
 
 var coins := 220
 var lives := 20
@@ -24,6 +24,7 @@ var start_btn: Button
 var banner: Label
 var selected := "tickindle"
 var cards := {}
+var queue: Array = []
 
 func _ready() -> void:
 	var layer := CanvasLayer.new()
@@ -52,7 +53,7 @@ func _ready() -> void:
 		var d: Dictionary = Creatures.DEFS[i]
 		var b := Button.new()
 		b.toggle_mode = true
-		b.text = "%s\n%d" % [d.name, d.cost]
+		b.text = "%s\n%s\n%d" % [d.name, " / ".join(d.types.map(func(t): return t.capitalize())), d.cost]
 		b.position = Vector2(16 + cards.size() * 150, 616)
 		b.size = Vector2(140, 90)
 		b.add_theme_font_size_override("font_size", 18)
@@ -68,13 +69,37 @@ func _sync_cards() -> void:
 		cards[k].button_pressed = (k == selected)
 
 func _refresh() -> void:
-	hud.text = "Coins %d    Lives %d    Wave %d/%d\nPick a creature below, tap grass to place" % [coins, lives, wave, TOTAL_WAVES]
+	hud.text = "Coins %d    Lives %d    Wave %d/%d\n%s" % [coins, lives, wave, TOTAL_WAVES, ("Next: " + _incoming_text(wave + 1)) if (not wave_running and wave < TOTAL_WAVES) else "Pick a creature below, tap grass to place"]
+
+func _build_wave(w: int) -> Array:
+	var q: Array = []
+	for i in 6 + 3 * w:
+		q.append("shuckit")
+	if w >= 2:
+		for i in (w - 1) * 2:
+			q.append("zapnose")
+	if w >= 3:
+		for i in w - 2:
+			q.append("glomm")
+	seed(1000 + w)
+	q.shuffle()
+	return q
+
+func _incoming_text(w: int) -> String:
+	var counts := {}
+	for k in _build_wave(w):
+		counts[k] = counts.get(k, 0) + 1
+	var parts := []
+	for k in counts:
+		parts.append("%d %s" % [counts[k], Creatures.DEFS[k].name])
+	return ", ".join(parts)
 
 func _start_wave() -> void:
 	if wave_running or state != "play":
 		return
 	wave += 1
-	to_spawn = 8 + wave * 4
+	queue = _build_wave(wave)
+	to_spawn = queue.size()
 	spawn_cd = 0.0
 	wave_running = true
 	start_btn.disabled = true
@@ -86,15 +111,15 @@ func _process(delta: float) -> void:
 		if to_spawn > 0 and spawn_cd <= 0.0:
 			_spawn()
 			to_spawn -= 1
-			spawn_cd = 1.1
+			spawn_cd = maxf(0.45, 1.1 - 0.05 * wave)
 		elif to_spawn == 0 and get_tree().get_nodes_in_group("enemies").is_empty():
 			_wave_done()
 	queue_redraw()
 
 func _spawn() -> void:
-	var d: Dictionary = Creatures.DEFS.shuckit
+	var d: Dictionary = Creatures.DEFS[queue.pop_front()]
 	var e = EnemyScript.new()
-	e.setup(PATH, float(d.hp) + 7.0 * wave, float(d.speed), d.types, int(d.reward))
+	e.setup(PATH, d, wave)
 	e.died.connect(_on_died)
 	e.leaked.connect(_on_leaked)
 	add_child(e)
@@ -103,7 +128,7 @@ func _on_died(e) -> void:
 	coins += e.reward
 	# Gale hook: a fallen Shuckit whips nearby wave-mates into a speed burst (punishes single-target-only builds).
 	for o in get_tree().get_nodes_in_group("enemies"):
-		if o != e and not o.dead and o.position.distance_to(e.position) < 170.0:
+		if e.kind == "shuckit" and o != e and not o.dead and o.position.distance_to(e.position) < 170.0:
 			o.boost(1.5)
 	# Venom hook: poison stacks hop to the nearest living foe when a poisoned one dies.
 	if e.poison > 1:
@@ -116,15 +141,15 @@ func _on_died(e) -> void:
 			near.add_poison(e.poison - 1)
 	_refresh()
 
-func _on_leaked(_e) -> void:
-	lives -= 1
+func _on_leaked(e) -> void:
+	lives -= e.leak
 	_refresh()
 	if lives <= 0:
 		_end("lost")
 
 func _wave_done() -> void:
 	wave_running = false
-	coins += 50
+	coins += 40 + 10 * wave
 	_refresh()
 	if wave >= TOTAL_WAVES:
 		_end("won")

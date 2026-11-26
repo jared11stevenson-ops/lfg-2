@@ -7,6 +7,8 @@ var speed := 620.0
 var color := Color("ff8a2b")
 var effect := ""
 var effect_n := 1
+var mult := 1.0
+const FxScript = preload("res://fx.gd")
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(target) or target.is_queued_for_deletion():
@@ -17,6 +19,7 @@ func _process(delta: float) -> void:
 	if step >= d:
 		if effect == "poison":
 			target.add_poison(effect_n)
+		FxScript.pop(get_parent(), target.position, mult)
 		target.take_damage(dmg)
 		queue_free()
 		return
