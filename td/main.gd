@@ -6,6 +6,9 @@ const TowerScript = preload("res://tower.gd")
 const DrawUtil = preload("res://draw_util.gd")
 const UiStyle = preload("res://ui_style.gd")
 const PanelScript = preload("res://upgrade_panel.gd")
+const PoofScript = preload("res://poof.gd")
+const FxScript = preload("res://fx.gd")
+const POOF_COL := {"shuckit": Color("8a89c0"), "zapnose": Color("ffd23a"), "glomm": Color("bfe6ff")}
 
 var PATH := PackedVector2Array([
 	Vector2(-40, 360), Vector2(300, 360), Vector2(300, 160), Vector2(700, 160),
@@ -32,6 +35,7 @@ var queue: Array = []
 var decor: Array = []
 var sel_tower = null
 var panel
+var shake := 0.0
 
 func _ready() -> void:
 	var layer := CanvasLayer.new()
@@ -157,6 +161,8 @@ func _start_wave() -> void:
 	_refresh()
 
 func _process(delta: float) -> void:
+	shake = maxf(0.0, shake - delta * 2.5)
+	position = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 9.0
 	if state == "play" and wave_running:
 		spawn_cd -= delta
 		if to_spawn > 0 and spawn_cd <= 0.0:
@@ -177,6 +183,11 @@ func _spawn() -> void:
 
 func _on_died(e) -> void:
 	coins += e.reward
+	var pf = PoofScript.new()
+	pf.col = POOF_COL.get(e.kind, Color.WHITE)
+	pf.position = e.position
+	add_child(pf)
+	FxScript.text_at(self, e.position + Vector2(0, -20), "+%d" % e.reward, Color("ffd23a"))
 	# Gale hook: a fallen Shuckit whips nearby wave-mates into a speed burst.
 	for o in get_tree().get_nodes_in_group("enemies"):
 		if e.kind == "shuckit" and o != e and not o.dead and o.position.distance_to(e.position) < 170.0:
@@ -198,6 +209,7 @@ func _on_died(e) -> void:
 
 func _on_leaked(e) -> void:
 	lives -= e.leak
+	shake = 1.0
 	_refresh()
 	if lives <= 0:
 		_end("lost")

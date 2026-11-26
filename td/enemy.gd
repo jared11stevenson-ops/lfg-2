@@ -28,6 +28,7 @@ var vuln_t := 0.0
 var heading := 0.0
 var wobble := 0.0
 var dead := false
+var flash_t := 0.0
 
 func setup(p: PackedVector2Array, d: Dictionary, wave: int) -> void:
 	path = p
@@ -80,6 +81,7 @@ func _process(delta: float) -> void:
 	if dead:
 		return
 	boost_t = maxf(0.0, boost_t - delta)
+	flash_t = maxf(0.0, flash_t - delta)
 	slow_t = maxf(0.0, slow_t - delta)
 	poison_t = maxf(0.0, poison_t - delta)
 	stun_t = maxf(0.0, stun_t - delta)
@@ -118,6 +120,7 @@ func take_damage(amount: float) -> void:
 	if dead:
 		return
 	hp -= amount * (1.2 if vuln_t > 0.0 else 1.0)
+	flash_t = 0.12
 	if hp <= 0.0:
 		dead = true
 		died.emit(self)
@@ -135,7 +138,7 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 22 if big else 16, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var bob_y := sin(wobble) * 2.0
-	if SpriteLib.draw(self, kind, SpriteLib.dir_from_angle(heading), SPRITE_SCALE.get(kind, 30.0), Vector2(0, bob_y + 8)):
+	if SpriteLib.draw(self, kind, SpriteLib.dir_from_angle(heading), SPRITE_SCALE.get(kind, 30.0) * (1.0 + flash_t * 1.2), Vector2(0, bob_y + 8), Color(1.0, 0.55, 0.55) if flash_t > 0.0 else Color.WHITE):
 		pass
 	else:
 		match kind:

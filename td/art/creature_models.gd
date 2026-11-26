@@ -141,9 +141,9 @@ static func _tickindle(r: Node3D) -> void:
 
 # Dugloom: Tide/Spirit. Dugong + selkie lore + lighthouse lamp.
 static func _dugloom(r: Node3D) -> void:
-	var hide := Color("5f9fb0")
+	var hide := Color("3f8ea6")
 	part(r, S(0.9), Vector3(0, 0.8, 0), hide, Vector3(1, 0.85, 1.25))
-	part(r, S(0.7), Vector3(0, 0.5, 0.1), Color("bfe0e6"), Vector3(1, 0.6, 1.1))
+	part(r, S(0.7), Vector3(0, 0.5, 0.1), Color("a3d0d9"), Vector3(1, 0.6, 1.1))
 	part(r, S(0.55), Vector3(0, 1.15, 0.95), hide)
 	part(r, S(0.38), Vector3(0, 0.95, 1.35), Color("d9ecef"), Vector3(1.2, 0.8, 0.9))
 	for s in [-1.0, 1.0]:
@@ -181,7 +181,7 @@ static func _hutzin(r: Node3D) -> void:
 	# cottage-teapot on its back
 	part(r, Box(0.85, 0.6, 0.7), Vector3(0, 1.75, -0.3), Color("9a6b3c"))
 	var roof := Cone(0.75, 0.55, 4)
-	part(r, roof, Vector3(0, 2.3, -0.3), Color("c14a4a"), Vector3.ONE, Vector3(0, 45, 0))
+	part(r, roof, Vector3(0, 2.3, -0.3), Color("a83a3a"), Vector3.ONE, Vector3(0, 45, 0))
 	part(r, Box(0.22, 0.38, 0.05), Vector3(0, 1.6, 0.07), Color("3b2412"))
 	part(r, Box(0.2, 0.4, 0.2), Vector3(0.28, 2.55, -0.45), Color("8a8a96"))
 	part(r, Cone(0.12, 0.5), Vector3(0.65, 1.85, -0.3), Color("9a6b3c"), Vector3.ONE, Vector3(0, 0, -65))
@@ -196,8 +196,8 @@ static func _shuckit(r: Node3D) -> void:
 	part(r, Cone(0.2, 0.55), Vector3(0, 0.85, 1.15), ink, Vector3.ONE, Vector3(90, 0, 0))
 	part(r, S(0.07), Vector3(0, 0.85, 1.42), Color("14121a"))
 	for s in [-1.0, 1.0]:
-		part(r, Cone(0.38, 1.1), Vector3(0.42 * s, 1.6, 0.5), ink, Vector3(1, 1, 0.3), Vector3(-10, 0, -22 * s))
-		part(r, Cyl(0.02, 1.0), Vector3(0.36 * s, 1.6, 0.58), Color("8a89a6"), Vector3.ONE, Vector3(-10, 0, -22 * s))
+		part(r, Cone(0.5, 1.0), Vector3(0.5 * s, 1.55, 0.45), ink, Vector3(1, 1, 0.28), Vector3(-8, 14 * s, -32 * s))
+		part(r, Cyl(0.022, 0.95), Vector3(0.46 * s, 1.55, 0.55), Color("8a89a6"), Vector3.ONE, Vector3(-8, 14 * s, -32 * s))
 		part(r, Cyl(0.07, 0.6), Vector3(0.28 * s, 0.3, 0.3), Color("231f2b"))
 		part(r, Cyl(0.07, 0.6), Vector3(0.28 * s, 0.3, -0.5), Color("231f2b"))
 	for i in 3:
@@ -226,8 +226,8 @@ static func _zapnose(r: Node3D) -> void:
 
 # Glomm: Stone/Frost. Yeti crab + Golem of Prague + snow globe.
 static func _glomm(r: Node3D) -> void:
-	var stone := Color("7f8da6")
-	var fur := Color("e8f0f7")
+	var stone := Color("66768f")
+	var fur := Color("dbe6f0")
 	part(r, S(0.95), Vector3(0, 0.95, 0), stone, Vector3(1, 0.85, 1))
 	for i in 3:
 		part(r, S(0.28), Vector3(-0.5 + i * 0.5, 1.25 - (i % 2) * 0.35, -0.7), Color("5a6679"), Vector3(1, 0.5, 0.5))

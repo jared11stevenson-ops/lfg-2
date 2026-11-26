@@ -30,6 +30,8 @@ var windup := 0
 var shots := 0
 var pulse_t := 0.0
 var face := 2
+var face_vec := Vector2.DOWN
+var kick := 0.0
 
 func _rebuild() -> void:
 	st = def.duplicate(true)
@@ -73,6 +75,7 @@ func cycle_target() -> void:
 func _process(delta: float) -> void:
 	cooldown -= delta
 	pulse_t = maxf(0.0, pulse_t - delta)
+	kick = maxf(0.0, kick - delta * 6.0)
 	var id: String = def.id
 	if id == "dugloom":
 		_dugloom_tick()
@@ -119,6 +122,7 @@ func _dugloom_tick() -> void:
 		return
 	cooldown = 1.0 / float(st.rate)
 	pulse_t = 0.45
+	kick = 1.0
 	for e in hit:
 		var m := TypeChart.best(def.types, e.types)
 		FxScript.pop(get_parent(), e, m)
@@ -133,6 +137,8 @@ func _fire(t) -> void:
 	shots += 1
 	windup += 1
 	face = SpriteLib.dir_from_angle((t.position - position).angle())
+	face_vec = (t.position - position).normalized()
+	kick = 1.0
 	var molten: bool = def.id == "tickindle" and shots % int(st.molten_every) == 0
 	for i in int(st.multishot):
 		var p = ProjectileScript.new()
@@ -180,7 +186,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, 24), 0.0, Vector2(1.0, 0.4))
 	draw_circle(Vector2.ZERO, 28, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	if SpriteLib.draw(self, String(def.id), face, SPRITE_SCALE, Vector2(0, 14.0 * sin(float(Time.get_ticks_msec()) / 400.0 + position.x) * 0.2 + 6)):
+	if SpriteLib.draw(self, String(def.id), face, SPRITE_SCALE * (1.0 + 0.07 * kick), Vector2(0, 14.0 * sin(float(Time.get_ticks_msec()) / 400.0 + position.x) * 0.2 + 6) - face_vec * 5.0 * kick):
 		pass
 	else:
 		match String(def.id):

@@ -7,6 +7,7 @@ var molten := false
 var speed := 620.0
 var color := Color("ff8a2b")
 var mult := 1.0
+var trail: Array = []
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(target) or target.is_queued_for_deletion():
@@ -21,11 +22,17 @@ func _process(delta: float) -> void:
 			target.take_damage(dmg)
 		queue_free()
 		return
+	trail.append(global_position)
+	if trail.size() > 7:
+		trail.pop_front()
 	position += position.direction_to(target.position) * step
 	queue_redraw()
 
 func _draw() -> void:
 	var c := Color("ffd23a") if molten else color
+	for i in trail.size():
+		var a := float(i + 1) / (trail.size() + 1)
+		draw_circle(to_local(trail[i]), (4.0 + (4.0 if molten else 0.0)) * a, Color(c.r, c.g, c.b, 0.35 * a))
 	var r := 9.0 if molten else 5.0
 	draw_circle(Vector2.ZERO, r + 4.0, Color(c.r, c.g, c.b, 0.3))
 	DrawUtil.disc(self, Vector2.ZERO, r, c, Color("7a2a00"), 2.0)

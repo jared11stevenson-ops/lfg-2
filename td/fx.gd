@@ -29,3 +29,10 @@ static func pop(parent: Node, target: Node2D, mult: float) -> void:
 	f.color = Color("ffe35a") if mult > 1.0 else Color("b8c2d6")
 	f.position = target.position + Vector2(0, -34)
 	parent.add_child(f)
+
+static func text_at(parent: Node, pos: Vector2, txt: String, col: Color) -> void:
+	var f = load("res://fx.gd").new()
+	f.text = txt
+	f.color = col
+	f.position = pos
+	parent.add_child(f)

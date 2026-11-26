@@ -20,13 +20,13 @@ func _run() -> void:
 	env.background_mode = Environment.BG_CLEAR_COLOR
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.6, 0.64, 0.8)
-	env.ambient_light_energy = 0.5
+	env.ambient_light_energy = 0.45
 	var we := WorldEnvironment.new()
 	we.environment = env
 	vp.add_child(we)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-50, -35, 0)
-	sun.light_energy = 1.0
+	sun.light_energy = 0.88
 	sun.light_color = Color(1.0, 0.96, 0.88)
 	vp.add_child(sun)
 	var cam := Camera3D.new()
