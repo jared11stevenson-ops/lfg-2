@@ -11,6 +11,9 @@ LINE_PX = 5.5
 LIGHT = Vector((-0.55, -0.45, 0.75)).normalized()   # toward the light, world space
 
 def reset():
+    global _ink
+    _mats.clear()
+    _ink = None
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.context.scene.render.engine = 'CYCLES'
 
@@ -126,7 +129,7 @@ def _finish(obj, mat, outline, smooth=True):
     obj.select_set(True)
     if smooth:
         bpy.ops.object.shade_smooth()
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     obj.select_set(False)
     if outline > 0.0:
         add_outline(obj, outline)
@@ -177,6 +180,16 @@ def torus(name, loc, major, minor, mat, rot=(0, 0, 0), outline=0.012):
     o.name = name
     o.rotation_euler = [math.radians(a) for a in rot]
     return _finish(o, mat, outline)
+
+TUBE_CAPS = []
+
+def box(name, loc, size, mat, rot=(0, 0, 0), outline=0.015):
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+    o = bpy.context.active_object
+    o.name = name
+    o.scale = size
+    o.rotation_euler = [math.radians(a) for a in rot]
+    return _finish(o, mat, outline, smooth=False)
 
 def _catmull(pts, n=10):
     out = []
@@ -231,9 +244,10 @@ def tube(name, pts, radii, mat, outline=0.02, cap=True, sides=18):
     bmesh_smooth = bpy.ops.object.shade_smooth
     o = _finish(o, mat, outline)
     # round caps
+    TUBE_CAPS.clear()
     if cap:
         for end, rr in ((path[0], rad[0]), (path[-1], rad[-1])):
-            ellipsoid(name + "_cap", tuple(end), (rr, rr, rr), mat, outline=0, seg=24)
+            TUBE_CAPS.append(ellipsoid(name + "_cap", tuple(end), (rr, rr, rr), mat, outline=0, seg=24))
     return o
 
 def teardrop(name, loc, scale, mat, outline=0.015, rot=(0, 0, 0)):
