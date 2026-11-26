@@ -9,7 +9,7 @@ const FxScript = preload("res://fx.gd")
 const BoltScript = preload("res://bolt.gd")
 const PoofScript = preload("res://poof.gd")
 const Sfx = preload("res://sfx.gd")
-const BASE_SCALE := 0.62
+const BASE_SCALE := 0.7
 const MODES := ["first", "last", "strong"]
 const DEFAULTS := {"multishot": 1, "multitarget": 1, "splash": 0.0, "splash_always": false, "molten_every": 10, "burn_patch": false, "patch_t": 4.0,
 	"windup_max": 6, "pull": 0.0, "stun": 0.0, "poison_mul": 1.0, "vuln": false, "burst_every": 0, "spread_all": false, "max_stacks": 5, "stacks": 1,

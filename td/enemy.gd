@@ -2,7 +2,7 @@ extends Node2D
 # Enemy with 2D puppet sprites and a trait system (see creatures.gd for per-species values).
 const PuppetLib = preload("res://puppet_lib.gd")
 const FxScript = preload("res://fx.gd")
-const BASE_SCALE := 0.5
+const BASE_SCALE := 0.56
 signal died(e)
 signal leaked(e)
 

@@ -389,7 +389,7 @@ func _wave_done() -> void:
 	var inc := 0
 	for t in get_tree().get_nodes_in_group("towers"):
 		inc += int(t.st.income)
-	coins += int((40 + 10 * wave) * float(mut.reward)) + inc
+	coins += int((50 + 14 * wave) * float(mut.reward)) + inc
 	if inc > 0:
 		FxScript.text_at(self, Vector2(640, 300), "Tea money: +%d" % inc, Color("9fffa0"))
 	start_btn.disabled = false

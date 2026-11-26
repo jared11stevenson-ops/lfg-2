@@ -5,7 +5,7 @@ const Levels = preload("res://levels.gd")
 const Creatures = preload("res://creatures.gd")
 
 static func budget(w: int) -> float:
-	return 8.0 + 5.2 * pow(float(w), 1.3)
+	return 7.0 + 4.0 * pow(float(w), 1.25)
 
 # Returns an Array of species ids (boss appears as "boss:<species>").
 static func build(level: Dictionary, w: int, rng: RandomNumberGenerator, count_mult: float, endless_boss_every: int = 5) -> Array:
@@ -58,7 +58,7 @@ static func boss_def(level: Dictionary, species: String, w: int) -> Dictionary:
 	d.name = "Elder " + String(d.name)
 	d.boss = true
 	d.scale = 1.9
-	d.hp = (float(d.hp) + float(d.hp_wave) * 10.0) * 11.0
+	d.hp = (float(d.hp) + float(d.hp_wave) * 10.0) * 7.0
 	d.hp_wave = float(d.hp) * 0.06 * maxi(0, w - Levels.TOTAL_WAVES + 1)
 	d.speed = float(d.speed) * 0.75
 	d.reward = 200

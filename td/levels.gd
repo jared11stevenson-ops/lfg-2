@@ -18,7 +18,7 @@ const LEVELS := {
 	},
 	"frostrun": {
 		"name": "Frostrun Pass", "style": "snow", "blurb": "Switchbacks under the White Lantern. Ice patches make the herd slide.",
-		"rule": "Ice patches speed enemies up. Spirit towers love the cold.", "lane_mode": "random", "hp_mult": 1.15, "coins": 250,
+		"rule": "Ice patches speed enemies up. Spirit towers love the cold.", "lane_mode": "random", "hp_mult": 1.08, "coins": 250,
 		"colors": {"g1": "#2a3b78", "g2": "#6f93d0", "accent": "#d8f0ff", "path": "#aab8e0", "edge": "#27356a", "glow": "#bfe8ff", "moon": "#e8f4ff"},
 		"weather": ["snow", "snow", "clear", "snow", "snow", "clear", "snow", "snow", "clear", "snow"],
 		"paths": [[[-40, 140], [900, 140], [900, 300], [240, 300], [240, 470], [1000, 470], [1000, 560], [1320, 560]]],
@@ -29,7 +29,7 @@ const LEVELS := {
 	},
 	"emberflats": {
 		"name": "Emberflats", "style": "desert", "blurb": "A zig-zag desert over the Kindling Deep. Lava vents scorch whatever walks over them.",
-		"rule": "Vents burn enemies. Heatwaves empower Ember and Forge.", "lane_mode": "random", "hp_mult": 1.3, "coins": 250,
+		"rule": "Vents burn enemies. Heatwaves empower Ember and Forge.", "lane_mode": "random", "hp_mult": 1.15, "coins": 250,
 		"colors": {"g1": "#5e2f55", "g2": "#c4694a", "accent": "#ffc07a", "path": "#e8a870", "edge": "#552a3a", "glow": "#ffb060", "moon": "#ffd8a0"},
 		"weather": ["heat", "clear", "heat", "heat", "clear", "heat", "heat", "clear", "heat", "heat"],
 		"paths": [[[-40, 540], [220, 540], [220, 200], [520, 200], [520, 460], [820, 460], [820, 160], [1100, 160], [1100, 420], [1320, 420]]],
@@ -40,7 +40,7 @@ const LEVELS := {
 	},
 	"gloamwood": {
 		"name": "Gloamwood", "style": "forest", "blurb": "A midnight forest where two trails merge. Moths drift over the trees, ignoring the path.",
-		"rule": "Two lanes merge. Gloamoths fly straight over the forest.", "lane_mode": "split", "hp_mult": 1.35, "coins": 260,
+		"rule": "Two lanes merge. Gloamoths fly straight over the forest.", "lane_mode": "split", "hp_mult": 1.2, "coins": 260,
 		"colors": {"g1": "#14283a", "g2": "#2b5a5a", "accent": "#7fffd0", "path": "#7a6aa8", "edge": "#1a1030", "glow": "#a07aff", "moon": "#c8e8ff"},
 		"weather": ["clear", "rain", "clear", "rain", "clear", "rain", "clear", "rain", "rain", "clear"],
 		"paths": [[[-40, 190], [360, 190], [360, 400], [640, 400], [640, 250], [960, 250], [960, 480], [1320, 480]],
@@ -52,7 +52,7 @@ const LEVELS := {
 	},
 	"bogwash": {
 		"name": "Bogwash Marsh", "style": "marsh", "blurb": "A slow marsh at the Sour Spring. Bogs drag at everyone's feet, including yours.",
-		"rule": "Bog patches slow enemies. Bogbards heal their herd.", "lane_mode": "random", "hp_mult": 1.5, "coins": 260,
+		"rule": "Bog patches slow enemies. Bogbards heal their herd.", "lane_mode": "random", "hp_mult": 1.2, "coins": 260,
 		"colors": {"g1": "#243a2e", "g2": "#4f6a3c", "accent": "#d0ff70", "path": "#a89868", "edge": "#2a2a1a", "glow": "#c8ff6a", "moon": "#f0ffc0"},
 		"weather": ["rain", "clear", "rain", "rain", "clear", "rain", "rain", "clear", "rain", "rain"],
 		"paths": [[[-40, 330], [240, 330], [240, 170], [520, 170], [520, 470], [800, 470], [800, 200], [1080, 200], [1080, 540], [1320, 540]]],
@@ -63,7 +63,7 @@ const LEVELS := {
 	},
 	"stormspire": {
 		"name": "Stormspire Heights", "style": "mesa", "blurb": "Wind-scoured mesas where two lanes cross. Colugos glide over everything.",
-		"rule": "The lanes cross. Fast fliers cut straight across.", "lane_mode": "random", "hp_mult": 1.6, "coins": 270,
+		"rule": "The lanes cross. Fast fliers cut straight across.", "lane_mode": "random", "hp_mult": 1.25, "coins": 270,
 		"colors": {"g1": "#2a2a52", "g2": "#6a6aa0", "accent": "#ffe36a", "path": "#b8a8d8", "edge": "#241f4a", "glow": "#ffe36a", "moon": "#fff0b0"},
 		"weather": ["clear", "rain", "rain", "clear", "rain", "rain", "clear", "rain", "rain", "rain"],
 		"paths": [[[-40, 150], [500, 150], [500, 520], [900, 520], [900, 300], [1320, 300]],
@@ -75,7 +75,7 @@ const LEVELS := {
 	},
 	"brasswick": {
 		"name": "Brasswick Works", "style": "factory", "blurb": "A clockwork foundry of conveyor belts. Belts rush the herd forward; sticky vats slow it.",
-		"rule": "Conveyors speed enemies up. Glue vats slow them.", "lane_mode": "random", "hp_mult": 1.7, "coins": 280,
+		"rule": "Conveyors speed enemies up. Glue vats slow them.", "lane_mode": "random", "hp_mult": 1.35, "coins": 280,
 		"colors": {"g1": "#3a2a22", "g2": "#80603a", "accent": "#ffc860", "path": "#5a5a6a", "edge": "#1c1a24", "glow": "#ffc860", "moon": "#ffe0a0"},
 		"weather": ["clear", "heat", "clear", "heat", "clear", "heat", "clear", "heat", "clear", "heat"],
 		"paths": [[[-40, 150], [1000, 150], [1000, 330], [280, 330], [280, 510], [1320, 510]]],
@@ -86,7 +86,7 @@ const LEVELS := {
 	},
 	"lanterntide": {
 		"name": "Lantern Tide", "style": "coast", "blurb": "A spirit coast under a thousand lanterns. The herd alternates between two shores.",
-		"rule": "Waves alternate between two lanes.", "lane_mode": "alternate", "hp_mult": 1.8, "coins": 280,
+		"rule": "Waves alternate between two lanes.", "lane_mode": "alternate", "hp_mult": 1.46, "coins": 280,
 		"colors": {"g1": "#123a5a", "g2": "#2f7a8a", "accent": "#9fffe0", "path": "#e8c8a0", "edge": "#183050", "glow": "#ffd0a0", "moon": "#e0fff0"},
 		"weather": ["clear", "rain", "clear", "rain", "clear", "rain", "clear", "rain", "clear", "rain"],
 		"paths": [[[-40, 250], [300, 250], [300, 150], [900, 150], [900, 300], [1320, 300]],
@@ -98,7 +98,7 @@ const LEVELS := {
 	},
 	"thornpeak": {
 		"name": "Thornpeak Ridge", "style": "volcano", "blurb": "A volcanic ridge of tight switchbacks. Vents burn, belts of hot air shove the herd forward.",
-		"rule": "Vents burn enemies. Hot updrafts speed them up.", "lane_mode": "random", "hp_mult": 1.9, "coins": 290,
+		"rule": "Vents burn enemies. Hot updrafts speed them up.", "lane_mode": "random", "hp_mult": 1.5, "coins": 290,
 		"colors": {"g1": "#3a1c2a", "g2": "#8a3a2a", "accent": "#ff7a3a", "path": "#d0906a", "edge": "#2a1020", "glow": "#ff7a3a", "moon": "#ffc890"},
 		"weather": ["heat", "heat", "clear", "heat", "heat", "clear", "heat", "heat", "heat", "heat"],
 		"paths": [[[-40, 520], [200, 520], [200, 200], [480, 200], [480, 480], [760, 480], [760, 160], [1040, 160], [1040, 440], [1320, 440]]],
@@ -109,7 +109,7 @@ const LEVELS := {
 	},
 	"lastwell": {
 		"name": "The Last Well", "style": "well", "blurb": "Three lanes converge on the last Well. Everything the Wells ever fed comes for it.",
-		"rule": "Three lanes merge into one. The whole herd is here.", "lane_mode": "random", "hp_mult": 2.1, "coins": 300,
+		"rule": "Three lanes merge into one. The whole herd is here.", "lane_mode": "random", "hp_mult": 1.55, "coins": 300,
 		"colors": {"g1": "#241a4a", "g2": "#5a2f7a", "accent": "#ff9ad8", "path": "#c8a8f0", "edge": "#1a1030", "glow": "#9fffe0", "moon": "#ffe0ff"},
 		"weather": ["clear", "rain", "snow", "heat", "rain", "snow", "heat", "rain", "snow", "heat"],
 		"paths": [[[-40, 150], [420, 150], [420, 330], [720, 330], [720, 460], [1320, 460]],
