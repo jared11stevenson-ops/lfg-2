@@ -325,6 +325,8 @@ func _pick_lane() -> int:
 	return rng.randi() % n
 
 func _spawn() -> void:
+	if queue.is_empty():
+		return
 	var kind: String = queue.pop_front()
 	spawn_idx += 1
 	var d: Dictionary
@@ -413,6 +415,8 @@ func _on_died(e) -> void:
 	_refresh()
 
 func _on_leaked(e) -> void:
+	if state != "play":
+		return
 	lives -= e.leak
 	red_flash = 0.5
 	shake = 1.0 if e.leak < 5 else 2.0
