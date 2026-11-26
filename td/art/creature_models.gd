@@ -110,6 +110,8 @@ static func build(id: String, variant: String = "") -> Node3D:
 		"shuckit": _shuckit(root)
 		"zapnose": _zapnose(root)
 		"glomm": _glomm(root)
+		"hoardillo": _hoardillo(root)
+		"mirewick": _mirewick(root)
 	if variant != "":
 		_evolve(root, id, variant)
 		root.scale = Vector3.ONE * 1.1
@@ -301,3 +303,45 @@ static func _evolve(r: Node3D, id: String, v: String) -> void:
 				part(r, Box(0.16, 0.16, 0.05), Vector3(0.22 * s, 2.42, 0.02), Color("ffe680"), Vector3.ONE, Vector3.ZERO, 2.0)
 				part(r, Box(0.16, 0.16, 0.05), Vector3(0.28 * s, 1.8, 0.07), Color("ffe680"), Vector3.ONE, Vector3.ZERO, 2.0)
 				part(r, Cyl(0.09, 0.5), Vector3(0.3 * s, 0.7, 0.15), Color("e0a23b"))
+
+# Hoardillo: Stone/Forge. Pink fairy armadillo + Fafnir's hoard + piggy bank.
+static func _hoardillo(r: Node3D) -> void:
+	var pink := Color("d68fa0")
+	var plate := Color("b0627c")
+	part(r, S(0.8), Vector3(0, 0.8, -0.1), pink, Vector3(1, 0.8, 1.3))
+	for i in 5:
+		part(r, S(0.6 - abs(i - 2) * 0.07), Vector3(0, 1.3 - abs(i - 2) * 0.12, 0.55 - i * 0.38), plate, Vector3(1.15, 0.35, 0.5))
+	part(r, Box(0.5, 0.06, 0.12), Vector3(0, 1.5, -0.1), Color("2a1a22"))
+	part(r, Cyl(0.22, 0.05), Vector3(0, 1.62, -0.1), Color("ffd23a"), Vector3.ONE, Vector3(0, 0, 90), 1.4)
+	part(r, S(0.45), Vector3(0, 0.75, 0.95), pink)
+	part(r, Cone(0.2, 0.45), Vector3(0, 0.62, 1.35), Color("e8b8c4"), Vector3.ONE, Vector3(90, 0, 0))
+	for s in [-1.0, 1.0]:
+		part(r, Cone(0.1, 0.4), Vector3(0.28 * s, 1.15, 0.95), Color("f2e6c8"), Vector3.ONE, Vector3(-10, 0, -25 * s))
+		part(r, S(0.2), Vector3(0.5 * s, 0.9, 0.7), Color("e8b8c4"), Vector3(0.6, 1, 1.2))
+		part(r, S(0.22), Vector3(0.5 * s, 0.2, 0.5), Color("a86a80"), Vector3(1, 0.8, 1.3))
+		part(r, S(0.22), Vector3(0.5 * s, 0.2, -0.6), Color("a86a80"), Vector3(1, 0.8, 1.3))
+	_eyes(r, 0.9, 0.2, 1.22, 0.09, Color("14121a"))
+	part(r, Cone(0.18, 0.7), Vector3(0, 0.5, -1.4), pink, Vector3.ONE, Vector3(-80, 0, 0))
+	for i in 4:
+		part(r, Cyl(0.13, 0.03), Vector3(-0.4 + i * 0.27, 1.72 + (i % 2) * 0.08, -0.5 - (i % 3) * 0.15), Color("ffd23a"), Vector3.ONE, Vector3(70, 0, 15 * i), 1.2)
+
+# Mirewick: Verdant/Spirit. Aye-aye + will-o'-the-wisp + kettle.
+static func _mirewick(r: Node3D) -> void:
+	var kettle := Color("3d6b56")
+	part(r, S(0.75), Vector3(0, 0.85, 0), kettle, Vector3(1, 0.85, 1))
+	part(r, S(0.3), Vector3(0, 1.6, 0), Color("2f5545"), Vector3(1.1, 0.5, 1.1))
+	part(r, Tor(0.05, 0.18), Vector3(0, 1.85, 0), Color("2f5545"))
+	part(r, Cone(0.14, 0.5), Vector3(0.72, 0.95, 0), kettle, Vector3.ONE, Vector3(0, 0, -70))
+	part(r, S(0.5), Vector3(0, 1.0, 0.45), Color("4f8a6e"), Vector3(1.1, 0.9, 0.7))
+	for s in [-1.0, 1.0]:
+		part(r, S(0.4), Vector3(0.55 * s, 1.45, 0.3), Color("4f8a6e"), Vector3(0.45, 1, 1))
+		part(r, S(0.24), Vector3(0.55 * s, 1.45, 0.36), Color("2a1f2e"), Vector3(0.4, 1, 1))
+		part(r, Cyl(0.05, 0.75), Vector3(0.8 * s, 0.85, 0.5), Color("2f5545"), Vector3.ONE, Vector3(70, 0, -25 * s))
+		part(r, S(0.2), Vector3(0.3 * s, 0.2, 0.2), Color("2f5545"), Vector3(1, 0.8, 1.3))
+	_eyes(r, 1.1, 0.22, 0.78, 0.15, Color("c8ff6a"))
+	part(r, Cyl(0.03, 0.55), Vector3(0.98, 0.75, 0.85), Color("2f5545"), Vector3.ONE, Vector3(80, 0, -35))
+	for i in 3:
+		var h := 1.95 + i * 0.35
+		part(r, Cone(0.22 - i * 0.05, 0.7), Vector3((i - 1) * 0.12, h + 0.3, -0.05), Color("7fffd0"), Vector3.ONE, Vector3(0, 0, (i - 1) * 12), 2.2, 0.85)
+	for i in 4:
+		part(r, S(0.07), Vector3(-0.6 + i * 0.4, 2.2 + (i % 2) * 0.35, 0.3 - (i % 3) * 0.3), Color("b6ffe8"), Vector3.ONE, Vector3.ZERO, 2.4, 0.8)

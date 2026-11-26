@@ -125,4 +125,14 @@ const DEFS := {
 		"id": "boss", "sprite": "glomm", "name": "Rimeheart Glomm", "types": ["stone", "frost"],
 		"hp": 650.0, "hp_wave": 30.0, "speed": 52.0, "reward": 150, "leak": 10,
 	},
+	# Hoardillo: Stone/Forge. Pink fairy armadillo + Fafnir's hoard + piggy bank. Armored: each direct hit loses 4 damage.
+	"hoardillo": {
+		"id": "hoardillo", "name": "Hoardillo", "types": ["stone", "forge"],
+		"hp": 45.0, "hp_wave": 14.0, "speed": 85.0, "reward": 10, "leak": 2, "armor": 4.0,
+	},
+	# Mirewick: Verdant/Spirit. Aye-aye + will-o'-the-wisp + kettle. Regenerates 6 HP/s unless poisoned.
+	"mirewick": {
+		"id": "mirewick", "name": "Mirewick", "types": ["verdant", "spirit"],
+		"hp": 30.0, "hp_wave": 9.0, "speed": 105.0, "reward": 8, "leak": 1, "regen": 6.0,
+	},
 }

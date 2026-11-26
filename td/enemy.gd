@@ -2,7 +2,7 @@ extends Node2D
 # Enemy roster (see creatures.gd): shuckit (fodder), zapnose (fast), glomm (tank). All code-drawn placeholders.
 const DrawUtil = preload("res://draw_util.gd")
 const SpriteLib = preload("res://sprite_lib.gd")
-const SPRITE_SCALE := {"shuckit": 30.0, "zapnose": 28.0, "glomm": 30.0, "boss": 50.0}
+const SPRITE_SCALE := {"shuckit": 30.0, "zapnose": 28.0, "glomm": 30.0, "boss": 50.0, "hoardillo": 30.0, "mirewick": 30.0}
 signal died(e)
 signal leaked(e)
 
@@ -17,6 +17,8 @@ var max_hp := 18.0
 var types: Array = []
 var reward := 5
 var leak := 1
+var armor := 0.0
+var regen := 0.0
 var boost_t := 0.0
 var slow_t := 0.0
 var slow_f := 1.0
@@ -25,6 +27,9 @@ var poison_t := 0.0
 var poison_mul := 1.0
 var spread_all := false
 var stun_t := 0.0
+var stun_immune_t := 0.0
+var pulled_total := 0.0
+const MAX_PULL := 450.0   # anti-exploit: total drag-back an enemy can ever suffer
 var vuln_t := 0.0
 var heading := 0.0
 var wobble := 0.0
@@ -41,6 +46,8 @@ func setup(p: PackedVector2Array, d: Dictionary, wave: int) -> void:
 	types = d.types
 	reward = int(d.reward)
 	leak = int(d.leak)
+	armor = float(d.get("armor", 0.0))
+	regen = float(d.get("regen", 0.0))
 
 func _ready() -> void:
 	add_to_group("enemies")
@@ -61,10 +68,19 @@ func add_poison(n: int, mul: float = 1.0, cap: int = 5, spread: bool = false) ->
 	poison_t = 4.0
 
 func stun(t: float) -> void:
-	stun_t = maxf(stun_t, t)
+	# Anti-exploit: after a stun ends the enemy is immune for 1s; bosses only take half.
+	if stun_immune_t > 0.0:
+		return
+	stun_t = maxf(stun_t, t * (0.5 if kind == "boss" else 1.0))
 
 # Drag the enemy back along its path by px pixels.
 func rewind(px: float) -> void:
+	if kind == "boss":
+		px *= 0.25
+	px = minf(px, MAX_PULL - pulled_total)
+	if px <= 0.0:
+		return
+	pulled_total += px
 	while px > 0.0:
 		var start := path[seg]
 		var d := position.distance_to(start)
@@ -86,12 +102,18 @@ func _process(delta: float) -> void:
 	flash_t = maxf(0.0, flash_t - delta)
 	slow_t = maxf(0.0, slow_t - delta)
 	poison_t = maxf(0.0, poison_t - delta)
+	var was_stunned := stun_t > 0.0
 	stun_t = maxf(0.0, stun_t - delta)
+	stun_immune_t = maxf(0.0, stun_immune_t - delta)
+	if was_stunned and stun_t <= 0.0:
+		stun_immune_t = 1.0
 	vuln_t = maxf(0.0, vuln_t - delta)
 	if poison_t <= 0.0:
 		poison = 0
 		poison_mul = 1.0
 		spread_all = false
+	if regen > 0.0 and poison == 0:
+		hp = minf(max_hp, hp + regen * delta)
 	if poison > 0:
 		take_damage(2.5 * poison_mul * poison * delta)
 		if dead:
@@ -121,6 +143,8 @@ func _process(delta: float) -> void:
 func take_damage(amount: float) -> void:
 	if dead:
 		return
+	if armor > 0.0 and amount >= 1.5:
+		amount = maxf(1.0, amount - armor)
 	hp -= amount * (1.2 if vuln_t > 0.0 else 1.0)
 	flash_t = 0.12
 	load("res://sfx.gd").play(self, "hit", -20.0, 70)

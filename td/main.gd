@@ -11,7 +11,7 @@ const FxScript = preload("res://fx.gd")
 const Maps = preload("res://maps.gd")
 const Session = preload("res://session.gd")
 const Sfx = preload("res://sfx.gd")
-const POOF_COL := {"shuckit": Color("8a89c0"), "zapnose": Color("ffd23a"), "glomm": Color("bfe6ff")}
+const POOF_COL := {"shuckit": Color("8a89c0"), "zapnose": Color("ffd23a"), "glomm": Color("bfe6ff"), "hoardillo": Color("ffb0c8"), "mirewick": Color("7fffd0")}
 
 var PATH: PackedVector2Array
 var map: Dictionary
@@ -42,6 +42,12 @@ var decor: Array = []
 var sel_tower = null
 var panel
 var shake := 0.0
+var endless := false
+var surge_cd := 0.0
+var surge_btn: Button
+var endless_btn: Button
+var hint: Label
+const SURGE_CD := 45.0
 
 func _ready() -> void:
 	map = Maps.MAPS[Session.map_id]
@@ -100,6 +106,30 @@ func _ready() -> void:
 	menu_btn.pressed.connect(func(): get_tree().change_scene_to_file("res://menu.tscn"))
 	menu_btn.visible = false
 	layer.add_child(menu_btn)
+	endless_btn = Button.new()
+	endless_btn.text = "Endless mode"
+	endless_btn.position = Vector2(540, 540)
+	endless_btn.size = Vector2(200, 64)
+	endless_btn.add_theme_font_size_override("font_size", 24)
+	endless_btn.pressed.connect(_go_endless)
+	endless_btn.visible = false
+	layer.add_child(endless_btn)
+	UiStyle.style_btn(endless_btn, Color("8a5a1a"), Color("8a5a1a"))
+	surge_btn = Button.new()
+	surge_btn.position = Vector2(1060, 556)
+	surge_btn.size = Vector2(200, 64)
+	surge_btn.add_theme_font_size_override("font_size", 20)
+	surge_btn.pressed.connect(_surge)
+	layer.add_child(surge_btn)
+	UiStyle.style_btn(surge_btn, Color("2a6f9a"), Color("2a6f9a"))
+	hint = Label.new()
+	hint.position = Vector2(330, 540)
+	hint.add_theme_font_size_override("font_size", 22)
+	hint.add_theme_color_override("font_outline_color", Color.BLACK)
+	hint.add_theme_constant_override("outline_size", 6)
+	hint.text = "Pick a creature below, tap grass to place it.\nTap a placed creature to upgrade it. Then press Start wave!"
+	hint.visible = Session.best.is_empty()
+	layer.add_child(hint)
 	UiStyle.style_btn(retry_btn, Color("2f6b3a"), Color("2f6b3a"))
 	UiStyle.style_btn(menu_btn, Color("3a4a6b"), Color("3a4a6b"))
 	for i in ["tickindle", "dugloom", "hutzin", "ally_shuckit", "ally_zapnose", "ally_glomm"]:
@@ -128,6 +158,33 @@ func _ready() -> void:
 	panel.position = Vector2(16, 90)
 	_sync_cards()
 	_build_decor()
+	_refresh()
+
+func _surge() -> void:
+	if surge_cd > 0.0 or not wave_running or state != "play":
+		return
+	surge_cd = SURGE_CD
+	shake = 1.2
+	Sfx.play(self, "pulse", -4.0)
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if not e.dead:
+			e.stun(1.6)
+			e.take_damage(40.0 + 6.0 * wave)
+	var pf = PoofScript.new()
+	pf.col = Color("7fd8ff")
+	pf.position = Vector2(640, 360)
+	pf.scale = Vector2(9, 9)
+	add_child(pf)
+
+func _go_endless() -> void:
+	endless = true
+	state = "play"
+	banner.visible = false
+	retry_btn.visible = false
+	menu_btn.visible = false
+	endless_btn.visible = false
+	start_btn.disabled = false
+	FxScript.text_at(self, Vector2(640, 300), "Endless mode: the Wells never stop!", Color("ffd23a"))
 	_refresh()
 
 func _on_card(id: String, on: bool) -> void:
@@ -161,9 +218,9 @@ func _build_decor() -> void:
 
 func _refresh() -> void:
 	speed_btn.text = "Speed x%d" % int(Engine.time_scale)
-	var nxt: String = map.weather[wave % map.weather.size()] if not wave_running and wave < TOTAL_WAVES else weather
-	hud.text = "Coins %d    Lives %d    Wave %d/%d\n%s\n%s" % [coins, lives, wave, TOTAL_WAVES,
-		("Next: " + _incoming_text(wave + 1)) if (not wave_running and wave < TOTAL_WAVES) else "Tap a creature to upgrade it",
+	var nxt: String = map.weather[wave % map.weather.size()] if not wave_running and (endless or wave < TOTAL_WAVES) else weather
+	hud.text = "Coins %d    Lives %d    Wave %s\n%s\n%s" % [coins, lives, ("%d (Endless)" % wave) if endless else ("%d/%d" % [wave, TOTAL_WAVES]),
+		("Next: " + _incoming_text(wave + 1)) if (not wave_running and (endless or wave < TOTAL_WAVES)) else "Tap a creature to upgrade it",
 		"Weather: " + Maps.WEATHER[nxt].label]
 	if sel_tower != null and is_instance_valid(sel_tower):
 		panel.refresh(coins)
@@ -178,9 +235,15 @@ func _build_wave(w: int) -> Array:
 	if w >= 3:
 		for i in w - 2:
 			q.append("glomm")
+	if w >= 4:
+		for i in w - 3:
+			q.append("hoardillo")
+	if w >= 5:
+		for i in (w - 4) * 2:
+			q.append("mirewick")
 	seed(1000 + w)
 	q.shuffle()
-	if w == TOTAL_WAVES:
+	if w == TOTAL_WAVES or (w > TOTAL_WAVES and (w - TOTAL_WAVES) % 4 == 0):
 		q.insert(q.size() / 2, "boss")
 	return q
 
@@ -208,6 +271,11 @@ func _start_wave() -> void:
 
 func _process(delta: float) -> void:
 	clock += delta
+	surge_cd = maxf(0.0, surge_cd - delta)
+	surge_btn.disabled = surge_cd > 0.0 or not wave_running
+	surge_btn.text = "Well Surge\n(stun + damage)" if surge_cd <= 0.0 else "Surge ready in %ds" % ceili(surge_cd)
+	if hint.visible and clock > 14.0:
+		hint.visible = false
 	shake = maxf(0.0, shake - delta * 2.5)
 	position = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 9.0
 	if state == "play" and wave_running:
@@ -275,7 +343,7 @@ func _wave_done() -> void:
 	wave_running = false
 	coins += 40 + 10 * wave
 	_refresh()
-	if wave >= TOTAL_WAVES:
+	if wave >= TOTAL_WAVES and not endless:
 		_end("won")
 	else:
 		start_btn.disabled = false
@@ -287,12 +355,13 @@ func _end(result: String) -> void:
 	banner.visible = true
 	retry_btn.visible = true
 	menu_btn.visible = true
+	endless_btn.visible = result == "won" and not endless
 	start_btn.disabled = true
 	var ally := ""
 	for k in Creatures.DEFS:
 		if Creatures.DEFS[k].get("unlock", "") == Session.map_id:
 			ally = k
-	Session.record(Session.map_id, wave, result == "won", ally if result == "won" else "")
+	Session.record(Session.map_id, wave, result == "won" or endless, ally if result == "won" else "")
 	if result == "won" and ally != "":
 		banner.text += "\nNew ally: %s befriended!" % Creatures.DEFS[ally].name
 	Sfx.play(self, "win" if result == "won" else "lose")

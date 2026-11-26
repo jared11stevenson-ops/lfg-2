@@ -3,7 +3,7 @@ extends RefCounted
 const SIZE := 256.0
 const GROUND_UNITS := 0.79   # ground contact sits this many world units below sprite centre
 # Orthographic camera size (world units across the 256px frame) per creature; keeps big models from clipping.
-const CAM := {"tickindle": 4.0, "dugloom": 5.4, "hutzin": 4.5, "shuckit": 4.3, "zapnose": 5.2, "glomm": 4.6}
+const CAM := {"tickindle": 4.0, "dugloom": 5.4, "hutzin": 4.5, "shuckit": 4.3, "zapnose": 5.2, "glomm": 4.6, "hoardillo": 4.4, "mirewick": 4.4}
 static var _cache := {}
 
 static func tex(id: String, k: int) -> Texture2D:
