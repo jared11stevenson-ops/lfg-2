@@ -32,6 +32,7 @@ var state := "play"
 var hud: Label
 var start_btn: Button
 var speed_btn: Button
+var sound_btn: Button
 var banner: Label
 var selected := "tickindle"
 var placing := true
@@ -67,6 +68,15 @@ func _ready() -> void:
 	speed_btn.add_theme_font_size_override("font_size", 22)
 	speed_btn.pressed.connect(_cycle_speed)
 	layer.add_child(speed_btn)
+	sound_btn = Button.new()
+	sound_btn.position = Vector2(1100, 64)
+	sound_btn.size = Vector2(160, 40)
+	sound_btn.add_theme_font_size_override("font_size", 18)
+	sound_btn.text = "Sound: On" if Sfx.music_on else "Sound: Off"
+	sound_btn.pressed.connect(func(): sound_btn.text = "Sound: On" if Sfx.toggle_sound(self) else "Sound: Off")
+	layer.add_child(sound_btn)
+	UiStyle.style_btn(sound_btn, Color("3a4a6b"), Color("3a4a6b"))
+	Sfx.start_music(self)
 	banner = Label.new()
 	banner.position = Vector2(340, 300)
 	banner.add_theme_font_size_override("font_size", 48)
@@ -216,6 +226,8 @@ func _spawn() -> void:
 		FxScript.text_at(self, Vector2(640, 330), "BOSS: Rimeheart Glomm!", Color("ff6a5a"))
 	var e = EnemyScript.new()
 	e.setup(PATH, d, wave)
+	e.hp *= float(map.get("hp_mult", 1.0))
+	e.max_hp = e.hp
 	e.died.connect(_on_died)
 	e.leaked.connect(_on_leaked)
 	add_child(e)

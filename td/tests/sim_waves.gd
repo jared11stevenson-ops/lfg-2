@@ -4,10 +4,17 @@ extends SceneTree
 var main
 var frames := 0
 func _initialize() -> void:
+	load("res://session.gd").no_save = true
+	var args := OS.get_cmdline_user_args()
+	for x in args:
+		if x.begins_with("map="):
+			load("res://session.gd").map_id = x.substr(4)
 	main = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	var defs = load("res://creatures.gd").DEFS
-	for a in OS.get_cmdline_user_args():
+	for a in args:
+		if a.begins_with("map="):
+			continue
 		var parts: PackedStringArray = a.split(":")
 		var xy: PackedStringArray = parts[1].split(",")
 		var t = load("res://tower.gd").new()

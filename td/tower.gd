@@ -193,7 +193,14 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, 24), 0.0, Vector2(1.0, 0.4))
 	draw_circle(Vector2.ZERO, 28, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	if SpriteLib.draw(self, String(def.id), face, SPRITE_SCALE * (1.0 + 0.07 * kick), Vector2(0, 14.0 * sin(float(Time.get_ticks_msec()) / 400.0 + position.x) * 0.2 + 6) - face_vec * 5.0 * kick):
+	var total: int = tiers.a + tiers.b
+	if total >= 3:
+		var ac := Color(1.0, 0.7, 0.25) if tiers.a >= tiers.b else Color(0.4, 0.85, 1.0)
+		var pulse := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) / 350.0)
+		draw_set_transform(Vector2(0, 24), 0.0, Vector2(1.0, 0.4))
+		draw_arc(Vector2.ZERO, 34 + pulse * 4, 0, TAU, 40, Color(ac.r, ac.g, ac.b, 0.6), 4.0 + (3.0 if total >= 6 else 0.0), true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if SpriteLib.draw(self, String(def.id), face, SPRITE_SCALE * (1.0 + 0.07 * kick + 0.03 * (tiers.a + tiers.b)), Vector2(0, 14.0 * sin(float(Time.get_ticks_msec()) / 400.0 + position.x) * 0.2 + 6) - face_vec * 5.0 * kick):
 		pass
 	else:
 		match String(def.id):

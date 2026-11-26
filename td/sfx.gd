@@ -78,3 +78,80 @@ static func play(n: Node, name: String, vol_db: float = -8.0, min_gap: int = 0) 
 	pl.volume_db = vol_db
 	pl.pitch_scale = randf_range(0.95, 1.05)
 	pl.play()
+
+# ---- Music: a short chiptune loop synthesised at startup (11 kHz mono, ~13 s) ----
+static var music_on := true
+static var _music_player: AudioStreamPlayer
+static var _music_stream: AudioStreamWAV
+
+static func _note(freq: float, t: float, wave: String) -> float:
+	var ph := fmod(t * freq, 1.0)
+	match wave:
+		"tri": return absf(ph * 4.0 - 2.0) - 1.0
+		"sq": return 1.0 if ph < 0.5 else -1.0
+	return sin(ph * TAU)
+
+static func _make_music() -> AudioStreamWAV:
+	var rate := 11025
+	var bpm := 112.0
+	var beat := 60.0 / bpm
+	var chords := [[261.63, 329.63, 392.0], [220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 246.94, 293.66]]
+	var bass := [65.41, 55.0, 43.65, 49.0]
+	var melody := [0, 2, 4, 2, 4, 7, 4, 2, 0, 2, 4, 7, 9, 7, 4, 2]
+	var pent := [0, 2, 4, 7, 9]
+	var bars := 8
+	var total := int(bars * 4 * beat * rate)
+	var data := PackedFloat32Array()
+	data.resize(total)
+	for i in total:
+		var t := float(i) / rate
+		var b := int(t / (beat * 4.0))
+		var chord: Array = chords[b % 4]
+		var step := int(t / (beat * 0.5)) % 16
+		var bt := fmod(t, beat * 0.5) / (beat * 0.5)
+		var s := 0.0
+		# arpeggio
+		var af: float = chord[(int(t / (beat * 0.5))) % 3] * 2.0
+		s += _note(af, t, "sq") * 0.07 * (1.0 - bt * 0.6)
+		# bass on beats
+		var bb := fmod(t, beat) / beat
+		s += _note(bass[b % 4], t, "tri") * 0.22 * (1.0 - bb * 0.5)
+		# melody (second half of each 2 bars)
+		if b % 2 == 1 or b >= 4:
+			var deg: int = melody[step]
+			var mf: float = 523.25 * pow(2.0, float(pent[deg % 5] + 12 * (deg / 5)) / 12.0)
+			s += _note(mf, t, "sq") * 0.05 * (1.0 - bt * 0.7)
+		data[i] = s
+	var w := AudioStreamWAV.new()
+	w.format = AudioStreamWAV.FORMAT_16_BITS
+	w.mix_rate = rate
+	w.stereo = false
+	var by := PackedByteArray()
+	by.resize(total * 2)
+	for i in total:
+		by.encode_s16(i * 2, int(clampf(data[i], -1.0, 1.0) * 32767.0))
+	w.data = by
+	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	w.loop_begin = 0
+	w.loop_end = total
+	return w
+
+static func start_music(n: Node) -> void:
+	if _music_player == null or not is_instance_valid(_music_player):
+		_music_player = AudioStreamPlayer.new()
+		n.get_tree().root.add_child.call_deferred(_music_player)
+		if _music_stream == null:
+			_music_stream = _make_music()
+		_music_player.stream = _music_stream
+		_music_player.volume_db = -14.0
+	if music_on:
+		_play_music.call_deferred()
+
+static func _play_music() -> void:
+	if is_instance_valid(_music_player) and _music_player.is_inside_tree() and not _music_player.playing:
+		_music_player.play()
+
+static func toggle_sound(n: Node) -> bool:
+	music_on = not music_on
+	AudioServer.set_bus_mute(0, not music_on)
+	return music_on

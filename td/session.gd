@@ -3,6 +3,7 @@ extends RefCounted
 static var map_id := "mossgate"
 static var best := {}
 static var _loaded := false
+static var no_save := false   # set by headless tests
 
 static func load_save() -> void:
 	if _loaded:
@@ -15,6 +16,8 @@ static func load_save() -> void:
 
 static func record(map: String, wave: int, won: bool) -> void:
 	load_save()
+	if no_save:
+		return
 	var score := wave + (100 if won else 0)
 	if score > int(best.get(map, 0)):
 		best[map] = score

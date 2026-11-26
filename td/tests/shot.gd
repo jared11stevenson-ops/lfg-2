@@ -46,6 +46,6 @@ func _process(_d: float) -> bool:
 		main._start_wave()
 	if frames == at:
 		root.get_texture().get_image().save_png(out)
-		print("saved ", out, " wave=", main.wave)
+		print("saved ", out)
 		quit(0)
 	return false
