@@ -39,3 +39,14 @@ Credits are the user's, so the plan is: balance check first, 6 base creatures on
 - Export templates are a large download: try once in block 5, else deliver source zip.
 - Software-rendered screenshots are slow: use short captures only.
 - Timezone unknown: deadline set conservatively at 11:30 UTC.
+
+## Status (updated 05:47 UTC): all six blocks completed ahead of schedule
+- Block 1: upgrade framework, tap-select panel, targeting, sell, speed. DONE
+- Block 2: full upgrade trees for 6 creatures, tests and balance sims. DONE
+- Block 3: Tripo auth failed, so pivoted to primitive-3D pre-render pipeline (toon shader, outlines, 8 directions, evolved forms). DONE
+- Block 4: 3 maps, weather, boss, menu, end screens. DONE
+- Block 5: procedural SFX + music, save/progress, exports (Windows + Web), exploit fixes. DONE
+- Block 6: packaged zips, README, lore bible. DONE
+
+## Next night
+Art quality remains the biggest gap to the Bloons TD6 bar: hand-sculpted models (or a working Tripo key), real animation rigs, lighting and ground shadows baked into sprites, VFX sprites. Then: 9 more regions/Wells, ally evolutions, Keeper's Hall meta hub, hero abilities, a real balance pass from human playtests, Android export (needs SDK), touch UX tuning.

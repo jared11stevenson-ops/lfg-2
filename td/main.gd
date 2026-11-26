@@ -42,6 +42,7 @@ var decor: Array = []
 var sel_tower = null
 var panel
 var shake := 0.0
+var red_flash := 0.0
 var endless := false
 var surge_cd := 0.0
 var surge_btn: Button
@@ -262,6 +263,7 @@ func _start_wave() -> void:
 	wave += 1
 	weather = map.weather[(wave - 1) % map.weather.size()]
 	Sfx.play(self, "horn")
+	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
 	queue = _build_wave(wave)
 	to_spawn = queue.size()
 	spawn_cd = 0.0
@@ -271,6 +273,7 @@ func _start_wave() -> void:
 
 func _process(delta: float) -> void:
 	clock += delta
+	red_flash = maxf(0.0, red_flash - delta)
 	surge_cd = maxf(0.0, surge_cd - delta)
 	surge_btn.disabled = surge_cd > 0.0 or not wave_running
 	surge_btn.text = "Well Surge\n(stun + damage)" if surge_cd <= 0.0 else "Surge ready in %ds" % ceili(surge_cd)
@@ -333,6 +336,7 @@ func _on_died(e) -> void:
 
 func _on_leaked(e) -> void:
 	lives -= e.leak
+	red_flash = 0.5
 	shake = 1.0 if e.leak < 5 else 2.0
 	Sfx.play(self, "leak", -4.0)
 	_refresh()
@@ -480,6 +484,8 @@ func _draw() -> void:
 		draw_circle(m, 28, Color(tint.r, tint.g, tint.b, 0.2))
 	_draw_weather()
 	_draw_vignette()
+	if red_flash > 0.0:
+		draw_rect(Rect2(0, 0, 1280, 720), Color(1, 0.1, 0.1, red_flash * 0.3))
 
 func _draw_vignette() -> void:
 	var steps := 8

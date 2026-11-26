@@ -9,6 +9,8 @@ const ProjectileScript = preload("res://projectile.gd")
 const PatchScript = preload("res://patch.gd")
 const FxScript = preload("res://fx.gd")
 const BoltScript = preload("res://bolt.gd")
+const PoofScript = preload("res://poof.gd")
+const HIT_COL := {"tickindle": Color("ffb040"), "dugloom": Color("9fe8ff"), "hutzin": Color("c46bff"), "ally_shuckit": Color("a09ec8"), "ally_zapnose": Color("fff3a0"), "ally_glomm": Color("dff4ff")}
 const Sfx = preload("res://sfx.gd")
 const SpriteLib = preload("res://sprite_lib.gd")
 const SPRITE_SCALE := 34.0
@@ -173,6 +175,11 @@ func _fire(t) -> void:
 
 # Called by the projectile on arrival.
 func resolve_hit(p, t) -> void:
+	var sp = PoofScript.new()
+	sp.col = HIT_COL.get(def.id, Color.WHITE)
+	sp.position = t.position
+	sp.scale = Vector2(0.45, 0.45)
+	get_parent().add_child(sp)
 	FxScript.pop(get_parent(), t, p.mult)
 	if def.id == "hutzin":
 		t.add_poison(int(st.stacks), float(st.poison_mul), int(st.max_stacks), bool(st.spread_all))
