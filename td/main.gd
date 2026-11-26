@@ -12,7 +12,7 @@ var PATH := PackedVector2Array([
 const PATH_HALF := 34.0
 const TOTAL_WAVES := 5
 
-var coins := 250
+var coins := 220
 var lives := 20
 var wave := 0
 var to_spawn := 0
@@ -22,6 +22,8 @@ var state := "play"
 var hud: Label
 var start_btn: Button
 var banner: Label
+var selected := "tickindle"
+var cards := {}
 
 func _ready() -> void:
 	var layer := CanvasLayer.new()
@@ -46,16 +48,33 @@ func _ready() -> void:
 	banner.add_theme_constant_override("outline_size", 10)
 	banner.visible = false
 	layer.add_child(banner)
+	for i in ["tickindle", "dugloom", "hutzin"]:
+		var d: Dictionary = Creatures.DEFS[i]
+		var b := Button.new()
+		b.toggle_mode = true
+		b.text = "%s\n%d" % [d.name, d.cost]
+		b.position = Vector2(16 + cards.size() * 150, 616)
+		b.size = Vector2(140, 90)
+		b.add_theme_font_size_override("font_size", 18)
+		b.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		b.pressed.connect(func(): selected = i; _sync_cards())
+		layer.add_child(b)
+		cards[i] = b
+	_sync_cards()
 	_refresh()
 
+func _sync_cards() -> void:
+	for k in cards:
+		cards[k].button_pressed = (k == selected)
+
 func _refresh() -> void:
-	hud.text = "Coins %d    Lives %d    Wave %d/%d\nTap grass: place Tickindle (%d)" % [coins, lives, wave, TOTAL_WAVES, Creatures.DEFS.tickindle.cost]
+	hud.text = "Coins %d    Lives %d    Wave %d/%d\nPick a creature below, tap grass to place" % [coins, lives, wave, TOTAL_WAVES]
 
 func _start_wave() -> void:
 	if wave_running or state != "play":
 		return
 	wave += 1
-	to_spawn = 6 + wave * 3
+	to_spawn = 8 + wave * 4
 	spawn_cd = 0.0
 	wave_running = true
 	start_btn.disabled = true
@@ -75,7 +94,7 @@ func _process(delta: float) -> void:
 func _spawn() -> void:
 	var d: Dictionary = Creatures.DEFS.shuckit
 	var e = EnemyScript.new()
-	e.setup(PATH, float(d.hp) + 3.0 * wave, float(d.speed), d.types, int(d.reward))
+	e.setup(PATH, float(d.hp) + 7.0 * wave, float(d.speed), d.types, int(d.reward))
 	e.died.connect(_on_died)
 	e.leaked.connect(_on_leaked)
 	add_child(e)
@@ -86,6 +105,15 @@ func _on_died(e) -> void:
 	for o in get_tree().get_nodes_in_group("enemies"):
 		if o != e and not o.dead and o.position.distance_to(e.position) < 170.0:
 			o.boost(1.5)
+	# Venom hook: poison stacks hop to the nearest living foe when a poisoned one dies.
+	if e.poison > 1:
+		var near = null
+		for o in get_tree().get_nodes_in_group("enemies"):
+			if o != e and not o.dead and o.position.distance_to(e.position) < 150.0:
+				if near == null or o.position.distance_to(e.position) < near.position.distance_to(e.position):
+					near = o
+		if near != null:
+			near.add_poison(e.poison - 1)
 	_refresh()
 
 func _on_leaked(_e) -> void:
@@ -116,7 +144,7 @@ func _dist_to_path(p: Vector2) -> float:
 	return best
 
 func _valid_spot(p: Vector2) -> bool:
-	if p.x < 30 or p.x > 1250 or p.y < 70 or p.y > 690:
+	if p.x < 30 or p.x > 1250 or p.y < 70 or p.y > 690 or (p.y > 600 and p.x < 480):
 		return false
 	if _dist_to_path(p) < PATH_HALF + 30.0:
 		return false
@@ -130,7 +158,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 		if state != "play":
 			get_tree().reload_current_scene()
 			return
-		var d: Dictionary = Creatures.DEFS.tickindle
+		var d: Dictionary = Creatures.DEFS[selected]
 		var p := get_global_mouse_position()
 		if coins >= int(d.cost) and _valid_spot(p):
 			coins -= int(d.cost)
@@ -155,8 +183,11 @@ func _draw() -> void:
 		draw_circle(p, PATH_HALF - 2, Color("d1a56a"))
 	if state == "play":
 		var m := get_global_mouse_position()
-		var d: Dictionary = Creatures.DEFS.tickindle
+		var d: Dictionary = Creatures.DEFS[selected]
 		var ok := coins >= int(d.cost) and _valid_spot(m)
 		var tint := Color(1, 1, 1, 0.45) if ok else Color(1, 0.2, 0.2, 0.45)
 		draw_arc(m, float(d.range), 0, TAU, 64, tint, 2.0, true)
-		draw_circle(m, 26, tint)
+		draw_set_transform(m, 0.0, Vector2.ONE)
+		TowerScript.draw_icon(self, selected, d)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		draw_circle(m, 28, Color(tint.r, tint.g, tint.b, 0.2))

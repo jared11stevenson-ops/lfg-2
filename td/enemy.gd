@@ -13,6 +13,10 @@ var max_hp := 18.0
 var types: Array = []
 var reward := 5
 var boost_t := 0.0
+var slow_t := 0.0
+var slow_f := 1.0
+var poison := 0
+var poison_t := 0.0
 var heading := 0.0
 var wobble := 0.0
 var dead := false
@@ -33,17 +37,33 @@ func _ready() -> void:
 func boost(t: float) -> void:
 	boost_t = maxf(boost_t, t)
 
+func apply_slow(f: float, t: float) -> void:
+	slow_f = minf(slow_f if slow_t > 0.0 else 1.0, f)
+	slow_t = maxf(slow_t, t)
+
+func add_poison(n: int) -> void:
+	poison = mini(poison + n, 5)
+	poison_t = 4.0
+
 func _process(delta: float) -> void:
 	if dead:
 		return
 	boost_t = maxf(0.0, boost_t - delta)
+	slow_t = maxf(0.0, slow_t - delta)
+	poison_t = maxf(0.0, poison_t - delta)
+	if poison_t <= 0.0:
+		poison = 0
+	if poison > 0:
+		take_damage(2.5 * poison * delta)
+		if dead:
+			return
 	if seg + 1 >= path.size():
 		dead = true
 		leaked.emit(self)
 		queue_free()
 		return
 	var target := path[seg + 1]
-	var step := speed * (1.3 if boost_t > 0.0 else 1.0) * delta
+	var step := speed * (1.3 if boost_t > 0.0 else 1.0) * (slow_f if slow_t > 0.0 else 1.0) * delta
 	var d := position.distance_to(target)
 	heading = (target - position).angle()
 	if step >= d:
@@ -72,6 +92,10 @@ func _draw() -> void:
 	var fur := Color("34314a")
 	var rib := Color("6b6a86")
 	var bob := Vector2(0, sin(wobble) * 2.0)
+	if slow_t > 0.0:
+		draw_circle(Vector2(0, 8), 24, Color(0.4, 0.8, 1.0, 0.3))
+	if poison > 0:
+		draw_circle(Vector2(0, 8), 18 + poison * 2, Color(0.6, 0.2, 0.8, 0.3))
 	# shadow
 	draw_set_transform(Vector2(0, 16), 0.0, Vector2(1.2, 0.4))
 	draw_circle(Vector2.ZERO, 16, Color(0, 0, 0, 0.25))
