@@ -102,15 +102,18 @@ func _ready() -> void:
 	layer.add_child(menu_btn)
 	UiStyle.style_btn(retry_btn, Color("2f6b3a"), Color("2f6b3a"))
 	UiStyle.style_btn(menu_btn, Color("3a4a6b"), Color("3a4a6b"))
-	for i in ["tickindle", "dugloom", "hutzin"]:
+	for i in ["tickindle", "dugloom", "hutzin", "ally_shuckit", "ally_zapnose", "ally_glomm"]:
 		var d: Dictionary = Creatures.DEFS[i]
 		var b := Button.new()
 		b.toggle_mode = true
-		b.text = "%s\n%s\n%d" % [d.name, " / ".join(d.types.map(func(t): return t.capitalize())), d.cost]
+		var open := Session.is_unlocked(d)
+		b.text = ("%s\n%s\n%d" % [d.name, " / ".join(d.types.map(func(t): return t.capitalize())), d.cost]) if open else "%s\nLocked\n(%s)" % [d.name, Maps.MAPS[d.unlock].name.get_slice(" ", 0)]
+		b.disabled = not open
 		b.position = Vector2(16 + cards.size() * 150, 616)
-		b.size = Vector2(140, 90)
-		b.add_theme_font_size_override("font_size", 18)
-		b.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		b.size = Vector2(142, 90)
+		b.add_theme_font_size_override("font_size", 14)
+		b.clip_text = true
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.toggled.connect(func(on): _on_card(i, on))
 		layer.add_child(b)
 		cards[i] = b
@@ -285,7 +288,13 @@ func _end(result: String) -> void:
 	retry_btn.visible = true
 	menu_btn.visible = true
 	start_btn.disabled = true
-	Session.record(Session.map_id, wave, result == "won")
+	var ally := ""
+	for k in Creatures.DEFS:
+		if Creatures.DEFS[k].get("unlock", "") == Session.map_id:
+			ally = k
+	Session.record(Session.map_id, wave, result == "won", ally if result == "won" else "")
+	if result == "won" and ally != "":
+		banner.text += "\nNew ally: %s befriended!" % Creatures.DEFS[ally].name
 	Sfx.play(self, "win" if result == "won" else "lose")
 
 func _dist_to_path(p: Vector2) -> float:
@@ -295,7 +304,7 @@ func _dist_to_path(p: Vector2) -> float:
 	return best
 
 func _valid_spot(p: Vector2) -> bool:
-	if p.x < 30 or p.x > 1250 or p.y < 70 or p.y > 690 or (p.y > 600 and p.x < 480):
+	if p.x < 30 or p.x > 1250 or p.y < 70 or p.y > 690 or (p.y > 600 and p.x < 930):
 		return false
 	if _dist_to_path(p) < PATH_HALF + 30.0:
 		return false
@@ -323,7 +332,7 @@ func _select_tower(t) -> void:
 	placing = false
 	_sync_cards()
 	panel.show_for(t, coins)
-	panel.position = Vector2(1280 - 16 - 380, 70) if t.position.x < 640 else Vector2(16, 70)
+	panel.position = Vector2(1280 - 16 - 380, 116) if t.position.x < 640 else Vector2(16, 116)
 
 func _deselect_tower() -> void:
 	if sel_tower != null and is_instance_valid(sel_tower):

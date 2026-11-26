@@ -8,13 +8,15 @@ const TypeChart = preload("res://type_chart.gd")
 const ProjectileScript = preload("res://projectile.gd")
 const PatchScript = preload("res://patch.gd")
 const FxScript = preload("res://fx.gd")
+const BoltScript = preload("res://bolt.gd")
 const Sfx = preload("res://sfx.gd")
 const SpriteLib = preload("res://sprite_lib.gd")
 const SPRITE_SCALE := 34.0
 const MODES := ["first", "last", "strong"]
 const DEFAULTS := {"multishot": 1, "splash": 0.0, "molten_every": 10, "burn_patch": false, "windup_max": 6, "pull": 0.0,
 	"stun": 0.0, "poison_mul": 1.0, "vuln": false, "burst_every": 0, "spread_all": false, "max_stacks": 5, "stacks": 1,
-	"slow": 1.0, "slow_t": 2.0}
+	"slow": 1.0, "slow_t": 2.0, "chain_n": 0, "chain_range": 110.0, "hit_slow": 1.0, "hit_slow_t": 1.5,
+	"hit_stun": 0.0, "crit_every": 0, "crit_mult": 3.0}
 
 var def: Dictionary = {}:
 	set(v):
@@ -75,11 +77,13 @@ func _weather() -> float:
 	return m.weather_mult(def.types) if m != null and m.has_method("weather_mult") else 1.0
 
 func _sprite_id() -> String:
+	var base: String = def.get("sprite", def.id)
+	var cand := base
 	if tiers.a >= 3 and tiers.a >= tiers.b:
-		return String(def.id) + "_a"
-	if tiers.b >= 3:
-		return String(def.id) + "_b"
-	return String(def.id)
+		cand = base + "_a"
+	elif tiers.b >= 3:
+		cand = base + "_b"
+	return cand if SpriteLib.tex(cand, face) != null else base
 
 func cycle_target() -> void:
 	target_mode = MODES[(MODES.find(target_mode) + 1) % MODES.size()]
@@ -154,13 +158,14 @@ func _fire(t) -> void:
 	face_vec = (t.position - position).normalized()
 	kick = 1.0
 	var molten: bool = def.id == "tickindle" and shots % int(st.molten_every) == 0
+	var crit: bool = int(st.crit_every) > 0 and shots % int(st.crit_every) == 0
 	for i in int(st.multishot):
 		var p = ProjectileScript.new()
 		p.target = t
 		p.tower = self
-		p.molten = molten
+		p.molten = molten or crit
 		p.mult = TypeChart.best(def.types, t.types)
-		p.dmg = float(st.dmg) * p.mult * _weather() * (2.0 if molten else 1.0)
+		p.dmg = float(st.dmg) * p.mult * _weather() * (2.0 if molten else (float(st.crit_mult) if crit else 1.0))
 		if def.id == "hutzin":
 			p.color = Color("b44bd8")
 		p.position = position + Vector2(0, -10) + Vector2(0, i * 6)
@@ -178,8 +183,33 @@ func resolve_hit(p, t) -> void:
 		var patch = PatchScript.new()
 		patch.position = t.position
 		get_parent().add_child(patch)
+	if float(st.hit_slow) < 1.0:
+		t.apply_slow(float(st.hit_slow), float(st.hit_slow_t))
+	if float(st.hit_stun) > 0.0:
+		t.stun(float(st.hit_stun))
+	if int(st.chain_n) > 0:
+		var cur = t
+		var hit_list := [t]
+		for i in int(st.chain_n):
+			var nxt = null
+			for o in get_tree().get_nodes_in_group("enemies"):
+				if o.dead or o in hit_list or o.position.distance_to(cur.position) > float(st.chain_range):
+					continue
+				if nxt == null or o.position.distance_to(cur.position) < nxt.position.distance_to(cur.position):
+					nxt = o
+			if nxt == null:
+				break
+			var bolt = BoltScript.new()
+			bolt.a = cur.position
+			bolt.b = nxt.position
+			get_parent().add_child(bolt)
+			nxt.take_damage(p.dmg * pow(0.75, i + 1))
+			if float(st.hit_stun) > 0.0:
+				nxt.stun(float(st.hit_stun))
+			hit_list.append(nxt)
+			cur = nxt
 	var splash := float(st.splash)
-	if splash > 0.0 and (def.id == "hutzin" or p.molten):
+	if splash > 0.0 and (def.id == "hutzin" or def.id == "ally_glomm" or p.molten):
 		for o in get_tree().get_nodes_in_group("enemies"):
 			if o != t and not o.dead and o.position.distance_to(t.position) <= splash:
 				if def.id == "hutzin":
@@ -220,6 +250,8 @@ func _draw() -> void:
 		draw_circle(Vector2(6 + i * 8, 34), 3.0, Color("6fd3ff"))
 
 static func draw_icon(ci: CanvasItem, id: String, def_: Dictionary) -> void:
+	if SpriteLib.draw(ci, def_.get("sprite", id), 2, SPRITE_SCALE):
+		return
 	# Used by the UI cards: draws the creature into any CanvasItem at its origin.
 	var t = load("res://tower.gd").new()
 	t.def = def_

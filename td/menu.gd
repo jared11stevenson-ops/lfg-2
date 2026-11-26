@@ -74,4 +74,8 @@ func _draw() -> void:
 	for i in 6:
 		var x := fmod(clock * 70.0 + i * 260.0, 1500.0) - 110.0
 		SpriteLib.draw(self, foes[i % 3], 0, 28.0, Vector2(x, 700 + sin(clock * 8.0 + i) * 3.0))
+	var n_open := 0
+	for k in Session.unlocked:
+		n_open += 1
+	_text("Allies befriended: %d/3   (clear a map to befriend its creature)" % n_open, Vector2(0, 566), 20, Color("ffd23a"), 1280, HORIZONTAL_ALIGNMENT_CENTER)
 	_text("Tap a map to begin", Vector2(0, 596), 26, Color.WHITE, 1280, HORIZONTAL_ALIGNMENT_CENTER)

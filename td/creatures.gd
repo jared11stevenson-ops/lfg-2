@@ -55,6 +55,57 @@ const DEFS := {
 			],
 		},
 	},
+	"ally_shuckit": {
+		"id": "ally_shuckit", "sprite": "shuckit", "name": "Shuckit", "types": ["umbra", "gale"], "cost": 90, "range": 150.0, "dmg": 3.0, "rate": 2.8, "unlock": "mossgate",
+		"upgrades": {
+			"a": [
+				{"name": "Sharp Fangs", "cost": 70, "desc": "+40% attack speed", "mul": {"rate": 1.4}},
+				{"name": "Hunting Pack", "cost": 140, "desc": "Fires 2 bites per shot", "set": {"multishot": 2}},
+				{"name": "Alpha Howl", "cost": 240, "desc": "Every 4th bite is a 3x crit", "set": {"crit_every": 4}},
+				{"name": "Black Shuck", "cost": 480, "desc": "3 bites per shot, +3 damage", "set": {"multishot": 3}, "add": {"dmg": 3}},
+			],
+			"b": [
+				{"name": "Tailwind", "cost": 70, "desc": "+25 range", "add": {"range": 25}},
+				{"name": "Cutting Wind", "cost": 130, "desc": "Bites slow foes", "set": {"hit_slow": 0.7}},
+				{"name": "Gale Force", "cost": 250, "desc": "Bites briefly stun", "set": {"hit_stun": 0.25}},
+				{"name": "Storm Dog", "cost": 500, "desc": "+50% speed, heavy slow", "mul": {"rate": 1.5}, "set": {"hit_slow": 0.5}},
+			],
+		},
+	},
+	"ally_zapnose": {
+		"id": "ally_zapnose", "sprite": "zapnose", "name": "Zapnose", "types": ["volt", "aether"], "cost": 140, "range": 170.0, "dmg": 6.0, "rate": 1.1, "chain_n": 2, "unlock": "emberflats",
+		"upgrades": {
+			"a": [
+				{"name": "Static", "cost": 100, "desc": "+3 damage", "add": {"dmg": 3}},
+				{"name": "Arc Jump", "cost": 160, "desc": "Lightning jumps to 1 more foe", "add": {"chain_n": 1}},
+				{"name": "Overcharge", "cost": 300, "desc": "+30% speed, +4 damage", "mul": {"rate": 1.3}, "add": {"dmg": 4}},
+				{"name": "Thunder Doorbell", "cost": 600, "desc": "3 more jumps, longer reach", "add": {"chain_n": 3}, "set": {"chain_range": 160.0}},
+			],
+			"b": [
+				{"name": "Longer Nose", "cost": 90, "desc": "+30 range", "add": {"range": 30}},
+				{"name": "Ringing", "cost": 160, "desc": "Shocks briefly stun", "set": {"hit_stun": 0.3}},
+				{"name": "Static Field", "cost": 280, "desc": "Shocks slow foes", "set": {"hit_slow": 0.6}},
+				{"name": "Tesla's Gambit", "cost": 580, "desc": "Longer stun, +50% damage", "set": {"hit_stun": 0.6}, "mul": {"dmg": 1.5}},
+			],
+		},
+	},
+	"ally_glomm": {
+		"id": "ally_glomm", "sprite": "glomm", "name": "Glomm", "types": ["stone", "frost"], "cost": 180, "range": 150.0, "dmg": 14.0, "rate": 0.5, "splash": 60.0, "hit_slow": 0.6, "unlock": "frostrun",
+		"upgrades": {
+			"a": [
+				{"name": "Heavy Snow", "cost": 120, "desc": "+8 damage", "add": {"dmg": 8}},
+				{"name": "Wide Tumble", "cost": 180, "desc": "Bigger splash", "set": {"splash": 90.0}},
+				{"name": "Rime Slam", "cost": 320, "desc": "+12 damage, +20% speed", "add": {"dmg": 12}, "mul": {"rate": 1.2}},
+				{"name": "Golem's Fist", "cost": 620, "desc": "+60% damage, huge splash", "mul": {"dmg": 1.6}, "set": {"splash": 125.0}},
+			],
+			"b": [
+				{"name": "Frost Fringe", "cost": 110, "desc": "Stronger slow", "set": {"hit_slow": 0.5, "hit_slow_t": 2.0}},
+				{"name": "Permafrost", "cost": 170, "desc": "Heavy slow", "set": {"hit_slow": 0.35}},
+				{"name": "Flash Freeze", "cost": 300, "desc": "Hits briefly freeze", "set": {"hit_stun": 0.5}},
+				{"name": "Snowglobe Blizzard", "cost": 600, "desc": "Long freeze, +40 range", "set": {"hit_stun": 1.0, "hit_slow": 0.3}, "add": {"range": 40}},
+			],
+		},
+	},
 	"shuckit": {
 		"id": "shuckit", "name": "Shuckit", "types": ["umbra", "gale"],
 		"hp": 18.0, "hp_wave": 7.0, "speed": 120.0, "reward": 5, "leak": 1,
