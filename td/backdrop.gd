@@ -93,6 +93,13 @@ func _draw() -> void:
 			for k in n:
 				var q := a.lerp(b, float(k) / maxf(1.0, n)) + Vector2(crng.randf_range(-20, 20), crng.randf_range(-20, 20)) * 0.9
 				draw_circle(q, crng.randf_range(2.0, 4.5), Color(0, 0, 0, 0.1))
+	# spawn gates and the Well
+	var ends := {}
+	for path in paths:
+		_gate(path[0])
+		ends[path[path.size() - 1]] = true
+	for e in ends:
+		_well(e)
 	# zones
 	for z in level.zones:
 		_zone(Vector2(z.pos[0], z.pos[1]), float(z.r), String(z.kind))
@@ -357,3 +364,34 @@ func _spiral(p: Vector2, z: float, col: Color) -> void:
 		pts.append(p + Vector2(cos(a), sin(a)) * (2.0 + i * 0.5) * z + Vector2(0, -14))
 	draw_polyline(pts, OUT, 7.0, true)
 	draw_polyline(pts, col, 3.5, true)
+
+func _gate(p: Vector2) -> void:
+	var glow := Color(level.colors.glow)
+	var acc := Color(level.colors.accent)
+	for i in 5:
+		draw_circle(p, 70.0 - i * 10.0, Color(glow.r, glow.g, glow.b, 0.06))
+	for sgn in [-1.0, 1.0]:
+		var base := p + Vector2(-6, 52.0 * sgn)
+		_poly(PackedVector2Array([base + Vector2(-16, 14), base + Vector2(-12, -34), base + Vector2(12, -34), base + Vector2(16, 14)]), Color("6a5a82"), 3.5)
+		_blob(base + Vector2(0, -38), 17, 10, Color("8a7aa2"), 3.0)
+		draw_circle(base + Vector2(0, -38), 5, acc)
+	draw_arc(p + Vector2(-6, 0), 54.0, -PI / 2.0 - 0.15, PI / 2.0 + 0.15, 24, OUT, 9.0, true)
+	draw_arc(p + Vector2(-6, 0), 54.0, -PI / 2.0 - 0.15, PI / 2.0 + 0.15, 24, Color("a090c0"), 5.0, true)
+	for i in 4:
+		draw_arc(p + Vector2(8, 0), 14.0 + i * 9.0, 0.0, TAU, 20, Color(acc.r, acc.g, acc.b, 0.22), 2.5, true)
+
+func _well(p: Vector2) -> void:
+	var glow := Color(level.colors.glow)
+	for i in 6:
+		draw_circle(p, 80.0 - i * 10.0, Color(glow.r, glow.g, glow.b, 0.07))
+	draw_set_transform(p + Vector2(0, 10), 0.0, Vector2(1.0, 0.7))
+	draw_circle(Vector2.ZERO, 56.0, OUT)
+	draw_circle(Vector2.ZERO, 52.0, Color("8a8aa8"))
+	draw_circle(Vector2.ZERO, 40.0, OUT)
+	draw_circle(Vector2.ZERO, 37.0, Color(glow.r, glow.g, glow.b, 0.95).lightened(0.1))
+	draw_circle(Vector2(-8, -6), 18.0, Color(1, 1, 1, 0.45))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	for i in 10:
+		var a := TAU * i / 10.0
+		var q := p + Vector2(0, 10) + Vector2(cos(a) * 50.0, sin(a) * 35.0)
+		_blob(q, 9, 7, Color("a8a8c8").darkened(0.12 * (i % 3)), 2.5)

@@ -16,6 +16,9 @@ const Sfx = preload("res://sfx.gd")
 const Backdrop = preload("res://backdrop.gd")
 const PuppetLib = preload("res://puppet_lib.gd")
 const SettingsPanel = preload("res://settings_panel.gd")
+const HudBar = preload("res://hud_bar.gd")
+const ResultScreen = preload("res://result_screen.gd")
+const Tutorial = preload("res://tutorial.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -73,6 +76,12 @@ var enemy_list: Array = []
 var pending := Vector2.ZERO
 var has_pending := false
 var pause_menu
+var well_flash := 0.0
+var hud_bar
+var fade_rect: ColorRect
+var fade_t := 0.0
+var run_seconds := 0.0
+var tutorial
 var event_id := ""
 var intro_t := 3.6
 
@@ -118,9 +127,14 @@ func _build_ui() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = _label(Vector2(16, 8), 26)
+	hud.visible = false
 	layer.add_child(hud)
 	info = _label(Vector2(16, 40), 17)
+	info.visible = false
 	layer.add_child(info)
+	hud_bar = HudBar.new()
+	hud_bar.m = self
+	layer.add_child(hud_bar)
 	start_btn = _button("Start wave", Vector2(1060, 636), Vector2(200, 64), 24, Color("c4552b"), _start_wave)
 	layer.add_child(start_btn)
 	speed_btn = _button("", Vector2(1100, 8), Vector2(160, 52), 22, Color("3a4a6b"), _cycle_speed)
@@ -137,19 +151,23 @@ func _build_ui() -> void:
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.size = Vector2(600, 200)
 	layer.add_child(banner)
-	retry_btn = _button("Retry", Vector2(330, 480), Vector2(190, 60), 26, Color("2f6b3a"), func(): get_tree().reload_current_scene())
+	retry_btn = _button("Retry", Vector2(330, 525), Vector2(190, 60), 26, Color("2f6b3a"), func(): get_tree().reload_current_scene())
 	retry_btn.visible = false
 	layer.add_child(retry_btn)
-	menu_btn = _button("Levels", Vector2(545, 480), Vector2(190, 60), 26, Color("3a4a6b"), func(): Engine.time_scale = 1.0; get_tree().change_scene_to_file("res://menu.tscn"))
+	menu_btn = _button("Levels", Vector2(545, 525), Vector2(190, 60), 26, Color("3a4a6b"), func(): Engine.time_scale = 1.0; get_tree().change_scene_to_file("res://menu.tscn"))
 	menu_btn.visible = false
 	layer.add_child(menu_btn)
-	endless_btn = _button("Endless", Vector2(760, 480), Vector2(190, 60), 26, Color("8a5a1a"), _go_endless)
+	endless_btn = _button("Endless", Vector2(760, 525), Vector2(190, 60), 26, Color("8a5a1a"), _go_endless)
 	endless_btn.visible = false
 	layer.add_child(endless_btn)
+	if Session.level_id == "mossgate" and not bool(Session.settings.get("tutorial_done", false)):
+		tutorial = Tutorial.new()
+		tutorial.m = self
+		layer.add_child(tutorial)
 	hint = _label(Vector2(260, 470), 22)
 	hint.text = "Pick a creature below, tap the ground to place it.\nTap a placed creature to upgrade it. Glowing rune stones boost whoever stands on them!"
 	Session.load_save()
-	hint.visible = Session.stars.is_empty()
+	hint.visible = false
 	layer.add_child(hint)
 	panel = PanelScript.new()
 	panel.upgrade.connect(_on_upgrade)
@@ -168,6 +186,11 @@ func _build_ui() -> void:
 	next_btn = _button(">", Vector2(924, 662), Vector2(50, 44), 22, Color("3a4a6b"), func(): _page(1))
 	layer.add_child(prev_btn)
 	layer.add_child(next_btn)
+	fade_rect = ColorRect.new()
+	fade_rect.color = Color(0.03, 0.0, 0.08, 1.0)
+	fade_rect.size = Vector2(1280, 720)
+	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(fade_rect)
 	intro = _label(Vector2(0, 250), 34)
 	intro.size = Vector2(1280, 200)
 	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -315,6 +338,11 @@ func eff(key: String) -> float:
 func _process(delta: float) -> void:
 	enemy_list = get_tree().get_nodes_in_group("enemies")
 	clock += delta
+	fade_t += delta
+	fade_rect.modulate.a = clampf(1.0 - fade_t / 0.6, 0.0, 1.0)
+	if state == "play" and wave_running:
+		run_seconds += delta
+	well_flash = maxf(0.0, well_flash - delta * 1.6)
 	intro_t -= delta
 	intro.modulate.a = clampf(intro_t / 1.2, 0.0, 1.0) if not pause_menu.visible else 0.0
 	red_flash = maxf(0.0, red_flash - delta)
@@ -365,6 +393,11 @@ func _spawn() -> void:
 	if bool(d.get("flying", false)):
 		path = PackedVector2Array([path[0], path[path.size() - 1]])
 	var en = _make_enemy(d, path, wave, true, boss)
+	var gp = PoofScript.new()
+	gp.col = Color(lv.colors.accent)
+	gp.position = path[0]
+	gp.scale = Vector2(0.55, 0.55)
+	add_child(gp)
 	if champion:
 		en.make_elite()
 		en.hp *= 1.6
@@ -438,6 +471,7 @@ func _on_leaked(e) -> void:
 		return
 	lives -= e.leak
 	red_flash = 0.5
+	well_flash = 1.0
 	shake = 1.0 if e.leak < 5 else 2.0
 	Sfx.haptic(60 if e.leak < 5 else 140)
 	Sfx.play(self, "leak", -4.0)
@@ -458,28 +492,42 @@ func _wave_done() -> void:
 	if wave >= Levels.TOTAL_WAVES and not endless:
 		_end("won")
 
+var result_screen
+
 func _end(result: String) -> void:
 	state = result
 	start_btn.disabled = true
 	retry_btn.visible = true
 	menu_btn.visible = true
-	banner.visible = true
-	banner.position = Vector2(340, 230)
+	banner.visible = false
+	if result_screen != null and is_instance_valid(result_screen):
+		result_screen.queue_free()
+	var rs = ResultScreen.new()
+	rs.won = result == "won"
+	var layer: CanvasLayer = start_btn.get_parent()
 	if result == "won":
 		var rec := Session.record_win(Session.level_id, wave, lives, lives_start, endless)
-		var s := int(rec.stars)
-		banner.text = "The Well holds!\n%s" % "★".repeat(s) + "☆".repeat(3 - s)
-		if not rec.allies.is_empty():
-			var names := []
-			for a in rec.allies:
-				names.append(Creatures.TOWERS[a].name)
-			banner.text += "\nBefriended: %s!" % ", ".join(names)
+		rs.title = "The Well holds!"
+		rs.stars = int(rec.stars)
+		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], "Lives left: %d/%d" % [lives, lives_start], "Difficulty: %s" % Rules.DIFFICULTY[Session.diff].name]
+		for a in rec.allies:
+			rs.ally_sprites.append(Creatures.TOWERS[a].sprite)
+			rs.ally_names.append(Creatures.TOWERS[a].name)
 		endless_btn.visible = not endless
 		Sfx.play(self, "win")
+		Sfx.haptic(120)
 	else:
 		Session.record_loss(Session.level_id, wave)
-		banner.text = "The Well is lost...\nReached wave %d" % wave
+		rs.title = "The Well is lost..."
+		rs.lines = ["You reached wave %d of %d" % [wave, Levels.TOTAL_WAVES], "Run seed: %d" % run_seed]
+		var tips := ["Put creatures on rune stones for a free boost.", "Mix types: Super! hits do 50% more damage.", "Upgrade a path to tier 3 to evolve a creature.", "Dugloom's slow gives every other defender more time to shoot.", "Try the Well Surge when a wave overwhelms you."]
+		rs.tip = tips[wave % tips.size()]
 		Sfx.play(self, "lose")
+	layer.add_child(rs)
+	layer.move_child(rs, retry_btn.get_index())
+	if tutorial != null and is_instance_valid(tutorial):
+		tutorial.queue_free()
+	result_screen = rs
 
 func _go_endless() -> void:
 	endless = true
@@ -488,6 +536,8 @@ func _go_endless() -> void:
 	retry_btn.visible = false
 	menu_btn.visible = false
 	endless_btn.visible = false
+	if result_screen != null and is_instance_valid(result_screen):
+		result_screen.queue_free()
 	start_btn.disabled = false
 	FxScript.text_at(self, Vector2(640, 300), "Endless mode: the Wells never stop!", Color("ffd23a"))
 	_refresh()
@@ -648,6 +698,18 @@ func _draw() -> void:
 		var pulse2 := 0.5 + 0.5 * sin(clock * 6.0)
 		draw_arc(m, 40.0 + pulse2 * 4.0, 0, TAU, 32, Color(1, 0.95, 0.5, 0.9), 3.0, true)
 		draw_string(ThemeDB.fallback_font, m + Vector2(-70, -86), "Tap again to place" if ok else "Can't place here", HORIZONTAL_ALIGNMENT_CENTER, 140, 18, Color.WHITE if ok else Color(1, 0.6, 0.6))
+	var seen := {}
+	for path in paths:
+		var wp: Vector2 = path[path.size() - 1]
+		if seen.has(wp):
+			continue
+		seen[wp] = true
+		var g := Color(c.glow)
+		var pw := 0.5 + 0.5 * sin(clock * 2.2)
+		draw_circle(wp + Vector2(0, 10), 60.0 + pw * 8.0 + well_flash * 30.0, Color(g.r, g.g, g.b, 0.10 + 0.12 * pw + well_flash * 0.3))
+		for i in 5:
+			var a := clock * 1.2 + i * 1.3
+			draw_circle(wp + Vector2(cos(a) * 22.0, 10.0 - fmod(clock * 18.0 + i * 11.0, 46.0)), 2.5, Color(1, 1, 1, 0.8))
 	# fireflies / spirit motes in the level's accent colour
 	for i in 26:
 		var x := fmod(i * 197.0 + sin(clock * 0.4 + i) * 40.0 + clock * 6.0, 1300.0)

@@ -13,8 +13,8 @@ const LEVELS := {
 		"paths": [[[-40, 360], [300, 360], [300, 160], [700, 160], [700, 560], [1000, 560], [1000, 300], [1320, 300]]],
 		"stones": [[460, 250, "verdant"], [560, 470, "tide"], [880, 420, "ember"], [150, 230, "umbra"]],
 		"zones": [],
-		"roster": [["shuckit", 1, 10], ["zapnose", 2, 4], ["glomm", 5, 2], ["hoardillo", 8, 2]],
-		"boss": "glomm", "boss_extra": {},
+		"roster": [["shuckit", 1, 10], ["zapnose", 2, 4], ["glomm", 5, 2], ["hoardillo", 9, 1]],
+		"boss": "glomm", "boss_extra": {}, "boss_mult": 4.0, "early": [0.5, 0.65, 0.8, 0.92],
 	},
 	"frostrun": {
 		"name": "Frostrun Pass", "style": "snow", "blurb": "Switchbacks under the White Lantern. Ice patches make the herd slide.",
@@ -135,5 +135,10 @@ static func to_paths(level: Dictionary) -> Array:
 		var pv := PackedVector2Array()
 		for q in p:
 			pv.append(Vector2(q[0], q[1]))
+		# lanes start at a spawn gate and end at the Well, both inside the screen
+		if pv[0].x < 0.0:
+			pv[0].x = 54.0
+		if pv[pv.size() - 1].x > 1280.0:
+			pv[pv.size() - 1].x = 1190.0
 		out.append(pv)
 	return out

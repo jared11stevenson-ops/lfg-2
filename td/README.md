@@ -16,6 +16,7 @@ Godot 4.7 tower defense: **10 levels, 20 creatures**, hand-drawn 2D cartoon art.
 
 ## Tests (headless)
 `GODOT=/path/to/godot tests/run_all.sh` runs the type-chart, upgrade-rule and level-data tests plus a wave sim.
+Economy-aware bot (earns and spends coins; skill 0..1): `godot --headless --path td --fixed-fps 60 -s tests/sim_bot.gd -- level=mossgate diff=normal seed=3 skill=0.6`
 Auto balance sim: `godot --headless --path td --fixed-fps 60 -s tests/sim_auto.gd -- level=lastwell diff=hard n=10 tiers=2 seed=5`
 Screenshots: `xvfb-run godot --path td --rendering-driver opengl3 --fixed-fps 60 -s tests/shot.gd -- out.png 600 level=gloamwood wave=4 tickindle:430,330:aab`
 

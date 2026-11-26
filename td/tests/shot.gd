@@ -27,6 +27,12 @@ func _initialize() -> void:
 		if a[i].begins_with("setup="):
 			main.call_deferred("_open_setup", a[i].substr(6))
 			continue
+		if a[i] == "win":
+			main.call_deferred("_end", "won")
+			continue
+		if a[i] == "lose":
+			main.call_deferred("_end", "lost")
+			continue
 		if a[i] == "pause":
 			main.call_deferred("_toggle_pause")
 			continue

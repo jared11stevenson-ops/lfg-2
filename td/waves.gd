@@ -20,6 +20,9 @@ static func build(level: Dictionary, w: int, rng: RandomNumberGenerator, count_m
 			q.append(r[0])
 			q.append(r[0])
 	var left := budget(w) * count_mult
+	var early: Array = level.get("early", [])
+	if w <= early.size():
+		left *= float(early[w - 1])
 	for id in q:
 		left -= float(Creatures.ENEMIES[id].cost)
 	var guard := 0
@@ -49,7 +52,7 @@ static func build(level: Dictionary, w: int, rng: RandomNumberGenerator, count_m
 	if w == 5:
 		var top: String = avail[0][0]
 		for r in avail:
-			if float(Creatures.ENEMIES[r[0]].cost) > float(Creatures.ENEMIES[top].cost):
+			if int(r[1]) < w and float(Creatures.ENEMIES[r[0]].cost) > float(Creatures.ENEMIES[top].cost):
 				top = r[0]
 		q.insert(q.size() / 3, "champion:" + String(top))
 	var is_boss_wave := w == Levels.TOTAL_WAVES or (w > Levels.TOTAL_WAVES and (w - Levels.TOTAL_WAVES) % endless_boss_every == 0)
@@ -64,7 +67,7 @@ static func boss_def(level: Dictionary, species: String, w: int) -> Dictionary:
 	d.name = "Elder " + String(d.name)
 	d.boss = true
 	d.scale = 1.9
-	d.hp = (float(d.hp) + float(d.hp_wave) * 10.0) * 7.0
+	d.hp = (float(d.hp) + float(d.hp_wave) * 10.0) * float(level.get("boss_mult", 7.0))
 	d.hp_wave = float(d.hp) * 0.06 * maxi(0, w - Levels.TOTAL_WAVES + 1)
 	d.speed = float(d.speed) * 0.75
 	d.reward = 200

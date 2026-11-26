@@ -1,0 +1,131 @@
+extends Control
+# Guided first run (Mossgate only): teaches placing, starting a wave, type matchups, upgrading and a second creature.
+const Session = preload("res://session.gd")
+var m
+var step := "intro"
+var label: Label
+var box: PanelContainer
+var targets: Array = []     # Rect2 in screen space to highlight
+var timer := 0.0
+var hint_seen_super := false
+
+func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	size = Vector2(1280, 720)
+	box = PanelContainer.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.09, 0.07, 0.16, 0.94)
+	sb.set_corner_radius_all(16)
+	sb.set_border_width_all(3)
+	sb.border_color = Color("f0b43c")
+	sb.set_content_margin_all(14)
+	box.add_theme_stylebox_override("panel", sb)
+	label = Label.new()
+	label.add_theme_font_size_override("font_size", 21)
+	label.custom_minimum_size = Vector2(560, 0)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(label)
+	add_child(box)
+	box.position = Vector2(16, 520)
+	_enter("intro")
+
+func _say(text: String, rects: Array = []) -> void:
+	label.text = text
+	targets = rects
+	box.size = Vector2(0, 0)
+	box.position = Vector2(16, 520)
+
+func _enter(s: String) -> void:
+	step = s
+	timer = 0.0
+	var card: Control = m.cards.get("tickindle")
+	match s:
+		"intro":
+			_say("Welcome, Wellkeeper!\nWild creatures are drawn to the Well at the end of the lane. Hold them off.")
+		"place":
+			_say("Tap Tickindle below, then tap a glowing rune stone to preview where to place it.", [card.get_global_rect()] + _stone_rects())
+		"confirm":
+			_say("Tap the creature ghost again to place it. Stones boost whoever stands on them!", _pending_rect())
+		"start":
+			_say("Press Start wave to let the first creatures come.", [m.start_btn.get_global_rect()])
+		"watch":
+			_say("Your creature fights on its own. Watch for \"Super!\": that is a type advantage with bonus damage.")
+		"upgrade":
+			_say("Wave cleared! Tap your creature to open its upgrades.", _tower_rects())
+		"buy":
+			_say("Pick an upgrade path. Two paths, four tiers each. Spend your coins!")
+		"second":
+			_say("Add a second creature. Dugloom slows enemies down, a great partner.", [m.cards.get("dugloom").get_global_rect()])
+		"done":
+			_say("You are ready. The Well is yours to hold. Good luck!")
+
+func _stone_rects() -> Array:
+	var out := []
+	for s in m.stones:
+		out.append(Rect2(s.pos - Vector2(48, 48), Vector2(96, 96)))
+	return out
+
+func _pending_rect() -> Array:
+	return [Rect2(m.pending - Vector2(48, 48), Vector2(96, 96))] if m.has_pending else []
+
+func _tower_rects() -> Array:
+	var out := []
+	for t in m.get_tree().get_nodes_in_group("towers"):
+		out.append(Rect2(t.position - Vector2(44, 70), Vector2(88, 100)))
+	return out
+
+func _process(delta: float) -> void:
+	if m == null:
+		return
+	timer += delta
+	var towers: int = m.get_tree().get_nodes_in_group("towers").size()
+	match step:
+		"intro":
+			if timer > 4.5:
+				_enter("place")
+		"place":
+			if m.has_pending:
+				_enter("confirm")
+			else:
+				targets = [m.cards.get("tickindle").get_global_rect()] + _stone_rects()
+		"confirm":
+			targets = _pending_rect()
+			if towers >= 1:
+				_enter("start")
+			elif not m.has_pending:
+				_enter("place")
+		"start":
+			if m.wave_running:
+				_enter("watch")
+		"watch":
+			if not m.wave_running:
+				_enter("upgrade")
+		"upgrade":
+			targets = _tower_rects()
+			if m.sel_tower != null:
+				_enter("buy")
+		"buy":
+			var tiers := 0
+			for t in m.get_tree().get_nodes_in_group("towers"):
+				tiers += t.tiers.a + t.tiers.b
+			if tiers >= 1 or timer > 14.0:
+				_enter("second")
+		"second":
+			if towers >= 2 or timer > 25.0:
+				_enter("done")
+		"done":
+			if timer > 4.0:
+				Session.settings["tutorial_done"] = true
+				Session.save_prefs()
+				queue_free()
+	queue_redraw()
+
+func _draw() -> void:
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 220.0)
+	for r in targets:
+		var rr: Rect2 = r.grow(4.0 + pulse * 4.0)
+		draw_rect(rr, Color(1, 0.9, 0.4, 0.18 + 0.15 * pulse))
+		draw_rect(rr, Color(1, 0.9, 0.4, 0.9), false, 4.0)

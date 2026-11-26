@@ -12,7 +12,7 @@ static var best_wave := {}      # level -> best wave reached
 static var unlocked := {}       # ally tower id -> true
 static var dev_all := false     # testing: unlock everything
 static var _loaded := false
-static var settings := {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true}
+static var settings := {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true, "tutorial_done": false}
 static var no_save := false     # set by headless tests
 
 static func load_save() -> void:
