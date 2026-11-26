@@ -1,5 +1,4 @@
 extends Node2D
-const DrawUtil = preload("res://draw_util.gd")
 var target: Node2D
 var tower
 var dmg := 1.0
@@ -35,4 +34,6 @@ func _draw() -> void:
 		draw_circle(to_local(trail[i]), (4.0 + (4.0 if molten else 0.0)) * a, Color(c.r, c.g, c.b, 0.35 * a))
 	var r := 9.0 if molten else 5.0
 	draw_circle(Vector2.ZERO, r + 4.0, Color(c.r, c.g, c.b, 0.3))
-	DrawUtil.disc(self, Vector2.ZERO, r, c, Color("7a2a00"), 2.0)
+	draw_circle(Vector2.ZERO, r + 1.5, Color("2b1a3d"))
+	draw_circle(Vector2.ZERO, r, c)
+	draw_circle(Vector2(-r * 0.25, -r * 0.25), r * 0.3, Color(1, 1, 1, 0.8))

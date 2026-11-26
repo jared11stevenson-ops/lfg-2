@@ -9,6 +9,9 @@ const BEATS := {
 	"umbra": ["venom", "aether"], "aether": ["volt", "spirit"], "spirit": ["forge", "umbra"],
 }
 
+const COLORS := {"ember": Color("ff8a2b"), "tide": Color("4aa8ff"), "verdant": Color("6fd35a"), "volt": Color("ffe34a"), "stone": Color("b09a7a"),
+	"frost": Color("bfe8ff"), "gale": Color("c8f0e0"), "venom": Color("b44bd8"), "forge": Color("e0a040"), "umbra": Color("7a6ac0"), "aether": Color("ff9ad8"), "spirit": Color("9fffe0")}
+
 static func mult(att: String, defs: Array) -> float:
 	var m := 1.0
 	for d in defs:

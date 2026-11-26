@@ -6,9 +6,9 @@ const Creatures = preload("res://creatures.gd")
 func _init() -> void:
 	var fails := 0
 	var n := 0
-	for id in ["tickindle", "dugloom", "hutzin", "ally_shuckit", "ally_zapnose", "ally_glomm"]:
+	for id in Creatures.TOWERS:
 		var t = TowerScript.new()
-		t.def = Creatures.DEFS[id]
+		t.def = Creatures.TOWERS[id]
 		# buy A,A,A (tier 3) then B must be limited to tier 2
 		for ch in "aaa":
 			t.buy(ch)
@@ -32,9 +32,9 @@ func _init() -> void:
 		# spent equals sum of costs
 		var total := 0
 		for i in 4:
-			total += int(Creatures.DEFS[id].upgrades.a[i].cost)
+			total += int(Creatures.TOWERS[id].upgrades.a[i].cost)
 		for i in 2:
-			total += int(Creatures.DEFS[id].upgrades.b[i].cost)
+			total += int(Creatures.TOWERS[id].upgrades.b[i].cost)
 		n += 1
 		if t.spent != total:
 			fails += 1
@@ -42,7 +42,7 @@ func _init() -> void:
 		t.free()
 	# stat application: Hot Iron (+30% dmg) on Tickindle
 	var tk = TowerScript.new()
-	tk.def = Creatures.DEFS.tickindle
+	tk.def = Creatures.TOWERS.tickindle
 	var base := float(tk.st.dmg)
 	tk.buy("b")
 	n += 1

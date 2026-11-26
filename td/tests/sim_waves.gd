@@ -7,13 +7,19 @@ func _initialize() -> void:
 	load("res://session.gd").no_save = true
 	var args := OS.get_cmdline_user_args()
 	for x in args:
-		if x.begins_with("map="):
-			load("res://session.gd").map_id = x.substr(4)
+		if x.begins_with("map=") or x.begins_with("level="):
+			load("res://session.gd").level_id = x.get_slice("=", 1)
+		if x.begins_with("diff="):
+			load("res://session.gd").diff = x.substr(5)
+		if x.begins_with("mut="):
+			load("res://session.gd").muts = Array(x.substr(4).split(","))
+		if x.begins_with("seed="):
+			load("res://session.gd").run_seed = int(x.substr(5))
 	main = load("res://main.tscn").instantiate()
 	root.add_child(main)
-	var defs = load("res://creatures.gd").DEFS
+	var defs = load("res://creatures.gd").TOWERS
 	for a in args:
-		if a.begins_with("map="):
+		if "=" in a and not ":" in a:
 			continue
 		var parts: PackedStringArray = a.split(":")
 		var xy: PackedStringArray = parts[1].split(",")

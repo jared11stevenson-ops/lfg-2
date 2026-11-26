@@ -11,13 +11,17 @@ func _initialize() -> void:
 	out = a[0]
 	at = int(a[1])
 	for x in a:
-		if x.begins_with("map="):
-			load("res://session.gd").map_id = x.substr(4)
-	main = load("res://scene.tscn".replace("scene", "menu" if "menu" in a else "main")).instantiate()
+		if x.begins_with("map=") or x.begins_with("level="):
+			load("res://session.gd").level_id = x.get_slice("=", 1)
+	load("res://session.gd").no_save = true
+	main = load("res://scene.tscn".replace("scene", "menu" if ("menu" in a or "bestiary" in a) else "main")).instantiate()
 	root.add_child(main)
-	var defs = load("res://creatures.gd").DEFS
+	var defs = load("res://creatures.gd").TOWERS
 	for i in range(2, a.size()):
-		if a[i] == "menu" or a[i].begins_with("map="):
+		if a[i] == "bestiary":
+			main.mode = "bestiary"
+			continue
+		if a[i] == "menu" or a[i].begins_with("map=") or a[i].begins_with("level="):
 			continue
 		if a[i].begins_with("select="):
 			sel_spec = a[i].substr(7)
