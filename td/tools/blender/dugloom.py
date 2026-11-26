@@ -104,6 +104,8 @@ def build(variant=""):
             bind(cap, "flipP")
         for sy in (-1, 1):
             bind(cone(f"bigtusk{sy}", (1.55, sy * 0.2, 0.6), 0.06, 0.0, 0.3, white, rot=(180, 0, 0), outline=0.008), "head")
+    import faces
+    faces.upgrade_dugloom(r, variant)
     return r
 
 def pose(r, state, t):

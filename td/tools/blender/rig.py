@@ -138,22 +138,34 @@ def sprite_camera(ppu, size=192, origin=(105, 173), el=10.0, az=90.0):
     bpy.context.scene.camera = cam
     return cam
 
-def bake_frames(rig, pose_fn, out_dir, name, ppu, states=("idle", "walk", "attack"), yaw=-28.0):
-    """Render every animation frame to 192px PNGs (2x supersampled, downscaled)."""
+def bake_frames(rig, pose_fn, out_dir, name, ppu, states=("idle", "walk", "attack"), yaw=-32.0, size=256):
+    """Render every animation frame to size x size PNGs (2x supersampled). The game draws every frame at a fixed
+    logical size, so higher `size` just means crisper sprites."""
     from PIL import Image
     import os, tempfile
     os.makedirs(out_dir, exist_ok=True)
-    setup_render(res=384, samples=14)
-    bpy.context.scene.render.line_thickness = 4.8
-    sprite_camera(ppu, size=192)
+    k = size / 192.0
+    setup_render(res=size * 2, samples=14)
+    bpy.context.scene.render.line_thickness = 4.8 * k
+    sprite_camera(ppu * k, size=size, origin=(105 * k, 173 * k))
     tmp = os.path.join(tempfile.gettempdir(), "wf_frame_%d.png" % os.getpid())
     for state in states:
         for i in range(FRAMES[state]):
             pose_fn(rig, state, i / FRAMES[state])
             rig.rot("root", AXZ, yaw)
             bpy.context.scene.render.filepath = tmp
-            bpy.context.scene.render.resolution_x = 384
-            bpy.context.scene.render.resolution_y = 384
+            bpy.context.scene.render.resolution_x = size * 2
+            bpy.context.scene.render.resolution_y = size * 2
             bpy.ops.render.render(write_still=True)
-            im = Image.open(tmp).convert("RGBA").resize((192, 192), Image.LANCZOS)
+            im = Image.open(tmp).convert("RGBA").resize((size, size), Image.LANCZOS)
             im.save(os.path.join(out_dir, f"{name}_{state}_{i}.png"))
+
+def closeup(rig, pose_fn, out, target, ortho=1.9, res=900, state="idle", t=0.1, yaw=-32.0):
+    """High-res close-up of the face to check eyes/mouth/nose detail."""
+    pose_fn(rig, state, t)
+    rig.rot("root", AXZ, yaw)
+    setup_render(res=res, samples=24)
+    bpy.context.scene.render.line_thickness = 3.0 * res / 768.0 * 1.6
+    camera('side', ortho, target)
+    bpy.context.scene.render.filepath = out
+    bpy.ops.render.render(write_still=True)

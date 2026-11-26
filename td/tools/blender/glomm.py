@@ -86,6 +86,8 @@ def build(variant=""):
         for k in range(10):
             a = k * 0.63
             bind(ellipsoid(f"storm{k}", (-0.1 + math.cos(a) * 0.32, math.sin(a) * 0.32, 1.85 + k * 0.05), (0.05, 0.05, 0.05), flake, outline=0), "globe")
+    import faces
+    faces.upgrade_glomm(r, variant)
     return r
 
 def pose(r, state, t):

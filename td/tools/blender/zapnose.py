@@ -89,6 +89,8 @@ def build(variant=""):
         bind(tube("scarf", [(0.5, 0.3, 1.4), (0.4, 0.5, 1.25), (0.1, 0.5, 1.4)], [0.07] * 3, toon_mat("scarfr", "#e0463a"), outline=0.008), "body")
         for cap in TUBE_CAPS:
             bind(cap, "body")
+    import faces
+    faces.upgrade_zapnose(r, variant)
     return r
 
 def pose(r, state, t):

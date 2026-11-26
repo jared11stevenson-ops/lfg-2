@@ -82,6 +82,8 @@ def build(variant=""):
     bind(caps[0], "tail1")
     bind(caps[1], "tail3")
     bind(ellipsoid("tailwisp", (-1.6, 0, 1.84), (0.07, 0.07, 0.13), wisp, outline=0), "tail3")
+    import faces
+    faces.upgrade_shuckit(r, variant)
     return r
 
 def pose(r, state, t):

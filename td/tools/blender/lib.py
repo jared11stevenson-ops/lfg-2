@@ -29,9 +29,10 @@ def hexc(h):
 
 _mats = {}
 
-def toon_mat(name, color, shadow=(0.55, 0.5, 0.75), rim=0.18, glow=0.0):
-    """Cel-shaded material. color: hex or rgba. glow>0 makes it emissive (lanterns, flames, eyes)."""
-    key = (name, str(color), glow)
+def toon_mat(name, color, shadow=(0.55, 0.5, 0.75), rim=0.18, glow=0.0, spec=0.0, ao=0.5):
+    """Cel-shaded material with soft band edges, contact-shadow AO and an optional toon specular glint.
+    color: hex or rgba. glow>0 makes it emissive (lanterns, flames, glowing eyes). spec 0..1: glossy highlight strength."""
+    key = (name, str(color), glow, spec, ao)
     if key in _mats:
         return _mats[key]
     base = hexc(color) if isinstance(color, str) else _col(color)
@@ -58,13 +59,19 @@ def toon_mat(name, color, shadow=(0.55, 0.5, 0.75), rim=0.18, glow=0.0):
     ma.inputs[2].default_value = 0.5
     nt.links.new(dot.outputs['Value'], ma.inputs[0])
     ramp = nt.nodes.new('ShaderNodeValToRGB')
-    ramp.color_ramp.interpolation = 'CONSTANT'
-    ramp.color_ramp.elements[0].position = 0.0
-    ramp.color_ramp.elements[0].color = (shadow[0] * 0.62, shadow[1] * 0.58, shadow[2] * 0.85, 1)
-    e1 = ramp.color_ramp.elements.new(0.40)
-    e1.color = (min(1, shadow[0] * 1.3 + 0.12), min(1, shadow[1] * 1.3 + 0.12), min(1, shadow[2] * 1.15 + 0.1), 1)
-    e2 = ramp.color_ramp.elements.new(0.66)
-    e2.color = (1.0, 1.0, 1.0, 1)
+    cr = ramp.color_ramp
+    cr.interpolation = 'LINEAR'
+    dark = (shadow[0] * 0.62, shadow[1] * 0.58, shadow[2] * 0.85, 1)
+    mid = (min(1, shadow[0] * 1.3 + 0.12), min(1, shadow[1] * 1.3 + 0.12), min(1, shadow[2] * 1.15 + 0.1), 1)
+    cr.elements[0].position = 0.0
+    cr.elements[0].color = dark
+    for pos, col in ((0.34, dark), (0.44, mid), (0.56, mid), (0.64, (1, 1, 1, 1)), (1.0, (1, 1, 1, 1))):
+        if pos == 1.0:
+            cr.elements[1].position = pos
+            cr.elements[1].color = col
+        else:
+            e = cr.elements.new(pos)
+            e.color = col
     nt.links.new(ma.outputs[0], ramp.inputs['Fac'])
     mul = nt.nodes.new('ShaderNodeMix')
     mul.data_type = 'RGBA'
@@ -72,6 +79,27 @@ def toon_mat(name, color, shadow=(0.55, 0.5, 0.75), rim=0.18, glow=0.0):
     mul.inputs['Factor'].default_value = 1.0
     mul.inputs['A'].default_value = base
     nt.links.new(ramp.outputs['Color'], mul.inputs['B'])
+    last = mul.outputs['Result']
+    # contact-shadow ambient occlusion
+    if ao > 0.0:
+        ao_n = nt.nodes.new('ShaderNodeAmbientOcclusion')
+        ao_n.inputs['Distance'].default_value = 0.35
+        ao_n.samples = 6
+        inv_ao = nt.nodes.new('ShaderNodeMath')
+        inv_ao.operation = 'SUBTRACT'
+        inv_ao.inputs[0].default_value = 1.0
+        nt.links.new(ao_n.outputs['AO'], inv_ao.inputs[1])
+        sc = nt.nodes.new('ShaderNodeMath')
+        sc.operation = 'MULTIPLY'
+        sc.inputs[1].default_value = ao
+        nt.links.new(inv_ao.outputs[0], sc.inputs[0])
+        aomix = nt.nodes.new('ShaderNodeMix')
+        aomix.data_type = 'RGBA'
+        aomix.blend_type = 'MIX'
+        aomix.inputs['B'].default_value = (0.10, 0.05, 0.22, 1.0)
+        nt.links.new(last, aomix.inputs['A'])
+        nt.links.new(sc.outputs[0], aomix.inputs['Factor'])
+        last = aomix.outputs['Result']
     lw = nt.nodes.new('ShaderNodeLayerWeight')
     lw.inputs['Blend'].default_value = 0.5
     rr = nt.nodes.new('ShaderNodeValToRGB')
@@ -80,8 +108,6 @@ def toon_mat(name, color, shadow=(0.55, 0.5, 0.75), rim=0.18, glow=0.0):
     rr.color_ramp.elements[0].color = (0, 0, 0, 1)
     r1 = rr.color_ramp.elements.new(0.78)
     r1.color = (1, 1, 1, 1)
-    nt.links.new(lw.outputs['Facing'], rr.inputs['Fac'])
-    # facing is 1 at the centre, 0 at the silhouette: invert for rim
     inv = nt.nodes.new('ShaderNodeMath')
     inv.operation = 'SUBTRACT'
     inv.inputs[0].default_value = 1.0
@@ -91,10 +117,42 @@ def toon_mat(name, color, shadow=(0.55, 0.5, 0.75), rim=0.18, glow=0.0):
     rim_mix.data_type = 'RGBA'
     rim_mix.blend_type = 'ADD'
     rim_mix.inputs['Factor'].default_value = rim
-    nt.links.new(mul.outputs['Result'], rim_mix.inputs['A'])
+    nt.links.new(last, rim_mix.inputs['A'])
     nt.links.new(rr.outputs['Color'], rim_mix.inputs['B'])
+    last = rim_mix.outputs['Result']
+    # toon specular: a hard white glint where the half-vector aligns with the normal
+    if spec > 0.0:
+        neg = nt.nodes.new('ShaderNodeVectorMath')
+        neg.operation = 'SCALE'
+        neg.inputs['Scale'].default_value = -1.0
+        nt.links.new(geo.outputs['Incoming'], neg.inputs[0])
+        add = nt.nodes.new('ShaderNodeVectorMath')
+        add.operation = 'ADD'
+        add.inputs[1].default_value = LIGHT
+        nt.links.new(neg.outputs[0], add.inputs[0])
+        nrm = nt.nodes.new('ShaderNodeVectorMath')
+        nrm.operation = 'NORMALIZE'
+        nt.links.new(add.outputs[0], nrm.inputs[0])
+        sd = nt.nodes.new('ShaderNodeVectorMath')
+        sd.operation = 'DOT_PRODUCT'
+        nt.links.new(nrm.outputs[0], sd.inputs[0])
+        nt.links.new(geo.outputs['Normal'], sd.inputs[1])
+        sr = nt.nodes.new('ShaderNodeValToRGB')
+        sr.color_ramp.interpolation = 'CONSTANT'
+        sr.color_ramp.elements[0].position = 0.0
+        sr.color_ramp.elements[0].color = (0, 0, 0, 1)
+        s1 = sr.color_ramp.elements.new(0.965)
+        s1.color = (1, 1, 1, 1)
+        nt.links.new(sd.outputs['Value'], sr.inputs['Fac'])
+        sp = nt.nodes.new('ShaderNodeMix')
+        sp.data_type = 'RGBA'
+        sp.blend_type = 'ADD'
+        sp.inputs['Factor'].default_value = spec
+        nt.links.new(last, sp.inputs['A'])
+        nt.links.new(sr.outputs['Color'], sp.inputs['B'])
+        last = sp.outputs['Result']
     em = nt.nodes.new('ShaderNodeEmission')
-    nt.links.new(rim_mix.outputs['Result'], em.inputs['Color'])
+    nt.links.new(last, em.inputs['Color'])
     nt.links.new(em.outputs[0], out.inputs[0])
     _mats[key] = m
     return m

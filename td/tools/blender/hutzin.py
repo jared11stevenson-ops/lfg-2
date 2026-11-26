@@ -102,6 +102,8 @@ def build(variant=""):
         for sx in (-0.4, 0.1):
             bind(box(f"win2{sx}", (sx, 0.3, 2.6), (0.12, 0.04, 0.14), lit, outline=0.006), "hut")
         bind(box("door2", (-0.15, 0.3, 2.45), (0.14, 0.04, 0.22), brownd, outline=0.006), "hut")
+    import faces
+    faces.upgrade_hutzin(r, variant)
     return r
 
 def pose(r, state, t):

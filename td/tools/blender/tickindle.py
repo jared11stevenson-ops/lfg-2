@@ -130,6 +130,8 @@ def build(variant=""):
         bind(cone("anvilhorn", (-0.22, 0, 1.5), 0.08, 0.0, 0.22, steel, rot=(0, 90, 0), outline=0.008), "body")
         for k in range(4):
             bind(ellipsoid(f"seam{k}", (0.2 - k * 0.2, 0.0, 1.43 - 0.04 * (k % 2)), (0.05, 0.12, 0.03), toon_mat("lava", "#ff6a1a", glow=2.5), outline=0), "body")
+    import faces
+    faces.upgrade_tickindle(r, variant)
     return r
 
 def pose(r, state, t):
