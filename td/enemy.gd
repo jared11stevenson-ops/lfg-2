@@ -282,6 +282,12 @@ func _draw() -> void:
 		draw_circle(Vector2(0, 6), (20 + poison * 2) * scale_mul, Color(0.6, 0.2, 0.8, 0.3))
 	if wet_t > 0.0:
 		draw_circle(Vector2(0, 6), 22 * scale_mul, Color(0.3, 0.6, 1.0, 0.25))
+	if heal_aura > 0.0:
+		draw_arc(Vector2.ZERO, 150.0, 0, TAU, 40, Color(0.5, 1.0, 0.6, 0.18), 2.0, true)
+	if speed_aura:
+		draw_arc(Vector2.ZERO, 150.0, 0, TAU, 40, Color(1.0, 0.9, 0.4, 0.18), 2.0, true)
+	if chill_aura:
+		draw_arc(Vector2.ZERO, 140.0, 0, TAU, 40, Color(0.6, 0.85, 1.0, 0.22), 2.0, true)
 	if shield > 0.0:
 		draw_arc(Vector2(0, -26 * scale_mul), 34 * scale_mul, 0, TAU, 28, Color(0.6, 0.9, 1.0, 0.8), 3.0, true)
 	draw_set_transform(Vector2(0, 8), 0.0, Vector2(1.3 * scale_mul, 0.4 * scale_mul))

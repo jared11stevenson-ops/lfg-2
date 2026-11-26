@@ -67,6 +67,8 @@ var prev_btn: Button
 var next_btn: Button
 var panel
 var paused_scale := 1.0
+var intro: Label
+var intro_t := 5.0
 
 func _ready() -> void:
 	lv = Levels.LEVELS[Session.level_id]
@@ -137,7 +139,7 @@ func _build_ui() -> void:
 	endless_btn = _button("Endless", Vector2(760, 480), Vector2(190, 60), 26, Color("8a5a1a"), _go_endless)
 	endless_btn.visible = false
 	layer.add_child(endless_btn)
-	hint = _label(Vector2(300, 520), 22)
+	hint = _label(Vector2(260, 470), 22)
 	hint.text = "Pick a creature below, tap the ground to place it.\nTap a placed creature to upgrade it. Glowing rune stones boost whoever stands on them!"
 	Session.load_save()
 	hint.visible = Session.stars.is_empty()
@@ -152,6 +154,11 @@ func _build_ui() -> void:
 	next_btn = _button(">", Vector2(924, 662), Vector2(50, 44), 22, Color("3a4a6b"), func(): _page(1))
 	layer.add_child(prev_btn)
 	layer.add_child(next_btn)
+	intro = _label(Vector2(0, 300), 44)
+	intro.size = Vector2(1280, 200)
+	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	intro.text = "%s\n%s" % [lv.name, lv.rule]
+	layer.add_child(intro)
 	Sfx.start_music(self)
 
 func _build_shop() -> void:
@@ -272,6 +279,8 @@ func _start_wave() -> void:
 
 func _process(delta: float) -> void:
 	clock += delta
+	intro_t -= delta
+	intro.modulate.a = clampf(intro_t / 1.2, 0.0, 1.0)
 	red_flash = maxf(0.0, red_flash - delta)
 	surge_cd = maxf(0.0, surge_cd - delta)
 	surge_btn.disabled = surge_cd > 0.0 or not wave_running
@@ -530,7 +539,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 		if state != "play":
 			return
-		var p := get_global_mouse_position()
+		var p: Vector2 = get_canvas_transform().affine_inverse() * ev.position
 		var tw = _tower_at(p)
 		if tw != null:
 			_select_tower(tw)

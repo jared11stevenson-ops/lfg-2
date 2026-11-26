@@ -6,6 +6,12 @@ var out := "shot.png"
 var at := 900
 var sel_spec := ""
 var first_tower
+func _has_prefix(a: PackedStringArray, pre: String) -> bool:
+	for x in a:
+		if x.begins_with(pre):
+			return true
+	return false
+
 func _initialize() -> void:
 	var a := OS.get_cmdline_user_args()
 	out = a[0]
@@ -14,10 +20,13 @@ func _initialize() -> void:
 		if x.begins_with("map=") or x.begins_with("level="):
 			load("res://session.gd").level_id = x.get_slice("=", 1)
 	load("res://session.gd").no_save = true
-	main = load("res://scene.tscn".replace("scene", "menu" if ("menu" in a or "bestiary" in a) else "main")).instantiate()
+	main = load("res://scene.tscn".replace("scene", "menu" if ("menu" in a or "bestiary" in a or _has_prefix(a, "setup=")) else "main")).instantiate()
 	root.add_child(main)
 	var defs = load("res://creatures.gd").TOWERS
 	for i in range(2, a.size()):
+		if a[i].begins_with("setup="):
+			main.call_deferred("_open_setup", a[i].substr(6))
+			continue
 		if a[i] == "bestiary":
 			main.mode = "bestiary"
 			continue

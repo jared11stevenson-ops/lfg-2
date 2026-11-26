@@ -222,6 +222,7 @@ func _fire(t) -> void:
 			if tg.wet_t > 0.0 and "volt" in def.types:
 				p.dmg *= float(st.wet_mult)
 			p.color = TypeChart.COLORS[def.types[0]]
+			p.ptype = def.types[0]
 			p.position = position + Vector2(0, -26) + Vector2(0, i * 6)
 			get_parent().add_child(p)
 
@@ -360,7 +361,20 @@ func _draw() -> void:
 	var sc := BASE_SCALE * (1.0 + 0.04 * total)
 	if not PuppetLib.draw(self, _sprite_id(), state, frame, flip, sc, Vector2(0, 8), Color.WHITE if chilled_t <= 0.0 else Color(0.7, 0.85, 1.0)):
 		draw_circle(Vector2(0, -20), 20, TypeChart.COLORS[def.types[0]])
+	_draw_emote()
 	for i in tiers.a:
 		draw_circle(Vector2(-14 + i * 8, 20), 3.0, Color("ffb347"))
 	for i in tiers.b:
 		draw_circle(Vector2(6 + i * 8, 20), 3.0, Color("6fd3ff"))
+
+# Idle personality: now and then a defender pipes up with a little emote above its head.
+const EMOTES := ["♪", "!", "?", "...", "♥", "zZ"]
+func _draw_emote() -> void:
+	var ph := fmod(float(Time.get_ticks_msec()) / 1000.0 * 0.11 + position.x * 0.0173 + position.y * 0.0091, 1.0)
+	if ph < 0.1 and atk_t <= 0.0:
+		var idx := int(position.x * 7.0 + position.y * 3.0 + floor(float(Time.get_ticks_msec()) / 9000.0)) % EMOTES.size()
+		var k := ph / 0.1
+		var f := ThemeDB.fallback_font
+		var pos := Vector2(-6, -86 * BASE_SCALE / 0.62 - 10 - k * 10)
+		draw_string_outline(f, pos, EMOTES[idx], HORIZONTAL_ALIGNMENT_LEFT, -1, 22, 6, Color("1d1230"))
+		draw_string(f, pos, EMOTES[idx], HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(1, 1, 1, 1.0 - k * 0.6))

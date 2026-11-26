@@ -6,4 +6,5 @@ $G --headless --path . --import >/dev/null 2>&1 || true
 $G --headless --path . -s tests/test_type_chart.gd | tail -1
 $G --headless --path . -s tests/test_upgrades.gd | tail -1
 $G --headless --path . -s tests/test_levels.gd | tail -1
+$G --headless --path . -s tests/test_ui.gd | tail -1
 $G --headless --path . --fixed-fps 60 -s tests/sim_auto.gd -- level=mossgate n=9 tiers=2 seed=5 | grep RESULT
