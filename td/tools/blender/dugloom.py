@@ -5,7 +5,7 @@ import sys, os, math
 sys.path.insert(0, os.path.dirname(__file__))
 from rig import *
 
-PPU = 40.0
+PPU = 44.0
 
 def build(variant=""):
     reset()
@@ -19,7 +19,7 @@ def build(variant=""):
     cream = toon_mat("cream", "#fff6d8", rim=0.0)
     wood = toon_mat("wood", "#9a7a5a")
     glint = toon_mat("glint", "#ffffff", glow=2.0)
-    cap_m = toon_mat("cap", "#5a6fd8", shadow=(0.4, 0.45, 0.85))
+    cap_m = toon_mat("cap", "#4a5cff", shadow=(0.35, 0.4, 0.9))
     pom = toon_mat("pom", "#fff2f8", shadow=(0.7, 0.6, 0.8))
     r = Rig("DugloomRig")
     S = [(0.78, 0, 1.5), (0.55, 0, 1.95), (0.85, 0, 2.4), (1.25, 0, 2.38), (1.32, 0, 2.12)]
@@ -43,10 +43,10 @@ def build(variant=""):
         flp = "flipP" if sy > 0 else "flipN"
         bind(ellipsoid(f"nostril{sy}", (1.66, sy * 0.1, 0.99), (0.04, 0.05, 0.04), inkc, outline=0), "head")
         bind(cone(f"tusk{sy}", (1.5, sy * 0.15, 0.66), 0.05, 0.0, 0.2, white, rot=(180, 0, 0), outline=0.008), "head")
-        bind(ellipsoid(f"eye{sy}", (1.1, sy * 0.38, 1.2), (0.17, 0.17, 0.17), cream, outline=0.012), "head")
-        bind(ellipsoid(f"pupil{sy}", (1.24, sy * 0.38, 1.16), (0.07, 0.075, 0.095), inkc, outline=0), "head")
+        bind(ellipsoid(f"eye{sy}", (1.1, sy * 0.38, 1.2), (0.2, 0.2, 0.2), cream, outline=0.012), "head")
+        bind(ellipsoid(f"pupil{sy}", (1.28, sy * 0.38, 1.16), (0.085, 0.09, 0.115), inkc, outline=0), "head")
         bind(ellipsoid(f"glint{sy}", (1.29, sy * 0.35, 1.2), (0.03, 0.035, 0.04), glint, outline=0), "head")
-        bind(ellipsoid(f"lid{sy}", (1.1, sy * 0.38, 1.27), (0.19, 0.19, 0.095), deep, outline=0.01), lid)
+        bind(ellipsoid(f"lid{sy}", (1.1, sy * 0.38, 1.29), (0.22, 0.22, 0.11), deep, outline=0.01), lid)
         bind(ellipsoid(f"blush{sy}", (1.2, sy * 0.42, 0.98), (0.05, 0.11, 0.07), blush, outline=0), "head")
         for k in range(3):
             bind(tube(f"whisk{sy}{k}", [(1.6, sy * 0.22, 0.88 - k * 0.04), (1.62, sy * 0.45, 0.9 - k * 0.07 + 0.02), (1.58, sy * 0.7, 0.93 - k * 0.11)], [0.012] * 3, inkc, outline=0), "head")

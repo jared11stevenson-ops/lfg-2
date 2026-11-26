@@ -5,7 +5,7 @@ import sys, os, math
 sys.path.insert(0, os.path.dirname(__file__))
 from rig import *
 
-PPU = 50.0
+PPU = 52.0
 
 def build(variant=""):
     reset()
@@ -56,7 +56,7 @@ def build(variant=""):
             for cap in TUBE_CAPS:
                 bind(cap, ear)
         # mismatched, glowing, cheeky eyes (one bigger)
-        big = 0.15 if sy > 0 else 0.11
+        big = 0.2 if sy > 0 else 0.15
         bind(ellipsoid(f"eye{sy}", (1.1, sy * 0.2, 1.34), (big, big, big), glow, outline=0.01), "head")
         bind(ellipsoid(f"pupil{sy}", (1.1 + big * 0.9, sy * 0.2, 1.33), (0.035, 0.05, 0.075), inkc, outline=0), "head")
         bind(ellipsoid(f"lid{sy}", (1.1, sy * 0.2, 1.34 + big * 0.6), (big * 1.15, big * 1.15, big * 0.7), ink, outline=0.01), lid)
@@ -69,11 +69,11 @@ def build(variant=""):
         bind(cap, "head")
     # noodle legs with paws
     for name, x, sy, bone in (("FP", 0.55, 1, "legFP"), ("FN", 0.55, -1, "legFN"), ("BP", -0.5, 1, "legBP"), ("BN", -0.5, -1, "legBN")):
-        lg = tube(f"leg{name}", [(x, sy * 0.17, 0.86), (x + 0.04, sy * 0.17, 0.5), (x + 0.02, sy * 0.17, 0.12)], [0.09, 0.065, 0.06], inkd)
+        lg = tube(f"leg{name}", [(x, sy * 0.17, 0.86), (x + 0.04, sy * 0.17, 0.5), (x + 0.02, sy * 0.17, 0.12)], [0.115, 0.085, 0.075], inkd)
         bind(lg, bone)
         for cap in TUBE_CAPS:
             bind(cap, bone)
-        bind(ellipsoid(f"paw{name}", (x + 0.1, sy * 0.17, 0.06), (0.14, 0.1, 0.06), inkd), bone)
+        bind(ellipsoid(f"paw{name}", (x + 0.1, sy * 0.17, 0.06), (0.17, 0.12, 0.07), inkd), bone)
     # wispy tail
     pts = [(-0.7, 0, 1.0), (-1.1, 0, 1.1), (-1.45, 0, 1.35), (-1.6, 0, 1.75)]
     tl = tube("tail", pts, [0.13, 0.11, 0.08, 0.04], ink)

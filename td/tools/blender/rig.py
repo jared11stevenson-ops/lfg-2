@@ -146,7 +146,7 @@ def bake_frames(rig, pose_fn, out_dir, name, ppu, states=("idle", "walk", "attac
     setup_render(res=384, samples=14)
     bpy.context.scene.render.line_thickness = 4.8
     sprite_camera(ppu, size=192)
-    tmp = os.path.join(tempfile.gettempdir(), "wf_frame.png")
+    tmp = os.path.join(tempfile.gettempdir(), "wf_frame_%d.png" % os.getpid())
     for state in states:
         for i in range(FRAMES[state]):
             pose_fn(rig, state, i / FRAMES[state])

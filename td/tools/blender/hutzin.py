@@ -61,10 +61,10 @@ def build(variant=""):
         bind(cap, "neck")
     bind(ellipsoid("head", (0.74, 0, 1.97), (0.32, 0.27, 0.28), green), "head")
     bind(ellipsoid("face", (0.96, 0, 1.93), (0.14, 0.22, 0.22), blue, outline=0.01), "head")
-    bind(cone("beakU", (1.12, 0, 1.92), 0.11, 0.0, 0.4, gold, rot=(0, 90, 0)), "head")
-    bind(cone("beakL", (1.08, 0, 1.82), 0.08, 0.0, 0.3, gold, rot=(0, 90, 0)), "jaw")
+    bind(cone("beakU", (1.14, 0, 1.92), 0.14, 0.0, 0.5, gold, rot=(0, 90, 0)), "head")
+    bind(cone("beakL", (1.1, 0, 1.82), 0.1, 0.0, 0.38, gold, rot=(0, 90, 0)), "jaw")
     # manic mismatched bug eyes
-    for sy, big, lid in ((1, 0.15, "lidP"), (-1, 0.1, "lidN")):
+    for sy, big, lid in ((1, 0.19, "lidP"), (-1, 0.13, "lidN")):
         z = 2.05 if sy > 0 else 2.0
         bind(ellipsoid(f"eye{sy}", (0.9, sy * 0.19, z), (big, big, big), white, outline=0.012), "head")
         bind(ellipsoid(f"iris{sy}", (0.9 + big * 0.85, sy * 0.19, z - 0.01), (0.05, big * 0.5, big * 0.5), ired, outline=0), "head")

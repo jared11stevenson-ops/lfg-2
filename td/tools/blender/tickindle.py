@@ -47,8 +47,8 @@ def build(variant=""):
     # --- head ---
     bind(ellipsoid("head", (0.6, 0, 1.38), (0.72, 0.84, 0.56), fur), "head")
     for sy, bn in ((1, "earP"), (-1, "earN")):
-        bind(ellipsoid(f"cheek{sy}", (0.52, sy * 0.78, 1.28), (0.34, 0.3, 0.3), light), "head")
-        bind(ellipsoid(f"cheek2{sy}", (0.42, sy * 0.92, 1.2), (0.22, 0.2, 0.22), light), "head")
+        bind(ellipsoid(f"cheek{sy}", (0.52, sy * 0.78, 1.28), (0.26, 0.24, 0.24), light), "head")
+        bind(ellipsoid(f"cheek2{sy}", (0.42, sy * 0.92, 1.2), (0.16, 0.15, 0.16), light), "head")
         tilt = (sy * -14, 8, 0) if sy > 0 else (sy * -14, 8, 0)
         bind(cone(f"ear{sy}", (0.34, sy * 0.52, 1.86), 0.24, 0.03, 0.42, fur, rot=(sy * -14, 8, sy * (10 if sy > 0 else 0))), bn)
         bind(cone(f"earin{sy}", (0.4, sy * 0.52, 1.84), 0.13, 0.02, 0.3, pink, rot=(sy * -14, 8, sy * (10 if sy > 0 else 0)), outline=0), bn)
@@ -56,14 +56,14 @@ def build(variant=""):
         for k in range(3):
             bind(tube(f"whisk{sy}{k}", [(1.2, sy * 0.58, 1.2 - k * 0.07), (1.22, sy * 0.85, 1.22 - k * 0.1), (1.12, sy * 1.12, 1.2 - k * 0.15)], [0.014] * 3, inkc, outline=0), "head")
         # big expressive eyes
-        bind(ellipsoid(f"eye{sy}", (1.0, sy * 0.34, 1.46), (0.17, 0.2, 0.19), eye, outline=0.012), "head")
-        bind(ellipsoid(f"pupil{sy}", (1.15, sy * 0.34, 1.46), (0.035, 0.06, 0.15), inkc, outline=0), "head")
-        bind(ellipsoid(f"glint{sy}", (1.17, sy * 0.3, 1.52), (0.025, 0.03, 0.04), glint, outline=0), "head")
+        bind(ellipsoid(f"eye{sy}", (1.0, sy * 0.34, 1.46), (0.2, 0.23, 0.22), eye, outline=0.012), "head")
+        bind(ellipsoid(f"pupil{sy}", (1.19, sy * 0.34, 1.46), (0.04, 0.07, 0.17), inkc, outline=0), "head")
+        bind(ellipsoid(f"glint{sy}", (1.22, sy * 0.3, 1.53), (0.03, 0.04, 0.05), glint, outline=0), "head")
         brow = tube(f"brow{sy}", [(0.98, sy * 0.62, 1.78), (1.04, sy * 0.36, 1.72), (1.08, sy * 0.1, 1.58)], [0.065, 0.075, 0.065], dark, outline=0.01)
         bind(brow, "browP" if sy > 0 else "browN")
         for cap in TUBE_CAPS:
             bind(cap, "browP" if sy > 0 else "browN")
-        bind(ellipsoid(f"lid{sy}", (1.0, sy * 0.34, 1.62), (0.19, 0.22, 0.1), fur, outline=0.01), "lidP" if sy > 0 else "lidN")
+        bind(ellipsoid(f"lid{sy}", (1.0, sy * 0.34, 1.64), (0.22, 0.25, 0.1), fur, outline=0.01), "lidP" if sy > 0 else "lidN")
     # fur crown tuft: scruffy personality
     for k, (dy, h) in enumerate(((-0.2, 0.3), (0.0, 0.42), (0.2, 0.32))):
         bind(cone(f"tuft{k}", (0.4, dy, 1.9 + h * 0.1), 0.1, 0.0, h, fur, rot=(dy * -40, -12, 0)), "head")

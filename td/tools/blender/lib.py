@@ -99,6 +99,28 @@ def toon_mat(name, color, shadow=(0.55, 0.5, 0.75), rim=0.18, glow=0.0):
     _mats[key] = m
     return m
 
+def glass_mat(name, color, alpha=0.35):
+    """See-through tinted glass (snow globes, goggles)."""
+    key = (name, str(color), alpha, 'glass')
+    if key in _mats:
+        return _mats[key]
+    base = hexc(color) if isinstance(color, str) else _col(color)
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new('ShaderNodeOutputMaterial')
+    em = nt.nodes.new('ShaderNodeEmission')
+    em.inputs['Color'].default_value = base
+    tr = nt.nodes.new('ShaderNodeBsdfTransparent')
+    mix = nt.nodes.new('ShaderNodeMixShader')
+    mix.inputs['Fac'].default_value = alpha
+    nt.links.new(tr.outputs[0], mix.inputs[1])
+    nt.links.new(em.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], out.inputs[0])
+    _mats[key] = m
+    return m
+
 _ink = None
 def ink_mat():
     """Outline material: black on backfaces only, transparent on front faces (inverted hull in Cycles)."""
