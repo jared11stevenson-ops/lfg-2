@@ -2,3 +2,4 @@
 *.import
 build/
 dist/
+*.blend1
