@@ -10,10 +10,15 @@ func _initialize() -> void:
 	var a := OS.get_cmdline_user_args()
 	out = a[0]
 	at = int(a[1])
-	main = load("res://main.tscn").instantiate()
+	for x in a:
+		if x.begins_with("map="):
+			load("res://session.gd").map_id = x.substr(4)
+	main = load("res://scene.tscn".replace("scene", "menu" if "menu" in a else "main")).instantiate()
 	root.add_child(main)
 	var defs = load("res://creatures.gd").DEFS
 	for i in range(2, a.size()):
+		if a[i] == "menu" or a[i].begins_with("map="):
+			continue
 		if a[i].begins_with("select="):
 			sel_spec = a[i].substr(7)
 			continue
@@ -35,7 +40,9 @@ func _process(_d: float) -> bool:
 	frames += 1
 	if frames == 5 and sel_spec != "":
 		main._select_tower(first_tower)
-	if main.state == "play" and not main.wave_running and main.wave < 8:
+	if not ("state" in main):
+		pass
+	elif main.state == "play" and not main.wave_running and main.wave < 8:
 		main._start_wave()
 	if frames == at:
 		root.get_texture().get_image().save_png(out)

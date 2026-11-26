@@ -8,12 +8,17 @@ const UiStyle = preload("res://ui_style.gd")
 const PanelScript = preload("res://upgrade_panel.gd")
 const PoofScript = preload("res://poof.gd")
 const FxScript = preload("res://fx.gd")
+const Maps = preload("res://maps.gd")
+const Session = preload("res://session.gd")
+const Sfx = preload("res://sfx.gd")
 const POOF_COL := {"shuckit": Color("8a89c0"), "zapnose": Color("ffd23a"), "glomm": Color("bfe6ff")}
 
-var PATH := PackedVector2Array([
-	Vector2(-40, 360), Vector2(300, 360), Vector2(300, 160), Vector2(700, 160),
-	Vector2(700, 560), Vector2(1000, 560), Vector2(1000, 300), Vector2(1320, 300),
-])
+var PATH: PackedVector2Array
+var map: Dictionary
+var weather := "clear"
+var clock := 0.0
+var retry_btn: Button
+var menu_btn: Button
 const PATH_HALF := 34.0
 const TOTAL_WAVES := 8
 
@@ -38,6 +43,9 @@ var panel
 var shake := 0.0
 
 func _ready() -> void:
+	map = Maps.MAPS[Session.map_id]
+	PATH = PackedVector2Array(map.path)
+	weather = "clear"
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = Label.new()
@@ -66,6 +74,24 @@ func _ready() -> void:
 	banner.add_theme_constant_override("outline_size", 10)
 	banner.visible = false
 	layer.add_child(banner)
+	retry_btn = Button.new()
+	retry_btn.text = "Retry"
+	retry_btn.position = Vector2(420, 460)
+	retry_btn.size = Vector2(200, 64)
+	retry_btn.add_theme_font_size_override("font_size", 26)
+	retry_btn.pressed.connect(func(): get_tree().reload_current_scene())
+	retry_btn.visible = false
+	layer.add_child(retry_btn)
+	menu_btn = Button.new()
+	menu_btn.text = "Menu"
+	menu_btn.position = Vector2(660, 460)
+	menu_btn.size = Vector2(200, 64)
+	menu_btn.add_theme_font_size_override("font_size", 26)
+	menu_btn.pressed.connect(func(): get_tree().change_scene_to_file("res://menu.tscn"))
+	menu_btn.visible = false
+	layer.add_child(menu_btn)
+	UiStyle.style_btn(retry_btn, Color("2f6b3a"), Color("2f6b3a"))
+	UiStyle.style_btn(menu_btn, Color("3a4a6b"), Color("3a4a6b"))
 	for i in ["tickindle", "dugloom", "hutzin"]:
 		var d: Dictionary = Creatures.DEFS[i]
 		var b := Button.new()
@@ -92,6 +118,7 @@ func _ready() -> void:
 	_refresh()
 
 func _on_card(id: String, on: bool) -> void:
+	Sfx.play(self, "click")
 	if on:
 		selected = id
 		placing = true
@@ -121,8 +148,10 @@ func _build_decor() -> void:
 
 func _refresh() -> void:
 	speed_btn.text = "Speed x%d" % int(Engine.time_scale)
-	hud.text = "Coins %d    Lives %d    Wave %d/%d\n%s" % [coins, lives, wave, TOTAL_WAVES,
-		("Next: " + _incoming_text(wave + 1)) if (not wave_running and wave < TOTAL_WAVES) else "Tap a creature to upgrade it"]
+	var nxt: String = map.weather[wave % map.weather.size()] if not wave_running and wave < TOTAL_WAVES else weather
+	hud.text = "Coins %d    Lives %d    Wave %d/%d\n%s\n%s" % [coins, lives, wave, TOTAL_WAVES,
+		("Next: " + _incoming_text(wave + 1)) if (not wave_running and wave < TOTAL_WAVES) else "Tap a creature to upgrade it",
+		"Weather: " + Maps.WEATHER[nxt].label]
 	if sel_tower != null and is_instance_valid(sel_tower):
 		panel.refresh(coins)
 
@@ -138,6 +167,8 @@ func _build_wave(w: int) -> Array:
 			q.append("glomm")
 	seed(1000 + w)
 	q.shuffle()
+	if w == TOTAL_WAVES:
+		q.insert(q.size() / 2, "boss")
 	return q
 
 func _incoming_text(w: int) -> String:
@@ -153,6 +184,8 @@ func _start_wave() -> void:
 	if wave_running or state != "play":
 		return
 	wave += 1
+	weather = map.weather[(wave - 1) % map.weather.size()]
+	Sfx.play(self, "horn")
 	queue = _build_wave(wave)
 	to_spawn = queue.size()
 	spawn_cd = 0.0
@@ -161,6 +194,7 @@ func _start_wave() -> void:
 	_refresh()
 
 func _process(delta: float) -> void:
+	clock += delta
 	shake = maxf(0.0, shake - delta * 2.5)
 	position = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 9.0
 	if state == "play" and wave_running:
@@ -174,7 +208,12 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _spawn() -> void:
-	var d: Dictionary = Creatures.DEFS[queue.pop_front()]
+	var kind: String = queue.pop_front()
+	var d: Dictionary = Creatures.DEFS[kind]
+	if kind == "boss":
+		shake = 1.5
+		Sfx.play(self, "boss")
+		FxScript.text_at(self, Vector2(640, 330), "BOSS: Rimeheart Glomm!", Color("ff6a5a"))
 	var e = EnemyScript.new()
 	e.setup(PATH, d, wave)
 	e.died.connect(_on_died)
@@ -188,6 +227,8 @@ func _on_died(e) -> void:
 	pf.position = e.position
 	add_child(pf)
 	FxScript.text_at(self, e.position + Vector2(0, -20), "+%d" % e.reward, Color("ffd23a"))
+	Sfx.play(self, "pop", -9.0, 30)
+	Sfx.play(self, "coin", -14.0, 60)
 	# Gale hook: a fallen Shuckit whips nearby wave-mates into a speed burst.
 	for o in get_tree().get_nodes_in_group("enemies"):
 		if e.kind == "shuckit" and o != e and not o.dead and o.position.distance_to(e.position) < 170.0:
@@ -209,7 +250,8 @@ func _on_died(e) -> void:
 
 func _on_leaked(e) -> void:
 	lives -= e.leak
-	shake = 1.0
+	shake = 1.0 if e.leak < 5 else 2.0
+	Sfx.play(self, "leak", -4.0)
 	_refresh()
 	if lives <= 0:
 		_end("lost")
@@ -225,9 +267,14 @@ func _wave_done() -> void:
 
 func _end(result: String) -> void:
 	state = result
-	banner.text = "The Well holds!\nTap to restart" if result == "won" else "The Well is lost...\nTap to restart"
+	banner.text = "The Well holds!" if result == "won" else "The Well is lost..."
+	banner.position = Vector2(440, 330)
 	banner.visible = true
+	retry_btn.visible = true
+	menu_btn.visible = true
 	start_btn.disabled = true
+	Session.record(Session.map_id, wave, result == "won")
+	Sfx.play(self, "win" if result == "won" else "lose")
 
 func _dist_to_path(p: Vector2) -> float:
 	var best := INF
@@ -247,6 +294,9 @@ func _valid_spot(p: Vector2) -> bool:
 		if n.get_script() == TowerScript and n.position.distance_to(p) < 60.0:
 			return false
 	return true
+
+func weather_mult(types: Array) -> float:
+	return Maps.weather_mult(weather, types)
 
 func _tower_at(p: Vector2):
 	for n in get_children():
@@ -276,12 +326,14 @@ func _on_upgrade(path: String) -> void:
 	if u.is_empty() or sel_tower.blocked(path) or coins < int(u.cost):
 		return
 	coins -= sel_tower.buy(path)
+	Sfx.play(self, "up")
 	_refresh()
 
 func _on_sell() -> void:
 	if sel_tower == null or not is_instance_valid(sel_tower):
 		return
 	coins += int(sel_tower.spent * 0.7)
+	Sfx.play(self, "coin")
 	sel_tower.queue_free()
 	sel_tower = null
 	panel.visible = false
@@ -290,7 +342,6 @@ func _on_sell() -> void:
 func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 		if state != "play":
-			get_tree().reload_current_scene()
 			return
 		var p := get_global_mouse_position()
 		var tw = _tower_at(p)
@@ -305,40 +356,28 @@ func _unhandled_input(ev: InputEvent) -> void:
 			t.spent = int(d.cost)
 			t.position = p
 			add_child(t)
+			Sfx.play(self, "place")
 			_refresh()
 		else:
 			_deselect_tower()
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 1280, 720), Color("5fae4f"))
+	var g: Color = map.grass
+	draw_rect(Rect2(0, 0, 1280, 720), g)
 	for gx in 20:
 		for gy in 12:
 			if (gx + gy) % 2 == 0:
-				draw_rect(Rect2(gx * 64, gy * 64, 64, 64), Color(1, 1, 1, 0.045))
+				draw_rect(Rect2(gx * 64, gy * 64, 64, 64), Color(1, 1, 1, 0.045) if map.style != "snow" else Color(0.4, 0.5, 0.7, 0.05))
 	for i in PATH.size() - 1:
-		draw_line(PATH[i], PATH[i + 1], Color("6b4a2a"), PATH_HALF * 2 + 8)
+		draw_line(PATH[i], PATH[i + 1], map.path_edge, PATH_HALF * 2 + 8)
 	for p in PATH:
-		draw_circle(p, PATH_HALF + 4, Color("6b4a2a"))
+		draw_circle(p, PATH_HALF + 4, map.path_edge)
 	for i in PATH.size() - 1:
-		draw_line(PATH[i], PATH[i + 1], Color("d1a56a"), PATH_HALF * 2 - 4)
+		draw_line(PATH[i], PATH[i + 1], map.path_fill, PATH_HALF * 2 - 4)
 	for p in PATH:
-		draw_circle(p, PATH_HALF - 2, Color("d1a56a"))
+		draw_circle(p, PATH_HALF - 2, map.path_fill)
 	for dc in decor:
-		var p: Vector2 = dc[0]
-		var z: float = dc[2]
-		match int(dc[1]):
-			0:
-				DrawUtil.disc(self, p, 13 * z, Color("3f8a3a"), Color("24501f"), 3.0)
-				DrawUtil.disc(self, p + Vector2(11, 4) * z, 9 * z, Color("4a9a42"), Color("24501f"), 3.0)
-			1:
-				DrawUtil.disc(self, p, 11 * z, Color("9aa3ad"), Color("4a5260"), 3.0)
-			2:
-				for j in 3:
-					draw_circle(p + Vector2(j * 7 - 7, (j % 2) * 5) * z, 3.5 * z, Color("ffe36a") if j != 1 else Color("ff8fb1"))
-			3:
-				draw_line(p + Vector2(0, 8) * z, p + Vector2(0, 26) * z, Color("5a3a1e"), 7.0 * z)
-				DrawUtil.disc(self, p, 24 * z, Color("2f7a35"), Color("1c4a22"), 4.0)
-				draw_circle(p + Vector2(-8, -8) * z, 8 * z, Color("4aa04a"))
+		_draw_decor(dc[0], int(dc[1]), dc[2])
 	if state == "play" and placing:
 		var m := get_global_mouse_position()
 		var d: Dictionary = Creatures.DEFS[selected]
@@ -349,3 +388,71 @@ func _draw() -> void:
 		TowerScript.draw_icon(self, selected, d)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		draw_circle(m, 28, Color(tint.r, tint.g, tint.b, 0.2))
+	_draw_weather()
+
+func _draw_decor(p: Vector2, kind: int, z: float) -> void:
+	match String(map.style):
+		"snow":
+			match kind:
+				0:
+					DrawUtil.disc(self, p, 12 * z, Color("eef6fc"), Color("9db2c9"), 3.0)
+				1:
+					DrawUtil.disc(self, p, 11 * z, Color("a9b4c4"), Color("586378"), 3.0)
+					draw_circle(p + Vector2(0, -5) * z, 6 * z, Color("f4faff"))
+				2:
+					for j in 3:
+						draw_circle(p + Vector2(j * 7 - 7, (j % 2) * 5) * z, 3.0 * z, Color("9fd8ff"))
+				3:
+					draw_line(p + Vector2(0, 8) * z, p + Vector2(0, 24) * z, Color("5a3a1e"), 6.0 * z)
+					for k in 3:
+						var w := (26 - k * 6) * z
+						DrawUtil.poly(self, PackedVector2Array([p + Vector2(-w, 8 - k * 14) * 1.0 * z, p + Vector2(w, 8 - k * 14) * 1.0 * z, p + Vector2(0, -12 - k * 14) * z]), Color("2f6f58"), Color("1c4034"), 3.0)
+						draw_line(p + Vector2(-w * 0.6, 4 - k * 14) * z, p + Vector2(w * 0.6, 4 - k * 14) * z, Color("eef6fc"), 4.0 * z)
+		"desert":
+			match kind:
+				0:
+					DrawUtil.disc(self, p, 10 * z, Color("9a8a3a"), Color("5a5020"), 3.0)
+				1:
+					DrawUtil.disc(self, p, 11 * z, Color("b0845a"), Color("6a4a30"), 3.0)
+				2:
+					for j in 3:
+						draw_circle(p + Vector2(j * 7 - 7, (j % 2) * 5) * z, 3.0 * z, Color("ff9a5a"))
+				3:
+					DrawUtil.disc(self, p + Vector2(0, -6) * z, 7 * z, Color("4a9a4a"), Color("2a5a2a"), 3.0)
+					DrawUtil.disc(self, p + Vector2(0, 6) * z, 7 * z, Color("4a9a4a"), Color("2a5a2a"), 3.0)
+					DrawUtil.disc(self, p + Vector2(-9, 0) * z, 5 * z, Color("4a9a4a"), Color("2a5a2a"), 3.0)
+		_:
+			match kind:
+				0:
+					DrawUtil.disc(self, p, 13 * z, Color("3f8a3a"), Color("24501f"), 3.0)
+					DrawUtil.disc(self, p + Vector2(11, 4) * z, 9 * z, Color("4a9a42"), Color("24501f"), 3.0)
+				1:
+					DrawUtil.disc(self, p, 11 * z, Color("9aa3ad"), Color("4a5260"), 3.0)
+				2:
+					for j in 3:
+						draw_circle(p + Vector2(j * 7 - 7, (j % 2) * 5) * z, 3.5 * z, Color("ffe36a") if j != 1 else Color("ff8fb1"))
+				3:
+					draw_line(p + Vector2(0, 8) * z, p + Vector2(0, 26) * z, Color("5a3a1e"), 7.0 * z)
+					DrawUtil.disc(self, p, 24 * z, Color("2f7a35"), Color("1c4a22"), 4.0)
+					draw_circle(p + Vector2(-8, -8) * z, 8 * z, Color("4aa04a"))
+
+func _draw_weather() -> void:
+	match weather:
+		"rain":
+			draw_rect(Rect2(0, 0, 1280, 720), Color(0.1, 0.15, 0.3, 0.16))
+			for i in 110:
+				var x := fmod(i * 97.0 + clock * 90.0, 1300.0) - 10.0
+				var y := fmod(i * 53.0 + clock * 720.0, 760.0) - 20.0
+				draw_line(Vector2(x, y), Vector2(x - 6, y + 16), Color(0.7, 0.85, 1.0, 0.5), 2.0)
+		"snow":
+			draw_rect(Rect2(0, 0, 1280, 720), Color(0.8, 0.9, 1.0, 0.07))
+			for i in 90:
+				var x := fmod(i * 131.0 + clock * 25.0 + sin(clock + i) * 18.0, 1300.0)
+				var y := fmod(i * 61.0 + clock * 70.0, 760.0) - 20.0
+				draw_circle(Vector2(x, y), 2.0 + (i % 3), Color(1, 1, 1, 0.85))
+		"heat":
+			draw_rect(Rect2(0, 0, 1280, 720), Color(1.0, 0.55, 0.15, 0.09))
+			for i in 40:
+				var x := fmod(i * 173.0 + sin(clock * 0.7 + i) * 30.0, 1300.0)
+				var y := 720.0 - fmod(i * 47.0 + clock * 60.0, 760.0)
+				draw_circle(Vector2(x, y), 2.5, Color(1.0, 0.7, 0.3, 0.6))

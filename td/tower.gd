@@ -8,6 +8,7 @@ const TypeChart = preload("res://type_chart.gd")
 const ProjectileScript = preload("res://projectile.gd")
 const PatchScript = preload("res://patch.gd")
 const FxScript = preload("res://fx.gd")
+const Sfx = preload("res://sfx.gd")
 const SpriteLib = preload("res://sprite_lib.gd")
 const SPRITE_SCALE := 34.0
 const MODES := ["first", "last", "strong"]
@@ -69,6 +70,10 @@ func buy(p: String) -> int:
 	_rebuild()
 	return int(u.cost)
 
+func _weather() -> float:
+	var m = get_parent()
+	return m.weather_mult(def.types) if m != null and m.has_method("weather_mult") else 1.0
+
 func cycle_target() -> void:
 	target_mode = MODES[(MODES.find(target_mode) + 1) % MODES.size()]
 
@@ -123,6 +128,7 @@ func _dugloom_tick() -> void:
 	cooldown = 1.0 / float(st.rate)
 	pulse_t = 0.45
 	kick = 1.0
+	Sfx.play(self, "pulse", -10.0, 120)
 	for e in hit:
 		var m := TypeChart.best(def.types, e.types)
 		FxScript.pop(get_parent(), e, m)
@@ -131,11 +137,12 @@ func _dugloom_tick() -> void:
 			e.stun(float(st.stun))
 		if float(st.pull) > 0.0:
 			e.rewind(float(st.pull))
-		e.take_damage(float(st.dmg) * m)
+		e.take_damage(float(st.dmg) * m * _weather())
 
 func _fire(t) -> void:
 	shots += 1
 	windup += 1
+	Sfx.play(self, "shoot", -16.0, 45)
 	face = SpriteLib.dir_from_angle((t.position - position).angle())
 	face_vec = (t.position - position).normalized()
 	kick = 1.0
@@ -146,7 +153,7 @@ func _fire(t) -> void:
 		p.tower = self
 		p.molten = molten
 		p.mult = TypeChart.best(def.types, t.types)
-		p.dmg = float(st.dmg) * p.mult * (2.0 if molten else 1.0)
+		p.dmg = float(st.dmg) * p.mult * _weather() * (2.0 if molten else 1.0)
 		if def.id == "hutzin":
 			p.color = Color("b44bd8")
 		p.position = position + Vector2(0, -10) + Vector2(0, i * 6)

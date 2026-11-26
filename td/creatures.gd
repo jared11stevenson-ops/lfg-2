@@ -69,4 +69,9 @@ const DEFS := {
 		"id": "glomm", "name": "Glomm", "types": ["stone", "frost"],
 		"hp": 70.0, "hp_wave": 22.0, "speed": 62.0, "reward": 14, "leak": 3,
 	},
+	# Rimeheart Glomm: boss. Same model as Glomm, scaled up. Costs 10 lives if it leaks.
+	"boss": {
+		"id": "boss", "sprite": "glomm", "name": "Rimeheart Glomm", "types": ["stone", "frost"],
+		"hp": 650.0, "hp_wave": 30.0, "speed": 52.0, "reward": 150, "leak": 10,
+	},
 }

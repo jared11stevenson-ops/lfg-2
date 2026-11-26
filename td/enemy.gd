@@ -2,12 +2,13 @@ extends Node2D
 # Enemy roster (see creatures.gd): shuckit (fodder), zapnose (fast), glomm (tank). All code-drawn placeholders.
 const DrawUtil = preload("res://draw_util.gd")
 const SpriteLib = preload("res://sprite_lib.gd")
-const SPRITE_SCALE := {"shuckit": 30.0, "zapnose": 28.0, "glomm": 30.0}
+const SPRITE_SCALE := {"shuckit": 30.0, "zapnose": 28.0, "glomm": 30.0, "boss": 50.0}
 signal died(e)
 signal leaked(e)
 
 var path: PackedVector2Array
 var kind := "shuckit"
+var sprite_id := "shuckit"
 var seg := 0
 var travelled := 0.0
 var speed := 120.0
@@ -33,6 +34,7 @@ var flash_t := 0.0
 func setup(p: PackedVector2Array, d: Dictionary, wave: int) -> void:
 	path = p
 	kind = d.id
+	sprite_id = d.get("sprite", d.id)
 	hp = float(d.hp) + float(d.hp_wave) * wave
 	max_hp = hp
 	speed = float(d.speed)
@@ -113,7 +115,7 @@ func _process(delta: float) -> void:
 	else:
 		position += position.direction_to(target) * step
 		travelled += step
-	wobble += delta * (9.0 if kind != "glomm" else 5.0)
+	wobble += delta * (9.0 if kind != "glomm" and kind != "boss" else 5.0)
 	queue_redraw()
 
 func take_damage(amount: float) -> void:
@@ -121,6 +123,7 @@ func take_damage(amount: float) -> void:
 		return
 	hp -= amount * (1.2 if vuln_t > 0.0 else 1.0)
 	flash_t = 0.12
+	load("res://sfx.gd").play(self, "hit", -20.0, 70)
 	if hp <= 0.0:
 		dead = true
 		died.emit(self)
@@ -129,7 +132,7 @@ func take_damage(amount: float) -> void:
 		queue_redraw()
 
 func _draw() -> void:
-	var big := kind == "glomm"
+	var big := kind == "glomm" or kind == "boss"
 	if slow_t > 0.0:
 		draw_circle(Vector2(0, 8), 30 if big else 24, Color(0.4, 0.8, 1.0, 0.3))
 	if poison > 0:
@@ -138,17 +141,17 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 22 if big else 16, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var bob_y := sin(wobble) * 2.0
-	if SpriteLib.draw(self, kind, SpriteLib.dir_from_angle(heading), SPRITE_SCALE.get(kind, 30.0) * (1.0 + flash_t * 1.2), Vector2(0, bob_y + 8), Color(1.0, 0.55, 0.55) if flash_t > 0.0 else Color.WHITE):
+	if SpriteLib.draw(self, sprite_id, SpriteLib.dir_from_angle(heading), SPRITE_SCALE.get(kind, 30.0) * (1.0 + flash_t * 1.2), Vector2(0, bob_y + 8), Color(1.0, 0.55, 0.55) if flash_t > 0.0 else Color.WHITE):
 		pass
 	else:
 		match kind:
 			"zapnose": _draw_zapnose()
-			"glomm": _draw_glomm()
+			"glomm", "boss": _draw_glomm()
 			_: _draw_shuckit()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if hp < max_hp:
-		var w := 48.0 if big else 34.0
-		var y := -52.0 if big else -36.0
+		var w := 90.0 if kind == "boss" else (48.0 if big else 34.0)
+		var y := -90.0 if kind == "boss" else (-52.0 if big else -36.0)
 		draw_rect(Rect2(-w / 2, y, w, 6), Color(0, 0, 0, 0.6))
 		draw_rect(Rect2(-w / 2 + 1, y + 1, (w - 2) * clampf(hp / max_hp, 0.0, 1.0), 4), Color("7bdc6a"))
 
