@@ -3,7 +3,7 @@ extends SceneTree
 const Models = preload("res://art/creature_models.gd")
 const SpriteLib = preload("res://sprite_lib.gd")
 const SIZE := 256
-const IDS := ["tickindle", "dugloom", "hutzin", "shuckit", "zapnose", "glomm"]
+const IDS := ["tickindle", "dugloom", "hutzin", "shuckit", "zapnose", "glomm", "tickindle:a", "tickindle:b", "dugloom:a", "dugloom:b", "hutzin:a", "hutzin:b"]
 
 func _initialize() -> void:
 	_run()
@@ -38,8 +38,11 @@ func _run() -> void:
 	var sheet := Image.create(SIZE * 8, SIZE * ids.size(), false, Image.FORMAT_RGBA8)
 	sheet.fill(Color(0.36, 0.68, 0.31))
 	for row in ids.size():
-		cam.size = float(SpriteLib.CAM[ids[row]])
-		var model: Node3D = Models.build(ids[row])
+		var parts: PackedStringArray = String(ids[row]).split(":")
+		var vname := parts[1] if parts.size() > 1 else ""
+		cam.size = float(SpriteLib.CAM[parts[0]]) * (1.1 if vname != "" else 1.0)
+		var model: Node3D = Models.build(parts[0], vname)
+		var fname := String(ids[row]).replace(":", "_")
 		vp.add_child(model)
 		for k in 8:
 			var theta := k * PI / 4.0
@@ -50,7 +53,7 @@ func _run() -> void:
 			await RenderingServer.frame_post_draw
 			var img := vp.get_texture().get_image()
 			img.convert(Image.FORMAT_RGBA8)
-			img.save_png("res://art/sprites/%s_%d.png" % [ids[row], k])
+			img.save_png("res://art/sprites/%s_%d.png" % [fname, k])
 			sheet.blend_rect(img, Rect2i(0, 0, SIZE, SIZE), Vector2i(k * SIZE, row * SIZE))
 		model.queue_free()
 	sheet.save_png("res://art/contact.png")

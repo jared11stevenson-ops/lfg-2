@@ -74,6 +74,13 @@ func _weather() -> float:
 	var m = get_parent()
 	return m.weather_mult(def.types) if m != null and m.has_method("weather_mult") else 1.0
 
+func _sprite_id() -> String:
+	if tiers.a >= 3 and tiers.a >= tiers.b:
+		return String(def.id) + "_a"
+	if tiers.b >= 3:
+		return String(def.id) + "_b"
+	return String(def.id)
+
 func cycle_target() -> void:
 	target_mode = MODES[(MODES.find(target_mode) + 1) % MODES.size()]
 
@@ -200,7 +207,7 @@ func _draw() -> void:
 		draw_set_transform(Vector2(0, 24), 0.0, Vector2(1.0, 0.4))
 		draw_arc(Vector2.ZERO, 34 + pulse * 4, 0, TAU, 40, Color(ac.r, ac.g, ac.b, 0.6), 4.0 + (3.0 if total >= 6 else 0.0), true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	if SpriteLib.draw(self, String(def.id), face, SPRITE_SCALE * (1.0 + 0.07 * kick + 0.03 * (tiers.a + tiers.b)), Vector2(0, 14.0 * sin(float(Time.get_ticks_msec()) / 400.0 + position.x) * 0.2 + 6) - face_vec * 5.0 * kick):
+	if SpriteLib.draw(self, _sprite_id(), face, SPRITE_SCALE * (1.0 + 0.07 * kick + 0.03 * (tiers.a + tiers.b)), Vector2(0, 14.0 * sin(float(Time.get_ticks_msec()) / 400.0 + position.x) * 0.2 + 6) - face_vec * 5.0 * kick):
 		pass
 	else:
 		match String(def.id):

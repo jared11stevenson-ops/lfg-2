@@ -21,6 +21,7 @@ static func draw(ci: CanvasItem, id: String, k: int, ppu: float, off: Vector2 = 
 	var t := tex(id, k)
 	if t == null:
 		return false
-	var s: float = float(CAM.get(id, 4.0)) * ppu
+	var base := id.get_slice("_", 0)
+	var s: float = float(CAM.get(base, 4.0)) * (1.1 if id.contains("_") else 1.0) * ppu
 	ci.draw_texture_rect(t, Rect2(off + Vector2(-s / 2.0, -s / 2.0 - GROUND_UNITS * ppu), Vector2(s, s)), false, tint)
 	return true

@@ -101,7 +101,7 @@ static func _eyes(p: Node3D, y: float, x: float, z: float, r: float, iris: Color
 		part(p, S(r * 0.5), Vector3(x * s, y, z + r * 0.35), Color("14121a"), Vector3(1, 1, 0.5))
 		part(p, S(r * 0.18), Vector3(x * s + r * 0.2, y + r * 0.25, z + r * 0.6), Color.WHITE, Vector3.ONE, Vector3.ZERO, 1.0)
 
-static func build(id: String) -> Node3D:
+static func build(id: String, variant: String = "") -> Node3D:
 	var root := Node3D.new()
 	match id:
 		"tickindle": _tickindle(root)
@@ -110,6 +110,9 @@ static func build(id: String) -> Node3D:
 		"shuckit": _shuckit(root)
 		"zapnose": _zapnose(root)
 		"glomm": _glomm(root)
+	if variant != "":
+		_evolve(root, id, variant)
+		root.scale = Vector3.ONE * 1.1
 	return root
 
 # Tickindle: Ember/Forge. Manul + Hephaestus's automatons + pocket watch.
@@ -190,20 +193,23 @@ static func _hutzin(r: Node3D) -> void:
 
 # Shuckit: Umbra/Gale. Bat-eared fox + Black Shuck + broken umbrella.
 static func _shuckit(r: Node3D) -> void:
-	var ink := Color("34314a")
-	part(r, S(0.55), Vector3(0, 0.75, -0.1), ink, Vector3(0.9, 0.8, 1.3))
-	part(r, S(0.42), Vector3(0, 0.95, 0.7), ink)
-	part(r, Cone(0.2, 0.55), Vector3(0, 0.85, 1.15), ink, Vector3.ONE, Vector3(90, 0, 0))
-	part(r, S(0.07), Vector3(0, 0.85, 1.42), Color("14121a"))
+	var ink := Color("3a3656")
+	part(r, S(0.6), Vector3(0, 0.75, -0.15), ink, Vector3(0.9, 0.8, 1.2))
+	part(r, S(0.55), Vector3(0, 1.05, 0.62), ink)
+	part(r, Cone(0.22, 0.5), Vector3(0, 0.95, 1.1), ink, Vector3.ONE, Vector3(90, 0, 0))
+	part(r, S(0.08), Vector3(0, 0.95, 1.38), Color("14121a"))
+	part(r, S(0.5), Vector3(0, 0.6, 0.5), Color("55507a"), Vector3(0.8, 0.7, 0.6))
 	for s in [-1.0, 1.0]:
-		part(r, Cone(0.5, 1.0), Vector3(0.5 * s, 1.55, 0.45), ink, Vector3(1, 1, 0.28), Vector3(-8, 14 * s, -32 * s))
-		part(r, Cyl(0.022, 0.95), Vector3(0.46 * s, 1.55, 0.55), Color("8a89a6"), Vector3.ONE, Vector3(-8, 14 * s, -32 * s))
-		part(r, Cyl(0.07, 0.6), Vector3(0.28 * s, 0.3, 0.3), Color("231f2b"))
-		part(r, Cyl(0.07, 0.6), Vector3(0.28 * s, 0.3, -0.5), Color("231f2b"))
+		# broken-umbrella ears: big panel, rib line, torn tip
+		part(r, Cone(0.55, 1.1), Vector3(0.55 * s, 1.75, 0.35), ink, Vector3(1, 1, 0.26), Vector3(-6, 12 * s, -34 * s))
+		part(r, Cyl(0.025, 1.0), Vector3(0.5 * s, 1.75, 0.45), Color("a09ec8"), Vector3.ONE, Vector3(-6, 12 * s, -34 * s))
+		part(r, Cone(0.14, 0.4), Vector3(0.95 * s, 1.25, 0.3), Color("2a2740"), Vector3(1, 1, 0.3), Vector3(0, 0, 40 * s))
+		part(r, Cyl(0.08, 0.55), Vector3(0.3 * s, 0.28, 0.35), Color("231f2b"))
+		part(r, Cyl(0.08, 0.55), Vector3(0.3 * s, 0.28, -0.55), Color("231f2b"))
+		part(r, Cone(0.05, 0.16), Vector3(0.16 * s, 0.7, 1.28), Color.WHITE, Vector3.ONE, Vector3(180, 0, 0))
+	_eyes(r, 1.12, 0.26, 0.98, 0.16, Color("fff3a0"))
 	for i in 3:
-		part(r, S(0.2 - i * 0.04), Vector3(0, 0.9 + i * 0.15, -0.95 - i * 0.28), ink, Vector3.ONE, Vector3.ZERO, 0.3 * i)
-	for s in [-1.0, 1.0]:
-		part(r, S(0.09), Vector3(0.2 * s, 1.05, 1.0), Color("fff3a0"), Vector3.ONE, Vector3.ZERO, 2.2)
+		part(r, S(0.24 - i * 0.05), Vector3(0, 0.95 + i * 0.18, -1.0 - i * 0.3), ink, Vector3.ONE, Vector3.ZERO, 0.4 * i)
 
 # Zapnose: Volt/Aether. Elephantnose fish + Nikola Tesla + doorbell.
 static func _zapnose(r: Node3D) -> void:
@@ -250,3 +256,48 @@ static func _glomm(r: Node3D) -> void:
 	part(r, Cone(0.14, 0.4), Vector3(0, 2.1, -0.2), Color("3f8a3a"))
 	for i in 9:
 		part(r, S(0.04), Vector3(-0.3 + fmod(i * 0.37, 0.6), 2.1 + fmod(i * 0.23, 0.5), -0.4 + fmod(i * 0.31, 0.4)), Color.WHITE, Vector3.ONE, Vector3.ZERO, 2.0)
+
+# Evolved forms (tier 3+ on a path). Extras on top of the base model.
+static func _evolve(r: Node3D, id: String, v: String) -> void:
+	match id + ":" + v:
+		"tickindle:a":  # Clockwork Pyre: brass goggles, floating gears, big flame
+			for s in [-1.0, 1.0]:
+				part(r, Tor(0.12, 0.24), Vector3(0.4 * s, 1.56, 0.86), Color("e8c15a"), Vector3.ONE, Vector3(90, 0, 0), 0.4)
+				part(r, Tor(0.28, 0.5), Vector3(1.1 * s, 2.0 + (0.2 if s > 0 else 0.0), 0.0), Color("e8c15a"), Vector3.ONE, Vector3(90, 30 * s, 0), 0.8)
+			part(r, Box(1.5, 0.08, 0.1), Vector3(0, 1.58, 0.78), Color("7a5a12"))
+			part(r, Cone(0.22, 0.7), Vector3(0, 2.2, -1.0), Color("ffd23a"), Vector3.ONE, Vector3.ZERO, 2.0)
+			part(r, Cone(0.14, 0.5), Vector3(0.25, 2.0, -1.0), Color("ff6a1a"), Vector3.ONE, Vector3(0, 0, -20), 2.0)
+		"tickindle:b":  # Anvilmanul: steel shoulders, anvil, molten cracks
+			for s in [-1.0, 1.0]:
+				part(r, S(0.45), Vector3(0.9 * s, 1.25, 0.0), Color("3a3f4d"), Vector3(1, 0.7, 1))
+				part(r, Tor(0.06, 0.2), Vector3(0.9 * s, 1.5, 0.0), Color("ff8a2b"), Vector3.ONE, Vector3.ZERO, 2.0)
+			part(r, Box(0.9, 0.3, 0.5), Vector3(0, 2.1, -0.7), Color("4a5060"))
+			part(r, Box(0.4, 0.35, 0.3), Vector3(0, 1.8, -0.7), Color("353a46"))
+			part(r, Cone(0.18, 0.5), Vector3(0.55, 2.1, -0.7), Color("4a5060"), Vector3.ONE, Vector3(0, 0, -90))
+			part(r, Box(0.5, 0.06, 0.06), Vector3(0, 1.55, 0.82), Color("ff8a2b"), Vector3.ONE, Vector3.ZERO, 2.0)
+		"dugloom:a":  # Beaconmaid: haloed lantern, pearl crown
+			part(r, Tor(0.5, 0.62), Vector3(0, 2.75, 0.85), Color("ffe680"), Vector3.ONE, Vector3.ZERO, 2.2)
+			part(r, S(0.75), Vector3(0, 2.05, 0.85), Color("ffe680"), Vector3.ONE, Vector3.ZERO, 1.5, 0.28)
+			for i in 6:
+				var a := i * TAU / 6.0
+				part(r, S(0.09), Vector3(cos(a) * 0.4, 1.78, 0.85 + sin(a) * 0.4), Color("fff6e0"), Vector3.ONE, Vector3.ZERO, 0.8)
+		"dugloom:b":  # Wreckwarden: barnacle shell, anchor
+			for i in 3:
+				part(r, S(0.42 - i * 0.06), Vector3(0, 1.45 - i * 0.12, -0.3 - i * 0.55), Color("6a5a4a"), Vector3(1.1, 0.55, 1))
+			part(r, Cyl(0.05, 0.9), Vector3(1.1, 0.9, 0.4), Color("4a4f66"))
+			part(r, Tor(0.28, 0.36), Vector3(1.1, 0.4, 0.4), Color("4a4f66"), Vector3.ONE, Vector3(0, 0, 90))
+			part(r, Tor(0.06, 0.16), Vector3(1.1, 1.4, 0.4), Color("4a4f66"), Vector3.ONE, Vector3(90, 0, 0))
+			part(r, Cone(0.1, 0.5), Vector3(0.22, 0.65, 1.55), Color.WHITE, Vector3.ONE, Vector3(180, 0, 0))
+		"hutzin:a":  # Brewmother: bubbling cauldron
+			part(r, S(0.6), Vector3(0, 2.7, -0.3), Color("2a2a3a"), Vector3(1.1, 0.8, 1.1))
+			part(r, S(0.45), Vector3(0, 2.95, -0.3), Color("9a4bd8"), Vector3(1.1, 0.35, 1.1), Vector3.ZERO, 1.8)
+			for i in 5:
+				part(r, S(0.1 + (i % 3) * 0.03), Vector3(-0.3 + i * 0.15, 3.15 + (i % 2) * 0.25, -0.3), Color("c46bff"), Vector3.ONE, Vector3.ZERO, 2.0, 0.8)
+			part(r, Cyl(0.04, 1.0), Vector3(0.6, 2.7, -0.2), Color("5a3a1e"), Vector3.ONE, Vector3(0, 0, 30))
+		"hutzin:b":  # Walking Cottage: second storey, lit windows, tall legs
+			part(r, Box(0.7, 0.5, 0.6), Vector3(0, 2.4, -0.3), Color("9a6b3c"))
+			part(r, Cone(0.62, 0.5, 4), Vector3(0, 2.9, -0.3), Color("a83a3a"), Vector3.ONE, Vector3(0, 45, 0))
+			for s in [-1.0, 1.0]:
+				part(r, Box(0.16, 0.16, 0.05), Vector3(0.22 * s, 2.42, 0.02), Color("ffe680"), Vector3.ONE, Vector3.ZERO, 2.0)
+				part(r, Box(0.16, 0.16, 0.05), Vector3(0.28 * s, 1.8, 0.07), Color("ffe680"), Vector3.ONE, Vector3.ZERO, 2.0)
+				part(r, Cyl(0.09, 0.5), Vector3(0.3 * s, 0.7, 0.15), Color("e0a23b"))
