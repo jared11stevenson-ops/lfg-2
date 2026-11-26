@@ -46,6 +46,12 @@ static func build(level: Dictionary, w: int, rng: RandomNumberGenerator, count_m
 		var tmp = q[i]
 		q[i] = q[j]
 		q[j] = tmp
+	if w == 5:
+		var top: String = avail[0][0]
+		for r in avail:
+			if float(Creatures.ENEMIES[r[0]].cost) > float(Creatures.ENEMIES[top].cost):
+				top = r[0]
+		q.insert(q.size() / 3, "champion:" + String(top))
 	var is_boss_wave := w == Levels.TOTAL_WAVES or (w > Levels.TOTAL_WAVES and (w - Levels.TOTAL_WAVES) % endless_boss_every == 0)
 	if is_boss_wave:
 		q.insert(q.size() / 2, "boss:" + String(level.boss))

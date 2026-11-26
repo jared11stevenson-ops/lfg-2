@@ -40,3 +40,14 @@ static func combine(diff: String, muts: Array) -> Dictionary:
 			out.nosurge = true
 		out.score = float(out.score) + float(mu.mult)
 	return out
+
+# Wave events: random per-wave twists (from wave 3). Effects are multipliers applied while the wave runs.
+const EVENTS := {
+	"stampede": {"name": "Stampede!", "desc": "Enemies 20% faster, +25% coins", "speed": 1.2, "reward": 1.25},
+	"blessing": {"name": "Wellspring Blessing", "desc": "Defenders deal +20% damage", "dmg": 1.2},
+	"frenzy": {"name": "Frenzy!", "desc": "Enemies arrive much faster", "interval": 0.6},
+	"mist": {"name": "Thick Mist", "desc": "Defender range -15%", "range": 0.85},
+	"gold": {"name": "Golden Herd", "desc": "+60% coins, enemies +25% HP", "reward": 1.6, "hp": 1.25},
+	"calm": {"name": "Calm Winds", "desc": "Defenders attack 15% faster", "rate": 1.15},
+}
+const EVENT_ORDER := ["stampede", "blessing", "frenzy", "mist", "gold", "calm"]

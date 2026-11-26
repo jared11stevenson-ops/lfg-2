@@ -68,6 +68,7 @@ var next_btn: Button
 var panel
 var paused_scale := 1.0
 var intro: Label
+var event_id := ""
 var intro_t := 5.0
 
 func _ready() -> void:
@@ -253,7 +254,7 @@ func _plan(w: int) -> Array:
 func _incoming_text(w: int) -> String:
 	var counts := {}
 	for k in _plan(w):
-		var key := String(k).replace("boss:", "")
+		var key := String(k).replace("boss:", "").replace("champion:", "")
 		counts[key] = counts.get(key, 0) + 1
 	var parts := []
 	for k in counts:
@@ -273,9 +274,26 @@ func _start_wave() -> void:
 	spawn_cd = 0.0
 	wave_running = true
 	rng.seed = hash([run_seed, wave, 77])
+	_roll_event()
 	start_btn.disabled = true
 	hint.visible = false
 	_refresh()
+
+func _roll_event() -> void:
+	event_id = ""
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([run_seed, wave, 4242])
+	if wave >= 3 and r.randf() < 0.3:
+		event_id = Rules.EVENT_ORDER[r.randi() % Rules.EVENT_ORDER.size()]
+		var ev: Dictionary = Rules.EVENTS[event_id]
+		FxScript.text_at(self, Vector2(640, 210), "%s  %s" % [ev.name, ev.desc], Color("ffd23a"))
+
+# Combined multiplier for key: run mutators x current wave event.
+func eff(key: String) -> float:
+	var m := float(mut.get(key, 1.0))
+	if event_id != "":
+		m *= float(Rules.EVENTS[event_id].get(key, 1.0))
+	return m
 
 func _process(delta: float) -> void:
 	clock += delta
@@ -292,7 +310,7 @@ func _process(delta: float) -> void:
 		if to_spawn > 0 and spawn_cd <= 0.0:
 			_spawn()
 			to_spawn -= 1
-			spawn_cd = maxf(0.45, 1.1 - 0.05 * wave) * float(mut.interval)
+			spawn_cd = maxf(0.4, 1.1 - 0.05 * wave) * eff("interval")
 		elif to_spawn == 0 and get_tree().get_nodes_in_group("enemies").is_empty():
 			_wave_done()
 	queue_redraw()
@@ -310,6 +328,9 @@ func _spawn() -> void:
 	var kind: String = queue.pop_front()
 	spawn_idx += 1
 	var d: Dictionary
+	var champion := kind.begins_with("champion:")
+	if champion:
+		kind = kind.substr(9)
 	var boss := kind.begins_with("boss:")
 	if boss:
 		d = Waves.boss_def(lv, kind.substr(5), wave)
@@ -322,16 +343,22 @@ func _spawn() -> void:
 	var path: PackedVector2Array = paths[lane]
 	if bool(d.get("flying", false)):
 		path = PackedVector2Array([path[0], path[path.size() - 1]])
-	_make_enemy(d, path, wave, true, boss)
+	var en = _make_enemy(d, path, wave, true, boss)
+	if champion:
+		en.make_elite()
+		en.hp *= 1.6
+		en.max_hp = en.hp
+		en.reward *= 2
+		FxScript.text_at(self, Vector2(640, 330), "Champion: %s!" % d.name, Color("ffb040"))
 
 func _make_enemy(d: Dictionary, path: PackedVector2Array, w: int, scale_stats: bool, boss: bool = false):
 	var e = EnemyScript.new()
 	e.setup(path, d, w)
 	if scale_stats:
-		e.hp *= float(lv.hp_mult) * float(mut.hp)
+		e.hp *= float(lv.hp_mult) * eff("hp")
 		e.max_hp = e.hp
-		e.speed *= float(mut.speed)
-		e.reward = int(round(e.reward * float(mut.reward)))
+		e.speed *= eff("speed")
+		e.reward = int(round(e.reward * eff("reward")))
 		if not boss and float(mut.elite_p) > 0.0 and rng.randf() < float(mut.elite_p):
 			e.make_elite()
 	e.zones = zones

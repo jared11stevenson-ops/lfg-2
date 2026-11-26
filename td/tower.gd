@@ -90,7 +90,7 @@ func _stone_mult() -> float:
 
 func _mut(key: String, default: float = 1.0) -> float:
 	var m = get_parent()
-	return float(m.mut.get(key, default)) if m != null and "mut" in m else default
+	return m.eff(key) if m != null and m.has_method("eff") else default
 
 func rng() -> float:
 	return float(st.range) * buff_range * (1.0 + (_stone_mult() - 1.0) * 0.5) * _mut("range")
@@ -192,7 +192,7 @@ func _pulse_tick() -> void:
 			e.wet_t = float(st.wet_t)
 		if float(st.pull) > 0.0:
 			e.rewind(float(st.pull))
-		var d := float(st.dmg) * m * wx
+		var d := float(st.dmg) * m * wx * _mut("dmg")
 		if e.wet_t > 0.0 and "volt" in def.types:
 			d *= float(st.wet_mult)
 		e.take_damage(d)
@@ -218,7 +218,7 @@ func _fire(t) -> void:
 			p.tower = self
 			p.molten = molten or crit
 			p.mult = TypeChart.best(def.types, tg.types)
-			p.dmg = float(st.dmg) * p.mult * _weather() * _stone_mult() * (2.0 if molten else (float(st.crit_mult) if crit else 1.0))
+			p.dmg = float(st.dmg) * p.mult * _weather() * _stone_mult() * _mut("dmg") * (2.0 if molten else (float(st.crit_mult) if crit else 1.0))
 			if tg.wet_t > 0.0 and "volt" in def.types:
 				p.dmg *= float(st.wet_mult)
 			p.color = TypeChart.COLORS[def.types[0]]
