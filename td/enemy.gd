@@ -1,6 +1,8 @@
 extends Node2D
 # Enemy roster (see creatures.gd): shuckit (fodder), zapnose (fast), glomm (tank). All code-drawn placeholders.
 const DrawUtil = preload("res://draw_util.gd")
+const SpriteLib = preload("res://sprite_lib.gd")
+const SPRITE_SCALE := {"shuckit": 30.0, "zapnose": 28.0, "glomm": 30.0}
 signal died(e)
 signal leaked(e)
 
@@ -132,10 +134,14 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, 18 if big else 16), 0.0, Vector2(1.4 if big else 1.2, 0.4))
 	draw_circle(Vector2.ZERO, 22 if big else 16, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	match kind:
-		"zapnose": _draw_zapnose()
-		"glomm": _draw_glomm()
-		_: _draw_shuckit()
+	var bob_y := sin(wobble) * 2.0
+	if SpriteLib.draw(self, kind, SpriteLib.dir_from_angle(heading), SPRITE_SCALE.get(kind, 30.0), Vector2(0, bob_y + 8)):
+		pass
+	else:
+		match kind:
+			"zapnose": _draw_zapnose()
+			"glomm": _draw_glomm()
+			_: _draw_shuckit()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if hp < max_hp:
 		var w := 48.0 if big else 34.0

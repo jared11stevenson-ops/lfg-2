@@ -8,6 +8,8 @@ const TypeChart = preload("res://type_chart.gd")
 const ProjectileScript = preload("res://projectile.gd")
 const PatchScript = preload("res://patch.gd")
 const FxScript = preload("res://fx.gd")
+const SpriteLib = preload("res://sprite_lib.gd")
+const SPRITE_SCALE := 34.0
 const MODES := ["first", "last", "strong"]
 const DEFAULTS := {"multishot": 1, "splash": 0.0, "molten_every": 10, "burn_patch": false, "windup_max": 6, "pull": 0.0,
 	"stun": 0.0, "poison_mul": 1.0, "vuln": false, "burst_every": 0, "spread_all": false, "max_stacks": 5, "stacks": 1,
@@ -27,6 +29,7 @@ var last_target_id := 0
 var windup := 0
 var shots := 0
 var pulse_t := 0.0
+var face := 2
 
 func _rebuild() -> void:
 	st = def.duplicate(true)
@@ -129,6 +132,7 @@ func _dugloom_tick() -> void:
 func _fire(t) -> void:
 	shots += 1
 	windup += 1
+	face = SpriteLib.dir_from_angle((t.position - position).angle())
 	var molten: bool = def.id == "tickindle" and shots % int(st.molten_every) == 0
 	for i in int(st.multishot):
 		var p = ProjectileScript.new()
@@ -176,10 +180,13 @@ func _draw() -> void:
 	draw_set_transform(Vector2(0, 24), 0.0, Vector2(1.0, 0.4))
 	draw_circle(Vector2.ZERO, 28, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	match String(def.id):
-		"tickindle": _draw_tickindle()
-		"dugloom": _draw_dugloom()
-		"hutzin": _draw_hutzin()
+	if SpriteLib.draw(self, String(def.id), face, SPRITE_SCALE, Vector2(0, 14.0 * sin(float(Time.get_ticks_msec()) / 400.0 + position.x) * 0.2 + 6)):
+		pass
+	else:
+		match String(def.id):
+			"tickindle": _draw_tickindle()
+			"dugloom": _draw_dugloom()
+			"hutzin": _draw_hutzin()
 	for i in tiers.a:
 		draw_circle(Vector2(-14 + i * 8, 34), 3.0, Color("ffb347"))
 	for i in tiers.b:
