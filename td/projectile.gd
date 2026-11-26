@@ -19,7 +19,7 @@ func _process(delta: float) -> void:
 	if step >= d:
 		if effect == "poison":
 			target.add_poison(effect_n)
-		FxScript.pop(get_parent(), target.position, mult)
+		FxScript.pop(get_parent(), target, mult)
 		target.take_damage(dmg)
 		queue_free()
 		return

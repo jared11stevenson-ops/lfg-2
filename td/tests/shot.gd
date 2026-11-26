@@ -12,6 +12,9 @@ func _initialize() -> void:
 	root.add_child(main)
 	var defs = load("res://creatures.gd").DEFS
 	for i in range(2, a.size()):
+		if a[i].begins_with("wave="):
+			main.wave = int(a[i].substr(5)) - 1
+			continue
 		var parts: PackedStringArray = a[i].split(":")
 		var xy: PackedStringArray = parts[1].split(",")
 		var t = load("res://tower.gd").new()
@@ -20,7 +23,7 @@ func _initialize() -> void:
 		main.add_child(t)
 func _process(_d: float) -> bool:
 	frames += 1
-	if main.state == "play" and not main.wave_running and main.wave < 5:
+	if main.state == "play" and not main.wave_running and main.wave < 8:
 		main._start_wave()
 	if frames == at:
 		root.get_texture().get_image().save_png(out)

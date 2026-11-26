@@ -62,7 +62,7 @@ func _dugloom_tick() -> void:
 	for e in hit:
 		e.apply_slow(float(def.slow), float(def.slow_t))
 		var m := TypeChart.best(def.types, e.types)
-		load("res://fx.gd").pop(get_parent(), e.position, m)
+		load("res://fx.gd").pop(get_parent(), e, m)
 		e.take_damage(float(def.dmg) * m)
 
 func _fire(t) -> void:

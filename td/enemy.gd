@@ -99,6 +99,7 @@ func _draw() -> void:
 		draw_circle(Vector2(0, 8), (26 if big else 18) + poison * 2, Color(0.6, 0.2, 0.8, 0.3))
 	draw_set_transform(Vector2(0, 18 if big else 16), 0.0, Vector2(1.4 if big else 1.2, 0.4))
 	draw_circle(Vector2.ZERO, 22 if big else 16, Color(0, 0, 0, 0.25))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	match kind:
 		"zapnose": _draw_zapnose()
 		"glomm": _draw_glomm()

@@ -25,6 +25,7 @@ var banner: Label
 var selected := "tickindle"
 var cards := {}
 var queue: Array = []
+var decor: Array = []
 
 func _ready() -> void:
 	var layer := CanvasLayer.new()
@@ -62,7 +63,39 @@ func _ready() -> void:
 		layer.add_child(b)
 		cards[i] = b
 	_sync_cards()
+	_build_decor()
+	_style_ui()
 	_refresh()
+
+func _build_decor() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	for i in 160:
+		var p := Vector2(rng.randf_range(20, 1260), rng.randf_range(20, 700))
+		var kind := rng.randi() % 4
+		if _dist_to_path(p) < 62.0 or (p.y > 596 and p.x < 500) or (p.y < 100 and p.x < 560) or (p.y > 620 and p.x > 1040):
+			continue
+		decor.append([p, kind, rng.randf_range(0.8, 1.2)])
+	decor.sort_custom(func(a, b): return a[0].y < b[0].y)
+
+func _style_ui() -> void:
+	for k in cards:
+		_style_btn(cards[k], Color("2f6b3a"), Color("f0b43c"))
+	_style_btn(start_btn, Color("c4552b"), Color("c4552b"))
+
+func _style_btn(b: Button, col: Color, sel: Color) -> void:
+	var table := {"normal": col, "hover": col.lightened(0.15), "pressed": sel, "hover_pressed": sel.lightened(0.1), "disabled": col.darkened(0.4), "focus": col}
+	for st in table:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = table[st]
+		sb.set_corner_radius_all(14)
+		sb.set_border_width_all(4)
+		sb.border_color = Color("1b2a1b")
+		sb.shadow_size = 4
+		sb.shadow_color = Color(0, 0, 0, 0.35)
+		b.add_theme_stylebox_override(st, sb)
+	b.add_theme_color_override("font_pressed_color", Color("1a1a1a"))
+	b.add_theme_color_override("font_hover_pressed_color", Color("1a1a1a"))
 
 func _sync_cards() -> void:
 	for k in cards:
@@ -173,6 +206,9 @@ func _valid_spot(p: Vector2) -> bool:
 		return false
 	if _dist_to_path(p) < PATH_HALF + 30.0:
 		return false
+	for dc in decor:
+		if int(dc[1]) >= 1 and dc[1] != 2 and p.distance_to(dc[0]) < 30.0:
+			return false
 	for n in get_children():
 		if n.get_script() == TowerScript and n.position.distance_to(p) < 60.0:
 			return false
@@ -195,9 +231,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(0, 0, 1280, 720), Color("5fae4f"))
-	for i in 40:
-		var h := hash(i * 7919)
-		draw_circle(Vector2(h % 1280, (h / 1280) % 720), 40 + h % 50, Color(0.4, 0.68, 0.32, 0.35))
+	for gx in 20:
+		for gy in 12:
+			if (gx + gy) % 2 == 0:
+				draw_rect(Rect2(gx * 64, gy * 64, 64, 64), Color(1, 1, 1, 0.045))
 	for i in PATH.size() - 1:
 		draw_line(PATH[i], PATH[i + 1], Color("6b4a2a"), PATH_HALF * 2 + 8)
 	for p in PATH:
@@ -206,6 +243,22 @@ func _draw() -> void:
 		draw_line(PATH[i], PATH[i + 1], Color("d1a56a"), PATH_HALF * 2 - 4)
 	for p in PATH:
 		draw_circle(p, PATH_HALF - 2, Color("d1a56a"))
+	for dc in decor:
+		var p: Vector2 = dc[0]
+		var z: float = dc[2]
+		match int(dc[1]):
+			0:
+				DrawUtil.disc(self, p, 13 * z, Color("3f8a3a"), Color("24501f"), 3.0)
+				DrawUtil.disc(self, p + Vector2(11, 4) * z, 9 * z, Color("4a9a42"), Color("24501f"), 3.0)
+			1:
+				DrawUtil.disc(self, p, 11 * z, Color("9aa3ad"), Color("4a5260"), 3.0)
+			2:
+				for j in 3:
+					draw_circle(p + Vector2(j * 7 - 7, (j % 2) * 5) * z, 3.5 * z, Color("ffe36a") if j != 1 else Color("ff8fb1"))
+			3:
+				draw_line(p + Vector2(0, 8) * z, p + Vector2(0, 26) * z, Color("5a3a1e"), 7.0 * z)
+				DrawUtil.disc(self, p, 24 * z, Color("2f7a35"), Color("1c4a22"), 4.0)
+				draw_circle(p + Vector2(-8, -8) * z, 8 * z, Color("4aa04a"))
 	if state == "play":
 		var m := get_global_mouse_position()
 		var d: Dictionary = Creatures.DEFS[selected]
