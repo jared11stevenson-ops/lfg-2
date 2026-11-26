@@ -50,3 +50,10 @@ Credits are the user's, so the plan is: balance check first, 6 base creatures on
 
 ## Next night
 Art quality remains the biggest gap to the Bloons TD6 bar: hand-sculpted models (or a working Tripo key), real animation rigs, lighting and ground shadows baked into sprites, VFX sprites. Then: 9 more regions/Wells, ally evolutions, Keeper's Hall meta hub, hero abilities, a real balance pass from human playtests, Android export (needs SDK), touch UX tuning.
+
+## Update (06:50 UTC): second push after the brief changed
+New brief: at least 10 levels and 20 creatures, art loosely inspired by late-night surreal cartoons, picture-book whimsy and midnight paintings, creatures with real personality.
+- Art pivot: Tripo auth failed and 3D renders could not give a 2D cartoon look, so a Godot-native **2D puppet** system was built (noodle limbs, blinking/expressive eyes, per-part animation) and baked to sprite frames. 20 creature designs + evolved forms (tools/bake_puppets.gd).
+- 10 levels (docs/lore_v2.md), 20 creatures, 17 befriendable allies each with a 2x4 upgrade tree, painted midnight backdrops, rune stones, hazard zones, weather, wave generator, 4 difficulty tiers, 10 mutators, wave events, champion/boss waves, stars + unlocks, Daily Challenge, Endless, Bestiary.
+- Tests: type chart, upgrade rules, level data, session/unlocks, UI interaction, auto balance sims on every level (all 20 defenders exercised, no script errors).
+- Still open: human playtest, phone/touch tuning, real audio check, Android export (needs SDK), more hand-polish on creature art, balance from real players.
