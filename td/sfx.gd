@@ -41,7 +41,21 @@ static func _wav(data: PackedFloat32Array) -> AudioStreamWAV:
 	w.data = b
 	return w
 
+# Per-species voices: [start Hz, end Hz, wave, length]. Small tonal quirks give each creature a sound personality.
+const VOICES := {
+	"tickindle": [180, 120, "saw", 0.16], "dugloom": [300, 200, "sine", 0.3], "hutzin": [700, 330, "square", 0.2], "shuckit": [520, 260, "saw", 0.18],
+	"zapnose": [1200, 600, "square", 0.1], "glomm": [90, 60, "saw", 0.3], "hoardillo": [420, 300, "square", 0.14], "mirewick": [380, 760, "sine", 0.26],
+	"gloamoth": [900, 1100, "sine", 0.2], "bogbard": [140, 110, "saw", 0.22], "quillwyrm": [640, 420, "square", 0.12], "drumbeak": [110, 70, "square", 0.2],
+	"pyrelope": [760, 980, "square", 0.18], "mudskip": [240, 400, "saw", 0.2], "thornarok": [130, 90, "saw", 0.2], "ptarmitten": [1000, 780, "sine", 0.14],
+	"tentbat": [1300, 1500, "sine", 0.1], "dumbomaton": [320, 320, "square", 0.16], "colukite": [880, 440, "saw", 0.16], "gilamancer": [200, 330, "saw", 0.24],
+}
+
 static func _make(name: String) -> AudioStreamWAV:
+	if name.begins_with("v_"):
+		var sp := name.substr(2)
+		var v: Array = VOICES.get(sp.get_slice("|", 0), [400, 300, "square", 0.15])
+		var hurt := sp.ends_with("|hurt")
+		return _wav(_tone(float(v[0]) * (0.7 if hurt else 1.0), float(v[1]) * (0.55 if hurt else 1.0), float(v[3]) * (1.4 if hurt else 0.7), String(v[2]), 1.4, 0.35))
 	match name:
 		"shoot": return _wav(_tone(900, 480, 0.09, "square", 1.6, 0.3))
 		"pulse": return _wav(_tone(260, 720, 0.28, "sine", 1.2))
@@ -91,11 +105,16 @@ static func _note(freq: float, t: float, wave: String) -> float:
 		"sq": return 1.0 if ph < 0.5 else -1.0
 	return sin(ph * TAU)
 
-static func _make_music() -> AudioStreamWAV:
+static func _make_music(variant: int = 0) -> AudioStreamWAV:
 	var rate := 11025
-	var bpm := 112.0
+	var bpm: float = [112.0, 100.0, 124.0, 92.0][variant % 4]
 	var beat := 60.0 / bpm
-	var chords := [[261.63, 329.63, 392.0], [220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 246.94, 293.66]]
+	var sets := [
+		[[261.63, 329.63, 392.0], [220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 246.94, 293.66]],
+		[[220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [261.63, 329.63, 392.0], [196.0, 246.94, 293.66]],
+		[[246.94, 311.13, 369.99], [207.65, 261.63, 311.13], [185.0, 233.08, 277.18], [220.0, 277.18, 329.63]],
+		[[196.0, 246.94, 293.66], [164.81, 196.0, 246.94], [220.0, 261.63, 329.63], [174.61, 220.0, 261.63]]]
+	var chords: Array = sets[variant % 4]
 	var bass := [65.41, 55.0, 43.65, 49.0]
 	var melody := [0, 2, 4, 2, 4, 7, 4, 2, 0, 2, 4, 7, 9, 7, 4, 2]
 	var pent := [0, 2, 4, 7, 9]
@@ -136,12 +155,18 @@ static func _make_music() -> AudioStreamWAV:
 	w.loop_end = total
 	return w
 
-static func start_music(n: Node) -> void:
+static var _music_variant := -1
+
+static func voice(n: Node, species: String, hurt: bool = false, vol_db: float = -14.0) -> void:
+	play(n, "v_" + species + ("|hurt" if hurt else "|say"), vol_db, 120)
+
+static func start_music(n: Node, variant: int = 0) -> void:
 	if _music_player == null or not is_instance_valid(_music_player):
 		_music_player = AudioStreamPlayer.new()
 		n.get_tree().root.add_child.call_deferred(_music_player)
-		if _music_stream == null:
-			_music_stream = _make_music()
+		if _music_stream == null or _music_variant != variant:
+			_music_stream = _make_music(variant)
+			_music_variant = variant
 		_music_player.stream = _music_stream
 		_music_player.volume_db = -14.0
 	if music_on:

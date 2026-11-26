@@ -208,6 +208,8 @@ func _fire(t) -> void:
 	windup += 1
 	atk_t = 0.35
 	Sfx.play(self, "shoot", -16.0, 45)
+	if shots % 9 == 3:
+		Sfx.voice(self, String(def.get("sprite", def.id)), false, -17.0)
 	var molten: bool = def.id == "tickindle" and shots % int(st.molten_every) == 0
 	var crit: bool = int(st.crit_every) > 0 and shots % int(st.crit_every) == 0
 	var targets: Array = _pick_many(int(st.multitarget)) if int(st.multitarget) > 1 else [t]

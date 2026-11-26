@@ -375,7 +375,8 @@ func _on_died(e) -> void:
 	pf.scale = Vector2(1.4, 1.4) if e.is_boss else Vector2.ONE
 	add_child(pf)
 	FxScript.text_at(self, e.position + Vector2(0, -20), "+%d" % e.reward, Color("ffd23a"))
-	Sfx.play(self, "pop", -9.0, 30)
+	Sfx.play(self, "pop", -11.0, 30)
+	Sfx.voice(self, e.sprite_id, true, -12.0)
 	Sfx.play(self, "coin", -14.0, 60)
 	# Gale hook: a fallen Shuckit whips nearby packmates into a sprint.
 	for o in get_tree().get_nodes_in_group("enemies"):
