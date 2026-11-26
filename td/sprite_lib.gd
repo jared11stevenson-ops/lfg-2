@@ -16,12 +16,15 @@ static func tex(id: String, k: int) -> Texture2D:
 static func dir_from_angle(a: float) -> int:
 	return posmod(roundi(a / (PI / 4.0)), 8)
 
-# Draws creature `id` facing dir k at `ppu` pixels per world unit, ground point at the origin + off. Returns true if drawn.
-static func draw(ci: CanvasItem, id: String, k: int, ppu: float, off: Vector2 = Vector2.ZERO, tint: Color = Color.WHITE) -> bool:
+# Draws creature `id` facing dir k at `ppu` pixels per world unit, ground point at the origin + off.
+# rot/squash add life: rotate about the ground point and squash-and-stretch (sx, sy). Returns true if drawn.
+static func draw(ci: CanvasItem, id: String, k: int, ppu: float, off: Vector2 = Vector2.ZERO, tint: Color = Color.WHITE, rot: float = 0.0, squash: Vector2 = Vector2.ONE) -> bool:
 	var t := tex(id, k)
 	if t == null:
 		return false
 	var base := id.get_slice("_", 0)
 	var s: float = float(CAM.get(base, 4.0)) * (1.1 if id.contains("_") else 1.0) * ppu
-	ci.draw_texture_rect(t, Rect2(off + Vector2(-s / 2.0, -s / 2.0 - GROUND_UNITS * ppu), Vector2(s, s)), false, tint)
+	ci.draw_set_transform(off, rot, squash)
+	ci.draw_texture_rect(t, Rect2(Vector2(-s / 2.0, -s / 2.0 - GROUND_UNITS * ppu), Vector2(s, s)), false, tint)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	return true

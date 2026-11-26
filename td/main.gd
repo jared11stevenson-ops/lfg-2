@@ -479,6 +479,17 @@ func _draw() -> void:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		draw_circle(m, 28, Color(tint.r, tint.g, tint.b, 0.2))
 	_draw_weather()
+	_draw_vignette()
+
+func _draw_vignette() -> void:
+	var steps := 8
+	for i in steps:
+		var inset := float(i) * 12.0
+		var a := 0.05 * (1.0 - float(i) / steps)
+		draw_rect(Rect2(0, 0, 1280, inset + 12.0), Color(0, 0, 0, a))
+		draw_rect(Rect2(0, 720 - inset - 12.0, 1280, inset + 12.0), Color(0, 0, 0, a))
+		draw_rect(Rect2(0, 0, inset + 12.0, 720), Color(0, 0, 0, a))
+		draw_rect(Rect2(1280 - inset - 12.0, 0, inset + 12.0, 720), Color(0, 0, 0, a))
 
 func _draw_decor(p: Vector2, kind: int, z: float) -> void:
 	match String(map.style):

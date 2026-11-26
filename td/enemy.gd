@@ -165,7 +165,7 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 22 if big else 16, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var bob_y := sin(wobble) * 2.0
-	if SpriteLib.draw(self, sprite_id, SpriteLib.dir_from_angle(heading), SPRITE_SCALE.get(kind, 30.0) * (1.0 + flash_t * 1.2), Vector2(0, bob_y + 8), Color(1.0, 0.55, 0.55) if flash_t > 0.0 else Color.WHITE):
+	if SpriteLib.draw(self, sprite_id, SpriteLib.dir_from_angle(heading), SPRITE_SCALE.get(kind, 30.0) * (1.0 + flash_t * 1.2), Vector2(0, bob_y + 8), Color(1.0, 0.55, 0.55) if flash_t > 0.0 else Color.WHITE, sin(wobble) * 0.07, Vector2(1.0 + 0.035 * sin(wobble * 2.0), 1.0 - 0.035 * sin(wobble * 2.0))):
 		pass
 	else:
 		match kind:

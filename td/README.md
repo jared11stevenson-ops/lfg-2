@@ -1,8 +1,21 @@
-# Wellfall TD (pass 3)
-Separate Godot project, targets Godot 4.7 (verified headless on 4.7-stable). Root project is the older farm game.
-- Pick Tickindle / Dugloom / Hutzin from the bottom cards, tap grass to place, start waves, survive 8 waves (Shuckit, Zapnose, Glomm). 12-type chart with Super!/Resisted popups.
-- Dugloom: lantern pulse slows everything in range. Hutzin: stacking poison that hops to the nearest foe when its host dies.
-- Creature designs: `docs/creatures_v1.md`. Type chart so far: starter triangle only (`type_chart.gd`).
-- Tests (headless): `godot --headless --path td -s tests/test_type_chart.gd`
-  and `godot --headless --path td --fixed-fps 60 -s tests/sim_waves.gd` (balance smoke test; pass towers as `-- tickindle:500,260 dugloom:430,260`).
-- Art is code-drawn placeholder. Balance sims (pass 3, free towers): 7 mixed towers lose at wave 8; 10 mixed towers win with 20 lives. Screenshots: `tests/shot.gd` under xvfb-run. Not yet run on a phone or by a human.
+# Wellfall TD
+Godot 4.7 tower defense. Open the `td/` folder in Godot 4.7 and press F5, or run the exported build.
+
+## What's in
+- 6 creatures you place (3 starters + 3 befriended allies), each with 2 upgrade paths x 4 tiers (only one path past tier 2). Tier 3+ switches to an evolved 3D model.
+- 12-type chart (every type beats 2, is beaten by 2), weather that shifts matchups, 3 maps, 8 waves + boss, Endless mode.
+- 7 enemy kinds including an armored one (Hoardillo) and a regenerating one (Mirewick).
+- Well Surge active ability, targeting modes, sell, 1x/2x/3x speed, procedural SFX and music, saved progress.
+- Art: creatures are built from primitives in 3D, toon-shaded with outlines, and pre-rendered to 8-direction sprites (`tools/render_sprites.gd`). Code-drawn fallbacks exist for the starters and enemies.
+
+## Docs
+`docs/creatures_v1.md`, `docs/lore_v1.md` (world, types, roster), `docs/ROADMAP_NIGHT1.md`.
+
+## Tests (headless)
+`GODOT=/path/to/godot tests/run_all.sh` runs the type-chart test, upgrade-rule test and a full-wave balance sim.
+Single sim: `godot --headless --path . --fixed-fps 60 -s tests/sim_waves.gd -- map=frostrun tickindle:500,260:aab ally_zapnose:430,260:bb`
+Screenshots: `xvfb-run godot --path . --rendering-driver opengl3 --fixed-fps 60 -s tests/shot.gd -- out.png 600 wave=4 select=1 tickindle:430,260:aab`
+Re-render sprites: `xvfb-run godot --path . --rendering-driver opengl3 -s tools/render_sprites.gd -- [ids]`
+
+## Honest status
+Verified: headless tests and sims, in-engine screenshots under software rendering, exported pack boots. Not verified: human playtest, real phone, touch feel, audio on hardware (no audio device here), balance against real players.
