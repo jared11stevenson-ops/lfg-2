@@ -5,6 +5,26 @@ static var _cache := {}
 static var _pool: Array = []
 static var _next := 0
 static var _last := {}
+const Session = preload("res://session.gd")
+
+static func setup_buses() -> void:
+	for nm in ["Music", "SFX"]:
+		if AudioServer.get_bus_index(nm) < 0:
+			AudioServer.add_bus()
+			var i := AudioServer.get_bus_count() - 1
+			AudioServer.set_bus_name(i, nm)
+			AudioServer.set_bus_send(i, "Master")
+	apply_volumes()
+
+static func apply_volumes() -> void:
+	Session.load_save()
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(maxf(0.0001, float(Session.settings.music))))
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(maxf(0.0001, float(Session.settings.sfx))))
+
+static func haptic(ms: int = 20) -> void:
+	Session.load_save()
+	if bool(Session.settings.haptics):
+		Input.vibrate_handheld(ms)
 
 static func _tone(f0: float, f1: float, dur: float, wave: String, decay: float, vol: float = 0.55) -> PackedFloat32Array:
 	var n := int(dur * RATE)
@@ -82,6 +102,7 @@ static func play(n: Node, name: String, vol_db: float = -8.0, min_gap: int = 0) 
 		_pool.clear()
 		for i in 14:
 			var p := AudioStreamPlayer.new()
+			p.bus = "SFX"
 			n.get_tree().root.add_child(p)
 			_pool.append(p)
 	if not _cache.has(name):
@@ -161,8 +182,10 @@ static func voice(n: Node, species: String, hurt: bool = false, vol_db: float = 
 	play(n, "v_" + species + ("|hurt" if hurt else "|say"), vol_db, 120)
 
 static func start_music(n: Node, variant: int = 0) -> void:
+	setup_buses()
 	if _music_player == null or not is_instance_valid(_music_player):
 		_music_player = AudioStreamPlayer.new()
+		_music_player.bus = "Music"
 		n.get_tree().root.add_child.call_deferred(_music_player)
 		if _music_stream == null or _music_variant != variant:
 			_music_stream = _make_music(variant)

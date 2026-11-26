@@ -142,10 +142,14 @@ func _refresh_buffs() -> void:
 			buff_range += float(t.st.aura_range)
 	buff_rate *= _mut("rate")
 
+func _enemies() -> Array:
+	var m = get_parent()
+	return m.enemy_list if m != null and "enemy_list" in m else get_tree().get_nodes_in_group("enemies")
+
 func _in_range() -> Array:
 	var out := []
 	var r := rng()
-	for e in get_tree().get_nodes_in_group("enemies"):
+	for e in _enemies():
 		if not e.dead and not e.is_queued_for_deletion() and position.distance_to(e.position) <= r:
 			out.append(e)
 	return out

@@ -15,6 +15,7 @@ const Session = preload("res://session.gd")
 const Sfx = preload("res://sfx.gd")
 const Backdrop = preload("res://backdrop.gd")
 const PuppetLib = preload("res://puppet_lib.gd")
+const SettingsPanel = preload("res://settings_panel.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -68,10 +69,15 @@ var next_btn: Button
 var panel
 var paused_scale := 1.0
 var intro: Label
+var enemy_list: Array = []
+var pending := Vector2.ZERO
+var has_pending := false
+var pause_menu
 var event_id := ""
-var intro_t := 5.0
+var intro_t := 3.6
 
 func _ready() -> void:
+	Session.init_ui()
 	lv = Levels.LEVELS[Session.level_id]
 	paths = Levels.to_paths(lv)
 	for z in lv.zones:
@@ -117,11 +123,11 @@ func _build_ui() -> void:
 	layer.add_child(info)
 	start_btn = _button("Start wave", Vector2(1060, 636), Vector2(200, 64), 24, Color("c4552b"), _start_wave)
 	layer.add_child(start_btn)
-	speed_btn = _button("", Vector2(1100, 8), Vector2(160, 44), 20, Color("3a4a6b"), _cycle_speed)
+	speed_btn = _button("", Vector2(1100, 8), Vector2(160, 52), 22, Color("3a4a6b"), _cycle_speed)
 	layer.add_child(speed_btn)
-	sound_btn = _button("Sound: On" if Sfx.music_on else "Sound: Off", Vector2(1100, 58), Vector2(160, 38), 17, Color("3a4a6b"), func(): sound_btn.text = "Sound: On" if Sfx.toggle_sound(self) else "Sound: Off")
+	sound_btn = _button("Sound: On" if Sfx.music_on else "Sound: Off", Vector2(1100, 64), Vector2(160, 46), 19, Color("3a4a6b"), func(): sound_btn.text = "Sound: On" if Sfx.toggle_sound(self) else "Sound: Off")
 	layer.add_child(sound_btn)
-	pause_btn = _button("Pause", Vector2(990, 8), Vector2(100, 44), 20, Color("3a4a6b"), _toggle_pause)
+	pause_btn = _button("Menu", Vector2(970, 8), Vector2(120, 52), 22, Color("3a4a6b"), _toggle_pause)
 	layer.add_child(pause_btn)
 	surge_btn = _button("", Vector2(1060, 556), Vector2(200, 64), 20, Color("2a6f9a"), _surge)
 	surge_btn.visible = not bool(mut.nosurge)
@@ -151,11 +157,18 @@ func _build_ui() -> void:
 	panel.cycle_target.connect(func(): panel.refresh(coins))
 	layer.add_child(panel)
 	panel.position = Vector2(16, 116)
+	pause_menu = SettingsPanel.new()
+	pause_menu.mode = "pause"
+	pause_menu.resume.connect(_toggle_pause)
+	pause_menu.restart.connect(func(): Engine.time_scale = 1.0; get_tree().reload_current_scene())
+	pause_menu.levels.connect(func(): Engine.time_scale = 1.0; get_tree().change_scene_to_file("res://menu.tscn"))
+	layer.add_child(pause_menu)
+	pause_menu.position = Vector2(380, 150)
 	prev_btn = _button("<", Vector2(924, 612), Vector2(50, 44), 22, Color("3a4a6b"), func(): _page(-1))
 	next_btn = _button(">", Vector2(924, 662), Vector2(50, 44), 22, Color("3a4a6b"), func(): _page(1))
 	layer.add_child(prev_btn)
 	layer.add_child(next_btn)
-	intro = _label(Vector2(0, 300), 44)
+	intro = _label(Vector2(0, 250), 34)
 	intro.size = Vector2(1280, 200)
 	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	intro.text = "%s\n%s" % [lv.name, lv.rule]
@@ -187,7 +200,7 @@ func _build_shop() -> void:
 		b.size = Vector2(142, 90)
 		b.toggled.connect(func(on): _on_card(id, on))
 		layer.add_child(b)
-		UiStyle.style_btn(b, Color("2f6b3a"), Color("f0b43c"))
+		UiStyle.style_btn(b, Color("2f6b3a"), Color("d9892a"))
 		cards[id] = b
 	_layout_cards()
 
@@ -227,11 +240,15 @@ func _toggle_pause() -> void:
 	if Engine.time_scale > 0.0:
 		paused_scale = Engine.time_scale
 		Engine.time_scale = 0.0
-		pause_btn.text = "Resume"
+		pause_menu.visible = true
 	else:
 		Engine.time_scale = paused_scale
-		pause_btn.text = "Pause"
+		pause_menu.visible = false
 	_refresh()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and state == "play":
+		_toggle_pause()
 
 func _refresh() -> void:
 	speed_btn.text = "Speed x%d" % int(maxf(1.0, Engine.time_scale if Engine.time_scale > 0.0 else paused_scale))
@@ -296,22 +313,23 @@ func eff(key: String) -> float:
 	return m
 
 func _process(delta: float) -> void:
+	enemy_list = get_tree().get_nodes_in_group("enemies")
 	clock += delta
 	intro_t -= delta
-	intro.modulate.a = clampf(intro_t / 1.2, 0.0, 1.0)
+	intro.modulate.a = clampf(intro_t / 1.2, 0.0, 1.0) if not pause_menu.visible else 0.0
 	red_flash = maxf(0.0, red_flash - delta)
 	surge_cd = maxf(0.0, surge_cd - delta)
 	surge_btn.disabled = surge_cd > 0.0 or not wave_running
 	surge_btn.text = "Well Surge\n(stun + damage)" if surge_cd <= 0.0 else "Surge in %ds" % ceili(surge_cd)
 	shake = maxf(0.0, shake - delta * 2.5)
-	position = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 9.0
+	position = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 9.0 if bool(Session.settings.shake) else Vector2.ZERO
 	if state == "play" and wave_running:
 		spawn_cd -= delta
 		if to_spawn > 0 and spawn_cd <= 0.0:
 			_spawn()
 			to_spawn -= 1
 			spawn_cd = maxf(0.4, 1.1 - 0.05 * wave) * eff("interval")
-		elif to_spawn == 0 and get_tree().get_nodes_in_group("enemies").is_empty():
+		elif to_spawn == 0 and enemy_list.is_empty():
 			_wave_done()
 	queue_redraw()
 
@@ -337,6 +355,7 @@ func _spawn() -> void:
 	if boss:
 		d = Waves.boss_def(lv, kind.substr(5), wave)
 		shake = 1.5
+		Sfx.haptic(180)
 		Sfx.play(self, "boss")
 		FxScript.text_at(self, Vector2(640, 330), "BOSS: %s!" % d.name, Color("ff6a5a"))
 	else:
@@ -420,6 +439,7 @@ func _on_leaked(e) -> void:
 	lives -= e.leak
 	red_flash = 0.5
 	shake = 1.0 if e.leak < 5 else 2.0
+	Sfx.haptic(60 if e.leak < 5 else 140)
 	Sfx.play(self, "leak", -4.0)
 	_refresh()
 	if lives <= 0:
@@ -555,6 +575,7 @@ func _on_upgrade(path: String) -> void:
 		return
 	coins -= sel_tower.buy(path)
 	Sfx.play(self, "up")
+	Sfx.haptic(30)
 	_refresh()
 
 func _on_sell() -> void:
@@ -569,26 +590,41 @@ func _on_sell() -> void:
 
 func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
-		if state != "play":
+		if state != "play" or Engine.time_scale <= 0.0:
 			return
 		var p: Vector2 = get_canvas_transform().affine_inverse() * ev.position
 		var tw = _tower_at(p)
 		if tw != null:
+			has_pending = false
 			_select_tower(tw)
 			return
 		var d: Dictionary = Creatures.TOWERS[selected]
 		var sp := _snap(p)
-		if placing and coins >= int(d.cost) and _valid_spot(sp):
-			coins -= int(d.cost)
-			var t = TowerScript.new()
-			t.def = d
-			t.spent = int(d.cost)
-			t.position = sp
-			add_child(t)
-			Sfx.play(self, "place")
-			_refresh()
-		else:
+		if not placing:
 			_deselect_tower()
+			return
+		# Tap once to preview the spot, tap the preview again to place (precise on touch screens).
+		if has_pending and p.distance_to(pending) < 46.0 and coins >= int(d.cost) and _valid_spot(pending):
+			_place(d, pending)
+			has_pending = false
+		elif _valid_spot(sp):
+			pending = sp
+			has_pending = true
+			Sfx.play(self, "click", -12.0)
+		else:
+			has_pending = false
+			_deselect_tower()
+
+func _place(d: Dictionary, at: Vector2) -> void:
+	coins -= int(d.cost)
+	var t = TowerScript.new()
+	t.def = d
+	t.spent = int(d.cost)
+	t.position = at
+	add_child(t)
+	Sfx.play(self, "place")
+	Sfx.haptic(25)
+	_refresh()
 
 # ---------- drawing ----------
 func _draw() -> void:
@@ -599,8 +635,8 @@ func _draw() -> void:
 		var pulse := 0.5 + 0.5 * sin(clock * 2.0 + s.pos.x)
 		var col: Color = TypeChart.COLORS[s.type]
 		draw_arc(s.pos, 46.0 + pulse * 3.0, 0, TAU, 40, Color(col.r, col.g, col.b, 0.35 + 0.3 * pulse), 3.0, true)
-	if state == "play" and placing:
-		var m := _snap(get_global_mouse_position())
+	if state == "play" and placing and has_pending:
+		var m := pending
 		var d: Dictionary = Creatures.TOWERS[selected]
 		var ok := coins >= int(d.cost) and _valid_spot(m)
 		var tint := Color(1, 1, 1, 0.45) if ok else Color(1, 0.2, 0.2, 0.45)
@@ -609,6 +645,9 @@ func _draw() -> void:
 		TowerScript.draw_icon(self, selected, d)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		draw_circle(m, 28, Color(tint.r, tint.g, tint.b, 0.2))
+		var pulse2 := 0.5 + 0.5 * sin(clock * 6.0)
+		draw_arc(m, 40.0 + pulse2 * 4.0, 0, TAU, 32, Color(1, 0.95, 0.5, 0.9), 3.0, true)
+		draw_string(ThemeDB.fallback_font, m + Vector2(-70, -86), "Tap again to place" if ok else "Can't place here", HORIZONTAL_ALIGNMENT_CENTER, 140, 18, Color.WHITE if ok else Color(1, 0.6, 0.6))
 	# fireflies / spirit motes in the level's accent colour
 	for i in 26:
 		var x := fmod(i * 197.0 + sin(clock * 0.4 + i) * 40.0 + clock * 6.0, 1300.0)

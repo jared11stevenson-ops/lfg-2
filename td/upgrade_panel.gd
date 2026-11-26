@@ -35,7 +35,7 @@ func _ready() -> void:
 		b.custom_minimum_size = Vector2(0, 78)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.add_theme_font_size_override("font_size", 16)
-		UiStyle.style_btn(b, Color("2f6b3a") if p == "a" else Color("2f5f8a"), Color("f0b43c"))
+		UiStyle.style_btn(b, Color("2f6b3a") if p == "a" else Color("2f5f8a"), Color("d9892a"))
 		b.pressed.connect(func(): upgrade.emit(p))
 		v.add_child(b)
 		btn[p] = b
@@ -43,11 +43,15 @@ func _ready() -> void:
 	row.add_theme_constant_override("separation", 8)
 	v.add_child(row)
 	tgt = Button.new()
+	tgt.custom_minimum_size = Vector2(0, 54)
+	tgt.add_theme_font_size_override("font_size", 20)
 	tgt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UiStyle.style_btn(tgt, Color("4a4f66"), Color("4a4f66"))
 	tgt.pressed.connect(func(): cycle_target.emit())
 	row.add_child(tgt)
 	sellb = Button.new()
+	sellb.custom_minimum_size = Vector2(0, 54)
+	sellb.add_theme_font_size_override("font_size", 20)
 	sellb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	UiStyle.style_btn(sellb, Color("a63d3d"), Color("a63d3d"))
 	sellb.pressed.connect(func(): sell.emit())

@@ -27,6 +27,14 @@ func _initialize() -> void:
 		if a[i].begins_with("setup="):
 			main.call_deferred("_open_setup", a[i].substr(6))
 			continue
+		if a[i] == "pause":
+			main.call_deferred("_toggle_pause")
+			continue
+		if a[i].begins_with("ghost="):
+			var gp := a[i].substr(6).split(",")
+			main.pending = Vector2(float(gp[0]), float(gp[1]))
+			main.has_pending = true
+			continue
 		if a[i] == "bestiary":
 			main.mode = "bestiary"
 			continue

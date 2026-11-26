@@ -12,6 +12,7 @@ static var best_wave := {}      # level -> best wave reached
 static var unlocked := {}       # ally tower id -> true
 static var dev_all := false     # testing: unlock everything
 static var _loaded := false
+static var settings := {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true}
 static var no_save := false     # set by headless tests
 
 static func load_save() -> void:
@@ -27,6 +28,8 @@ static func load_save() -> void:
 		for k in cf.get_section_keys("unlocked"):
 			unlocked[k] = true
 		dev_all = bool(cf.get_value("settings", "dev_all", false))
+		for k in settings:
+			settings[k] = cf.get_value("prefs", k, settings[k])
 
 static func _save() -> void:
 	if no_save:
@@ -39,7 +42,12 @@ static func _save() -> void:
 	for k in unlocked:
 		cf.set_value("unlocked", k, true)
 	cf.set_value("settings", "dev_all", dev_all)
+	for k in settings:
+		cf.set_value("prefs", k, settings[k])
 	cf.save("user://wellfall.cfg")
+
+static func save_prefs() -> void:
+	_save()
 
 static func set_dev_all(v: bool) -> void:
 	dev_all = v
@@ -92,3 +100,9 @@ static func record_loss(level: String, wave: int) -> void:
 
 static func score_mult() -> float:
 	return float(Rules.combine(diff, muts).score)
+
+# Call once per scene: makes the custom cartoon font the default for draw_string() too.
+static func init_ui() -> void:
+	var f = load("res://art/fonts/LilitaOne-Regular.ttf")
+	if f != null:
+		ThemeDB.fallback_font = f

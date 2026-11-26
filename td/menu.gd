@@ -8,6 +8,7 @@ const PuppetLib = preload("res://puppet_lib.gd")
 const TypeChart = preload("res://type_chart.gd")
 const UiStyle = preload("res://ui_style.gd")
 const Sfx = preload("res://sfx.gd")
+const SettingsPanel = preload("res://settings_panel.gd")
 const CARD := Vector2(236, 196)
 const SPECIES := ["tickindle", "dugloom", "hutzin", "shuckit", "zapnose", "glomm", "hoardillo", "mirewick", "gloamoth", "bogbard", "quillwyrm", "drumbeak", "pyrelope", "mudskip", "thornarok", "ptarmitten", "tentbat", "dumbomaton", "colukite", "gilamancer"]
 const BLURBS := {
@@ -29,21 +30,29 @@ var dev_btn: Button
 var daily_btn: Button
 var best_btn: Button
 var back_btn: Button
+var settings_btn: Button
+var settings_panel
 
 func _ready() -> void:
+	Session.init_ui()
 	Session.load_save()
 	Sfx.start_music(self)
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	daily_btn = _btn("Daily Challenge", Vector2(1030, 14), Vector2(230, 46), 20, Color("c4552b"), _daily)
 	best_btn = _btn("Bestiary", Vector2(1030, 68), Vector2(230, 40), 18, Color("3a4a6b"), func(): mode = "bestiary"; back_btn.visible = true)
-	dev_btn = _btn("", Vector2(810, 14), Vector2(200, 40), 16, Color("4a4f66"), _toggle_dev)
+	dev_btn = _btn("", Vector2(780, 14), Vector2(230, 44), 17, Color("4a4f66"), _toggle_dev)
 	back_btn = _btn("Back", Vector2(1100, 14), Vector2(160, 46), 20, Color("3a4a6b"), func(): mode = "levels"; back_btn.visible = false)
 	back_btn.visible = false
-	for b in [daily_btn, best_btn, dev_btn, back_btn]:
+	settings_btn = _btn("Settings", Vector2(810, 62), Vector2(200, 46), 20, Color("3a4a6b"), func(): settings_panel.visible = true)
+	for b in [daily_btn, best_btn, dev_btn, back_btn, settings_btn]:
 		layer.add_child(b)
 	_update_dev()
 	_build_setup(layer)
+	settings_panel = SettingsPanel.new()
+	settings_panel.closed.connect(func(): settings_panel.visible = false)
+	layer.add_child(settings_panel)
+	settings_panel.position = Vector2(380, 130)
 
 func _btn(text: String, pos: Vector2, size: Vector2, fsize: int, col: Color, cb: Callable) -> Button:
 	var b := Button.new()
@@ -98,7 +107,7 @@ func _build_setup(layer: CanvasLayer) -> void:
 		b.custom_minimum_size = Vector2(205, 58)
 		b.add_theme_font_size_override("font_size", 15)
 		b.pressed.connect(func(): Session.diff = d; _sync_setup())
-		UiStyle.style_btn(b, Color("2f4a6b"), Color("f0b43c"))
+		UiStyle.style_btn(b, Color("2f4a6b"), Color("d9892a"))
 		drow.add_child(b)
 		diff_btns[d] = b
 	var ml := Label.new()
@@ -192,12 +201,22 @@ func _card_rect(i: int) -> Rect2:
 func _process(delta: float) -> void:
 	clock += delta
 	hover = -1
-	if mode == "levels" and not setup.visible:
+	if mode == "levels" and not setup.visible and not settings_panel.visible:
 		var m := get_global_mouse_position()
 		for i in Levels.ORDER.size():
 			if _card_rect(i).has_point(m):
 				hover = i
 	queue_redraw()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		if settings_panel.visible:
+			settings_panel.visible = false
+		elif setup.visible:
+			setup.visible = false
+		elif mode != "levels":
+			mode = "levels"
+			back_btn.visible = false
 
 func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and hover >= 0:

@@ -4,7 +4,12 @@ config_version=5
 [application]
 config/name="Wellfall TD"
 run/main_scene="res://menu.tscn"
+run/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[gui]
+
+theme/custom_font="res://art/fonts/LilitaOne-Regular.ttf"
 
 [display]
 window/size/viewport_width=1280

@@ -13,5 +13,10 @@ static func style_btn(b: Button, col: Color, sel: Color) -> void:
 		sb.shadow_size = 3
 		sb.shadow_color = Color(0, 0, 0, 0.35)
 		b.add_theme_stylebox_override(st, sb)
-	b.add_theme_color_override("font_pressed_color", Color("1a1a1a"))
-	b.add_theme_color_override("font_hover_pressed_color", Color("1a1a1a"))
+	for c in ["font_color", "font_hover_color", "font_focus_color"]:
+		b.add_theme_color_override(c, Color("ffffff"))
+	b.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.45))
+	b.add_theme_color_override("font_outline_color", Color("1d1230"))
+	b.add_theme_constant_override("outline_size", 4)
+	b.add_theme_color_override("font_pressed_color", Color("ffffff"))
+	b.add_theme_color_override("font_hover_pressed_color", Color("ffffff"))

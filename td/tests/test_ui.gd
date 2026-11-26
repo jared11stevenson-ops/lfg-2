@@ -27,7 +27,9 @@ func _process(_d: float) -> bool:
 	frames += 1
 	if frames == 3:
 		var c0: int = main.coins
-		_click(Vector2(500, 300))   # a valid ground spot (also near a stone)
+		_click(Vector2(500, 300))   # first tap previews the spot
+		_check(get_nodes_in_group("towers").size() == 0, "first tap only previews")
+		_click(Vector2(500, 300))   # second tap on the ghost places it
 		var towers := get_nodes_in_group("towers")
 		_check(towers.size() == 1, "tower placed by click")
 		_check(main.coins < c0, "coins spent on placement")
