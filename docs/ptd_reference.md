@@ -32,3 +32,18 @@ Energy cost per placement, starting energy, income, exact wave lists with levels
 | XP shared among attackers | XP banked per placed creature each wave, +win bonus |
 | Candies (about 5 lives) | 20 lives (kept; each leak costs 1) |
 | Level-up bar flashes | Result screen lists level-ups (in-battle flash still to do) |
+
+## Observed by actually playing PTD1 (Android build v3.6.6, run in Ruffle) - 2026-11-27
+How it was run: the APK is an Adobe AIR wrapper (PTD1.swf, 129 KB) that downloads the real game (13.6 MB SWF, AS3, 800x480) from ptd.onl and caches it. In headless Chromium I ran the wrapper in Ruffle (0.9 nightly) and served the two ptd.onl requests (game SWF, version check `version=1`) from local files. Account creation/login worked with a throwaway email/password; profile saving worked.
+
+Flow: Start -> account (email + password) -> 3 profile slots -> Oak intro (pick Bulbasaur/Charmander/Squirtle, pick Red/Blue) -> main menu (Story Mode, Challenge Mode, Multiplayer, PokeMart, PokeCenter, Pokedex, Mystery Gift, Wiki, Save) -> Story Mode -> Chapters (1 to 7 + Epilogue; Chapter 1 = Oak's Lab, Route 1, Route 2, Viridian Forest 1, Pewter Gym) -> **Team screen** -> battle.
+- **Team screen**: six team slots; the new starter is a Lvl 5 in "Storage"; drag from storage to a slot; tap a Pokemon to level up / change moves / release; Level, Number, Name sort buttons.
+- **Battle (Oak's Lab)**: 5 waves; start money 50 (shown as P50); six party cards with HP and EXP bars, plus six "Empty / Capture Pokemon" cards; speed x1-x4 and zoom 100/75/50/25 controls; a Pokeball button (catching) and a "x6" count (6 balls/candies shown near the pile); a pile of blue candies at the right = what you protect.
+- **Placement**: only on **four fixed orange squares** along the bottom of the room (the whole map is one room 625 px wide). Dropping anywhere else shows a red X. The card dims when placed. Placement is a drag-and-drop of the party card, not a tap.
+- **Enemies**: Rattata only, walking one lane left to right along the row above the spots toward the candies; each leaker grabs a candy and carries it back out. Waves start automatically (about 5 s apart on x1), no "Start wave" button. All 5 waves arrived within about 30 s of real time at x1.
+- **A single level-5 Charmander on one spot was enough**; Ember hits at range with a small fire effect on the target.
+- **Scripted finale**: after wave 5, Gary Oak appears with a Blastoise and says "tackle attack", the cutscene clears the remaining Rattatas, then the level ends (the win is scripted, not earned by kills).
+- **Result**: Route 1 unlocked.
+- **Dialogue boxes** have a green Next button at the lower right; a red Skip button appears in cutscenes.
+
+Take-aways for Wellfall Level 1: (1) one lane, one enemy species, four fixed tower spots and one starter is the entire first lesson; (2) tutorial is a short skippable drag-and-drop lesson; (3) the lose condition is visible and tactile (candies being carried off), which our coin pile now copies; (4) the first level ends with a payoff cutscene and an unlock.
