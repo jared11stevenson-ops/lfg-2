@@ -297,9 +297,7 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, 140.0, 0, TAU, 40, Color(0.6, 0.85, 1.0, 0.22), 2.0, true)
 	if shield > 0.0:
 		draw_arc(Vector2(0, -26 * scale_mul), 34 * scale_mul, 0, TAU, 28, Color(0.6, 0.9, 1.0, 0.8), 3.0, true)
-	draw_set_transform(Vector2(0, 8), 0.0, Vector2(1.3 * scale_mul, 0.4 * scale_mul))
-	draw_circle(Vector2.ZERO, 18, Color(0, 0, 0, 0.28))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	PuppetLib.shadow(self, scale_mul * (0.8 if flying else 1.0), Vector2(0, 8 + (10 if flying else 0)))
 	var moving := stun_t <= 0.0
 	var state := "walk" if moving else "idle"
 	var frame := int(anim) if moving else int(Time.get_ticks_msec() / 160.0)

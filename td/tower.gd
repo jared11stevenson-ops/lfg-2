@@ -38,6 +38,7 @@ var windup := 0
 var shots := 0
 var pulse_t := 0.0
 var atk_t := 0.0
+var has_tgt := false      # a target is in range: play the wind-up frames before each shot
 var flip := false
 var chilled_t := 0.0
 var buff_rate := 1.0
@@ -126,6 +127,7 @@ func _process(delta: float) -> void:
 		_pulse_tick()
 	else:
 		var t = _pick()
+		has_tgt = t != null
 		if t == null:
 			windup = 0
 			last_target_id = 0
@@ -368,11 +370,17 @@ func _draw() -> void:
 		draw_set_transform(Vector2(0, 8), 0.0, Vector2(1.0, 0.4))
 		draw_arc(Vector2.ZERO, 36 + pulse * 4, 0, TAU, 40, Color(ac.r, ac.g, ac.b, 0.6), 4.0 + (3.0 if total >= 6 else 0.0), true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	draw_set_transform(Vector2(0, 8), 0.0, Vector2(1.2, 0.4))
-	draw_circle(Vector2.ZERO, 24, Color(0, 0, 0, 0.3))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	var state := "attack" if atk_t > 0.0 else "idle"
-	var frame := int((1.0 - atk_t / 0.4) * 5.0) if atk_t > 0.0 else int(Time.get_ticks_msec() / 170.0 + position.x)
+	PuppetLib.shadow(self, 1.1)
+	# Attack frames: 0-1 anticipation (just before the shot), 2 strike (on release), 3-4 recovery.
+	var winding: bool = has_tgt and atk_t <= 0.0 and cooldown > 0.0 and cooldown < 0.16
+	var state := "attack" if (atk_t > 0.0 or winding) else "idle"
+	var frame := 0
+	if atk_t > 0.0:
+		frame = mini(4, 2 + int((1.0 - atk_t / 0.35) * 3.0))
+	elif winding:
+		frame = 0 if cooldown > 0.08 else 1
+	else:
+		frame = int(Time.get_ticks_msec() / 170.0 + position.x)
 	var sc := BASE_SCALE * (1.0 + 0.04 * total)
 	if not PuppetLib.draw(self, _sprite_id(), state, frame, flip, sc, Vector2(0, 8), Color.WHITE if chilled_t <= 0.0 else Color(0.7, 0.85, 1.0)):
 		draw_circle(Vector2(0, -20), 20, TypeChart.COLORS[def.types[0]])

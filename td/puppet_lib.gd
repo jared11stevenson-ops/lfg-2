@@ -6,6 +6,14 @@ const SIZE := 192.0
 static var _cache := {}
 const BLENDER_DIR := "res://art/blender/frames/"   # frames baked from Blender models take priority over 2D puppets
 
+# Soft contact shadow matching the map's key light (upper left): offset to the lower right, layered for a soft edge.
+static func shadow(ci: CanvasItem, k: float = 1.0, base: Vector2 = Vector2(0, 8)) -> void:
+	ci.draw_set_transform(base + Vector2(9, 5) * k, 0.1, Vector2(1.35 * k, 0.42 * k))
+	ci.draw_circle(Vector2.ZERO, 24.0, Color(0.02, 0.0, 0.06, 0.12))
+	ci.draw_circle(Vector2.ZERO, 19.0, Color(0.02, 0.0, 0.06, 0.16))
+	ci.draw_circle(Vector2.ZERO, 13.0, Color(0.02, 0.0, 0.06, 0.2))
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 static func tex(id: String, state: String, i: int) -> Texture2D:
 	var key := "%s_%s_%d" % [id, state, i]
 	if not _cache.has(key):
