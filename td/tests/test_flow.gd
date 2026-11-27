@@ -53,9 +53,11 @@ func _run() -> void:
 	main._update_capturable()
 	main.lures = 10
 	main.rng.seed = 3
+	Engine.time_scale = 8.0
 	for i in 10:
 		if is_instance_valid(target) and not target.dead:
 			main._try_capture(target)
+			await create_timer(2.2).timeout
 	_check(S.unlocked.has("ally_shuckit") or S.unlocked.has("ally_glomm"), "captured creature unlocked")
 	_check(main.shop_ids.size() >= 2, "captured creature appears in the shop")
 	# finish the level: win, bank XP and gold

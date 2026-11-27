@@ -87,9 +87,11 @@ func _initialize() -> void:
 	var l0: int = main.lures
 	main.rng.seed = 1
 	var got := false
+	Engine.time_scale = 8.0
 	for i in 8:
 		if is_instance_valid(e) and not e.dead:
 			main._try_capture(e)
+			await create_timer(0.5).timeout
 		else:
 			got = true
 			break
@@ -118,8 +120,10 @@ func _initialize() -> void:
 	main.lures = 10
 	for i in 12:
 		for en in main.get_tree().get_nodes_in_group("enemies"):
-			if en.rare and en.capturable and not en.dead:
+			if en.rare and en.capturable and not en.dead and not en.held:
 				main._try_capture(en)
+		await create_timer(0.5).timeout
+	Engine.time_scale = 1.0
 	_check(S.unlocked.has("hutzin"), "capturing the rare Hutzin unlocks it permanently")
 	S.rare_pity = 0
 	_check(S.rare_chance(0.14, "hutzin") < 0.14, "owning the creature halves the rare chance")

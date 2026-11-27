@@ -21,6 +21,8 @@ const ResultScreen = preload("res://result_screen.gd")
 const Tutorial = preload("res://tutorial.gd")
 const Moves = preload("res://moves.gd")
 const StoryScreen = preload("res://story_screen.gd")
+const CaptureFx = preload("res://capture_fx.gd")
+const Ambient = preload("res://ambient.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -91,6 +93,7 @@ var rare_wave := 0
 var rare_seen := false
 var story_screen
 var captures_run := 0
+var capturing := 0         # capture animations in flight (the wave cannot end while one is running)
 var free_ids := {}          # tower id -> free placements left (granted by capturing it)
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
@@ -114,6 +117,11 @@ func _ready() -> void:
 	run_seed = Session.run_seed if Session.run_seed != 0 else randi()
 	Session.run_seed = 0
 	backdrop_vp = Backdrop.make(self, lv)
+	if lv.has("art"):
+		var amb = Ambient.new()
+		amb.well = paths[0][paths[0].size() - 1] + Vector2(0, -4)
+		amb.glow = Color(lv.colors.glow)
+		add_child(amb)
 	_build_ui()
 	_build_shop()
 	_refresh()
@@ -393,7 +401,7 @@ func _process(delta: float) -> void:
 			_spawn()
 			to_spawn -= 1
 			spawn_cd = maxf(0.4, 1.1 - 0.05 * wave) * eff("interval")
-		elif to_spawn == 0 and enemy_list.is_empty():
+		elif to_spawn == 0 and enemy_list.is_empty() and capturing == 0:
 			_wave_done()
 	queue_redraw()
 
@@ -429,25 +437,44 @@ func _try_capture(e) -> void:
 	if lures <= 0:
 		FxScript.text_at(self, e.position + Vector2(0, -50), "No Lures left!", Color("ff9a9a"))
 		return
+	if e.held:
+		return
 	lures -= 1
-	if rng.randf() <= capture_chance(e):
+	var success: bool = rng.randf() <= capture_chance(e)
+	e.held = true
+	e.capturable = false
+	e.remove_from_group("enemies")
+	capturing += 1
+	var fx = CaptureFx.new()
+	fx.enemy = e
+	fx.success = success
+	fx.from = Vector2(640, 700)
+	fx.done = _finish_capture.bind(e)
+	add_child(fx)
+	Sfx.play(self, "place", -6.0)
+	_refresh()
+
+func _finish_capture(success: bool, e) -> void:
+	capturing = maxi(0, capturing - 1)
+	if not is_instance_valid(e):
+		return
+	if success:
 		e.dead = true
 		coins += int(e.reward * 1.5)
 		var id := Session.tower_for(e.kind)
 		var fresh := Session.capture(e.kind)
 		free_ids[id] = int(free_ids.get(id, 0)) + 1
 		run_xp[id] = int(run_xp.get(id, 0)) + (50 if (e.shiny or e.rare) else 25)
-		var pf = PoofScript.new()
-		pf.col = Color("ffd23a")
-		pf.position = e.position
-		add_child(pf)
 		captures_run += 1
-		FxScript.text_at(self, e.position + Vector2(0, -50), "Captured %s!%s" % [Creatures.ENEMIES[e.kind].name, " NEW" if fresh else ""], Color("ffe08a"))
+		FxScript.text_at(self, e.position + Vector2(0, -60), "Captured %s!%s" % [Creatures.ENEMIES[e.kind].name, " NEW" if fresh else ""], Color("ffe08a"))
 		Sfx.play(self, "up", -6.0)
 		Sfx.haptic(60)
 		e.queue_free()
 		_build_shop()
 	else:
+		e.held = false
+		e.visible = true
+		e.add_to_group("enemies")
 		e.boost(2.5)
 		FxScript.text_at(self, e.position + Vector2(0, -50), "Broke free!", Color("ff9a9a"))
 		Sfx.play(self, "leak", -14.0)
@@ -586,6 +613,8 @@ func _wave_done() -> void:
 		inc += int(t.st.income)
 	coins += int((50 + 14 * wave) * float(mut.reward)) + inc
 	lures = mini(lures + 1, 6)
+	for t in get_tree().get_nodes_in_group("towers"):
+		FxScript.text_at(self, t.position + Vector2(0, -52), "+%d XP" % (10 + 2 * int(t.tiers.a + t.tiers.b)), Color("9fe8ff"))
 	for t in get_tree().get_nodes_in_group("towers"):
 		var tid := String(t.def.id)
 		run_xp[tid] = int(run_xp.get(tid, 0)) + 10 + 2 * int(t.tiers.a + t.tiers.b)

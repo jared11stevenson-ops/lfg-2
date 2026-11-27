@@ -56,6 +56,7 @@ var flash_t := 0.0
 var anim := 0.0
 var rare := false         # level rare encounter (e.g. Hutzin on Mossgate): worth catching
 var shiny := false        # rare gold variant: tougher, pays 3x, double XP when captured
+var held := false         # sealed in a Lure orb during the capture animation
 var capturable := false   # set by main each frame: weak enough, not a boss, and a defender species exists
 
 func setup(p: PackedVector2Array, d: Dictionary, wave: int) -> void:
@@ -172,7 +173,7 @@ func _zone_mult(delta: float) -> float:
 	return m
 
 func _process(delta: float) -> void:
-	if dead:
+	if dead or held:
 		return
 	boost_t = maxf(0.0, boost_t - delta)
 	flash_t = maxf(0.0, flash_t - delta)
@@ -247,7 +248,7 @@ func _auras(delta: float) -> void:
 				t.chilled_t = 0.3
 
 func take_damage(amount: float) -> void:
-	if dead:
+	if dead or held:
 		return
 	if amount >= 1.5:
 		if dodge > 0.0 and randf() < dodge:
