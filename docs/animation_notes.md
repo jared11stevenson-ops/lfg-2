@@ -42,3 +42,16 @@ Anticipation (wind-up before every attack), squash and stretch (volume-preservin
 
 ## Rig approach
 Two-bone legs (upper, lower) solved with 2-bone IK so feet plant on the ground and knees/elbows bend the right way; skin weights from distance falloff, smoothed along the mesh surface.
+
+## What was actually built (td/tools/blender/rigkit.py, rig_tickindle.py, rig_others.py)
+| Need | Technique (source) | Where |
+|---|---|---|
+| Skeleton to skin | Hand-fit armature per creature in normalized model space (anatomy from the notes above); controls separate from deform bones | rig_*.py BONES |
+| Skin weights | Blender automatic weights (heat diffusion, `parent_set(type='ARMATURE_AUTO')`) on a watertight voxel-remeshed proxy, then Data Transfer to the real mesh, nearest-vertex fill, limit 4 influences, normalise. Direct heat diffusion on the raw fur-shell mesh failed (5% to 100% of vertices unweighted); the proxy fixes it. | rigkit.bind_heat |
+| Legs | Blender IK constraint, chain of 2, pole targets, pole angle auto-calibrated so knees/elbows bend the anatomically right way; foot controls live in world space so feet plant while the body bobs | rigkit.add_ik_leg / calibrate_pole |
+| Gait | Footfall order: cat lateral sequence RH, RF, LH, LF (Muybridge via EurekAlert); fox trot as diagonal pairs; biped alternation for the bird. Stance linear / swing eased arc; two bounces per cycle; hips and chest counter-rotate ("two bouncing balls"); walk cycle length = ground travel per cycle so feet do not skate (anim_meta walk_units) | rig_*.py, enemy.gd |
+| Secondary motion | Second-order dynamics (t3ssel8r, "Giving Personality to Procedural Animations"; k1=z/(pi f), k2=1/(2 pi f)^2, k3=r z/(2 pi f); r<0 anticipation, r>1 overshoot), chained along tails, ears, crest, steam, lantern, watch | rigkit.SOD |
+| Attacks | Key poses (anticipation, coil, strike, impact squash, settle) with slow-in/slow-out; the shot is released on the strike frame (anim_meta strike) | rig_*.py base() |
+| Type payoff | Per-type effects at baked anchors: Ember/Forge flame cone, Tide/Spirit lantern flare + ripples, Verdant/Venom spore cloud + steam, Umbra/Gale shadow crescent | attack_fx.gd |
+
+Not used: Tripo's rig/retarget API (credential did not authenticate here), UniRig (needs a GPU), Rigify (not needed once IK + heat weights worked).

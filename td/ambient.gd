@@ -6,7 +6,22 @@ var glow := Color("ffe9a8")
 var flies: Array = []
 var motes: Array = []
 var t := 0.0
+static var _glow_tex: GradientTexture2D
 const PALETTE := [Color("e8ff8a"), Color("9ff0ff"), Color("ffe08a")]
+
+static func _glow() -> GradientTexture2D:
+	if _glow_tex == null:
+		var g := Gradient.new()
+		g.offsets = PackedFloat32Array([0.0, 0.35, 0.7, 1.0])
+		g.colors = PackedColorArray([Color(1, 1, 1, 0.34), Color(1, 1, 1, 0.16), Color(1, 1, 1, 0.045), Color(1, 1, 1, 0.0)])
+		_glow_tex = GradientTexture2D.new()
+		_glow_tex.gradient = g
+		_glow_tex.fill = GradientTexture2D.FILL_RADIAL
+		_glow_tex.fill_from = Vector2(0.5, 0.5)
+		_glow_tex.fill_to = Vector2(1.0, 0.5)
+		_glow_tex.width = 128
+		_glow_tex.height = 128
+	return _glow_tex
 
 func _ready() -> void:
 	z_index = 2
@@ -26,10 +41,8 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var k := 0.5 + 0.5 * sin(t * 1.6)
-	for i in 18:
-		var u := float(i) / 18.0
-		var a := 0.02 * (1.0 - u) * (1.0 - u) * (0.75 + 0.5 * k)
-		draw_circle(well + Vector2(0, -4), 22.0 + u * 120.0 + k * 6.0, Color(glow.r, glow.g, glow.b, a))
+	var R := 142.0 + k * 6.0
+	draw_texture_rect(_glow(), Rect2(well + Vector2(0, -4) - Vector2(R, R), Vector2(R, R) * 2.0), false, Color(glow.r, glow.g, glow.b, 0.75 + 0.5 * k))
 	for m in motes:
 		var u := fmod(t * m.sp + m.ph, 1.0)
 		var p: Vector2 = well + Vector2(m.x * (0.4 + u), -10.0 - u * 120.0 + sin(t * 2.0 + m.ph * 9.0) * 6.0)
