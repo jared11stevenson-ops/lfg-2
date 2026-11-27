@@ -24,6 +24,8 @@ var def: Dictionary = {}:
 		if def.has("mode"):
 			target_mode = def.mode
 		_rebuild()
+const SessionScript = preload("res://session.gd")
+var lvl := 1
 var st: Dictionary = {}
 var tiers := {"a": 0, "b": 0}
 var spent := 0
@@ -53,6 +55,10 @@ func _rebuild() -> void:
 		for p in ["a", "b"]:
 			for i in tiers[p]:
 				_apply(def.upgrades[p][i])
+	lvl = SessionScript.level_of(String(def.id)) if def.has("id") else 1
+	var lm: float = SessionScript.level_mult(String(def.id)) if def.has("id") else 1.0
+	st.dmg = float(st.dmg) * lm
+	st.rate = float(st.rate) * (1.0 + 0.03 * float(lvl - 1))
 
 func _apply(u: Dictionary) -> void:
 	for k in u.get("add", {}):

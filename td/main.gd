@@ -84,6 +84,11 @@ var run_seconds := 0.0
 var tutorial
 var event_id := ""
 var intro_t := 3.6
+var lures := 3
+var free_ids := {}          # tower id -> free placements left (granted by capturing it)
+var run_xp := {}            # tower id -> XP earned this run (banked at the end)
+var capture_hint_shown := false
+const CAPTURE_HP := 0.35
 
 func _ready() -> void:
 	Session.init_ui()
@@ -214,7 +219,7 @@ func _build_shop() -> void:
 		var d: Dictionary = Creatures.TOWERS[id]
 		var b := Button.new()
 		b.toggle_mode = true
-		b.text = "%s\n%d" % [d.name, d.cost]
+		b.text = "%s\n%d  Lv%d" % [d.name, d.cost, Session.level_of(id)]
 		b.icon = PuppetLib.tex(d.sprite, "idle", 0)
 		b.expand_icon = true
 		b.add_theme_constant_override("icon_max_width", 44)
@@ -277,7 +282,7 @@ func _refresh() -> void:
 	speed_btn.text = "Speed x%d" % int(maxf(1.0, Engine.time_scale if Engine.time_scale > 0.0 else paused_scale))
 	var nxt: String = lv.weather[wave % lv.weather.size()] if not wave_running else weather
 	var wtxt: String = "Weather: " + String(Weather.WEATHER[nxt].label)
-	hud.text = "Coins %d    Lives %d    Wave %s" % [coins, lives, ("%d (Endless)" % wave) if endless else ("%d/%d" % [wave, Levels.TOTAL_WAVES])]
+	hud.text = "Coins %d    Lives %d    Lures %d    Wave %s" % [coins, lives, lures, ("%d (Endless)" % wave) if endless else ("%d/%d" % [wave, Levels.TOTAL_WAVES])]
 	var line2 := ("Next: " + _incoming_text(wave + 1)) if (not wave_running and (endless or wave < Levels.TOTAL_WAVES)) else "Tap a creature to upgrade it"
 	info.text = "%s  |  %s\n%s" % [lv.name, Rules.DIFFICULTY[Session.diff].name, line2 + "\n" + wtxt]
 	if sel_tower != null and is_instance_valid(sel_tower):
@@ -337,6 +342,8 @@ func eff(key: String) -> float:
 
 func _process(delta: float) -> void:
 	enemy_list = get_tree().get_nodes_in_group("enemies")
+	if state == "play" and wave_running:
+		_update_capturable()
 	clock += delta
 	fade_t += delta
 	fade_rect.modulate.a = clampf(1.0 - fade_t / 0.6, 0.0, 1.0)
@@ -369,6 +376,52 @@ func _pick_lane() -> int:
 		"alternate": return (wave - 1) % n
 		"split": return spawn_idx % n
 	return rng.randi() % n
+
+func _update_capturable() -> void:
+	for e in get_tree().get_nodes_in_group("enemies"):
+		var ok: bool = not e.dead and not e.is_boss and e.hp / e.max_hp <= CAPTURE_HP and Session.tower_for(e.kind) != ""
+		if ok and not e.capturable and not capture_hint_shown:
+			capture_hint_shown = true
+			FxScript.text_at(self, Vector2(640, 300), "Weak creature! Tap it to capture it (uses a Lure)", Color("ffe08a"))
+		e.capturable = ok
+
+func _capturable_at(p: Vector2):
+	var best = null
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.capturable and not e.dead and e.position.distance_to(p) < 48.0:
+			if best == null or e.position.distance_to(p) < best.position.distance_to(p):
+				best = e
+	return best
+
+func capture_chance(e) -> float:
+	return clampf(lerpf(0.9, 0.45, e.hp / e.max_hp / CAPTURE_HP), 0.45, 0.9)
+
+func _try_capture(e) -> void:
+	if lures <= 0:
+		FxScript.text_at(self, e.position + Vector2(0, -50), "No Lures left!", Color("ff9a9a"))
+		return
+	lures -= 1
+	if rng.randf() <= capture_chance(e):
+		e.dead = true
+		coins += int(e.reward * 1.5)
+		var id := Session.tower_for(e.kind)
+		var fresh := Session.capture(e.kind)
+		free_ids[id] = int(free_ids.get(id, 0)) + 1
+		run_xp[id] = int(run_xp.get(id, 0)) + 25
+		var pf = PoofScript.new()
+		pf.col = Color("ffd23a")
+		pf.position = e.position
+		add_child(pf)
+		FxScript.text_at(self, e.position + Vector2(0, -50), "Captured %s!%s" % [Creatures.ENEMIES[e.kind].name, " NEW" if fresh else ""], Color("ffe08a"))
+		Sfx.play(self, "up", -6.0)
+		Sfx.haptic(60)
+		e.queue_free()
+		_build_shop()
+	else:
+		e.boost(2.5)
+		FxScript.text_at(self, e.position + Vector2(0, -50), "Broke free!", Color("ff9a9a"))
+		Sfx.play(self, "leak", -14.0)
+	_refresh()
 
 func _spawn() -> void:
 	if queue.is_empty():
@@ -485,6 +538,10 @@ func _wave_done() -> void:
 	for t in get_tree().get_nodes_in_group("towers"):
 		inc += int(t.st.income)
 	coins += int((50 + 14 * wave) * float(mut.reward)) + inc
+	lures = mini(lures + 1, 6)
+	for t in get_tree().get_nodes_in_group("towers"):
+		var tid := String(t.def.id)
+		run_xp[tid] = int(run_xp.get(tid, 0)) + 10 + 2 * int(t.tiers.a + t.tiers.b)
 	if inc > 0:
 		FxScript.text_at(self, Vector2(640, 300), "Tea money: +%d" % inc, Color("9fffa0"))
 	start_btn.disabled = false
@@ -504,12 +561,18 @@ func _end(result: String) -> void:
 		result_screen.queue_free()
 	var rs = ResultScreen.new()
 	rs.won = result == "won"
+	var lvl_lines: Array = []
+	for id in run_xp:
+		var bonus := 40 if result == "won" else 0
+		var lv_change := Session.add_xp(String(id), int(run_xp[id]) + bonus)
+		if lv_change[1] > lv_change[0]:
+			lvl_lines.append("%s grew to Lv %d!" % [Creatures.TOWERS[id].name, lv_change[1]])
 	var layer: CanvasLayer = start_btn.get_parent()
 	if result == "won":
 		var rec := Session.record_win(Session.level_id, wave, lives, lives_start, endless)
 		rs.title = "The Well holds!"
 		rs.stars = int(rec.stars)
-		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], "Lives left: %d/%d" % [lives, lives_start], "Difficulty: %s" % Rules.DIFFICULTY[Session.diff].name]
+		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], "Lives left: %d/%d" % [lives, lives_start], "Difficulty: %s" % Rules.DIFFICULTY[Session.diff].name] + lvl_lines
 		for a in rec.allies:
 			rs.ally_sprites.append(Creatures.TOWERS[a].sprite)
 			rs.ally_names.append(Creatures.TOWERS[a].name)
@@ -519,7 +582,7 @@ func _end(result: String) -> void:
 	else:
 		Session.record_loss(Session.level_id, wave)
 		rs.title = "The Well is lost..."
-		rs.lines = ["You reached wave %d of %d" % [wave, Levels.TOTAL_WAVES], "Run seed: %d" % run_seed]
+		rs.lines = ["You reached wave %d of %d" % [wave, Levels.TOTAL_WAVES], "Run seed: %d" % run_seed] + lvl_lines
 		var tips := ["Put creatures on rune stones for a free boost.", "Mix types: Super! hits do 50% more damage.", "Upgrade a path to tier 3 to evolve a creature.", "Dugloom's slow gives every other defender more time to shoot.", "Try the Well Surge when a wave overwhelms you."]
 		rs.tip = tips[wave % tips.size()]
 		Sfx.play(self, "lose")
@@ -643,6 +706,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 		if state != "play" or Engine.time_scale <= 0.0:
 			return
 		var p: Vector2 = get_canvas_transform().affine_inverse() * ev.position
+		var cap = _capturable_at(p)
+		if cap != null:
+			_try_capture(cap)
+			return
 		var tw = _tower_at(p)
 		if tw != null:
 			has_pending = false
@@ -654,7 +721,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 			_deselect_tower()
 			return
 		# Tap once to preview the spot, tap the preview again to place (precise on touch screens).
-		if has_pending and p.distance_to(pending) < 46.0 and coins >= int(d.cost) and _valid_spot(pending):
+		if has_pending and p.distance_to(pending) < 46.0 and coins >= _cost(d) and _valid_spot(pending):
 			_place(d, pending)
 			has_pending = false
 		elif _valid_spot(sp):
@@ -665,11 +732,17 @@ func _unhandled_input(ev: InputEvent) -> void:
 			has_pending = false
 			_deselect_tower()
 
+func _cost(d: Dictionary) -> int:
+	return 0 if int(free_ids.get(d.id, 0)) > 0 else int(d.cost)
+
 func _place(d: Dictionary, at: Vector2) -> void:
-	coins -= int(d.cost)
+	var c := _cost(d)
+	if c == 0 and int(free_ids.get(d.id, 0)) > 0:
+		free_ids[d.id] = int(free_ids[d.id]) - 1
+	coins -= c
 	var t = TowerScript.new()
 	t.def = d
-	t.spent = int(d.cost)
+	t.spent = c
 	t.position = at
 	add_child(t)
 	Sfx.play(self, "place")
@@ -688,7 +761,7 @@ func _draw() -> void:
 	if state == "play" and placing and has_pending:
 		var m := pending
 		var d: Dictionary = Creatures.TOWERS[selected]
-		var ok := coins >= int(d.cost) and _valid_spot(m)
+		var ok := coins >= _cost(d) and _valid_spot(m)
 		var tint := Color(1, 1, 1, 0.45) if ok else Color(1, 0.2, 0.2, 0.45)
 		draw_arc(m, float(d.range), 0, TAU, 64, tint, 2.0, true)
 		draw_set_transform(m, 0.0, Vector2.ONE)

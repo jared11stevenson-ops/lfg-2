@@ -66,7 +66,7 @@ func show_for(tower, coins: int) -> void:
 func refresh(coins: int) -> void:
 	if t == null or not is_instance_valid(t):
 		return
-	title.text = t.def.name
+	title.text = "%s  Lv %d" % [t.def.name, t.lvl]
 	sub.text = "%s    Tiers A%d / B%d\nDmg %.0f   Speed %.1f/s   Range %.0f" % [" / ".join(t.def.types.map(func(x): return x.capitalize())), t.tiers.a, t.tiers.b, float(t.st.dmg), float(t.st.rate), float(t.st.range)]
 	for p in ["a", "b"]:
 		var u: Dictionary = t.next_upgrade(p)

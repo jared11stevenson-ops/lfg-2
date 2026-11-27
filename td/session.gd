@@ -10,6 +10,8 @@ static var daily := false
 static var stars := {}          # level -> 0..3
 static var best_wave := {}      # level -> best wave reached
 static var unlocked := {}       # ally tower id -> true
+static var xp := {}             # tower id -> banked XP (levels creatures up across runs)
+const MAX_LEVEL := 20
 static var dev_all := false     # testing: unlock everything
 static var _loaded := false
 static var settings := {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true, "tutorial_done": false}
@@ -27,6 +29,8 @@ static func load_save() -> void:
 			best_wave[k] = int(cf.get_value("best", k, 0))
 		for k in cf.get_section_keys("unlocked"):
 			unlocked[k] = true
+		for k in cf.get_section_keys("xp"):
+			xp[k] = int(cf.get_value("xp", k, 0))
 		dev_all = bool(cf.get_value("settings", "dev_all", false))
 		for k in settings:
 			settings[k] = cf.get_value("prefs", k, settings[k])
@@ -41,6 +45,8 @@ static func _save() -> void:
 		cf.set_value("best", k, best_wave[k])
 	for k in unlocked:
 		cf.set_value("unlocked", k, true)
+	for k in xp:
+		cf.set_value("xp", k, xp[k])
 	cf.set_value("settings", "dev_all", dev_all)
 	for k in settings:
 		cf.set_value("prefs", k, settings[k])
@@ -97,6 +103,41 @@ static func record_loss(level: String, wave: int) -> void:
 	if not no_save and wave > int(best_wave.get(level, 0)):
 		best_wave[level] = wave
 		_save()
+
+# ---- creature levels (Pokemon-style): XP is banked per species and permanently boosts its stats ----
+static func level_of(id: String) -> int:
+	return clampi(1 + int(sqrt(float(xp.get(id, 0)) / 30.0)), 1, MAX_LEVEL)
+
+static func xp_for_level(l: int) -> int:
+	return 30 * (l - 1) * (l - 1)
+
+static func level_mult(id: String) -> float:
+	return 1.0 + 0.06 * float(level_of(id) - 1)
+
+# Adds XP, returns [old_level, new_level].
+static func add_xp(id: String, amount: int) -> Array:
+	load_save()
+	var before := level_of(id)
+	xp[id] = int(xp.get(id, 0)) + amount
+	_save()
+	return [before, level_of(id)]
+
+# Tower id a captured wild species becomes (starters keep their id, others are "ally_<species>").
+static func tower_for(species: String) -> String:
+	var C = load("res://creatures.gd")
+	if C.TOWERS.has("ally_" + species):
+		return "ally_" + species
+	return species if C.TOWERS.has(species) else ""
+
+# Returns true if this is a brand-new creature for the collection.
+static func capture(species: String) -> bool:
+	load_save()
+	var id := tower_for(species)
+	if id == "" or unlocked.has(id):
+		return false
+	unlocked[id] = true
+	_save()
+	return true
 
 static func score_mult() -> float:
 	return float(Rules.combine(diff, muts).score)
