@@ -1,5 +1,18 @@
 # Creature animation study (Level 1 creatures)
 
+## Research findings (what existing tools/data say) - 2026-11-27
+1. **Tripo has a production auto-rig + animation service** (the same tool that generated the models). Official docs (developers.tripo3d.com, API base https://openapi.tripo3d.com/v3):
+   - `POST /v3/animations/rig-check` -> `{riggable, rig_type}` where rig_type is one of biped, quadruped, hexapod, octopod, avian, serpentine, aquatic. Free (0 credits in the example).
+   - `POST /v3/animations/rig` with `input` (a generation task_id, uploaded file_token or public URL; GLB/FBX/OBJ/STL up to 150 MB), `model` ("v2.5-20260210" for non-humanoids, "v3.0-20260909" newest), `rig_type`, `out_format` glb|fbx. About 25 credits in the docs example.
+   - `POST /v3/animations/retarget` with `input` = the RIG task id and `animation`/`animations` (max 5). Non-biped presets: `preset:quadruped:walk`, `preset:hexapod:walk`, `preset:octopod:walk`, `preset:serpentine:march`, `preset:aquatic:march`. No avian preset is listed. About 10 credits per animation. Options: `animate_in_place`, `export_with_geometry`, `out_format`.
+   - Poll `GET /v3/tasks/{id}`; result `output.model_url` is a rigged/animated GLB or FBX.
+   - Not stated anywhere: required pose/T-pose.
+2. **UniRig** (VAST-AI-Research/UniRig, SIGGRAPH 2025, by Tripo's parent): open-source autoregressive skeleton + skinning-weight prediction for arbitrary meshes. Needs a GPU; checkpoint availability should be checked on the repo.
+3. **Blender Rigify** ships Cat, Wolf, Horse, Basic Quadruped meta-rigs (IK legs, spine, tail). Automatic weights (heat diffusion) are the standard skinning method; our distance-falloff weights are a stopgap.
+4. **Gait data**: Muybridge's Animal Locomotion plates (public domain, archive.org / Project Gutenberg) are the primary reference. Cat lateral-sequence footfall order is right hind, right front, left hind, left front (EurekAlert, citing Muybridge). Animation tutorials (Animation Mentor, Autodesk 3ds Max quadruped walk, Toon Boom, Animschool) agree on key poses contact, down, passing, up for each leg, hips and chest acting as two offset bouncing balls, a 24-frame example cycle, and that dog/wolf contact-to-passing is only about 2 frames at speed.
+5. Sources gave NO gait mechanics for manul or bat-eared fox specifically (only build and behaviour), and nothing on hoatzin head-bobbing.
+
+
 Sources found: Smithsonian/WWF/ADW (manul build), ADW/Britannica (bat-eared fox ears, foraging), Science Advances 2019 + ADW (hoatzin), open.edu + Fish & Lauder (sirenian swimming), Wikipedia/StudioBinder (12 principles).
 Gait mechanics were NOT in those sources. The footfall timings below are standard quadruped biomechanics from general knowledge; treat them as design choices, not citations.
 
