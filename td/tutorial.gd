@@ -8,6 +8,8 @@ var box: PanelContainer
 var targets: Array = []     # Rect2 in screen space to highlight
 var timer := 0.0
 var hint_seen_super := false
+var taught_capture := false
+var resume := "second"
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -44,7 +46,7 @@ func _enter(s: String) -> void:
 	var card: Control = m.cards.get("tickindle")
 	match s:
 		"intro":
-			_say("Welcome, Wellkeeper!\nWild creatures are drawn to the Well at the end of the lane. Hold them off.")
+			_say("Welcome, Wellkeeper!\nWild Shuckits are after the Well's gold. Each one that reaches the Well steals coins and runs. Keep your 20 coins for 10 waves!")
 		"place":
 			_say("Tap Tickindle below, then tap a glowing rune stone to preview where to place it.", [card.get_global_rect()] + _stone_rects())
 		"confirm":
@@ -59,8 +61,17 @@ func _enter(s: String) -> void:
 			_say("Pick an upgrade path. Two paths, four tiers each. Spend your coins!")
 		"second":
 			_say("Place a second Tickindle. More firepower on the lane means fewer leaks.", [m.cards.get("tickindle").get_global_rect()])
+		"capture":
+			_say("This one is worn out! Tap it to throw a Lure. A captured creature is yours for good, and it fights for you.", _capturable_rects())
 		"done":
 			_say("You are ready. The Well is yours to hold. Good luck!")
+
+func _capturable_rects() -> Array:
+	var out := []
+	for e in m.get_tree().get_nodes_in_group("enemies"):
+		if e.capturable:
+			out.append(Rect2(e.position - Vector2(46, 78), Vector2(92, 100)))
+	return out
 
 func _stone_rects() -> Array:
 	var out := []
@@ -82,7 +93,15 @@ func _process(delta: float) -> void:
 		return
 	timer += delta
 	var towers: int = m.get_tree().get_nodes_in_group("towers").size()
+	if not taught_capture and step in ["watch", "upgrade", "buy", "second", "done"] and not _capturable_rects().is_empty():
+		taught_capture = true
+		resume = step
+		_enter("capture")
 	match step:
+		"capture":
+			targets = _capturable_rects()
+			if m.captures_run > 0 or timer > 14.0 or (targets.is_empty() and timer > 2.0):
+				_enter(resume)
 		"intro":
 			if timer > 4.5:
 				_enter("place")

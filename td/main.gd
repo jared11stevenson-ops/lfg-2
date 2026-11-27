@@ -434,7 +434,10 @@ func _update_capturable() -> void:
 		var ok: bool = not e.dead and not e.is_boss and e.hp / e.max_hp <= CAPTURE_HP and Session.tower_for(_cap_species(e)) != ""
 		if ok and not e.capturable and not capture_hint_shown:
 			capture_hint_shown = true
-			FxScript.text_at(self, Vector2(640, 300), "Weak creature! Tap it to capture it (uses a Lure)", Color("ffe08a"))
+			var shown := int(Session.settings.get("capture_hints", 0))
+			if (tutorial == null or not is_instance_valid(tutorial)) and shown < 3:
+				Session.settings["capture_hints"] = shown + 1
+				FxScript.text_at(self, Vector2(640, 300), "Weak creature! Tap it to capture it (uses a Lure)", Color("ffe08a"))
 		e.capturable = ok
 
 func _capturable_at(p: Vector2):
