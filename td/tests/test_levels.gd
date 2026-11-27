@@ -37,7 +37,7 @@ func _init() -> void:
 				fails += 1
 				print("FAIL ", id, " unknown species ", r[0])
 		n += 1
-		if not Creatures.ENEMIES.has(lv.boss):
+		if String(lv.boss) != "" and not Creatures.ENEMIES.has(lv.boss):
 			fails += 1
 			print("FAIL ", id, " unknown boss")
 		# waves generate without error and boss wave contains the boss
@@ -46,7 +46,7 @@ func _init() -> void:
 		for w in range(1, 12):
 			var q := Waves.build(lv, w, rng, 1.0)
 			n += 1
-			if q.is_empty() or (w == 10 and not ("boss:" + lv.boss) in q):
+			if q.is_empty() or (w == 10 and String(lv.boss) != "" and not ("boss:" + lv.boss) in q):
 				fails += 1
 				print("FAIL ", id, " wave ", w, " bad: ", q.size())
 	for tid in Creatures.TOWERS:

@@ -23,6 +23,8 @@ const Moves = preload("res://moves.gd")
 const StoryScreen = preload("res://story_screen.gd")
 const CaptureFx = preload("res://capture_fx.gd")
 const Ambient = preload("res://ambient.gd")
+const BossUi = preload("res://boss_ui.gd")
+const GoldPile = preload("res://gold_pile.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -92,6 +94,8 @@ var lures := 3
 var rare_wave := 0
 var rare_seen := false
 var story_screen
+var boss_ui
+var gold_pile
 var captures_run := 0
 var capturing := 0         # capture animations in flight (the wave cannot end while one is running)
 var free_ids := {}          # tower id -> free placements left (granted by capturing it)
@@ -122,6 +126,12 @@ func _ready() -> void:
 		amb.well = paths[0][paths[0].size() - 1] + Vector2(0, -4)
 		amb.glow = Color(lv.colors.glow)
 		add_child(amb)
+	if lv.get("steal", false):
+		gold_pile = GoldPile.new()
+		gold_pile.well = paths[0][paths[0].size() - 1] + Vector2(0, -2)
+		gold_pile.gold = lives
+		gold_pile.max_gold = lives
+		add_child(gold_pile)
 	_build_ui()
 	_build_shop()
 	_refresh()
@@ -174,6 +184,8 @@ func _build_ui() -> void:
 	hud_bar = HudBar.new()
 	hud_bar.m = self
 	layer.add_child(hud_bar)
+	boss_ui = BossUi.new()
+	layer.add_child(boss_ui)
 	start_btn = _button("Start wave", Vector2(1060, 636), Vector2(200, 64), 24, Color("c4552b"), _start_wave)
 	layer.add_child(start_btn)
 	speed_btn = _button("", Vector2(1100, 8), Vector2(160, 52), 22, Color("3a4a6b"), _cycle_speed)
@@ -414,9 +426,12 @@ func _pick_lane() -> int:
 		"split": return spawn_idx % n
 	return rng.randi() % n
 
+func _cap_species(e) -> String:
+	return String(Creatures.ENEMIES[e.kind].get("capture_as", e.kind))
+
 func _update_capturable() -> void:
 	for e in get_tree().get_nodes_in_group("enemies"):
-		var ok: bool = not e.dead and not e.is_boss and e.hp / e.max_hp <= CAPTURE_HP and Session.tower_for(e.kind) != ""
+		var ok: bool = not e.dead and not e.is_boss and e.hp / e.max_hp <= CAPTURE_HP and Session.tower_for(_cap_species(e)) != ""
 		if ok and not e.capturable and not capture_hint_shown:
 			capture_hint_shown = true
 			FxScript.text_at(self, Vector2(640, 300), "Weak creature! Tap it to capture it (uses a Lure)", Color("ffe08a"))
@@ -461,12 +476,12 @@ func _finish_capture(success: bool, e) -> void:
 	if success:
 		e.dead = true
 		coins += int(e.reward * 1.5)
-		var id := Session.tower_for(e.kind)
-		var fresh := Session.capture(e.kind)
+		var id := Session.tower_for(_cap_species(e))
+		var fresh := Session.capture(_cap_species(e))
 		free_ids[id] = int(free_ids.get(id, 0)) + 1
 		run_xp[id] = int(run_xp.get(id, 0)) + (50 if (e.shiny or e.rare) else 25)
 		captures_run += 1
-		FxScript.text_at(self, e.position + Vector2(0, -60), "Captured %s!%s" % [Creatures.ENEMIES[e.kind].name, " NEW" if fresh else ""], Color("ffe08a"))
+		FxScript.text_at(self, e.position + Vector2(0, -60), "Captured %s!%s" % [Creatures.TOWERS[id].name, " NEW" if fresh else ""], Color("ffe08a"))
 		Sfx.play(self, "up", -6.0)
 		Sfx.haptic(60)
 		e.queue_free()
@@ -498,10 +513,7 @@ func _spawn() -> void:
 		shake = 1.5
 		Sfx.haptic(180)
 		Sfx.play(self, "boss")
-		FxScript.text_at(self, Vector2(640, 330), "BOSS: %s!" % d.name, Color("ff6a5a"))
-		var st: Dictionary = lv.get("story", {})
-		if st.has("boss"):
-			FxScript.text_at(self, Vector2(640, 380), String(st.boss), Color("ffd0c0"))
+		pass
 	else:
 		d = Creatures.ENEMIES[kind]
 	var lane := _pick_lane()
@@ -509,6 +521,9 @@ func _spawn() -> void:
 	if bool(d.get("flying", false)):
 		path = PackedVector2Array([path[0], path[path.size() - 1]])
 	var en = _make_enemy(d, path, wave, true, boss)
+	if boss:
+		boss_ui.show_intro(String(d.name).replace("Elder ", ""), String(lv.get("story", {}).get("boss", "")), String(d.get("sprite", kind.substr(5) if kind.begins_with("boss:") else kind)))
+		boss_ui.track(en, String(d.name))
 	if rare_spawn:
 		en.rare = true
 		rare_seen = true
@@ -536,7 +551,7 @@ func _make_enemy(d: Dictionary, path: PackedVector2Array, w: int, scale_stats: b
 		e.reward = int(round(e.reward * eff("reward")))
 		if not boss and float(mut.elite_p) > 0.0 and rng.randf() < float(mut.elite_p):
 			e.make_elite()
-		if not boss and not e.elite and wave >= 2 and rng.randf() < 0.04 and Session.tower_for(e.kind) != "":
+		if not boss and not e.elite and wave >= 2 and rng.randf() < 0.04 and Session.tower_for(_cap_species(e)) != "":
 			e.shiny = true
 			e.hp *= 1.3
 			e.max_hp = e.hp
@@ -561,7 +576,7 @@ func _on_died(e) -> void:
 	Sfx.play(self, "coin", -14.0, 60)
 	# Gale hook: a fallen Shuckit whips nearby packmates into a sprint.
 	for o in get_tree().get_nodes_in_group("enemies"):
-		if e.kind == "shuckit" and o != e and not o.dead and o.position.distance_to(e.position) < 170.0:
+		if e.sprite_id == "shuckit" and o != e and not o.dead and o.position.distance_to(e.position) < 170.0:
 			o.boost(1.5)
 	# Venom hook: poison hops to the nearest foe (or everything nearby with Brewmother).
 	if e.poison > 1:
@@ -597,6 +612,10 @@ func _on_leaked(e) -> void:
 	if state != "play":
 		return
 	lives -= e.leak
+	if gold_pile != null:
+		gold_pile.steal(e.sprite_id, mini(int(e.leak), 3), e.position, e.scale_mul)
+		gold_pile.set_gold(lives)
+		FxScript.text_at(self, e.position + Vector2(0, -60), "-%d gold!" % int(e.leak), Color("ffd23a"))
 	red_flash = 0.5
 	well_flash = 1.0
 	shake = 1.0 if e.leak < 5 else 2.0
@@ -653,9 +672,9 @@ func _end(result: String) -> void:
 	var layer: CanvasLayer = start_btn.get_parent()
 	if result == "won":
 		var rec := Session.record_win(Session.level_id, wave, lives, lives_start, endless)
-		rs.title = "The Well holds!"
+		rs.title = "The Well holds!" if not lv.get("steal", false) else "The gold is safe!"
 		rs.stars = int(rec.stars)
-		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], "Lives left: %d/%d" % [lives, lives_start], "Difficulty: %s" % Rules.DIFFICULTY[Session.diff].name] + lvl_lines
+		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], ("Gold kept: %d/%d" if lv.get("steal", false) else "Lives left: %d/%d") % [lives, lives_start], "Difficulty: %s" % Rules.DIFFICULTY[Session.diff].name] + lvl_lines
 		for a in rec.allies:
 			rs.ally_sprites.append(Creatures.TOWERS[a].sprite)
 			rs.ally_names.append(Creatures.TOWERS[a].name)
@@ -666,7 +685,7 @@ func _end(result: String) -> void:
 		Sfx.haptic(120)
 	else:
 		Session.record_loss(Session.level_id, wave)
-		rs.title = "The Well is lost..."
+		rs.title = "The Well is lost..." if not lv.get("steal", false) else "The gold is gone..."
 		rs.lines = ["You reached wave %d of %d" % [wave, Levels.TOTAL_WAVES], "Run seed: %d" % run_seed] + lvl_lines
 		var tips := ["Put creatures on rune stones for a free boost.", "Mix types: Super! hits do 50% more damage.", "Upgrade a path to tier 3 to evolve a creature.", "Dugloom's slow gives every other defender more time to shoot.", "Try the Well Surge when a wave overwhelms you."]
 		rs.tip = tips[wave % tips.size()]

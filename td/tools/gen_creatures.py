@@ -12,6 +12,8 @@ def U(name, cost, desc, **mods):
 # cost = wave-budget weight used by the wave generator.
 ENEMIES = {
  "hutzin":    dict(name="Hutzin", types=["verdant","venom"], hp=60, hp_wave=18, speed=108, reward=30, leak=2, cost=3.0, rare=True, blurb="Rare wanderer. A hoatzin in a teapot hut that only shows up on foggy nights. Catch it and it is yours."),
+ "shuckit_pup":   dict(name="Shuckit Pup", sprite="shuckit", capture_as="shuckit", types=["umbra","gale"], hp=9, hp_wave=3, speed=168, reward=3, leak=1, cost=0.6, scale=0.74, tint="#d8ccff", blurb="A small, fast pup that darts ahead of the pack."),
+ "shuckit_alpha": dict(name="Shuckit Alpha", sprite="shuckit", capture_as="shuckit", types=["umbra","gale"], hp=62, hp_wave=20, speed=98, reward=14, leak=2, cost=3.5, scale=1.32, tint="#ffb4b4", speed_aura=True, blurb="The pack leader. Its howl speeds up every Shuckit nearby, and it grabs two coins."),
  "shuckit":   dict(name="Shuckit", types=["umbra","gale"], hp=18, hp_wave=7, speed=120, reward=5, leak=1, cost=1.0, blurb="Fast fodder. A fallen packmate whips others into a sprint."),
  "zapnose":   dict(name="Zapnose", types=["volt","aether"], hp=10, hp_wave=3, speed=190, reward=4, leak=1, cost=1.2, blurb="Caffeinated and fragile."),
  "glomm":     dict(name="Glomm", types=["stone","frost"], hp=70, hp_wave=22, speed=62, reward=14, leak=3, cost=4.0, blurb="Slow stoic tank."),

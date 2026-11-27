@@ -54,6 +54,7 @@ var face_left := false
 var dead := false
 var flash_t := 0.0
 var anim := 0.0
+var tint := Color.WHITE
 var rare := false         # level rare encounter (e.g. Hutzin on Mossgate): worth catching
 var shiny := false        # rare gold variant: tougher, pays 3x, double XP when captured
 var held := false         # sealed in a Lure orb during the capture animation
@@ -83,6 +84,8 @@ func setup(p: PackedVector2Array, d: Dictionary, wave: int) -> void:
 	flying = bool(d.get("flying", false))
 	is_boss = bool(d.get("boss", false))
 	scale_mul = float(d.get("scale", 1.0))
+	if d.has("tint"):
+		tint = Color(String(d.tint))
 	jump_cd = jump_every
 
 func make_elite() -> void:
@@ -300,7 +303,7 @@ func _draw() -> void:
 	var moving := stun_t <= 0.0
 	var state := "walk" if moving else "idle"
 	var frame := int(anim) if moving else int(Time.get_ticks_msec() / 160.0)
-	var hurt := Color(1.0, 0.55, 0.55) if flash_t > 0.0 else (Color(1.3, 1.1, 0.5) if shiny else (Color(1.0, 0.9, 0.55) if elite else Color.WHITE))
+	var hurt := Color(1.0, 0.55, 0.55) if flash_t > 0.0 else (Color(1.3, 1.1, 0.5) if shiny else (Color(1.0, 0.9, 0.55) if elite else tint))
 	var fl := sin(Time.get_ticks_msec() / 220.0 + anim) * 3.0 if flying else 0.0
 	PuppetLib.draw(self, sprite_id, state, frame, face_left, s * (1.0 + flash_t * 1.2), Vector2(0, lift + fl + 6), hurt)
 	if capturable:

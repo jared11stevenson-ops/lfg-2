@@ -36,6 +36,23 @@ func _coin(p: Vector2) -> void:
 	draw_circle(p, 8.0, Color("f0a81c"))
 	draw_circle(p + Vector2(-3, -3), 3.0, Color(1, 1, 1, 0.8))
 
+func _pile(p: Vector2, k: float = 1.0) -> void:
+	for i in 3:
+		var c := p + Vector2(0, (2 - i) * -5.0 + 6.0) * k
+		draw_set_transform(c, 0.0, Vector2(1.0, 0.6) * k)
+		draw_circle(Vector2.ZERO, 12.0, OUT)
+		draw_circle(Vector2.ZERO, 10.0, Color("f4b928"))
+		draw_arc(Vector2.ZERO, 10.0, PI * 1.1, PI * 1.9, 10, Color(1, 0.93, 0.6), 2.5, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _orb_icon(p: Vector2) -> void:
+	draw_circle(p, 12.0, OUT)
+	draw_circle(p, 10.0, Color("ffd23a"))
+	draw_line(p + Vector2(-10, 0), p + Vector2(10, 0), OUT, 2.0)
+	draw_circle(p, 3.5, OUT)
+	draw_circle(p, 2.0, Color(0.8, 1, 0.9))
+	draw_circle(p + Vector2(-4, -5), 2.5, Color(1, 1, 1, 0.8))
+
 func _heart(p: Vector2, col: Color, k: float = 1.0) -> void:
 	var s := k
 	draw_circle(p + Vector2(-6, -3) * s, 9.0 * s, OUT)
@@ -56,11 +73,17 @@ func _draw() -> void:
 	_txt(str(int(round(coins_shown))), Vector2(54, 40), 28, Color("fff3b0"))
 	var low: bool = m.lives <= maxi(3, m.lives_start / 4)
 	var hcol := Color("ff5a6a") if not low else Color(1.0, 0.25 + 0.2 * sin(t * 8.0), 0.3)
-	_heart(Vector2(170, 28), hcol, 1.0 + (0.1 * sin(t * 8.0) if low else 0.0))
-	_txt(str(maxi(0, m.lives)), Vector2(192, 40), 28, Color.WHITE)
+	if m.lv.get("steal", false):
+		_pile(Vector2(150, 28), 1.0 + (0.1 * sin(t * 8.0) if low else 0.0))
+		_txt(str(maxi(0, m.lives)), Vector2(172, 40), 28, Color.WHITE if not low else Color(1.0, 0.45, 0.4))
+	else:
+		_heart(Vector2(150, 28), hcol, 1.0 + (0.1 * sin(t * 8.0) if low else 0.0))
+		_txt(str(maxi(0, m.lives)), Vector2(172, 40), 28, Color.WHITE)
+	_orb_icon(Vector2(246, 28))
+	_txt(str(m.lures), Vector2(264, 40), 26, Color("ffe08a") if m.lures > 0 else Color("8a7a9a"))
 	var total := Levels.TOTAL_WAVES
 	for i in total:
-		var c := Vector2(296 + i * 24, 30)
+		var c := Vector2(332 + i * 22, 30)
 		var done: bool = i < m.wave - (1 if m.wave_running else 0)
 		var cur: bool = i == m.wave - 1 and m.wave_running
 		draw_circle(c, 9.0, OUT)

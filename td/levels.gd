@@ -7,26 +7,27 @@ const TOTAL_WAVES := 10
 const LEVELS := {
 	"mossgate": {
 		"name": "Mossgate Lane", "style": "meadow", "blurb": "A dusk meadow at the edge of the Green Hollow. A gentle first lesson.", "art": "res://art/maps/mossgate.png",
-		"rule": "Rain rolls in on later waves.", "lane_mode": "random", "hp_mult": 0.88, "coins": 320,
+		"rule": "Rain rolls in on later waves.", "lane_mode": "random", "hp_mult": 0.8, "coins": 320,
 		"colors": {"g1": "#274e63", "g2": "#3f8a6a", "accent": "#9fe8b8", "path": "#e2bd8a", "edge": "#4a2f55", "glow": "#ffe9a8", "moon": "#fff3c8"},
 		"weather": ["clear", "clear", "rain", "clear", "rain", "clear", "rain", "clear", "rain", "rain"],
 		"paths": [[[-40, 360], [300, 360], [300, 160], [700, 160], [700, 560], [1000, 560], [1000, 300], [1320, 300]]],
 		"stones": [[460, 250, "verdant"], [560, 470, "tide"], [880, 420, "ember"], [150, 230, "umbra"]],
 		"zones": [],
-		"roster": [["shuckit", 1, 10], ["glomm", 4, 3]],
-		"boss": "glomm", "boss_extra": {}, "boss_mult": 2.0, "early": [0.5, 0.65, 0.8, 0.92],
+		"roster": [["shuckit", 1, 10], ["shuckit_pup", 2, 6], ["shuckit_alpha", 4, 3]],
+		"boss": "", "boss_extra": {}, "early": [0.5, 0.65, 0.8, 0.92],
+		"steal": true, "finale": 1.0, "champion": "shuckit_alpha",
 		"rare": {"id": "hutzin", "chance": 0.14, "wave_min": 3, "wave_max": 8},
 		"story": {
 			"intro": [
-				["The Wells are failing. At the edge of the Green Hollow, the old Mossgate still stands, and the herds are drifting toward the light of its Well.", "glomm"],
+				["The Wells are failing. At the edge of the Green Hollow the old Mossgate still guards its Well, and in the Well sit twenty gold coins: the last of its power. Every herd in the Hollow can smell them.", "shuckit"],
 				["You are a Wellkeeper. You cannot hold a lane alone. Tickindle, a grumpy manul who keeps time with a stolen pocket watch, has decided to stand with you. Do not ask it why.", "tickindle"],
-				["Tonight a pack of Shuckit runs the lane: spooky, cheeky, and only chasing the glow. Weaken one and it may follow you home. Tap a tired creature to use a Lure.", "shuckit"],
-				["Old keepers whisper about a Hutzin, a bird in a teapot hut, that wanders in on foggy nights. Nobody knows when. Nobody has ever seen it twice.", "hutzin"],
+				["Tonight a pack of Shuckit runs the lane. They do not want a fight. They want the gold. Each one that reaches the Well grabs a coin and bolts. Lose all twenty and the Well goes dark. Hold for ten waves and it shines.", "shuckit"],
+				["Weaken a thief and a Lure can turn it into a friend. And old keepers whisper about a Hutzin, a bird in a teapot hut, that wanders in on foggy nights. Nobody knows when.", "hutzin"],
 			],
-			"boss": "The ground shakes. Elder Glomm walks the lane, driven by something beneath the Well. Hold the gate.",
-			"win": "The Elder turns back, and the Well hums again. Beyond the hedge the Shuckit pack lingers, watching you. They are ready to follow a Wellkeeper who held the gate.",
-			"lose": "The Well flickers. Mossgate will wait for you. Old gates are patient.",
+			"win": "Ten waves, and the Well still shines with every coin you saved. Beyond the hedge the Shuckit pack lingers, watching. They are ready to follow a Wellkeeper who held the gate.",
+			"lose": "The last coin is gone and the Well goes dark. Mossgate is patient. Old gates always get a second chance.",
 		},
+
 	},
 	"frostrun": {
 		"name": "Frostrun Pass", "style": "snow", "blurb": "Switchbacks under the White Lantern. Ice patches make the herd slide.",

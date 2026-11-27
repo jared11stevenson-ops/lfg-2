@@ -20,6 +20,8 @@ static func build(level: Dictionary, w: int, rng: RandomNumberGenerator, count_m
 			q.append(r[0])
 			q.append(r[0])
 	var left := budget(w) * count_mult
+	if w == Levels.TOTAL_WAVES and level.has("finale"):
+		left *= float(level.finale)
 	var early: Array = level.get("early", [])
 	if w <= early.size():
 		left *= float(early[w - 1])
@@ -51,11 +53,21 @@ static func build(level: Dictionary, w: int, rng: RandomNumberGenerator, count_m
 		q[j] = tmp
 	if w == 5:
 		var top: String = avail[0][0]
-		for r in avail:
-			if int(r[1]) < w and float(Creatures.ENEMIES[r[0]].cost) > float(Creatures.ENEMIES[top].cost):
-				top = r[0]
+		if level.has("champion"):
+			top = String(level.champion)
+		else:
+			for r in avail:
+				if int(r[1]) < w and float(Creatures.ENEMIES[r[0]].cost) > float(Creatures.ENEMIES[top].cost):
+					top = r[0]
 		q.insert(q.size() / 3, "champion:" + String(top))
-	var is_boss_wave := w == Levels.TOTAL_WAVES or (w > Levels.TOTAL_WAVES and (w - Levels.TOTAL_WAVES) % endless_boss_every == 0)
+	if w == Levels.TOTAL_WAVES and level.has("finale") and not avail.is_empty():
+		var big: String = avail[0][0]
+		for r in avail:
+			if float(Creatures.ENEMIES[r[0]].cost) > float(Creatures.ENEMIES[big].cost):
+				big = r[0]
+		q.insert(q.size() / 2, "champion:" + big)
+	var has_boss := String(level.get("boss", "")) != ""
+	var is_boss_wave := has_boss and w == Levels.TOTAL_WAVES or has_boss and (w > Levels.TOTAL_WAVES and (w - Levels.TOTAL_WAVES) % endless_boss_every == 0)
 	if is_boss_wave:
 		q.insert(q.size() / 2, "boss:" + String(level.boss))
 	return q
