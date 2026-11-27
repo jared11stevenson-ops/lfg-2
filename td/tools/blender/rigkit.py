@@ -234,7 +234,7 @@ class Creature:
         self.rig.reset()
         return out
 
-    def bake(self, pose_fn, counts, out_dir, name, size=256, ppu=50.0, yaw=-32.0, preview=None, glow=True, anchors=None, meta_extra=None, meta_path=None, meta_only=False):
+    def bake(self, pose_fn, counts, out_dir, name, size=256, ppu=50.0, yaw=-32.0, preview=None, glow=False, anchors=None, meta_extra=None, meta_path=None, meta_only=False):
         from PIL import Image, ImageFilter
         basic_render_setup(size * 2, samples=18)
         sc = bpy.context.scene

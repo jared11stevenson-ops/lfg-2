@@ -347,13 +347,7 @@ func _curse(t, p) -> void:
 				n -= 1
 
 func _sprite_id() -> String:
-	var base: String = def.get("sprite", def.id)
-	var cand := base
-	if tiers.a >= 3 and tiers.a >= tiers.b:
-		cand = base + "_a"
-	elif tiers.b >= 3:
-		cand = base + "_b"
-	return cand if PuppetLib.tex(cand, "idle", 0) != null else base
+	return def.get("sprite", def.id)
 
 static func draw_icon(ci: CanvasItem, id: String, def_: Dictionary) -> void:
 	PuppetLib.draw(ci, def_.get("sprite", id), "idle", int(Time.get_ticks_msec() / 160.0), false, BASE_SCALE)
@@ -394,6 +388,11 @@ func _draw() -> void:
 	else:
 		frame = int(Time.get_ticks_msec() / (1000.0 / (7.0 if am.is_empty() else 8.0 / 1.2)) + position.x)
 	var sc := BASE_SCALE * (1.0 + 0.04 * total)
+	if total >= 3:
+		# upgrade-tier halo: a slightly larger, over-bright tinted copy behind the sprite (no extra baked frames)
+		var hc := Color(3.6, 2.2, 0.5, 0.75) if tiers.a >= tiers.b else Color(0.6, 1.9, 3.6, 0.75)
+		var pulse2 := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) / 400.0)
+		PuppetLib.draw(self, sid, state, frame, flip, sc * (1.12 + 0.03 * pulse2), Vector2(0, 2), Color(hc.r, hc.g, hc.b, hc.a * (0.7 + 0.3 * pulse2)))
 	if not PuppetLib.draw(self, sid, state, frame, flip, sc, Vector2(0, 8), Color.WHITE if chilled_t <= 0.0 else Color(0.7, 0.85, 1.0)):
 		draw_circle(Vector2(0, -20), 20, TypeChart.COLORS[def.types[0]])
 	if atk_t > 0.0 and not am.is_empty():
