@@ -6,7 +6,7 @@ const TOTAL_WAVES := 10
 
 const LEVELS := {
 	"mossgate": {
-		"name": "Mossgate Lane", "style": "meadow", "blurb": "A dusk meadow at the edge of the Green Hollow. A gentle first lesson.",
+		"name": "Mossgate Lane", "style": "meadow", "blurb": "A dusk meadow at the edge of the Green Hollow. A gentle first lesson.", "art": "res://art/maps/mossgate.png",
 		"rule": "Rain rolls in on later waves.", "lane_mode": "random", "hp_mult": 0.88, "coins": 320,
 		"colors": {"g1": "#274e63", "g2": "#3f8a6a", "accent": "#9fe8b8", "path": "#e2bd8a", "edge": "#4a2f55", "glow": "#ffe9a8", "moon": "#fff3c8"},
 		"weather": ["clear", "clear", "rain", "clear", "rain", "clear", "rain", "clear", "rain", "rain"],

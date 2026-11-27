@@ -13,6 +13,15 @@ static func make(parent: Node, lv: Dictionary) -> SubViewport:
 	vp.size = Vector2i(1280, 720)
 	vp.transparent_bg = false
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	# Levels with hand-built art (rendered in Blender, see tools/blender/map_*.py) use that texture instead of the procedural paint.
+	if lv.has("art") and ResourceLoader.exists(String(lv.art)):
+		var spr := Sprite2D.new()
+		spr.texture = load(String(lv.art))
+		spr.centered = false
+		spr.scale = Vector2(1280.0 / spr.texture.get_width(), 720.0 / spr.texture.get_height())
+		vp.add_child(spr)
+		parent.add_child(vp)
+		return vp
 	var bd = load("res://backdrop.gd").new()
 	bd.level = lv
 	bd.paths = Levels.to_paths(lv)
