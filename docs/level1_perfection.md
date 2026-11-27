@@ -53,4 +53,9 @@ Goal for 7 am (13:00 UTC): Level 1 feels finished. Every pass is brainstorm -> b
 - 05:45 Design change from user: NO boss on Level 1. Enemies steal the Well's gold (20 coins = lives, shown as a coin pile in the Well; thieves grab coins and run off). Survive 10 waves to win; wave 10 is a larger finale with an Alpha champion. Boss UI kept for other levels.
 - 05:55 Level 1 roster restricted to creatures with models: Shuckit, Shuckit Pup, Shuckit Alpha (same rigged sprite, tinted/scaled), rare Hutzin. Glomm removed from Level 1.
 - 06:00 Balance (bot, 6 seeds): skill 0.6 wins 6/6 with 5-14 gold left; skill 0.4 wins 2/6; skill 0.8 wins 6/6.
-- NEXT: rig/animation quality pass (weight smoothing, 2-bone legs, better walk/attack), then tutorial, UI, audio, mastery goals.
+- 06:10 Rig/animation pass: weight smoothing, foot lift, bigger swings, squash/stretch attacks, Dugloom spine split; all four re-baked.
+- 06:30 UI: upgrade panel portrait/XP bar/moves; tutorial capture lesson + gold-theft intro; HUD Lure counter + gold-stack icon; next-wave preview distinguishes Pup/Alpha.
+- 06:50 Level 1 goals (5 goals, +60 gold once each) shown on setup panel; result screen trimmed to 6 lines.
+- 07:10 Audio overhaul: offline-synthesized SFX/voices, layered music (battle drums fade in on waves), ambient bed, new capture/steal/goal/level-up sounds. (Not auditioned by ear: no audio device here.)
+- 07:30 Mipmapped sprite filtering for smoother fur/edges.
+- (old) NEXT: rig/animation quality pass (weight smoothing, 2-bone legs, better walk/attack), then tutorial, UI, audio, mastery goals.

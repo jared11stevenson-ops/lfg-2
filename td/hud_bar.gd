@@ -1,6 +1,7 @@
 extends Control
 # Icon HUD: coins, lives hearts, wave pips, next-wave creature preview (or enemies remaining), weather chip, event badge.
 const PuppetLib = preload("res://puppet_lib.gd")
+const Creatures = preload("res://creatures.gd")
 const Weather = preload("res://weather.gd")
 const Rules = preload("res://rules.gd")
 const Levels = preload("res://levels.gd")
@@ -100,7 +101,9 @@ func _draw() -> void:
 			counts[key] = counts.get(key, 0) + 1
 		var x := 76.0
 		for k in counts:
-			PuppetLib.draw(self, k, "idle", int(t * 5.0), false, 0.24, Vector2(x + 16, y))
+			var ed: Dictionary = Creatures.ENEMIES.get(k, {})
+			var tint_c := Color(String(ed.tint)) if ed.has("tint") else Color.WHITE
+			PuppetLib.draw(self, String(ed.get("sprite", k)), "idle", int(t * 5.0), false, 0.24 * float(ed.get("scale", 1.0)), Vector2(x + 16, y), tint_c)
 			_txt("x%d" % counts[k], Vector2(x + 34, 94), 17, Color.WHITE)
 			x += 82.0
 			if x > 520.0:
