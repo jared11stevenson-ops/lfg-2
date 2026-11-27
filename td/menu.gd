@@ -173,6 +173,13 @@ func _sync_setup() -> void:
 	score_lbl.text = "Score multiplier x%.2f.   3 stars need: win with half your lives AND (Hard+ or 2+ mutators). Stars unlock new allies!" % mult
 
 func _open_setup(id: String) -> void:
+	# A brand-new player taps Level 1 and just plays: no difficulty/mutator screen before they know what a wave is.
+	if id == "mossgate" and int(Session.best_wave.get("mossgate", 0)) == 0 and not Session.settings.get("tutorial_done", false) and not Session.no_save:
+		Session.diff = "normal"
+		Session.muts = []
+		setup_level = id
+		_begin()
+		return
 	setup_level = id
 	var lv: Dictionary = Levels.LEVELS[id]
 	title_lbl.text = lv.name

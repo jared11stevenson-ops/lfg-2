@@ -97,6 +97,7 @@ var story_screen
 var boss_ui
 var gold_pile
 var captures_run := 0
+var banked := false
 var goals_new: Array = []   # goal texts completed for the first time this run
 var capturing := 0         # capture animations in flight (the wave cannot end while one is running)
 var free_ids := {}          # tower id -> free placements left (granted by capturing it)
@@ -203,10 +204,10 @@ func _build_ui() -> void:
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.size = Vector2(600, 200)
 	layer.add_child(banner)
-	retry_btn = _button("Retry", Vector2(330, 525), Vector2(190, 60), 26, Color("2f6b3a"), func(): get_tree().reload_current_scene())
+	retry_btn = _button("Retry", Vector2(330, 525), Vector2(190, 60), 26, Color("2f6b3a"), func(): _leave(true))
 	retry_btn.visible = false
 	layer.add_child(retry_btn)
-	menu_btn = _button("Levels", Vector2(545, 525), Vector2(190, 60), 26, Color("3a4a6b"), func(): Engine.time_scale = 1.0; get_tree().change_scene_to_file("res://menu.tscn"))
+	menu_btn = _button("Levels", Vector2(545, 525), Vector2(190, 60), 26, Color("3a4a6b"), func(): _leave(false))
 	menu_btn.visible = false
 	layer.add_child(menu_btn)
 	endless_btn = _button("Endless", Vector2(760, 525), Vector2(190, 60), 26, Color("8a5a1a"), _go_endless)
@@ -230,8 +231,8 @@ func _build_ui() -> void:
 	pause_menu = SettingsPanel.new()
 	pause_menu.mode = "pause"
 	pause_menu.resume.connect(_toggle_pause)
-	pause_menu.restart.connect(func(): Engine.time_scale = 1.0; get_tree().reload_current_scene())
-	pause_menu.levels.connect(func(): Engine.time_scale = 1.0; get_tree().change_scene_to_file("res://menu.tscn"))
+	pause_menu.restart.connect(func(): _leave(true))
+	pause_menu.levels.connect(func(): _leave(false))
 	layer.add_child(pause_menu)
 	pause_menu.position = Vector2(380, 150)
 	prev_btn = _button("<", Vector2(924, 612), Vector2(50, 44), 22, Color("3a4a6b"), func(): _page(-1))
@@ -433,6 +434,23 @@ func _pick_lane() -> int:
 		"alternate": return (wave - 1) % n
 		"split": return spawn_idx % n
 	return rng.randi() % n
+
+# Leaving a run early (restart / levels) still banks the XP and a little gold earned so far, so effort is never lost.
+func _bank_partial() -> void:
+	if state != "play" or banked:
+		return
+	banked = true
+	for id in run_xp:
+		Session.add_xp(String(id), int(run_xp[id]))
+	Session.add_gold(wave * 8 + captures_run * 30)
+
+func _leave(restart: bool) -> void:
+	_bank_partial()
+	Engine.time_scale = 1.0
+	if restart:
+		get_tree().reload_current_scene()
+	else:
+		get_tree().change_scene_to_file("res://menu.tscn")
 
 func _goal(goal: String) -> void:
 	for g in lv.get("goals", []):

@@ -130,5 +130,13 @@ func _initialize() -> void:
 	S.unlocked.erase("hutzin")
 	S.rare_pity = 3
 	_check(abs(S.rare_chance(0.14, "hutzin") - 0.26) < 0.001, "pity raises the chance (%.2f)" % S.rare_chance(0.14, "hutzin"))
+	# leaving a run early banks XP and some gold once
+	var xp0: int = int(S.xp.get("tickindle", 0)); var g0: int = S.gold
+	main.state = "play"; main.banked = false; main.wave = 4; main.captures_run = 1
+	main.run_xp = {"tickindle": 77}
+	main._bank_partial()
+	_check(int(S.xp.get("tickindle", 0)) == xp0 + 77 and S.gold == g0 + 4 * 8 + 30, "partial bank adds xp and gold")
+	main._bank_partial()
+	_check(int(S.xp.get("tickindle", 0)) == xp0 + 77, "partial bank is idempotent")
 	print("capture: %d/%d ok" % [ok, ok + bad])
 	quit(0 if bad == 0 else 1)
