@@ -12,6 +12,10 @@ static var best_wave := {}      # level -> best wave reached
 static var unlocked := {}       # ally tower id -> true
 static var xp := {}             # tower id -> banked XP (levels creatures up across runs)
 const MAX_LEVEL := 20
+static var gold := 0            # persistent money earned from runs, spent in the Team screen
+static var team: Array = []     # chosen loadout (max 6); empty = everything unlocked
+static var lure_bonus := 0      # extra Lures for the next run (bought with gold)
+const TEAM_MAX := 6
 static var dev_all := false     # testing: unlock everything
 static var _loaded := false
 static var settings := {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true, "tutorial_done": false}
@@ -31,6 +35,10 @@ static func load_save() -> void:
 			unlocked[k] = true
 		for k in cf.get_section_keys("xp"):
 			xp[k] = int(cf.get_value("xp", k, 0))
+		gold = int(cf.get_value("profile", "gold", 0))
+		lure_bonus = int(cf.get_value("profile", "lure_bonus", 0))
+		var tm := String(cf.get_value("profile", "team", ""))
+		team = Array(tm.split(",")) if tm != "" else []
 		dev_all = bool(cf.get_value("settings", "dev_all", false))
 		for k in settings:
 			settings[k] = cf.get_value("prefs", k, settings[k])
@@ -47,6 +55,9 @@ static func _save() -> void:
 		cf.set_value("unlocked", k, true)
 	for k in xp:
 		cf.set_value("xp", k, xp[k])
+	cf.set_value("profile", "gold", gold)
+	cf.set_value("profile", "lure_bonus", lure_bonus)
+	cf.set_value("profile", "team", ",".join(PackedStringArray(team)))
 	cf.set_value("settings", "dev_all", dev_all)
 	for k in settings:
 		cf.set_value("prefs", k, settings[k])
@@ -136,6 +147,58 @@ static func capture(species: String) -> bool:
 	if id == "" or unlocked.has(id):
 		return false
 	unlocked[id] = true
+	_save()
+	return true
+
+static func add_gold(n: int) -> void:
+	load_save()
+	gold += n
+	_save()
+
+static func spend_gold(n: int) -> bool:
+	load_save()
+	if gold < n:
+		return false
+	gold -= n
+	_save()
+	return true
+
+# Towers the player can bring: the chosen team (only unlocked ones), or everything unlocked when no team is set.
+static func team_ids() -> Array:
+	load_save()
+	var C = load("res://creatures.gd")
+	var out := []
+	for id in team:
+		if C.TOWERS.has(id) and tower_open(C.TOWERS[id]):
+			out.append(id)
+	if out.is_empty():
+		for k in C.TOWERS:
+			if tower_open(C.TOWERS[k]):
+				out.append(k)
+	return out
+
+static func toggle_team(id: String) -> bool:
+	load_save()
+	if team.is_empty():
+		team = team_ids().duplicate()
+	if id in team:
+		if team.size() <= 1:
+			return false
+		team.erase(id)
+	else:
+		if team.size() >= TEAM_MAX:
+			return false
+		team.append(id)
+	_save()
+	return true
+
+# Rare Candy: +1 level instantly. Returns false at max level.
+static func candy(id: String) -> bool:
+	load_save()
+	var l := level_of(id)
+	if l >= MAX_LEVEL:
+		return false
+	xp[id] = maxi(int(xp.get(id, 0)), xp_for_level(l + 1))
 	_save()
 	return true
 

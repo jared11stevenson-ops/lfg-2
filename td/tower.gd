@@ -25,6 +25,7 @@ var def: Dictionary = {}:
 			target_mode = def.mode
 		_rebuild()
 const SessionScript = preload("res://session.gd")
+const MovesScript = preload("res://moves.gd")
 var lvl := 1
 var st: Dictionary = {}
 var tiers := {"a": 0, "b": 0}
@@ -57,6 +58,8 @@ func _rebuild() -> void:
 				_apply(def.upgrades[p][i])
 	lvl = SessionScript.level_of(String(def.id)) if def.has("id") else 1
 	var lm: float = SessionScript.level_mult(String(def.id)) if def.has("id") else 1.0
+	for mv in MovesScript.learned(def.types, lvl):
+		_apply(mv)
 	st.dmg = float(st.dmg) * lm
 	st.rate = float(st.rate) * (1.0 + 0.03 * float(lvl - 1))
 

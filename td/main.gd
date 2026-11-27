@@ -19,6 +19,7 @@ const SettingsPanel = preload("res://settings_panel.gd")
 const HudBar = preload("res://hud_bar.gd")
 const ResultScreen = preload("res://result_screen.gd")
 const Tutorial = preload("res://tutorial.gd")
+const Moves = preload("res://moves.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -85,12 +86,16 @@ var tutorial
 var event_id := ""
 var intro_t := 3.6
 var lures := 3
+var captures_run := 0
 var free_ids := {}          # tower id -> free placements left (granted by capturing it)
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
 const CAPTURE_HP := 0.35
 
 func _ready() -> void:
+	Session.load_save()
+	lures = 3 + Session.lure_bonus
+	Session.lure_bonus = 0
 	Session.init_ui()
 	lv = Levels.LEVELS[Session.level_id]
 	paths = Levels.to_paths(lv)
@@ -205,8 +210,9 @@ func _build_ui() -> void:
 
 func _build_shop() -> void:
 	shop_ids.clear()
+	var team: Array = Session.team_ids()
 	for k in Creatures.TOWERS:
-		if Session.tower_open(Creatures.TOWERS[k]):
+		if Session.tower_open(Creatures.TOWERS[k]) and (k in team or int(free_ids.get(k, 0)) > 0):
 			shop_ids.append(k)
 	if not selected in shop_ids:
 		selected = shop_ids[0]
@@ -412,6 +418,7 @@ func _try_capture(e) -> void:
 		pf.col = Color("ffd23a")
 		pf.position = e.position
 		add_child(pf)
+		captures_run += 1
 		FxScript.text_at(self, e.position + Vector2(0, -50), "Captured %s!%s" % [Creatures.ENEMIES[e.kind].name, " NEW" if fresh else ""], Color("ffe08a"))
 		Sfx.play(self, "up", -6.0)
 		Sfx.haptic(60)
@@ -573,6 +580,11 @@ func _end(result: String) -> void:
 		var lv_change := Session.add_xp(String(id), int(run_xp[id]) + bonus)
 		if lv_change[1] > lv_change[0]:
 			lvl_lines.append("%s grew to Lv %d!" % [Creatures.TOWERS[id].name, lv_change[1]])
+			for mv in Moves.gained(Creatures.TOWERS[id].types, lv_change[0], lv_change[1]):
+				lvl_lines.append("   learned %s (%s)" % [mv.name, mv.desc])
+	var gold_gain := wave * 15 + (100 if result == "won" else 0) + captures_run * 30
+	Session.add_gold(gold_gain)
+	lvl_lines.append("Gold +%d (total %d)" % [gold_gain, Session.gold])
 	var layer: CanvasLayer = start_btn.get_parent()
 	if result == "won":
 		var rec := Session.record_win(Session.level_id, wave, lives, lives_start, endless)

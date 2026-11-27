@@ -9,6 +9,7 @@ const TypeChart = preload("res://type_chart.gd")
 const UiStyle = preload("res://ui_style.gd")
 const Sfx = preload("res://sfx.gd")
 const SettingsPanel = preload("res://settings_panel.gd")
+const TeamScreen = preload("res://team_screen.gd")
 const CARD := Vector2(236, 196)
 const SPECIES := ["tickindle", "dugloom", "hutzin", "shuckit", "zapnose", "glomm", "hoardillo", "mirewick", "gloamoth", "bogbard", "quillwyrm", "drumbeak", "pyrelope", "mudskip", "thornarok", "ptarmitten", "tentbat", "dumbomaton", "colukite", "gilamancer"]
 const BLURBS := {
@@ -32,6 +33,8 @@ var best_btn: Button
 var back_btn: Button
 var settings_btn: Button
 var settings_panel
+var team_btn: Button
+var team_screen
 
 func _ready() -> void:
 	Session.init_ui()
@@ -45,7 +48,8 @@ func _ready() -> void:
 	back_btn = _btn("Back", Vector2(1100, 14), Vector2(160, 46), 20, Color("3a4a6b"), func(): mode = "levels"; back_btn.visible = false)
 	back_btn.visible = false
 	settings_btn = _btn("Settings", Vector2(810, 62), Vector2(200, 46), 20, Color("3a4a6b"), func(): settings_panel.visible = true)
-	for b in [daily_btn, best_btn, dev_btn, back_btn, settings_btn]:
+	team_btn = _btn("Team", Vector2(560, 14), Vector2(200, 46), 20, Color("2f6b3a"), _open_team)
+	for b in [daily_btn, best_btn, dev_btn, back_btn, settings_btn, team_btn]:
 		layer.add_child(b)
 	_update_dev()
 	_build_setup(layer)
@@ -53,6 +57,13 @@ func _ready() -> void:
 	settings_panel.closed.connect(func(): settings_panel.visible = false)
 	layer.add_child(settings_panel)
 	settings_panel.position = Vector2(380, 130)
+
+func _open_team() -> void:
+	if team_screen != null and is_instance_valid(team_screen):
+		team_screen.queue_free()
+	team_screen = TeamScreen.new()
+	team_screen.closed.connect(func(): team_screen.queue_free(); team_screen = null)
+	team_btn.get_parent().add_child(team_screen)
 
 func _btn(text: String, pos: Vector2, size: Vector2, fsize: int, col: Color, cb: Callable) -> Button:
 	var b := Button.new()

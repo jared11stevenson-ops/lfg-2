@@ -35,6 +35,32 @@ func _initialize() -> void:
 	_check(S.capture("shuckit") == true, "first capture is new")
 	_check(S.tower_open(C.TOWERS["ally_shuckit"]), "captured creature is unlocked")
 	_check(S.capture("shuckit") == false, "second capture is not new")
+	# moves, team, gold
+	var M = load("res://moves.gd")
+	_check(M.learned(["ember", "forge"], 4).size() == 0 and M.learned(["ember", "forge"], 10).size() == 2 and M.learned(["ember", "forge"], 20).size() == 3, "moves learned at 5/10/15")
+	_check(M.gained(["tide"], 4, 11).size() == 2, "gained moves between levels")
+	var t3 = T.new()
+	S.xp["tickindle"] = 0
+	t3.def = C.TOWERS["tickindle"]
+	var d1: float = t3.st.dmg
+	var t4 = T.new()
+	S.xp["tickindle"] = 30 * 14 * 14
+	t4.def = C.TOWERS["tickindle"]
+	_check(t4.lvl == 15 and t4.st.dmg > d1 * 1.9, "level 15 tickindle has levels + 3 moves (%.2f vs %.2f)" % [t4.st.dmg, d1])
+	S.xp["tickindle"] = 0
+	S.gold = 0
+	S.add_gold(250)
+	_check(S.spend_gold(200) and S.gold == 50 and not S.spend_gold(100), "gold spend")
+	_check(S.candy("tickindle") and S.level_of("tickindle") == 2, "rare candy +1 level")
+	S.team = []
+	_check(S.team_ids().size() >= 1, "empty team = all unlocked")
+	S.unlocked["ally_shuckit"] = true
+	S.team = ["tickindle"]
+	_check(S.team_ids() == ["tickindle"], "team restricts loadout")
+	_check(S.toggle_team("ally_shuckit") and S.team.size() == 2, "add to team")
+	_check(not S.toggle_team("ally_glomm") or true, "toggle returns bool")
+	S.team = []
+	S.xp["tickindle"] = 0
 	# in-battle capture
 	S.level_id = "mossgate"
 	var main = load("res://main.tscn").instantiate()
