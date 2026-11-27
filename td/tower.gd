@@ -8,6 +8,7 @@ const PatchScript = preload("res://patch.gd")
 const FxScript = preload("res://fx.gd")
 const BoltScript = preload("res://bolt.gd")
 const PoofScript = preload("res://poof.gd")
+const AttackFx = preload("res://attack_fx.gd")
 const Sfx = preload("res://sfx.gd")
 const BASE_SCALE := 0.7
 const MODES := ["first", "last", "strong"]
@@ -38,6 +39,7 @@ var windup := 0
 var shots := 0
 var pulse_t := 0.0
 var atk_t := 0.0
+const ATK_T := 0.42
 var has_tgt := false      # a target is in range: play the wind-up frames before each shot
 var flip := false
 var chilled_t := 0.0
@@ -191,7 +193,7 @@ func _pulse_tick() -> void:
 		return
 	cooldown = 1.0 / float(st.rate)
 	pulse_t = 0.45
-	atk_t = 0.4
+	atk_t = ATK_T
 	Sfx.play(self, "pulse", -10.0, 120)
 	var wx := _weather() * _stone_mult()
 	for e in hit:
@@ -221,7 +223,7 @@ func _pulse_tick() -> void:
 func _fire(t) -> void:
 	shots += 1
 	windup += 1
-	atk_t = 0.35
+	atk_t = ATK_T
 	Sfx.play(self, "shoot", -16.0, 45)
 	if shots % 9 == 3:
 		Sfx.voice(self, String(def.get("sprite", def.id)), false, -17.0)
@@ -240,7 +242,12 @@ func _fire(t) -> void:
 				p.dmg *= float(st.wet_mult)
 			p.color = TypeChart.COLORS[def.types[0]]
 			p.ptype = def.types[0]
-			p.position = position + Vector2(0, -26) + Vector2(0, i * 6)
+			var mz := Vector2(0, -26)
+			var mm: Dictionary = PuppetLib.meta(_sprite_id())
+			if not mm.is_empty():
+				var an: Array = mm.anchors.get("muzzle", [40, -40])
+				mz = Vector2((-1.0 if flip else 1.0) * float(an[0]), float(an[1])) * (BASE_SCALE * (1.0 + 0.04 * (tiers.a + tiers.b))) + Vector2(0, 8)
+			p.position = position + mz + Vector2(0, i * 6)
 			get_parent().add_child(p)
 
 # Called by the projectile on arrival.
@@ -372,18 +379,25 @@ func _draw() -> void:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	PuppetLib.shadow(self, 1.1)
 	# Attack frames: 0-1 anticipation (just before the shot), 2 strike (on release), 3-4 recovery.
-	var winding: bool = has_tgt and atk_t <= 0.0 and cooldown > 0.0 and cooldown < 0.16
+	var sid := _sprite_id()
+	var am: Dictionary = PuppetLib.meta(sid)
+	var n_atk := PuppetLib.frame_count("attack", sid)
+	var strike: int = int(am.get("strike", 2)) if not am.is_empty() else 2
+	var wind_t := 0.30 if not am.is_empty() else 0.16
+	var winding: bool = has_tgt and atk_t <= 0.0 and cooldown > 0.0 and cooldown < wind_t
 	var state := "attack" if (atk_t > 0.0 or winding) else "idle"
 	var frame := 0
 	if atk_t > 0.0:
-		frame = mini(4, 2 + int((1.0 - atk_t / 0.35) * 3.0))
+		frame = mini(n_atk - 1, strike + int((1.0 - atk_t / ATK_T) * float(n_atk - strike)))
 	elif winding:
-		frame = 0 if cooldown > 0.08 else 1
+		frame = clampi(int((1.0 - cooldown / wind_t) * float(strike)), 0, strike - 1)
 	else:
-		frame = int(Time.get_ticks_msec() / 170.0 + position.x)
+		frame = int(Time.get_ticks_msec() / (1000.0 / (7.0 if am.is_empty() else 8.0 / 1.2)) + position.x)
 	var sc := BASE_SCALE * (1.0 + 0.04 * total)
-	if not PuppetLib.draw(self, _sprite_id(), state, frame, flip, sc, Vector2(0, 8), Color.WHITE if chilled_t <= 0.0 else Color(0.7, 0.85, 1.0)):
+	if not PuppetLib.draw(self, sid, state, frame, flip, sc, Vector2(0, 8), Color.WHITE if chilled_t <= 0.0 else Color(0.7, 0.85, 1.0)):
 		draw_circle(Vector2(0, -20), 20, TypeChart.COLORS[def.types[0]])
+	if atk_t > 0.0 and not am.is_empty():
+		AttackFx.draw(self, String(sid).get_slice("_", 0), def.types, am, 1.0 - atk_t / ATK_T, flip, sc, Vector2(0, 8))
 	_draw_emote()
 	for i in tiers.a:
 		draw_circle(Vector2(-14 + i * 8, 20), 3.0, Color("ffb347"))

@@ -1,0 +1,27 @@
+{
+ "strike": 3,
+ "walk_units": 1.4,
+ "counts": {
+  "idle": 8,
+  "walk": 12,
+  "attack": 8
+ },
+ "origin": [
+  95.0,
+  173.0
+ ],
+ "anchors": {
+  "lantern": [
+   36.1,
+   -107.7
+  ],
+  "mouth": [
+   46.6,
+   -49.9
+  ],
+  "snout": [
+   46.6,
+   -49.9
+  ]
+ }
+}

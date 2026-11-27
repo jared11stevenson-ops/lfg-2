@@ -234,7 +234,12 @@ func _process(delta: float) -> void:
 	else:
 		position += dir * step
 		travelled += step
-	anim += step * 0.09
+	var wm: Dictionary = PuppetLib.meta(sprite_id)
+	if wm.is_empty():
+		anim += step * 0.09
+	else:
+		# one walk cycle per walk_units of travel so feet match the ground speed
+		anim += step * float(PuppetLib.frame_count("walk", sprite_id)) / (float(wm.walk_units) * 50.0 * BASE_SCALE * scale_mul)
 	queue_redraw()
 
 func _auras(delta: float) -> void:
