@@ -709,7 +709,7 @@ func _end(result: String) -> void:
 		var rec := Session.record_win(Session.level_id, wave, lives, lives_start, endless)
 		rs.title = "The Well holds!" if not lv.get("steal", false) else "The gold is safe!"
 		rs.stars = int(rec.stars)
-		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], ("Gold kept: %d/%d" if lv.get("steal", false) else "Lives left: %d/%d") % [lives, lives_start]]
+		rs.lines = ["Waves %d/%d     %s" % [wave, Levels.TOTAL_WAVES, ("Gold kept %d/%d" if lv.get("steal", false) else "Lives left %d/%d") % [lives, lives_start]]]
 		rs.lines += lvl_lines
 		for a in rec.allies:
 			rs.ally_sprites.append(Creatures.TOWERS[a].sprite)
@@ -722,13 +722,13 @@ func _end(result: String) -> void:
 	else:
 		Session.record_loss(Session.level_id, wave)
 		rs.title = "The Well is lost..." if not lv.get("steal", false) else "The gold is gone..."
-		rs.lines = ["You reached wave %d of %d" % [wave, Levels.TOTAL_WAVES], "Run seed: %d" % run_seed] + lvl_lines
+		rs.lines = ["You reached wave %d of %d     (seed %d)" % [wave, Levels.TOTAL_WAVES, run_seed]] + lvl_lines
 		var tips := ["Put creatures on rune stones for a free boost.", "Mix types: Super! hits do 50% more damage.", "Upgrade a path to tier 3 to evolve a creature.", "Dugloom's slow gives every other defender more time to shoot.", "Try the Well Surge when a wave overwhelms you."]
 		rs.tip = tips[wave % tips.size()]
 		rs.story = String(lv.get("story", {}).get("lose", ""))
 		Sfx.play(self, "lose")
-	if rs.lines.size() > 6:
-		rs.lines = rs.lines.slice(0, 5) + [rs.lines[rs.lines.size() - 1]]
+	if rs.lines.size() > 9:
+		rs.lines = rs.lines.slice(0, 8) + [rs.lines[rs.lines.size() - 1]]
 	layer.add_child(rs)
 	layer.move_child(rs, retry_btn.get_index())
 	if leveled:
