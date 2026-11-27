@@ -73,7 +73,10 @@ func _run() -> void:
 	await process_frame
 	_check(main.result_screen != null and is_instance_valid(main.result_screen), "result screen shows")
 	_check(S.gold > gold0, "gold earned")
-	_check(S.level_of("tickindle") >= 3, "XP banked, creature levelled")
+	_check(S.xp_ready("tickindle") and S.level_of("tickindle") == 1, "XP banked, level waits to be bought")
+	S.gold += 500
+	_check(S.buy_level("tickindle") == "" and S.level_of("tickindle") == 2, "gold + Exp buys the level")
+	_check(int(S.clears.get("mossgate", 0)) >= 1 and S.tier("mossgate") >= 1, "clear raises the replay tier")
 	_check(int(S.stars.get("mossgate", 0)) >= 1, "level 1 star saved")
 	# reload from disk
 	var stars_before: int = int(S.stars.get("mossgate", 0))

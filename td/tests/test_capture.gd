@@ -17,17 +17,23 @@ func _initialize() -> void:
 	S.settings["tutorial_done"] = true
 	_check(S.level_of("tickindle") == 1, "starts at level 1")
 	S.add_xp("tickindle", 30)
-	_check(S.level_of("tickindle") == 2, "30 xp = level 2")
+	_check(S.level_of("tickindle") == 1, "xp alone no longer levels")
+	S.gold = 1000
+	_check(S.buy_level("tickindle") == "" and S.level_of("tickindle") == 2, "30 xp + gold buys level 2")
+	_check(S.buy_level("tickindle") != "" and S.level_of("tickindle") == 2, "level 3 needs more Exp")
 	S.add_xp("tickindle", 120)
-	_check(S.level_of("tickindle") == 3, "150 xp = level 3")
+	_check(S.buy_level("tickindle") == "" and S.level_of("tickindle") == 3, "150 xp + gold buys level 3")
+	S.gold = 0
+	S.add_xp("tickindle", 5000)
+	_check(S.buy_level("tickindle") != "" and S.level_of("tickindle") == 3, "no gold, no level")
 	_check(S.level_mult("tickindle") > 1.1, "level multiplier grows")
 	var T = load("res://tower.gd")
 	var t1 = T.new()
-	S.xp["ally_shuckit"] = 0
+	S.lvl["ally_shuckit"] = 1
 	t1.def = C.TOWERS["ally_shuckit"]
 	var base_dmg: float = t1.st.dmg
 	var t2 = T.new()
-	S.xp["ally_shuckit"] = 30 * 9 * 9
+	S.lvl["ally_shuckit"] = 10
 	t2.def = C.TOWERS["ally_shuckit"]
 	_check(t2.lvl == 10 and t2.st.dmg > base_dmg * 1.4, "tower damage scales with level (lvl %d dmg %.2f vs %.2f)" % [t2.lvl, t2.st.dmg, base_dmg])
 	_check(S.tower_for("shuckit") == "ally_shuckit" and S.tower_for("glomm") == "ally_glomm", "species map to tower ids")
@@ -40,14 +46,14 @@ func _initialize() -> void:
 	_check(M.learned(["ember", "forge"], 4).size() == 0 and M.learned(["ember", "forge"], 10).size() == 2 and M.learned(["ember", "forge"], 20).size() == 3, "moves learned at 5/10/15")
 	_check(M.gained(["tide"], 4, 11).size() == 2, "gained moves between levels")
 	var t3 = T.new()
-	S.xp["tickindle"] = 0
+	S.lvl["tickindle"] = 1
 	t3.def = C.TOWERS["tickindle"]
 	var d1: float = t3.st.dmg
 	var t4 = T.new()
-	S.xp["tickindle"] = 30 * 14 * 14
+	S.lvl["tickindle"] = 15
 	t4.def = C.TOWERS["tickindle"]
 	_check(t4.lvl == 15 and t4.st.dmg > d1 * 1.9, "level 15 tickindle has levels + 3 moves (%.2f vs %.2f)" % [t4.st.dmg, d1])
-	S.xp["tickindle"] = 0
+	S.lvl["tickindle"] = 1
 	S.gold = 0
 	S.add_gold(250)
 	_check(S.spend_gold(200) and S.gold == 50 and not S.spend_gold(100), "gold spend")

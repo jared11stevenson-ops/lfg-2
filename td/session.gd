@@ -10,7 +10,9 @@ static var daily := false
 static var stars := {}          # level -> 0..3
 static var best_wave := {}      # level -> best wave reached
 static var unlocked := {}       # ally tower id -> true
-static var xp := {}             # tower id -> banked XP (levels creatures up across runs)
+static var xp := {}             # tower id -> banked XP (the Exp gate for buying levels)
+static var lvl := {}            # tower id -> level bought with gold (progression is money levelling, gated by Exp)
+static var clears := {}         # level -> times cleared (replay tier: harder waves, rarer finds, more gold)
 const MAX_LEVEL := 20
 static var mastery := {}        # "<level>_<goal>" -> true (one-time gold rewards)
 static var gold := 0            # persistent money earned from runs, spent in the Team screen
@@ -39,6 +41,15 @@ static func load_save() -> void:
 			xp[k] = int(cf.get_value("xp", k, 0))
 		for k in cf.get_section_keys("mastery"):
 			mastery[k] = true
+		if cf.has_section("clears"):
+			for k in cf.get_section_keys("clears"):
+				clears[k] = int(cf.get_value("clears", k, 0))
+		if cf.has_section("lvl"):
+			for k in cf.get_section_keys("lvl"):
+				lvl[k] = int(cf.get_value("lvl", k, 1))
+		else:
+			for k in xp:  # older saves: keep the levels earned from XP
+				lvl[k] = clampi(1 + int(sqrt(maxf(0.0, float(xp[k])) / 30.0)), 1, MAX_LEVEL)
 		gold = int(cf.get_value("profile", "gold", 0))
 		lure_bonus = int(cf.get_value("profile", "lure_bonus", 0))
 		rare_pity = int(cf.get_value("profile", "rare_pity", 0))
@@ -63,6 +74,10 @@ static func _save() -> void:
 		cf.set_value("xp", k, xp[k])
 	for k in mastery:
 		cf.set_value("mastery", k, true)
+	for k in lvl:
+		cf.set_value("lvl", k, lvl[k])
+	for k in clears:
+		cf.set_value("clears", k, clears[k])
 	cf.set_value("profile", "gold", gold)
 	cf.set_value("profile", "lure_bonus", lure_bonus)
 	cf.set_value("profile", "rare_pity", rare_pity)
@@ -113,6 +128,7 @@ static func record_win(level: String, wave: int, lives_left: int, lives_start: i
 			if not unlocked.has(a):
 				unlocked[a] = true
 				new_allies.append(a)
+		clears[level] = int(clears.get(level, 0)) + 1
 		stars[level] = maxi(int(stars.get(level, 0)), s)
 		best_wave[level] = maxi(int(best_wave.get(level, 0)), wave)
 		_save()
@@ -126,7 +142,7 @@ static func record_loss(level: String, wave: int) -> void:
 
 # ---- creature levels (Pokemon-style): XP is banked per species and permanently boosts its stats ----
 static func level_of(id: String) -> int:
-	return clampi(1 + int(sqrt(float(xp.get(id, 0)) / 30.0)), 1, MAX_LEVEL)
+	return clampi(int(lvl.get(id, 1)), 1, MAX_LEVEL)
 
 static func xp_for_level(l: int) -> int:
 	return 30 * (l - 1) * (l - 1)
@@ -134,13 +150,40 @@ static func xp_for_level(l: int) -> int:
 static func level_mult(id: String) -> float:
 	return 1.0 + 0.06 * float(level_of(id) - 1)
 
-# Adds XP, returns [old_level, new_level].
+# Gold price of the next level. Money is how creatures grow; Exp (from fighting) only unlocks the right to buy.
+static func level_cost(id: String) -> int:
+	return 25 * (level_of(id) + 1)
+
+static func xp_ready(id: String) -> bool:
+	return int(xp.get(id, 0)) >= xp_for_level(level_of(id) + 1)
+
+# Banks XP (the gate). Levels no longer rise by themselves, so [old, new] is always the same level.
 static func add_xp(id: String, amount: int) -> Array:
 	load_save()
-	var before := level_of(id)
 	xp[id] = int(xp.get(id, 0)) + amount
 	_save()
-	return [before, level_of(id)]
+	var l := level_of(id)
+	return [l, l]
+
+# Buy the next level. Returns "" on success, otherwise the reason it failed.
+static func buy_level(id: String) -> String:
+	load_save()
+	var l := level_of(id)
+	if l >= MAX_LEVEL:
+		return "Already max level."
+	if not xp_ready(id):
+		return "Needs %d Exp (has %d). Fight with it to earn Exp." % [xp_for_level(l + 1), int(xp.get(id, 0))]
+	if gold < level_cost(id):
+		return "Needs %d gold." % level_cost(id)
+	gold -= level_cost(id)
+	lvl[id] = l + 1
+	_save()
+	return ""
+
+# Replay tier of a level: each clear adds a tier (max 5).
+static func tier(level: String) -> int:
+	load_save()
+	return mini(5, int(clears.get(level, 0)))
 
 # Tower id a captured wild species becomes (starters keep their id, others are "ally_<species>").
 static func tower_for(species: String) -> String:
@@ -160,9 +203,9 @@ static func capture(species: String) -> bool:
 	return true
 
 # Chance that a level's rare encounter shows up this run. Rises 4% per run without one (cap 40%), halves once you own the creature.
-static func rare_chance(base: float, species: String) -> float:
+static func rare_chance(base: float, species: String, level: String = "") -> float:
 	load_save()
-	var c := minf(0.4, base + 0.04 * float(rare_pity))
+	var c := minf(0.5, base + 0.04 * float(rare_pity) + (0.03 * float(tier(level)) if level != "" else 0.0))
 	var id := tower_for(species)
 	if id != "" and unlocked.has(id):
 		c *= 0.5
@@ -251,6 +294,7 @@ static func candy(id: String) -> bool:
 	var l := level_of(id)
 	if l >= MAX_LEVEL:
 		return false
+	lvl[id] = l + 1
 	xp[id] = maxi(int(xp.get(id, 0)), xp_for_level(l + 1))
 	_save()
 	return true

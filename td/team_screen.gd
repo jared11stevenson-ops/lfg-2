@@ -8,7 +8,7 @@ const UiStyle = preload("res://ui_style.gd")
 const TypeChart = preload("res://type_chart.gd")
 const Sfx = preload("res://sfx.gd")
 signal closed
-const CANDY_COST := 200
+const RESERVE := 60   # warn when a purchase leaves less gold than this
 const LURE_COST := 60
 var sel := ""
 var grid: Control
@@ -100,7 +100,7 @@ func refresh() -> void:
 	var xp := int(Session.xp.get(sel, 0))
 	var txt := "%s   Lv %d%s\nTypes: %s\n" % [d.name, l, "" if l < Session.MAX_LEVEL else " (MAX)", " / ".join(PackedStringArray(Array(d.types).map(func(t): return String(t).capitalize())))]
 	if l < Session.MAX_LEVEL:
-		txt += "XP %d / %d to Lv %d\n" % [xp, Session.xp_for_level(l + 1), l + 1]
+		txt += "Exp %d / %d to unlock Lv %d%s\n" % [xp, Session.xp_for_level(l + 1), l + 1, "  READY" if Session.xp_ready(sel) else ""]
 	txt += "Attack: %s   Power %.0f   Cooldown %.1fs   Accuracy 100%%   %s\n" % [String(d.types[0]).capitalize(), float(d.dmg) * Session.level_mult(sel), 1.0 / maxf(0.1, float(d.rate)), Moves.category(String(d.types[0]))]
 	if "ember" in d.types:
 		txt += "Burn chance 10%% (burn damage over time)\n"
@@ -109,9 +109,12 @@ func refresh() -> void:
 		txt += "  %s Lv %d  %s (%s)\n" % ["✔" if l >= int(m.lvl) else "·", m.lvl, m.name, m.desc]
 	detail.text = txt
 	toggle_btn.text = "Remove from team" if sel in team else "Add to team"
-	candy_btn.text = "Rare Candy +1 Lv (%d gold)" % CANDY_COST
+	if l >= Session.MAX_LEVEL:
+		candy_btn.text = "Max level"
+	else:
+		candy_btn.text = "Level up to %d: %d gold%s" % [l + 1, Session.level_cost(sel), "" if Session.xp_ready(sel) else "  (needs Exp)"]
 	lure_btn.text = "Lure Pack +2 (%d gold)" % LURE_COST
-	candy_btn.disabled = Session.gold < CANDY_COST or l >= Session.MAX_LEVEL
+	candy_btn.disabled = l >= Session.MAX_LEVEL
 	lure_btn.disabled = Session.gold < LURE_COST
 
 func _toggle() -> void:
@@ -119,9 +122,14 @@ func _toggle() -> void:
 	refresh()
 
 func _candy() -> void:
-	if Session.spend_gold(CANDY_COST):
-		Session.candy(sel)
+	var cost := Session.level_cost(sel)
+	var why := Session.buy_level(sel)
+	if why != "":
+		msg.text = why
+	else:
 		msg.text = "%s grew to Lv %d!" % [Creatures.TOWERS[sel].name, Session.level_of(sel)]
+		if Session.gold < RESERVE:
+			msg.text += "  Careful: only %d gold left for Lures." % Session.gold
 		Sfx.play(self, "up")
 	refresh()
 

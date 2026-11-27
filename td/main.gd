@@ -107,6 +107,10 @@ var free_ids := {}          # tower id -> free placements left (granted by captu
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
 const CAPTURE_HP := 0.5
+var lane_count := 1          # real lanes; a flank path (late-wave second entrance) sits after them in paths[]
+var tier := 0                # replay tier of this level (0..5): each clear makes waves tougher, rares likelier, gold richer
+func tower_cap() -> int:
+	return int(lv.get("tower_cap", 12))
 
 func _ready() -> void:
 	Session.load_save()
@@ -114,7 +118,11 @@ func _ready() -> void:
 	Session.lure_bonus = 0
 	Session.init_ui()
 	lv = Levels.LEVELS[Session.level_id]
+	tier = Session.tier(Session.level_id)
 	paths = Levels.to_paths(lv)
+	lane_count = paths.size()
+	if lv.has("flank"):
+		paths.append(Levels.to_paths({"paths": [lv.flank.path]})[0])  # a second entrance (blocks placement too)
 	for z in lv.zones:
 		zones.append({"pos": Vector2(z.pos[0], z.pos[1]), "r": z.r, "kind": z.kind})
 	for s in lv.stones:
@@ -144,7 +152,7 @@ func _ready() -> void:
 	if not rr.is_empty():
 		var r := RandomNumberGenerator.new()
 		r.seed = hash([run_seed, 991])
-		if r.randf() < Session.rare_chance(float(rr.chance), String(rr.id)):
+		if r.randf() < Session.rare_chance(float(rr.chance), String(rr.id), Session.level_id):
 			rare_wave = r.randi_range(int(rr.wave_min), int(rr.wave_max))
 	var key := "story_" + Session.level_id
 	if not lv.get("story", {}).is_empty() and not Session.no_save and not bool(Session.settings.get(key, false)):
@@ -340,9 +348,9 @@ func _refresh() -> void:
 	speed_btn.text = "Speed x%d" % int(maxf(1.0, Engine.time_scale if Engine.time_scale > 0.0 else paused_scale))
 	var nxt: String = lv.weather[wave % lv.weather.size()] if not wave_running else weather
 	var wtxt: String = "Weather: " + String(Weather.WEATHER[nxt].label)
-	hud.text = "Coins %d    Lives %d    Lures %d    Wave %s" % [coins, lives, lures, ("%d (Endless)" % wave) if endless else ("%d/%d" % [wave, Levels.TOTAL_WAVES])]
+	hud.text = "Coins %d    Lives %d    Lures %d    Towers %d/%d    Wave %s" % [coins, lives, lures, get_tree().get_nodes_in_group("towers").size(), tower_cap(), ("%d (Endless)" % wave) if endless else ("%d/%d" % [wave, Levels.TOTAL_WAVES])]
 	var line2 := ("Next: " + _incoming_text(wave + 1)) if (not wave_running and (endless or wave < Levels.TOTAL_WAVES)) else "Tap a creature to upgrade it"
-	info.text = "%s  |  %s\n%s" % [lv.name, Rules.DIFFICULTY[Session.diff].name, line2 + "\n" + wtxt]
+	info.text = "%s%s  |  %s\n%s" % [lv.name, (" (Replay Tier %d)" % tier) if tier > 0 else "", Rules.DIFFICULTY[Session.diff].name, line2 + "\n" + wtxt]
 	if sel_tower != null and is_instance_valid(sel_tower):
 		panel.refresh(coins)
 
@@ -452,7 +460,7 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _pick_lane() -> int:
-	var n := paths.size()
+	var n := lane_count
 	if n == 1:
 		return 0
 	match String(lv.lane_mode):
@@ -585,6 +593,10 @@ func _spawn() -> void:
 		d = Creatures.ENEMIES[kind]
 	var lane := _pick_lane()
 	var path: PackedVector2Array = paths[lane]
+	var fl: Dictionary = lv.get("flank", {})
+	if not fl.is_empty() and wave >= int(fl.wave) and not bool(d.get("flying", false)) and rng.randf() < float(fl.share):
+		path = paths[lane_count]
+		FxScript.text_at(self, Vector2(1000, 640), "Flank!", Color("ffb070"))
 	if bool(d.get("flying", false)):
 		path = PackedVector2Array([path[0], path[path.size() - 1]])
 	var en = _make_enemy(d, path, wave, true, boss)
@@ -612,13 +624,13 @@ func _make_enemy(d: Dictionary, path: PackedVector2Array, w: int, scale_stats: b
 	var e = EnemyScript.new()
 	e.setup(path, d, w)
 	if scale_stats:
-		e.hp *= float(lv.hp_mult) * eff("hp")
+		e.hp *= float(lv.hp_mult) * eff("hp") * (1.0 + 0.06 * float(tier))
 		e.max_hp = e.hp
 		e.speed *= eff("speed")
 		e.reward = int(round(e.reward * eff("reward")))
 		if not boss and float(mut.elite_p) > 0.0 and rng.randf() < float(mut.elite_p):
 			e.make_elite()
-		if not boss and not e.elite and wave >= 2 and rng.randf() < 0.04 and Session.tower_for(_cap_species(e)) != "":
+		if not boss and not e.elite and wave >= 2 and rng.randf() < 0.04 + 0.01 * float(tier) and Session.tower_for(_cap_species(e)) != "":
 			e.shiny = true
 			e.hp *= 1.3
 			e.max_hp = e.hp
@@ -754,6 +766,9 @@ func _end(result: String) -> void:
 			leveled = true
 			for mv in Moves.gained(Creatures.TOWERS[id].types, lv_change[0], lv_change[1]):
 				lvl_lines.append("   learned %s (%s)" % [mv.name, mv.desc])
+	for id in run_xp:
+		if Session.xp_ready(String(id)) and Session.level_of(String(id)) < Session.MAX_LEVEL:
+			lvl_lines.append("%s has enough Exp to level up (%d gold, Team screen)." % [Creatures.TOWERS[id].name, Session.level_cost(String(id))])
 	if not lv.get("rare", {}).is_empty():
 		Session.note_rare(rare_seen)
 	if result == "won":
@@ -764,7 +779,7 @@ func _end(result: String) -> void:
 			_goal("perfect")
 	if not goals_new.is_empty():
 		lvl_lines.append("Goal%s: %s  (+%d gold)" % ["s" if goals_new.size() > 1 else "", ", ".join(PackedStringArray(goals_new)), goals_new.size() * Session.GOAL_REWARD])
-	var gold_gain := wave * 15 + (100 if result == "won" else 0) + captures_run * 30
+	var gold_gain := int(float(wave * 15 + (100 if result == "won" else 0) + captures_run * 30) * (1.0 + 0.1 * float(tier)))
 	Session.add_gold(gold_gain)
 	lvl_lines.append("Gold +%d (total %d)" % [gold_gain, Session.gold])
 	var layer: CanvasLayer = start_btn.get_parent()
@@ -862,7 +877,10 @@ func _valid_spot(p: Vector2) -> bool:
 		return false
 	if _dist_to_paths(p) < PATH_HALF + 30.0:
 		return false
-	for n in get_tree().get_nodes_in_group("towers"):
+	var towers := get_tree().get_nodes_in_group("towers")
+	if towers.size() >= tower_cap():
+		return false
+	for n in towers:
 		if n.position.distance_to(p) < 56.0:
 			return false
 	return true
@@ -938,6 +956,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 			Sfx.play(self, "click", -12.0)
 		else:
 			has_pending = false
+			if get_tree().get_nodes_in_group("towers").size() >= tower_cap():
+				FxScript.text_at(self, sp + Vector2(0, -40), "Tower limit %d. Sell one to make room." % tower_cap(), Color("ff9a9a"))
 			_deselect_tower()
 
 func _cost(d: Dictionary) -> int:

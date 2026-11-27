@@ -15,7 +15,7 @@ const LEVELS := {
 		"zones": [],
 		"roster": [["shuckit", 1, 10], ["shuckit_pup", 2, 6], ["shuckit_alpha", 4, 3]],
 		"boss": "", "boss_extra": {}, "early": [0.5, 0.65, 0.8, 0.92],
-		"steal": true, "finale": 1.0, "champion": "shuckit_alpha",
+		"steal": true, "finale": 1.0, "tower_cap": 8, "flank": {"path": [[1000, 740], [1000, 560], [1000, 300], [1320, 300]], "wave": 6, "share": 0.35}, "champion": "shuckit_alpha",
 		"goals": [["win", "Clear all 10 waves"], ["gold15", "Finish with 15+ gold"], ["perfect", "Lose no gold at all"], ["capture", "Capture a Shuckit"], ["rare", "Catch the rare Hutzin"]],
 		"rare": {"id": "hutzin", "chance": 0.14, "wave_min": 3, "wave_max": 8},
 		"story": {

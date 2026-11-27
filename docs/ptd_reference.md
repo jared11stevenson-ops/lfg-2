@@ -94,3 +94,10 @@ Result: Oak's Lab, Route 1, Route 2 beaten. Viridian Forest 1 lost twice (waves 
 - VF1: 10 waves, Metapod/Pikachu arrive from both sides late (waves 9-10), which overran 4 units (Charmander Lv9 + three Pidgeys). Few free squares (~6).
 - Lessons: bank money for late waves, grind Routes 1-2 for levels/catches first, catch Caterpie/Metapod early in VF1 for more bodies, save from the main menu after each win.
 - Harness: Ruffle + AIR wrapper (needs version=1 reply); capture automated by pixel-detecting bar colours.
+
+## Wellfall features added from the playthrough
+- Money levelling: Exp (from fighting) only unlocks a level; gold buys it (25 x (level+1)). Team screen shows Exp READY, cost, and a low-reserve warning. Old saves keep their XP-earned levels.
+- Placement cap per level (`tower_cap`, Mossgate 8), shown in the HUD; sell a creature to make room.
+- Late-wave flank: Mossgate sends 35% of ground enemies from a second entrance from wave 6 (`flank`).
+- Replay tiers: each clear raises tier (max 5): +6% enemy HP, +10% gold, +3% rare chance, +1% shiny chance.
+- Capture/damage tension already exists: odds improve as HP drops, but enemies die first if you hit too hard.
