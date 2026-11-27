@@ -29,6 +29,12 @@ func _initialize() -> void:
 			"seed": seed_v = int(v); S.run_seed = seed_v
 			"skill": skill = float(v)
 	rng.seed = seed_v * 7919
+	var open_order := []
+	var C = load("res://creatures.gd")
+	for id in order:
+		if S.tower_open(C.TOWERS[id]):
+			open_order.append(id)
+	order = open_order
 	main = load("res://main.tscn").instantiate()
 	root.add_child(main)
 

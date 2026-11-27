@@ -7,14 +7,14 @@ const TOTAL_WAVES := 10
 const LEVELS := {
 	"mossgate": {
 		"name": "Mossgate Lane", "style": "meadow", "blurb": "A dusk meadow at the edge of the Green Hollow. A gentle first lesson.",
-		"rule": "Rain rolls in on later waves.", "lane_mode": "random", "hp_mult": 1.0, "coins": 240,
+		"rule": "Rain rolls in on later waves.", "lane_mode": "random", "hp_mult": 0.88, "coins": 320,
 		"colors": {"g1": "#274e63", "g2": "#3f8a6a", "accent": "#9fe8b8", "path": "#e2bd8a", "edge": "#4a2f55", "glow": "#ffe9a8", "moon": "#fff3c8"},
 		"weather": ["clear", "clear", "rain", "clear", "rain", "clear", "rain", "clear", "rain", "rain"],
 		"paths": [[[-40, 360], [300, 360], [300, 160], [700, 160], [700, 560], [1000, 560], [1000, 300], [1320, 300]]],
 		"stones": [[460, 250, "verdant"], [560, 470, "tide"], [880, 420, "ember"], [150, 230, "umbra"]],
 		"zones": [],
-		"roster": [["shuckit", 1, 10], ["zapnose", 2, 4], ["glomm", 5, 2], ["hoardillo", 9, 1]],
-		"boss": "glomm", "boss_extra": {}, "boss_mult": 4.0, "early": [0.5, 0.65, 0.8, 0.92],
+		"roster": [["shuckit", 1, 10], ["glomm", 4, 3]],
+		"boss": "glomm", "boss_extra": {}, "boss_mult": 2.0, "early": [0.5, 0.65, 0.8, 0.92],
 	},
 	"frostrun": {
 		"name": "Frostrun Pass", "style": "snow", "blurb": "Switchbacks under the White Lantern. Ice patches make the herd slide.",

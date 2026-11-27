@@ -58,7 +58,7 @@ func _enter(s: String) -> void:
 		"buy":
 			_say("Pick an upgrade path. Two paths, four tiers each. Spend your coins!")
 		"second":
-			_say("Add a second creature. Dugloom slows enemies down, a great partner.", [m.cards.get("dugloom").get_global_rect()])
+			_say("Place a second Tickindle. More firepower on the lane means fewer leaks.", [m.cards.get("tickindle").get_global_rect()])
 		"done":
 			_say("You are ready. The Well is yours to hold. Good luck!")
 

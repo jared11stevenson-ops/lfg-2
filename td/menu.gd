@@ -13,8 +13,8 @@ const CARD := Vector2(236, 196)
 const SPECIES := ["tickindle", "dugloom", "hutzin", "shuckit", "zapnose", "glomm", "hoardillo", "mirewick", "gloamoth", "bogbard", "quillwyrm", "drumbeak", "pyrelope", "mudskip", "thornarok", "ptarmitten", "tentbat", "dumbomaton", "colukite", "gilamancer"]
 const BLURBS := {
 	"tickindle": "Starter. Grumpy manul with a pocket watch. Winds up on one target.",
-	"dugloom": "Starter. Sleepy dugong with a lantern. Slows and drags foes back.",
-	"hutzin": "Starter. Manic hoatzin with a teapot hut. Stacking poison.",
+	"dugloom": "Befriend it by clearing Frostrun Pass. Sleepy dugong with a lantern. Slows and drags foes back.",
+	"hutzin": "Befriend it by clearing Gloamwood. Manic hoatzin with a teapot hut. Stacking poison.",
 }
 var clock := 0.0
 var hover := -1
