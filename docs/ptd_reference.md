@@ -73,3 +73,10 @@ Take-aways for Wellfall Level 1: (1) one lane, one enemy species, four fixed tow
 2. Move card with cooldown/power/category/accuracy/status: copy the data model; our moves are plain stat boosts.
 3. Fixed placement squares (4 then 12): our free placement is a bigger departure; fixed spots make balancing exact.
 4. Story cutscene as the win trigger instead of a boss fight: matches the user's "no boss" request.
+
+### Route 2 (level 3) - beaten
+- 4 waves, one lane that runs right then bends toward the candy pile, **8 free squares**. **Joey** (freed on Route 1) fights for you from the start: his Rattata and Pidgey are pre-placed on two of the squares (a scripted NPC ally).
+- Money: P117 on arrival -> Charmander Lv7 -> Lv8 for P40.
+- The last wave has a blue-health-bar boss (uncatchable). Win trigger: Joey says "We did it! We WON!", then the unlock of Viridian Forest 1.
+- Practical notes: the intro dialogue has a **Skip** button (top-left) on Route 1/2 cutscenes; extra Next clicks open the in-battle menu (Music / Sound FX / **Damage Text** toggles, Exit, Back). Progress only persists after pressing Save in the main menu.
+- Win/lose timing mattered: the same single Charmander lost twice at full speed and won at normal speed, so speed x4 is a real risk.
