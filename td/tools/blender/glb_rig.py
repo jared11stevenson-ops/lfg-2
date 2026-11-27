@@ -40,6 +40,18 @@ SPECS = {
     ("flipN", (0.55, -0.4, 0.8), (0.75, -0.6, 0.5), "body", 0.28),
     ("tail1", (-0.9, 0, 1.1), (-1.15, 0, 1.3), "body", 0.3),
     ("tail2", (-1.15, 0, 1.3), (-1.3, 0, 1.95), "tail1", 0.32)]),
+ "bird": dict(yaw_face=270, px_w=150, lift=0.0, YAW=-40.0, bones=[
+    ("root", (0, 0, 0), (0, 0, 0.3), None, 0.01),
+    ("body", (-0.75, 0, 1.0), (0.55, 0, 1.1), "root", 0.62),
+    ("neck", (0.55, 0, 1.2), (0.95, 0, 1.7), "body", 0.3),
+    ("head", (0.95, 0, 1.7), (1.25, 0, 1.8), "neck", 0.3),
+    ("crest", (0.95, 0, 1.95), (0.8, 0, 2.3), "head", 0.3),
+    ("legN", (-0.2, -0.25, 0.75), (-0.4, -0.25, 0.1), "body", 0.3),
+    ("legP", (0.4, 0.25, 0.7), (0.8, 0.25, 0.38), "body", 0.3),
+    ("wingP", (0.55, 0.45, 1.05), (1.2, 0.65, 0.95), "body", 0.3),
+    ("wingN", (0.55, -0.45, 1.05), (1.2, -0.65, 0.95), "body", 0.3),
+    ("tail", (-0.75, 0, 0.85), (-1.4, 0, 0.5), "body", 0.35),
+    ("steam", (-0.6, 0, 1.85), (-0.9, 0, 2.5), "body", 0.3)]),
  "bat": dict(yaw_face=270, px_w=150, lift=0.0, YAW=-32.0, bones=[
     ("root", (0, 0, 0), (0, 0, 0.3), None, 0.01),
     ("body", (-0.65, 0, 0.85), (0.6, 0, 0.9), "root", 0.5),
@@ -120,6 +132,20 @@ def pose(r, state, t):
             k = [(-6, 0.02, 10, 5, 8), (-14, 0.07, 28, 12, 14), (9, -0.05, -18, -18, -22), (4, 0.0, -6, -8, -10), (0, 0, 0, 0, 0)][min(int(t * 5), 4)]
             r.rot("body", AXY, k[0]); r.loc("root", (0, 0, k[1])); r.rot("flipP", AXX, k[2]); r.rot("flipN", AXX, -k[2])
             r.rot("lantern", AXY, k[3]); r.rot("stalk", AXY, k[3] * 0.6); r.rot("tail1", AXY, k[4] * 0.6); r.rot("tail2", AXY, k[4] * 0.9); r.rot("head", AXY, -k[0] * 0.5)
+    elif kind == "bird":
+        if state == "idle":
+            r.loc("root", (0, 0, 0.02 * s)); r.rot("body", AXY, -1.0 * s); r.rot("neck", AXY, 3 * math.sin(a + 0.5)); r.rot("head", AXY, 4 * math.sin(a + 1.0))
+            r.rot("crest", AXY, 8 * math.sin(a + 1.8)); r.rot("steam", AXZ, 9 * math.sin(a - 0.4)); r.rot("tail", AXY, 5 * math.sin(a - 0.7))
+            r.rot("wingP", AXX, 5 * math.sin(a + 0.2)); r.rot("wingN", AXX, -5 * math.sin(a + 0.2))
+        elif state == "walk":
+            r.rot("legN", AXY, 20 * s); r.rot("legP", AXY, -20 * s)
+            r.loc("root", (0, 0, 0.06 * abs(s))); r.rot("body", AXX, 2 * s); r.loc("neck", (0.07 * math.sin(a + 0.8), 0, 0))
+            r.rot("neck", AXY, -4 * math.sin(a + 0.8)); r.rot("head", AXY, 5 * math.sin(2 * a)); r.rot("crest", AXY, 12 * math.sin(2 * a + 0.9))
+            r.rot("wingP", AXX, 12 * math.sin(2 * a)); r.rot("wingN", AXX, -12 * math.sin(2 * a)); r.rot("tail", AXY, 8 * math.sin(a - 0.8)); r.rot("steam", AXZ, 14 * math.sin(a - 0.6))
+        else:
+            k = [(-0.08, -0.03, -4, -8, 10), (-0.14, -0.05, -8, -14, 18), (0.22, 0.02, 10, 22, -14), (0.10, 0.0, 5, 10, -6), (0, 0, 0, 0, 0)][min(int(t * 5), 4)]
+            r.loc("root", (k[0], 0, k[1])); r.rot("body", AXY, k[2]); r.rot("neck", AXY, k[3] * 0.6); r.rot("head", AXY, k[3])
+            r.rot("crest", AXY, -k[3] * 0.8); r.rot("wingP", AXX, k[4]); r.rot("wingN", AXX, -k[4]); r.rot("tail", AXY, -k[2]); r.rot("steam", AXZ, k[4] * 0.8)
     else:  # bat
         if state == "idle":
             r.loc("root", (0, 0, 0.012 * s)); r.rot("body", AXY, -0.8 * s); r.rot("head", AXY, 2 * math.sin(a + 0.6))
