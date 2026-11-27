@@ -461,7 +461,7 @@ func _update_capturable() -> void:
 func _capturable_at(p: Vector2):
 	var best = null
 	for e in get_tree().get_nodes_in_group("enemies"):
-		if e.capturable and not e.dead and e.position.distance_to(p) < 48.0:
+		if e.capturable and not e.dead and e.position.distance_to(p + Vector2(0, 14)) < 62.0:
 			if best == null or e.position.distance_to(p) < best.position.distance_to(p):
 				best = e
 	return best
@@ -806,7 +806,7 @@ func _valid_spot(p: Vector2) -> bool:
 
 func _tower_at(p: Vector2):
 	for n in get_tree().get_nodes_in_group("towers"):
-		if n.position.distance_to(p) < 36.0:
+		if n.position.distance_to(p) < 46.0:
 			return n
 	return null
 
