@@ -3,6 +3,7 @@ extends Node2D
 var text := ""
 var color := Color.WHITE
 var t := 0.0
+var small := false
 
 func _process(delta: float) -> void:
 	t += delta
@@ -14,8 +15,9 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var f := ThemeDB.fallback_font
-	draw_string_outline(f, Vector2(-70, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 140, 20, 6, Color.BLACK)
-	draw_string(f, Vector2(-70, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 140, 20, color)
+	var fs := 15 if small else 20
+	draw_string_outline(f, Vector2(-70, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 140, fs, 5, Color.BLACK)
+	draw_string(f, Vector2(-70, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 140, fs, color)
 
 static func pop(parent: Node, target: Node2D, mult: float) -> void:
 	if absf(mult - 1.0) < 0.05:
@@ -34,5 +36,19 @@ static func text_at(parent: Node, pos: Vector2, txt: String, col: Color) -> void
 	var f = load("res://fx.gd").new()
 	f.text = txt
 	f.color = col
+	f.position = pos
+	parent.add_child(f)
+
+# Small floating damage number (toggle: Settings > Damage numbers). Capped so busy waves do not flood the scene.
+static var _dmg_last := 0
+static func dmg(parent: Node, pos: Vector2, amount: float) -> void:
+	var now := Time.get_ticks_msec()
+	if now - _dmg_last < 70:
+		return
+	_dmg_last = now
+	var f = load("res://fx.gd").new()
+	f.text = str(int(round(amount)))
+	f.color = Color("fff0d0")
+	f.small = true
 	f.position = pos
 	parent.add_child(f)

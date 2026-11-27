@@ -270,6 +270,9 @@ func resolve_hit(p, t) -> void:
 		get_parent().add_coins(int(st.bounty), t.position)
 	if bool(st.curse):
 		_curse(t, p)
+	if "ember" in def.types and randf() < 0.10 + (0.15 if bool(st.burn_patch) else 0.0):
+		t.ignite(maxf(2.0, float(st.dmg) * 0.5))
+		FxScript.text_at(get_parent(), t.position + Vector2(0, -52), "Burn!", Color("ff9a4a"))
 	t.take_damage(p.dmg)
 	if bool(st.burn_patch) and (p.molten or def.id != "tickindle"):
 		_spawn_patch(t.position, "burn")

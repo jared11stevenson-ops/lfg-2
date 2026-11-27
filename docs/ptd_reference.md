@@ -80,3 +80,7 @@ Take-aways for Wellfall Level 1: (1) one lane, one enemy species, four fixed tow
 - The last wave has a blue-health-bar boss (uncatchable). Win trigger: Joey says "We did it! We WON!", then the unlock of Viridian Forest 1.
 - Practical notes: the intro dialogue has a **Skip** button (top-left) on Route 1/2 cutscenes; extra Next clicks open the in-battle menu (Music / Sound FX / **Damage Text** toggles, Exit, Back). Progress only persists after pressing Save in the main menu.
 - Win/lose timing mattered: the same single Charmander lost twice at full speed and won at normal speed, so speed x4 is a real risk.
+
+### Features taken from PTD into Wellfall after beating level 3
+Added (all Level-1-safe, tests green, 36 capture/feature checks): **floating damage numbers** (Settings > "Damage numbers", like PTD's Damage Text toggle); **burn status** from Ember/Forge attacks (10% chance, damage over time, flame on the enemy, "Burn!" text); **speed x4** (we had x1-x3); **Auto-start waves** toggle (PTD waves start by themselves); **full move stats** in the Team screen (type, power, cooldown, accuracy, physical/special, burn chance).
+Not added (bigger changes): bought level-ups gated by Exp, fixed placement squares, pre-placed NPC ally (Joey), drag-the-Pokeball capture, PokeMart evolution stones.

@@ -101,6 +101,9 @@ func refresh() -> void:
 	var txt := "%s   Lv %d%s\nTypes: %s\n" % [d.name, l, "" if l < Session.MAX_LEVEL else " (MAX)", " / ".join(PackedStringArray(Array(d.types).map(func(t): return String(t).capitalize())))]
 	if l < Session.MAX_LEVEL:
 		txt += "XP %d / %d to Lv %d\n" % [xp, Session.xp_for_level(l + 1), l + 1]
+	txt += "Attack: %s   Power %.0f   Cooldown %.1fs   Accuracy 100%%   %s\n" % [String(d.types[0]).capitalize(), float(d.dmg) * Session.level_mult(sel), 1.0 / maxf(0.1, float(d.rate)), Moves.category(String(d.types[0]))]
+	if "ember" in d.types:
+		txt += "Burn chance 10%% (burn damage over time)\n"
 	txt += "Damage x%.2f   Speed x%.2f\n\nMoves:\n" % [Session.level_mult(sel), 1.0 + 0.03 * (l - 1)]
 	for m in Moves.for_type(String(d.types[0])):
 		txt += "  %s Lv %d  %s (%s)\n" % ["✔" if l >= int(m.lvl) else "·", m.lvl, m.name, m.desc]

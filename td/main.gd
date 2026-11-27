@@ -99,6 +99,7 @@ var story_screen
 var boss_ui
 var gold_pile
 var captures_run := 0
+var auto_wave_t := 0.0    # >0: countdown to the next wave when Auto-start is on
 var banked := false
 var goals_new: Array = []   # goal texts completed for the first time this run
 var capturing := 0         # capture animations in flight (the wave cannot end while one is running)
@@ -318,7 +319,7 @@ func _on_card(id: String, on: bool) -> void:
 func _cycle_speed() -> void:
 	if Engine.time_scale <= 0.0:
 		Engine.time_scale = paused_scale
-	Engine.time_scale = 2.0 if Engine.time_scale < 1.5 else (3.0 if Engine.time_scale < 2.5 else 1.0)
+	Engine.time_scale = 2.0 if Engine.time_scale < 1.5 else (3.0 if Engine.time_scale < 2.5 else (4.0 if Engine.time_scale < 3.5 else 1.0))
 	_refresh()
 
 func _toggle_pause() -> void:
@@ -420,6 +421,10 @@ func eff(key: String) -> float:
 
 func _process(delta: float) -> void:
 	enemy_list = get_tree().get_nodes_in_group("enemies")
+	if auto_wave_t > 0.0 and state == "play" and not wave_running:
+		auto_wave_t -= delta
+		if auto_wave_t <= 0.0:
+			_start_wave()
 	if state == "play" and wave_running:
 		_update_capturable()
 	clock += delta
@@ -724,6 +729,8 @@ func _wave_done() -> void:
 	_refresh()
 	if wave >= Levels.TOTAL_WAVES and not endless:
 		_end("won")
+	elif bool(Session.settings.get("auto_wave", false)) and state == "play":
+		auto_wave_t = 3.0
 
 var result_screen
 

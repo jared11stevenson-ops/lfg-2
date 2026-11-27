@@ -2,6 +2,7 @@ extends Node2D
 # Enemy with 2D puppet sprites and a trait system (see creatures.gd for per-species values).
 const PuppetLib = preload("res://puppet_lib.gd")
 const FxScript = preload("res://fx.gd")
+const Session = preload("res://session.gd")
 const BASE_SCALE := 0.56
 signal died(e)
 signal leaked(e)
@@ -38,6 +39,8 @@ var slow_t := 0.0
 var slow_f := 1.0
 var poison := 0
 var poison_t := 0.0
+var burn_t := 0.0          # burning: damage over time from Fire attacks (PTD-style status)
+var burn_dps := 0.0
 var poison_mul := 1.0
 var spread_all := false
 var stun_t := 0.0
@@ -108,6 +111,10 @@ func boost(t: float) -> void:
 func apply_slow(f: float, t: float) -> void:
 	slow_f = minf(slow_f if slow_t > 0.0 else 1.0, f)
 	slow_t = maxf(slow_t, t)
+
+func ignite(dps: float, t: float = 3.0) -> void:
+	burn_dps = maxf(burn_dps, dps)
+	burn_t = maxf(burn_t, t)
 
 func add_poison(n: int, mul: float = 1.0, cap: int = 5, spread: bool = false) -> void:
 	poison = mini(poison + n, cap)
@@ -195,6 +202,13 @@ func _process(delta: float) -> void:
 	if was_stunned and stun_t <= 0.0:
 		stun_immune_t = 1.0
 	vuln_t = maxf(0.0, vuln_t - delta)
+	if burn_t > 0.0:
+		burn_t -= delta
+		take_damage(burn_dps * delta, true)
+		if dead:
+			return
+		if burn_t <= 0.0:
+			burn_dps = 0.0
 	if poison_t <= 0.0:
 		poison = 0
 		poison_mul = 1.0
@@ -258,7 +272,7 @@ func _auras(delta: float) -> void:
 			if position.distance_to(t.position) < 140.0:
 				t.chilled_t = 0.3
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, quiet: bool = false) -> void:
 	if dead or held:
 		return
 	if amount >= 1.5:
@@ -274,6 +288,8 @@ func take_damage(amount: float) -> void:
 		amount -= absorbed
 	hp -= amount
 	flash_t = 0.12
+	if not quiet and amount >= 1.0 and bool(Session.settings.get("damage_text", true)):
+		FxScript.dmg(get_parent(), position + Vector2(randf_range(-10.0, 10.0), -30.0 * scale_mul), amount)
 	load("res://sfx.gd").play(self, "hit", -20.0, 70)
 	if hp <= 0.0:
 		if rebirth > 0:
@@ -303,6 +319,11 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, 150.0, 0, TAU, 40, Color(1.0, 0.9, 0.4, 0.18), 2.0, true)
 	if chill_aura:
 		draw_arc(Vector2.ZERO, 140.0, 0, TAU, 40, Color(0.6, 0.85, 1.0, 0.22), 2.0, true)
+	if burn_t > 0.0:
+		for i in 3:
+			var fx := sin(Time.get_ticks_msec() / 90.0 + i * 2.1) * 6.0
+			draw_circle(Vector2(fx + (i - 1) * 8.0, -22.0 * scale_mul - absf(fx)), 4.0, Color(1.0, 0.55, 0.12, 0.85))
+			draw_circle(Vector2(fx + (i - 1) * 8.0, -22.0 * scale_mul - absf(fx)), 2.0, Color(1.0, 0.9, 0.4, 0.9))
 	if shield > 0.0:
 		draw_arc(Vector2(0, -26 * scale_mul), 34 * scale_mul, 0, TAU, 28, Color(0.6, 0.9, 1.0, 0.8), 3.0, true)
 	PuppetLib.shadow(self, scale_mul * (0.8 if flying else 1.0), Vector2(0, 8 + (10 if flying else 0)))

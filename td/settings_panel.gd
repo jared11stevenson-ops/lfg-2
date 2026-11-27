@@ -29,6 +29,8 @@ func _ready() -> void:
 	v.add_child(_slider("Effects", "sfx"))
 	v.add_child(_toggle("Haptics (vibration)", "haptics"))
 	v.add_child(_toggle("Screen shake", "shake"))
+	v.add_child(_toggle("Damage numbers", "damage_text"))
+	v.add_child(_toggle("Auto-start waves", "auto_wave"))
 	if mode == "pause":
 		v.add_child(_btn("Resume", Color("2f6b3a"), func(): resume.emit()))
 		v.add_child(_btn("Restart level", Color("8a5a1a"), func(): restart.emit()))

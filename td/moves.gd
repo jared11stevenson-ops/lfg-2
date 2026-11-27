@@ -45,3 +45,8 @@ static func gained(types: Array, a: int, b: int) -> Array:
 		if int(m.lvl) > a and int(m.lvl) <= b:
 			out.append(m)
 	return out
+
+const SPECIAL := ["ember", "tide", "volt", "frost", "spirit", "aether", "venom", "gale"]
+
+static func category(t: String) -> String:
+	return "Special" if t in SPECIAL else "Physical"

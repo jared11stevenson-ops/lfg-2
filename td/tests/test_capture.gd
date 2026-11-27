@@ -138,5 +138,25 @@ func _initialize() -> void:
 	_check(int(S.xp.get("tickindle", 0)) == xp0 + 77 and S.gold == g0 + 4 * 8 + 30, "partial bank adds xp and gold")
 	main._bank_partial()
 	_check(int(S.xp.get("tickindle", 0)) == xp0 + 77, "partial bank is idempotent")
+	# PTD-inspired features: burn status, damage numbers setting, auto-start flag
+	var be = load("res://enemy.gd").new()
+	be.setup(main.paths[0], C.ENEMIES["glomm"], 3)
+	main.add_child(be)
+	var hp0: float = be.hp
+	be.ignite(10.0, 2.0)
+	be._process(0.5)
+	_check(be.hp < hp0 and be.burn_t > 0.0, "burn deals damage over time")
+	be._process(2.0)
+	_check(be.burn_t <= 0.0 and be.burn_dps == 0.0, "burn expires")
+	S.settings["damage_text"] = false
+	var n0: int = main.get_child_count()
+	be.take_damage(5.0)
+	_check(main.get_child_count() == n0, "no damage number when the setting is off")
+	S.settings["damage_text"] = true
+	Engine.time_scale = 1.0
+	main._cycle_speed(); main._cycle_speed(); main._cycle_speed()
+	_check(Engine.time_scale == 4.0, "speed cycles up to x4")
+	main._cycle_speed()
+	_check(Engine.time_scale == 1.0, "speed wraps back to x1")
 	print("capture: %d/%d ok" % [ok, ok + bad])
 	quit(0 if bad == 0 else 1)
