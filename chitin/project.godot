@@ -1,0 +1,25 @@
+; CHITIN: Molt of the Last Hive - Godot 4.7 project
+config_version=5
+
+[application]
+config/name="CHITIN: Molt of the Last Hive"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+
+[autoload]
+Lineage="*res://core/lineage.gd"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=0
+
+[input_devices]
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+anti_aliasing/quality/msaa_3d=1
