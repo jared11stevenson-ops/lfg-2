@@ -96,5 +96,35 @@ func _initialize() -> void:
 	_check(main.lures < l0, "capturing spends lures")
 	_check(got or (is_instance_valid(e) and e.dead), "capture succeeds within a few tries")
 	_check(int(main.free_ids.get("ally_glomm", 0)) >= 1, "captured creature grants a free placement")
+	# rare encounter (Hutzin on Mossgate)
+	main.rare_wave = 1
+	main.wave_running = false
+	main.state = "play"
+	main._start_wave()
+	_check("rare:hutzin" in main.queue, "rare wave queues the rare enemy")
+	var spawned := 0
+	for i in 30:
+		if main.queue.is_empty():
+			break
+		main._spawn()
+	var rares := 0
+	for en in main.get_tree().get_nodes_in_group("enemies"):
+		if en.rare and en.kind == "hutzin":
+			rares += 1
+			en.hp = en.max_hp * 0.2
+	_check(rares == 1, "exactly one rare Hutzin spawns")
+	main._update_capturable()
+	var got_h := false
+	main.lures = 10
+	for i in 12:
+		for en in main.get_tree().get_nodes_in_group("enemies"):
+			if en.rare and en.capturable and not en.dead:
+				main._try_capture(en)
+	_check(S.unlocked.has("hutzin"), "capturing the rare Hutzin unlocks it permanently")
+	S.rare_pity = 0
+	_check(S.rare_chance(0.14, "hutzin") < 0.14, "owning the creature halves the rare chance")
+	S.unlocked.erase("hutzin")
+	S.rare_pity = 3
+	_check(abs(S.rare_chance(0.14, "hutzin") - 0.26) < 0.001, "pity raises the chance (%.2f)" % S.rare_chance(0.14, "hutzin"))
 	print("capture: %d/%d ok" % [ok, ok + bad])
 	quit(0 if bad == 0 else 1)

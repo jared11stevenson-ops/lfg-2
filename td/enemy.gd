@@ -54,6 +54,7 @@ var face_left := false
 var dead := false
 var flash_t := 0.0
 var anim := 0.0
+var rare := false         # level rare encounter (e.g. Hutzin on Mossgate): worth catching
 var shiny := false        # rare gold variant: tougher, pays 3x, double XP when captured
 var capturable := false   # set by main each frame: weak enough, not a boss, and a defender species exists
 
@@ -305,6 +306,8 @@ func _draw() -> void:
 		var pr := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 160.0)
 		draw_arc(Vector2(0, -22 * scale_mul), 34.0 * scale_mul + pr * 3.0, 0, TAU, 32, Color(1.0, 0.85, 0.3, 0.9), 3.0, true)
 		draw_string(ThemeDB.fallback_font, Vector2(-60, -62 * scale_mul - 14), "Tap to capture", HORIZONTAL_ALIGNMENT_CENTER, 120, 14, Color(1, 0.95, 0.6))
+	if rare:
+		draw_string(ThemeDB.fallback_font, Vector2(-30, -92 * scale_mul - (14 if shiny else 0)), "RARE", HORIZONTAL_ALIGNMENT_CENTER, 60, 13, Color(0.7, 1.0, 0.8))
 	if shiny:
 		var tw := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 120.0 + anim)
 		draw_string(ThemeDB.fallback_font, Vector2(-30, -92 * scale_mul), "✦ SHINY ✦", HORIZONTAL_ALIGNMENT_CENTER, 60, 12, Color(1.0, 0.92, 0.4, 0.6 + 0.4 * tw))

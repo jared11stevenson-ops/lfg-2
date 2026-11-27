@@ -27,6 +27,9 @@ func _initialize() -> void:
 		if a[i].begins_with("setup="):
 			main.call_deferred("_open_setup", a[i].substr(6))
 			continue
+		if a[i] == "story":
+			main.call_deferred("show_story")
+			continue
 		if a[i] == "team":
 			main.call_deferred("_open_team")
 			continue

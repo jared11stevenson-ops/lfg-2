@@ -1375,6 +1375,19 @@ const TOWERS := {
 }
 
 const ENEMIES := {
+	"hutzin": {
+		"name": "Hutzin",
+		"types": ["verdant", "venom"],
+		"hp": 60,
+		"hp_wave": 18,
+		"speed": 108,
+		"reward": 30,
+		"leak": 2,
+		"cost": 3.0,
+		"rare": true,
+		"blurb": "Rare wanderer. A hoatzin in a teapot hut that only shows up on foggy nights. Catch it and it is yours.",
+		"id": "hutzin",
+	},
 	"shuckit": {
 		"name": "Shuckit",
 		"types": ["umbra", "gale"],

@@ -14,6 +14,7 @@ static var xp := {}             # tower id -> banked XP (levels creatures up acr
 const MAX_LEVEL := 20
 static var gold := 0            # persistent money earned from runs, spent in the Team screen
 static var team: Array = []     # chosen loadout (max 6); empty = everything unlocked
+static var rare_pity := 0       # runs since a rare encounter last appeared (raises the next chance)
 static var lure_bonus := 0      # extra Lures for the next run (bought with gold)
 const TEAM_MAX := 6
 static var dev_all := false     # testing: unlock everything
@@ -37,6 +38,7 @@ static func load_save() -> void:
 			xp[k] = int(cf.get_value("xp", k, 0))
 		gold = int(cf.get_value("profile", "gold", 0))
 		lure_bonus = int(cf.get_value("profile", "lure_bonus", 0))
+		rare_pity = int(cf.get_value("profile", "rare_pity", 0))
 		var tm := String(cf.get_value("profile", "team", ""))
 		team = Array(tm.split(",")) if tm != "" else []
 		dev_all = bool(cf.get_value("settings", "dev_all", false))
@@ -57,6 +59,7 @@ static func _save() -> void:
 		cf.set_value("xp", k, xp[k])
 	cf.set_value("profile", "gold", gold)
 	cf.set_value("profile", "lure_bonus", lure_bonus)
+	cf.set_value("profile", "rare_pity", rare_pity)
 	cf.set_value("profile", "team", ",".join(PackedStringArray(team)))
 	cf.set_value("settings", "dev_all", dev_all)
 	for k in settings:
@@ -149,6 +152,20 @@ static func capture(species: String) -> bool:
 	unlocked[id] = true
 	_save()
 	return true
+
+# Chance that a level's rare encounter shows up this run. Rises 4% per run without one (cap 40%), halves once you own the creature.
+static func rare_chance(base: float, species: String) -> float:
+	load_save()
+	var c := minf(0.4, base + 0.04 * float(rare_pity))
+	var id := tower_for(species)
+	if id != "" and unlocked.has(id):
+		c *= 0.5
+	return c
+
+static func note_rare(seen: bool) -> void:
+	load_save()
+	rare_pity = 0 if seen else rare_pity + 1
+	_save()
 
 static func add_gold(n: int) -> void:
 	load_save()

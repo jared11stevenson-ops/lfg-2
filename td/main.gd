@@ -20,6 +20,7 @@ const HudBar = preload("res://hud_bar.gd")
 const ResultScreen = preload("res://result_screen.gd")
 const Tutorial = preload("res://tutorial.gd")
 const Moves = preload("res://moves.gd")
+const StoryScreen = preload("res://story_screen.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -86,6 +87,9 @@ var tutorial
 var event_id := ""
 var intro_t := 3.6
 var lures := 3
+var rare_wave := 0
+var rare_seen := false
+var story_screen
 var captures_run := 0
 var free_ids := {}          # tower id -> free placements left (granted by capturing it)
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
@@ -113,6 +117,23 @@ func _ready() -> void:
 	_build_ui()
 	_build_shop()
 	_refresh()
+	var rr: Dictionary = lv.get("rare", {})
+	if not rr.is_empty():
+		var r := RandomNumberGenerator.new()
+		r.seed = hash([run_seed, 991])
+		if r.randf() < Session.rare_chance(float(rr.chance), String(rr.id)):
+			rare_wave = r.randi_range(int(rr.wave_min), int(rr.wave_max))
+	var key := "story_" + Session.level_id
+	if not lv.get("story", {}).is_empty() and not Session.no_save and not bool(Session.settings.get(key, false)):
+		Session.settings[key] = true
+		Session.save_prefs()
+		show_story()
+
+func show_story() -> void:
+	story_screen = StoryScreen.new()
+	story_screen.pages = lv.story.intro
+	var layer: CanvasLayer = start_btn.get_parent()
+	layer.add_child(story_screen)
 
 # ---------- UI ----------
 func _label(pos: Vector2, size: int) -> Label:
@@ -320,6 +341,8 @@ func _start_wave() -> void:
 	Sfx.play(self, "horn")
 	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
 	queue = _plan(wave).duplicate()
+	if wave == rare_wave:
+		queue.insert(randi_range(1, maxi(1, queue.size() - 1)), "rare:" + String(lv.rare.id))
 	to_spawn = queue.size()
 	spawn_idx = 0
 	spawn_cd = 0.0
@@ -400,7 +423,7 @@ func _capturable_at(p: Vector2):
 	return best
 
 func capture_chance(e) -> float:
-	return clampf(lerpf(0.9, 0.45, e.hp / e.max_hp / CAPTURE_HP) + (0.1 if e.shiny else 0.0), 0.45, 0.95)
+	return clampf(lerpf(0.9, 0.45, e.hp / e.max_hp / CAPTURE_HP) + (0.1 if e.shiny else 0.0) + (0.15 if e.rare else 0.0), 0.45, 0.97)
 
 func _try_capture(e) -> void:
 	if lures <= 0:
@@ -413,7 +436,7 @@ func _try_capture(e) -> void:
 		var id := Session.tower_for(e.kind)
 		var fresh := Session.capture(e.kind)
 		free_ids[id] = int(free_ids.get(id, 0)) + 1
-		run_xp[id] = int(run_xp.get(id, 0)) + (50 if e.shiny else 25)
+		run_xp[id] = int(run_xp.get(id, 0)) + (50 if (e.shiny or e.rare) else 25)
 		var pf = PoofScript.new()
 		pf.col = Color("ffd23a")
 		pf.position = e.position
@@ -439,6 +462,9 @@ func _spawn() -> void:
 	var champion := kind.begins_with("champion:")
 	if champion:
 		kind = kind.substr(9)
+	var rare_spawn := kind.begins_with("rare:")
+	if rare_spawn:
+		kind = kind.substr(5)
 	var boss := kind.begins_with("boss:")
 	if boss:
 		d = Waves.boss_def(lv, kind.substr(5), wave)
@@ -446,6 +472,9 @@ func _spawn() -> void:
 		Sfx.haptic(180)
 		Sfx.play(self, "boss")
 		FxScript.text_at(self, Vector2(640, 330), "BOSS: %s!" % d.name, Color("ff6a5a"))
+		var st: Dictionary = lv.get("story", {})
+		if st.has("boss"):
+			FxScript.text_at(self, Vector2(640, 380), String(st.boss), Color("ffd0c0"))
 	else:
 		d = Creatures.ENEMIES[kind]
 	var lane := _pick_lane()
@@ -453,6 +482,11 @@ func _spawn() -> void:
 	if bool(d.get("flying", false)):
 		path = PackedVector2Array([path[0], path[path.size() - 1]])
 	var en = _make_enemy(d, path, wave, true, boss)
+	if rare_spawn:
+		en.rare = true
+		rare_seen = true
+		FxScript.text_at(self, Vector2(640, 300), "A rare %s wanders in! Catch it!" % d.name, Color("b8ffd0"))
+		Sfx.play(self, "boss", -10.0)
 	var gp = PoofScript.new()
 	gp.col = Color(lv.colors.accent)
 	gp.position = path[0]
@@ -582,6 +616,8 @@ func _end(result: String) -> void:
 			lvl_lines.append("%s grew to Lv %d!" % [Creatures.TOWERS[id].name, lv_change[1]])
 			for mv in Moves.gained(Creatures.TOWERS[id].types, lv_change[0], lv_change[1]):
 				lvl_lines.append("   learned %s (%s)" % [mv.name, mv.desc])
+	if not lv.get("rare", {}).is_empty():
+		Session.note_rare(rare_seen)
 	var gold_gain := wave * 15 + (100 if result == "won" else 0) + captures_run * 30
 	Session.add_gold(gold_gain)
 	lvl_lines.append("Gold +%d (total %d)" % [gold_gain, Session.gold])
@@ -594,6 +630,8 @@ func _end(result: String) -> void:
 		for a in rec.allies:
 			rs.ally_sprites.append(Creatures.TOWERS[a].sprite)
 			rs.ally_names.append(Creatures.TOWERS[a].name)
+			rs.lines.insert(0, "New friend: %s!" % Creatures.TOWERS[a].name)
+		rs.story = String(lv.get("story", {}).get("win", ""))
 		endless_btn.visible = not endless
 		Sfx.play(self, "win")
 		Sfx.haptic(120)
@@ -603,6 +641,7 @@ func _end(result: String) -> void:
 		rs.lines = ["You reached wave %d of %d" % [wave, Levels.TOTAL_WAVES], "Run seed: %d" % run_seed] + lvl_lines
 		var tips := ["Put creatures on rune stones for a free boost.", "Mix types: Super! hits do 50% more damage.", "Upgrade a path to tier 3 to evolve a creature.", "Dugloom's slow gives every other defender more time to shoot.", "Try the Well Surge when a wave overwhelms you."]
 		rs.tip = tips[wave % tips.size()]
+		rs.story = String(lv.get("story", {}).get("lose", ""))
 		Sfx.play(self, "lose")
 	layer.add_child(rs)
 	layer.move_child(rs, retry_btn.get_index())

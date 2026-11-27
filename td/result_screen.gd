@@ -10,6 +10,7 @@ var lines: Array = []
 var ally_sprites: Array = []
 var ally_names: Array = []
 var tip := ""
+var story := ""
 var panel_sb: StyleBoxFlat
 
 func _ready() -> void:
@@ -45,23 +46,24 @@ func _draw() -> void:
 	draw_rect(Rect2(0, 0, 1280, 720), Color(0.02, 0.0, 0.08, 0.6 * fade))
 	var slide := (1.0 - clampf(t * 2.2, 0.0, 1.0))
 	var oy := slide * slide * 120.0
-	draw_style_box(panel_sb, Rect2(340, 70 + oy, 600, 430))
-	_txt(title, Vector2(340, 150 + oy), 58, Color("ffe36a") if won else Color("ffb0b8"))
+	draw_style_box(panel_sb, Rect2(340, 40 + oy, 600, 470))
+	_txt(title, Vector2(340, 118 + oy), 54, Color("ffe36a") if won else Color("ffb0b8"))
 	if won:
 		for i in 3:
 			var k := clampf((t - 0.55 - i * 0.45) * 3.5, 0.0, 1.0)
 			var pop := 1.0 + 0.35 * sin(k * PI) if k < 1.0 else 1.0
-			var c := Vector2(540 + i * 100, 235 + oy)
-			_star(c, 40.0 * k * pop, Color("ffd23a") if i < stars else Color("3a2f5a"))
-	var y := 320.0 + oy
-	for l in lines:
-		_txt(String(l), Vector2(340, y), 24, Color("e8e0ff"))
-		y += 34.0
-	if not won and tip != "":
-		_txt(tip, Vector2(380, y + 10), 20, Color("c8b8f0"), HORIZONTAL_ALIGNMENT_CENTER, 520.0)
+			var c := Vector2(540 + i * 100, 190 + oy)
+			_star(c, 36.0 * k * pop, Color("ffd23a") if i < stars else Color("3a2f5a"))
 	if not ally_sprites.is_empty() and t > 1.9:
-		var n := ally_sprites.size()
-		_txt("New friends!", Vector2(340, 404 + oy), 24, Color("9fffa0"))
+		var n := mini(ally_sprites.size(), 2)
 		for i in n:
-			var x := 640.0 - (n - 1) * 70.0 + i * 140.0
-			PuppetLib.draw(self, ally_sprites[i], "idle", int(t * 6.0 + i), false, 0.62, Vector2(x, 480 + oy))
+			var x := 395.0 if i == 0 else 885.0
+			PuppetLib.draw(self, ally_sprites[i], "idle", int(t * 6.0 + i), i == 1, 0.5, Vector2(x, 235 + oy))
+	var y := 268.0 + oy
+	for l in lines:
+		_txt(String(l), Vector2(340, y), 21, Color("e8e0ff"))
+		y += 27.0
+	if story != "":
+		_txt(story, Vector2(380, y + 8), 17, Color("c8b8f0"), HORIZONTAL_ALIGNMENT_CENTER, 520.0)
+	elif not won and tip != "":
+		_txt(tip, Vector2(380, y + 8), 18, Color("c8b8f0"), HORIZONTAL_ALIGNMENT_CENTER, 520.0)
