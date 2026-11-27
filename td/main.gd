@@ -102,7 +102,7 @@ var capturing := 0         # capture animations in flight (the wave cannot end w
 var free_ids := {}          # tower id -> free placements left (granted by capturing it)
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
-const CAPTURE_HP := 0.35
+const CAPTURE_HP := 0.5
 
 func _ready() -> void:
 	Session.load_save()
@@ -454,6 +454,9 @@ func _update_capturable() -> void:
 				Session.settings["capture_hints"] = shown + 1
 				FxScript.text_at(self, Vector2(640, 300), "Weak creature! Tap it to capture it (uses a Lure)", Color("ffe08a"))
 		e.capturable = ok
+		if ok:
+			e.capture_pct = int(round(capture_chance(e) * 100.0))
+			e.apply_slow(0.6, 0.35)     # a worn-out creature slows down: gives a thumb time to tap
 
 func _capturable_at(p: Vector2):
 	var best = null
