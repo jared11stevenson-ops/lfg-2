@@ -45,8 +45,9 @@ static func load_save() -> void:
 		var tm := String(cf.get_value("profile", "team", ""))
 		team = Array(tm.split(",")) if tm != "" else []
 		dev_all = bool(cf.get_value("settings", "dev_all", false))
-		for k in settings:
-			settings[k] = cf.get_value("prefs", k, settings[k])
+		# restore every saved pref, including ones added at runtime (story_<level>, capture_hints, ...)
+		for k in cf.get_section_keys("prefs"):
+			settings[k] = cf.get_value("prefs", k, settings.get(k))
 
 static func _save() -> void:
 	if no_save:

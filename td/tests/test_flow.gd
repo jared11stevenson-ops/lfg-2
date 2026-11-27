@@ -84,7 +84,9 @@ func _run() -> void:
 	S.xp = {}
 	S.unlocked = {}
 	S.gold = 0
+	S.settings = {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true, "tutorial_done": false}
 	S.load_save()
+	_check(S.settings.get("story_mossgate", false) == true, "story-seen flag persists across restart")
 	_check(int(S.stars.get("mossgate", 0)) == stars_before and S.gold == gold_saved and S.unlocked.size() == unl.size() and S.level_of("tickindle") >= 3, "progress persists across restart")
 	# team screen opens from the menu with the saved collection
 	var m2 = load("res://menu.tscn").instantiate()
