@@ -25,6 +25,7 @@ const CaptureFx = preload("res://capture_fx.gd")
 const Ambient = preload("res://ambient.gd")
 const BossUi = preload("res://boss_ui.gd")
 const GoldPile = preload("res://gold_pile.gd")
+const CoinBurst = preload("res://coin_burst.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -631,6 +632,10 @@ func _on_died(e) -> void:
 	pf.scale = Vector2(1.4, 1.4) if e.is_boss else Vector2.ONE
 	add_child(pf)
 	FxScript.text_at(self, e.position + Vector2(0, -20), "+%d" % e.reward, Color("ffd23a"))
+	var cb = CoinBurst.new()
+	cb.position = e.position + Vector2(0, -14)
+	cb.n = 7 if (e.is_boss or e.elite or e.shiny or e.rare) else clampi(int(e.reward / 4) + 2, 2, 5)
+	add_child(cb)
 	Sfx.play(self, "pop", -11.0, 30)
 	Sfx.voice(self, e.sprite_id, true, -12.0)
 	Sfx.play(self, "coin", -14.0, 60)
@@ -691,8 +696,13 @@ func _wave_done() -> void:
 	var inc := 0
 	for t in get_tree().get_nodes_in_group("towers"):
 		inc += int(t.st.income)
-	coins += int((50 + 14 * wave) * float(mut.reward)) + inc
+	var bonus := int((50 + 14 * wave) * float(mut.reward)) + inc
+	coins += bonus
+	var lure_up := lures < 6
 	lures = mini(lures + 1, 6)
+	if wave < Levels.TOTAL_WAVES or endless:
+		FxScript.text_at(self, Vector2(640, 250), "Wave %d cleared!" % wave, Color("ffffff"))
+		FxScript.text_at(self, Vector2(640, 282), "+%d coins%s" % [bonus, "   +1 Lure" if lure_up else ""], Color("ffe08a"))
 	for t in get_tree().get_nodes_in_group("towers"):
 		FxScript.text_at(self, t.position + Vector2(0, -52), "+%d XP" % (10 + 2 * int(t.tiers.a + t.tiers.b)), Color("9fe8ff"))
 	for t in get_tree().get_nodes_in_group("towers"):

@@ -32,6 +32,8 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var c := Color("ffd23a") if molten else color
+	for gi in 3:
+		draw_circle(Vector2.ZERO, 16.0 - gi * 4.0, Color(c.r, c.g, c.b, 0.08 + 0.06 * gi))
 	var k := 1.5 if molten else 1.0
 	for i in trail.size():
 		var a := float(i + 1) / (trail.size() + 1)
