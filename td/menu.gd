@@ -19,6 +19,7 @@ const BLURBS := {
 }
 var clock := 0.0
 var hover := -1
+var _art := {}
 var mode := "levels"
 var setup: Control
 var setup_level := "mossgate"
@@ -230,11 +231,15 @@ func _notification(what: int) -> void:
 			back_btn.visible = false
 
 func _unhandled_input(ev: InputEvent) -> void:
-	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and hover >= 0:
-		var id: String = Levels.ORDER[hover]
-		if Session.level_open(id):
-			Sfx.play(self, "click")
-			_open_setup(id)
+	# Hit-test the tapped position directly: on touch screens a tap has no earlier hover frame.
+	if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and mode == "levels" and (setup == null or not setup.visible):
+		for i in Levels.ORDER.size():
+			if _card_rect(i).has_point(ev.position):
+				var id: String = Levels.ORDER[i]
+				if Session.level_open(id):
+					Sfx.play(self, "click")
+					_open_setup(id)
+				return
 
 func _text(s: String, pos: Vector2, size: int, col: Color, width: float = -1.0, align := HORIZONTAL_ALIGNMENT_LEFT) -> void:
 	var f := ThemeDB.fallback_font
@@ -277,13 +282,17 @@ func _draw_card(i: int) -> void:
 		var h := r.size.y * 0.62 / 8.0
 		draw_rect(Rect2(r.position + Vector2(0, k * h), Vector2(r.size.x, h + 1)), Color(c.g1).lerp(Color(c.g2), float(k) / 7.0))
 	var prev_h := r.size.y * 0.62
-	for path in lv.paths:
+	if lv.has("art") and ResourceLoader.exists(String(lv.art)):
+		if not _art.has(id):
+			_art[id] = load(String(lv.art))
+		draw_texture_rect(_art[id], Rect2(r.position, Vector2(r.size.x, prev_h)), false)
+	for path in ([] if lv.has("art") else lv.paths):
 		var pts := PackedVector2Array()
 		for q in path:
 			pts.append(r.position + Vector2(clampf(q[0], 0, 1280) / 1280.0 * (r.size.x - 20) + 10, 8 + clampf(q[1], 0, 720) / 720.0 * (prev_h - 16)))
 		draw_polyline(pts, Color(c.edge), 11.0, true)
 		draw_polyline(pts, Color(c.path), 7.0, true)
-	for s in lv.stones:
+	for s in ([] if lv.has("art") else lv.stones):
 		draw_circle(r.position + Vector2(s[0] / 1280.0 * (r.size.x - 20) + 10, 8 + s[1] / 720.0 * (prev_h - 16)), 3.0, TypeChart.COLORS[s[2]])
 	draw_rect(Rect2(r.position + Vector2(0, prev_h), Vector2(r.size.x, r.size.y - prev_h)), Color(0.08, 0.06, 0.14, 0.95))
 	_text("%d. %s" % [i + 1, lv.name], r.position + Vector2(8, prev_h + 24), 19, Color.WHITE)

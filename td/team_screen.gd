@@ -30,7 +30,7 @@ func _ready() -> void:
 	team_lbl = _lbl("", Vector2(40, 70), 20, Color("c9d4ff"))
 	gold_lbl = _lbl("", Vector2(900, 28), 26, Color("ffd23a"))
 	var back := _btn("Back", Vector2(1120, 20), Vector2(130, 46), 20, Color("3a4a6b"), func(): closed.emit())
-	add_child(t); add_child(back)
+	add_child(back)
 	grid = Control.new()
 	add_child(grid)
 	detail = _lbl("", Vector2(700, 110), 20, Color.WHITE)
