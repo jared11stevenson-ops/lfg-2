@@ -84,3 +84,13 @@ Take-aways for Wellfall Level 1: (1) one lane, one enemy species, four fixed tow
 ### Features taken from PTD into Wellfall after beating level 3
 Added (all Level-1-safe, tests green, 36 capture/feature checks): **floating damage numbers** (Settings > "Damage numbers", like PTD's Damage Text toggle); **burn status** from Ember/Forge attacks (10% chance, damage over time, flame on the enemy, "Burn!" text); **speed x4** (we had x1-x3); **Auto-start waves** toggle (PTD waves start by themselves); **full move stats** in the Team screen (type, power, cooldown, accuracy, physical/special, burn chance).
 Not added (bigger changes): bought level-ups gated by Exp, fixed placement squares, pre-placed NPC ally (Joey), drag-the-Pokeball capture, PokeMart evolution stones.
+
+## Chapter 1 playthrough findings (PTD1 via Ruffle harness)
+
+Result: Oak's Lab, Route 1, Route 2 beaten. Viridian Forest 1 lost twice (waves ~9-10); Pewter Gym not reached.
+
+- Catching: drag the Poké Ball only onto enemies whose HP bar is red/yellow. Only Pidgey/Rattata appeared catchable on early routes; Pidgeys caught at Lv2-5. Boss (blue bar) is uncatchable.
+- Economy: money persists between levels; level-up cost is 5x(level+1) and gated by Exp. Spending everything on levels before VF1 left too little for placement.
+- VF1: 10 waves, Metapod/Pikachu arrive from both sides late (waves 9-10), which overran 4 units (Charmander Lv9 + three Pidgeys). Few free squares (~6).
+- Lessons: bank money for late waves, grind Routes 1-2 for levels/catches first, catch Caterpie/Metapod early in VF1 for more bodies, save from the main menu after each win.
+- Harness: Ruffle + AIR wrapper (needs version=1 reply); capture automated by pixel-detecting bar colours.
