@@ -996,6 +996,14 @@ func _draw() -> void:
 		var pulse := 0.5 + 0.5 * sin(clock * 2.0 + s.pos.x)
 		var col: Color = TypeChart.COLORS[s.type]
 		draw_arc(s.pos, 46.0 + pulse * 3.0, 0, TAU, 40, Color(col.r, col.g, col.b, 0.35 + 0.3 * pulse), 3.0, true)
+	if lv.has("flank") and wave >= int(lv.flank.wave) - 1:
+		# pulsing chevrons mark the second entrance once it is about to open
+		var fp: Vector2 = paths[lane_count][1]
+		for i in 3:
+			var ph := fposmod(clock * 1.6 - i * 0.25, 1.0)
+			var cy := fp.y + 110.0 - i * 28.0 - ph * 10.0
+			var a := 0.25 + 0.5 * (1.0 - ph)
+			draw_polyline(PackedVector2Array([Vector2(fp.x - 18, cy + 10), Vector2(fp.x, cy - 6), Vector2(fp.x + 18, cy + 10)]), Color(1.0, 0.65, 0.35, a), 5.0, true)
 	if state == "play" and placing and has_pending:
 		var m := pending
 		var d: Dictionary = Creatures.TOWERS[selected]
