@@ -117,6 +117,13 @@ func _draw() -> void:
 	var chip := Rect2(584, 10, 190, 34)
 	draw_style_box(panel_sb, chip)
 	_txt(wname, Vector2(596, 36), 20, Color("bfe8ff"))
+	var nt: int = m.get_tree().get_nodes_in_group("towers").size()
+	var cap: int = m.tower_cap()
+	var chip2 := Rect2(784, 10, 176, 34)
+	draw_style_box(panel_sb, chip2)
+	_txt("Squares %d/%d" % [nt, cap], Vector2(796, 36), 20, Color("ff9a8a") if nt >= cap else Color("c8f0b8"))
+	if m.tier > 0:
+		_txt("Replay Tier %d" % m.tier, Vector2(584, 130), 18, Color("ffd23a"))
 	if m.event_id != "":
 		_txt(String(Rules.EVENTS[m.event_id].name), Vector2(584, 70), 22, Color("ffd23a"))
 	if m.Session.diff != "normal":

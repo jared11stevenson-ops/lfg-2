@@ -382,6 +382,8 @@ func _start_wave() -> void:
 	if weather != "clear" and weather != prev_weather:
 		_announce_weather()
 	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
+	if lv.has("flank") and wave == int(lv.flank.wave):
+		FxScript.text_at(self, Vector2(640, 300), "Warning: some thieves now slip in from the south!", Color("ffb070"))
 	queue = _plan(wave).duplicate()
 	if wave == rare_wave:
 		queue.insert(randi_range(1, maxi(1, queue.size() - 1)), "rare:" + String(lv.rare.id))
