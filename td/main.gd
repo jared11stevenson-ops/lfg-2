@@ -300,6 +300,10 @@ func _page(d: int) -> void:
 
 func _on_card(id: String, on: bool) -> void:
 	Sfx.play(self, "click")
+	# Cards act like radio buttons: tapping the selected card must not switch placing off (the tutorial tells you to tap it).
+	if not on and placing and selected == id:
+		cards[id].set_pressed_no_signal(true)
+		return
 	if on:
 		selected = id
 		placing = true
