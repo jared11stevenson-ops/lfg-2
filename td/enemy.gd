@@ -54,6 +54,7 @@ var face_left := false
 var dead := false
 var flash_t := 0.0
 var anim := 0.0
+var shiny := false        # rare gold variant: tougher, pays 3x, double XP when captured
 var capturable := false   # set by main each frame: weak enough, not a boss, and a defender species exists
 
 func setup(p: PackedVector2Array, d: Dictionary, wave: int) -> void:
@@ -297,17 +298,20 @@ func _draw() -> void:
 	var moving := stun_t <= 0.0
 	var state := "walk" if moving else "idle"
 	var frame := int(anim) if moving else int(Time.get_ticks_msec() / 160.0)
-	var hurt := Color(1.0, 0.55, 0.55) if flash_t > 0.0 else (Color(1.0, 0.9, 0.55) if elite else Color.WHITE)
+	var hurt := Color(1.0, 0.55, 0.55) if flash_t > 0.0 else (Color(1.3, 1.1, 0.5) if shiny else (Color(1.0, 0.9, 0.55) if elite else Color.WHITE))
 	var fl := sin(Time.get_ticks_msec() / 220.0 + anim) * 3.0 if flying else 0.0
 	PuppetLib.draw(self, sprite_id, state, frame, face_left, s * (1.0 + flash_t * 1.2), Vector2(0, lift + fl + 6), hurt)
 	if capturable:
 		var pr := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 160.0)
 		draw_arc(Vector2(0, -22 * scale_mul), 34.0 * scale_mul + pr * 3.0, 0, TAU, 32, Color(1.0, 0.85, 0.3, 0.9), 3.0, true)
 		draw_string(ThemeDB.fallback_font, Vector2(-60, -62 * scale_mul - 14), "Tap to capture", HORIZONTAL_ALIGNMENT_CENTER, 120, 14, Color(1, 0.95, 0.6))
+	if shiny:
+		var tw := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 120.0 + anim)
+		draw_string(ThemeDB.fallback_font, Vector2(-30, -92 * scale_mul), "✦ SHINY ✦", HORIZONTAL_ALIGNMENT_CENTER, 60, 12, Color(1.0, 0.92, 0.4, 0.6 + 0.4 * tw))
 	if elite:
 		draw_string(ThemeDB.fallback_font, Vector2(-8, -80 * scale_mul - 8), "★", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("ffd23a"))
 	if hp < max_hp or is_boss:
 		var w := 90.0 if is_boss else (50.0 if big else 34.0)
 		var y := (-100.0 if is_boss else -78.0 * scale_mul) + lift
 		draw_rect(Rect2(-w / 2, y, w, 6), Color(0, 0, 0, 0.6))
-		draw_rect(Rect2(-w / 2 + 1, y + 1, (w - 2) * clampf(hp / max_hp, 0.0, 1.0), 4), Color("7bdc6a"))
+		draw_rect(Rect2(-w / 2 + 1, y + 1, (w - 2) * clampf(hp / max_hp, 0.0, 1.0), 4), Color("5aa8ff") if is_boss else Color("7bdc6a"))

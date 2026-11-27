@@ -394,7 +394,7 @@ func _capturable_at(p: Vector2):
 	return best
 
 func capture_chance(e) -> float:
-	return clampf(lerpf(0.9, 0.45, e.hp / e.max_hp / CAPTURE_HP), 0.45, 0.9)
+	return clampf(lerpf(0.9, 0.45, e.hp / e.max_hp / CAPTURE_HP) + (0.1 if e.shiny else 0.0), 0.45, 0.95)
 
 func _try_capture(e) -> void:
 	if lures <= 0:
@@ -407,7 +407,7 @@ func _try_capture(e) -> void:
 		var id := Session.tower_for(e.kind)
 		var fresh := Session.capture(e.kind)
 		free_ids[id] = int(free_ids.get(id, 0)) + 1
-		run_xp[id] = int(run_xp.get(id, 0)) + 25
+		run_xp[id] = int(run_xp.get(id, 0)) + (50 if e.shiny else 25)
 		var pf = PoofScript.new()
 		pf.col = Color("ffd23a")
 		pf.position = e.position
@@ -468,6 +468,12 @@ func _make_enemy(d: Dictionary, path: PackedVector2Array, w: int, scale_stats: b
 		e.reward = int(round(e.reward * eff("reward")))
 		if not boss and float(mut.elite_p) > 0.0 and rng.randf() < float(mut.elite_p):
 			e.make_elite()
+		if not boss and not e.elite and wave >= 2 and rng.randf() < 0.04 and Session.tower_for(e.kind) != "":
+			e.shiny = true
+			e.hp *= 1.3
+			e.max_hp = e.hp
+			e.reward *= 3
+			FxScript.text_at(self, Vector2(640, 260), "A shiny %s appeared!" % d.name, Color("ffe35a"))
 	e.zones = zones
 	e.died.connect(_on_died)
 	e.leaked.connect(_on_leaked)
