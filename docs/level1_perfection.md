@@ -58,4 +58,6 @@ Goal for 7 am (13:00 UTC): Level 1 feels finished. Every pass is brainstorm -> b
 - 06:50 Level 1 goals (5 goals, +60 gold once each) shown on setup panel; result screen trimmed to 6 lines.
 - 07:10 Audio overhaul: offline-synthesized SFX/voices, layered music (battle drums fade in on waves), ambient bed, new capture/steal/goal/level-up sounds. (Not auditioned by ear: no audio device here.)
 - 07:30 Mipmapped sprite filtering for smoother fur/edges.
+- 07:50 Result screen rewrite; prefs persistence fix; touch targets; capture odds on ring; shadows; tower wind-up sync.
+- 08:00 Map v2 (leaf-puff trees, lily pond, glowing giant mushrooms, ferns, logs, signpost, fence); lane alignment re-verified; corrupt-save test.
 - (old) NEXT: rig/animation quality pass (weight smoothing, 2-bone legs, better walk/attack), then tutorial, UI, audio, mastery goals.

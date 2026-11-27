@@ -261,6 +261,8 @@ def free_spot(px, py, lane=70.0, pads=62.0):
             return False
     if math.hypot(px - 1190, py - 300) < 110 or math.hypot(px - 54, py - 360) < 90:
         return False
+    if ((px - 300) / 200.0) ** 2 + ((py - 650) / 82.0) ** 2 < 1.0:      # pond
+        return False
     return True
 
 # ------------------------------------------------------------------ terrain
@@ -338,25 +340,40 @@ cap_red = mushroom_cap_mat("#d8383a"); cap_pink = mushroom_cap_mat("#e8639a")
 stem_m = mat("stem", "#f1e4d2", 0.7)
 glowcap = mat("glowcap", "#7fe8ff", 0.4, 3.0)
 
+puff_mesh = None
 def tree(px, py, k=1.0, blue=False):
+    global puff_mesh
     base = G(px, py, 0.05)
-    h = 1.25 * k
-    # bent trunk from stacked tapered cylinders
+    h = 1.3 * k
     prev = base
-    for i in range(5):
-        t = (i + 1) / 5.0
-        nxt = base + Vector((math.sin(t * 2.2) * 0.14 * k, 0.04 * i * k, h * t))
+    for i in range(6):
+        t = (i + 1) / 6.0
+        nxt = base + Vector((math.sin(t * 2.4 + px) * 0.12 * k, 0.04 * i * k, h * t))
         mid = (prev + nxt) / 2; ln = (nxt - prev).length
         d = (nxt - prev).normalized()
         rot = Vector((0, 0, 1)).rotation_difference(d).to_euler()
-        rad = 0.16 * k * (1 - t * 0.55)
+        rad = 0.17 * k * (1 - t * 0.55)
         prim("cyl", "trunk", trunk_m, mid, r=rad, h=ln * 1.05, seg=14, rot=rot)
         prev = nxt
+    # root flare
+    for q in range(4):
+        a_ = q * 1.57 + px
+        prim("cone", "root", trunk_m, base + Vector((math.cos(a_) * 0.15 * k, math.sin(a_) * 0.15 * k, 0.05)), r=0.07 * k, r2=0.01, h=0.22 * k, seg=8, rot=(math.cos(a_) * 1.1, math.sin(a_) * 1.1, 0))
     top = prev
     cm = leaf2_m if blue else leaf_m
-    for j, (dx, dy, dz, r_) in enumerate([(0, 0, 0.35, 0.62), (-0.42, 0.05, 0.18, 0.46), (0.45, -0.02, 0.2, 0.48), (0.05, 0.3, 0.6, 0.4), (-0.15, -0.3, 0.12, 0.42)]):
-        me = shared_mesh(f"canopy{j}", lambda b, j=j: sphere_bm(b, 18, 12, 1.0, 0.1, j + 20))
-        inst("canopy", me, cm, top + Vector((dx * k, dy * k, dz * k)), (r_ * k * 1.05, r_ * k, r_ * k * 0.85), (0, 0, rnd.uniform(0, 6)))
+    if puff_mesh is None:
+        puff_mesh = shared_mesh("puff", lambda b: sphere_bm(b, 10, 7, 1.0, 0.12, 3))
+    clumps = [(0, 0, 0.35, 0.62), (-0.42, 0.05, 0.18, 0.46), (0.45, -0.02, 0.2, 0.48), (0.05, 0.3, 0.6, 0.4), (-0.15, -0.3, 0.12, 0.42)]
+    for j, (dx, dy, dz, r_) in enumerate(clumps):
+        me = shared_mesh(f"canopy{j}", lambda b, j=j: sphere_bm(b, 20, 14, 1.0, 0.1, j + 20))
+        c0 = top + Vector((dx * k, dy * k, dz * k))
+        inst("canopy", me, cm, c0, (r_ * k * 1.0, r_ * k * 0.95, r_ * k * 0.82), (0, 0, rnd.uniform(0, 6)))
+        # leaf puffs on the upper surface of each clump: lumpy painterly silhouette
+        for q in range(14):
+            th = rnd.uniform(0, 6.283); ph = rnd.uniform(0.1, 1.25)
+            off = Vector((math.cos(th) * math.cos(ph), math.sin(th) * math.cos(ph), math.sin(ph) * 0.85)) * r_ * k * 0.95
+            sz = rnd.uniform(0.07, 0.12) * k
+            inst("puff", puff_mesh, cm, c0 + off, (sz * 1.2, sz * 1.2, sz * 0.8), (0, 0, rnd.uniform(0, 6)))
     for q in range(7):   # glowing fruit
         a_ = rnd.uniform(0, 6.28)
         prim("sphere", "fruit", mat("fruit", "#ffd86a", 0.4, 4.0), top + Vector((math.cos(a_) * 0.55 * k, math.sin(a_) * 0.45 * k, rnd.uniform(0.0, 0.7) * k)), scale=(0.035,) * 3, seg=8, rings=6)
@@ -382,7 +399,7 @@ tuft_m = foliage_mat("#1f5a4a", "#5fa862", "grass")
 
 # trees: borders and corners, kept away from the lane and pads
 tree_spots = [(60, 112, 1.0), (175, 82, 0.9), (330, 70, 0.8), (470, 60, 0.95), (610, 70, 0.8), (800, 66, 0.9), (940, 84, 0.85), (1075, 70, 1.0), (1215, 130, 0.95),
-              (36, 600, 0.9), (150, 690, 0.8), (330, 702, 0.75), (520, 700, 0.7), (850, 706, 0.8), (1090, 690, 0.9), (1228, 600, 0.9), (1236, 470, 0.8), (70, 470, 0.75)]
+              (36, 590, 0.9), (520, 706, 0.7), (850, 706, 0.8), (1090, 690, 0.9), (1228, 600, 0.9), (1236, 470, 0.8), (70, 470, 0.75)]
 for i, (tx, ty, k) in enumerate(tree_spots):
     tree(tx, ty, k * 0.8, blue=(i % 5 == 2))
 
@@ -408,6 +425,100 @@ for _ in range(560):
     if dist_to_path(px, py) < 52 or any(math.hypot(px - sx, py - sy) < 50 for sx, sy, _c in STONES):
         continue
     inst("tuft", tuft_mesh, tuft_m, G(px, py, 0.05), (rnd.uniform(0.6, 1.2),) * 3, (0, 0, rnd.uniform(0, 6)))
+
+
+# ------------------------------------------------------------------ extra decor (non-buildable bands + borders)
+fern_m = foliage_mat("#1d6a52", "#7fd08a", "fern")
+def fern(px, py, k=1.0):
+    base = G(px, py, 0.06)
+    for q in range(9):
+        a_ = q * 0.7 + rnd.uniform(-0.2, 0.2)
+        ln = rnd.uniform(0.28, 0.42) * k
+        tilt = rnd.uniform(0.9, 1.25)
+        c = base + Vector((math.cos(a_) * ln * 0.45, math.sin(a_) * ln * 0.45, 0.05 + ln * 0.18))
+        prim("cone", "frond", fern_m, c, r=0.045 * k, r2=0.0, h=ln, seg=6, scale=(1.0, 0.35, 1.0), rot=(math.sin(a_) * tilt, -math.cos(a_) * tilt, a_))
+
+def giant_mushroom(px, py, k=1.0, col="#7fe8ff"):
+    base = G(px, py, 0.06)
+    gm_ = mat("gmush_" + col, col, 0.4, 2.6)
+    prim("cyl", "gstem", stem_m, base + Vector((0, 0, 0.22 * k)), r=0.07 * k, h=0.44 * k, seg=12)
+    prim("sphere", "gcap", mat("gcap_" + col, "#8a62d8", 0.45), base + Vector((0, 0, 0.5 * k)), scale=(0.3 * k, 0.3 * k, 0.17 * k), seg=20, rings=12)
+    for q in range(10):
+        a_ = q * 0.63
+        prim("sphere", "gdot", gm_, base + Vector((math.cos(a_) * 0.19 * k, math.sin(a_) * 0.19 * k, 0.58 * k + 0.02 * (q % 3))), scale=(0.05 * k,) * 3, seg=8, rings=6)
+    prim("sphere", "gtop", gm_, base + Vector((0, 0, 0.64 * k)), scale=(0.09 * k, 0.09 * k, 0.04 * k), seg=12, rings=6)
+    gl_ = bpy.data.lights.new("gml", 'POINT'); gl_.energy = 6; gl_.color = hexc(col)[:3]; gl_.shadow_soft_size = 0.2
+    lo_ = bpy.data.objects.new("gml", gl_); link(lo_); lo_.location = base + Vector((0, 0, 0.35 * k))
+
+def log(px, py, rot=0.0):
+    c = G(px, py, 0.12)
+    prim("cyl", "log", trunk_m, c, r=0.13, h=0.9, seg=16, rot=(0, math.pi / 2, rot))
+    ca = Vector((math.cos(rot) * 0.45, math.sin(rot) * 0.45 * -1, 0))
+    for sgn in (1, -1):
+        prim("cyl", "logend", mat("logend", "#c9a46a", 0.7), c + Vector((math.cos(rot) * 0.45 * sgn, -math.sin(rot) * 0.45 * sgn, 0)), r=0.115, h=0.02, seg=16, rot=(0, math.pi / 2, rot))
+    for q in range(3):
+        mushroom(px + (q - 1) * 14, py - 6, 0.9)
+    prim("cone", "logmoss", foliage_mat("#2f7d58", "#9ad66a", "moss"), c + Vector((0, 0, 0.13)), r=0.1, r2=0.08, h=0.5, seg=10, scale=(1.4, 0.7, 0.35), rot=(0, 0, rot))
+
+def sign(px, py):
+    b0 = G(px, py, 0.06)
+    prim("cyl", "signpost", trunk_m, b0 + Vector((0, 0, 0.35)), r=0.035, h=0.7, seg=10)
+    prim("cube", "signboard", mat("signboard", "#c9a46a", 0.7), b0 + Vector((0.0, -0.02, 0.62)), scale=(0.42, 0.04, 0.2), rot=(0, 0, 0.12))
+    prim("cube", "signrune", mat("signrune", "#ffe9a8", 0.4, 3.0), b0 + Vector((0.0, -0.045, 0.62)), scale=(0.2, 0.012, 0.04), rot=(0, 0, 0.12))
+    prim("cube", "signarrow", mat("signboard2", "#b98a52", 0.7), b0 + Vector((0.12, -0.02, 0.45)), scale=(0.3, 0.035, 0.11), rot=(0, 0, -0.18))
+
+def fence(x0, y0, x1, y1):
+    a_ = Vector((x0, y0)); b_ = Vector((x1, y1)); L = (b_ - a_).length; d = (b_ - a_).normalized()
+    n = max(2, int(L / 38))
+    ang = math.atan2(-(d.y), d.x)
+    for q in range(n + 1):
+        p = a_ + d * (L * q / n)
+        prim("cyl", "post", trunk_m, G(p.x, p.y, 0.4 + 0.05 * 0), r=0.035, h=0.55 + 0.05 * (q % 2), seg=8)
+    for hz in (0.28, 0.45):
+        mid = (a_ + b_) / 2
+        prim("cube", "rail", mat("rail", "#8a6a4a", 0.8), G(mid.x, mid.y, hz), scale=(L / S * 1.0, 0.035, 0.035), rot=(0, 0, ang))
+
+# pond in the bottom-left band (under the shop bar, never buildable)
+pond_c = G(300, 650, 0.02)
+prim("cyl", "pondbank", mossy_rock_mat("#6a6a90"), pond_c + Vector((0, 0, 0.0)), r=1.0, h=0.06, seg=64, scale=(1.7, 0.66, 1.0))
+water_m = bpy.data.materials.new("water"); water_m.use_nodes = True
+nt = water_m.node_tree; wb = nt.nodes["Principled BSDF"]
+wb.inputs["Base Color"].default_value = hexc("#1a4f78"); wb.inputs["Roughness"].default_value = 0.12
+wb.inputs["Metallic"].default_value = 0.0
+try:
+    wb.inputs["Specular IOR Level"].default_value = 0.9
+except Exception:
+    pass
+tcw = node(nt, "ShaderNodeTexCoord"); wv = node(nt, "ShaderNodeTexNoise"); wv.inputs["Scale"].default_value = 2.2; wv.inputs["Detail"].default_value = 4
+nt.links.new(tcw.outputs["Object"], wv.inputs["Vector"])
+wr = ramp(nt, [(0.3, "#1a5c86"), (0.7, "#2f86b0")]); nt.links.new(wv.outputs["Fac"], wr.inputs["Fac"])
+nt.links.new(wr.outputs["Color"], wb.inputs["Base Color"])
+wbump = node(nt, "ShaderNodeBump"); wbump.inputs["Strength"].default_value = 0.06
+nt.links.new(wv.outputs["Fac"], wbump.inputs["Height"]); nt.links.new(wbump.outputs["Normal"], wb.inputs["Normal"])
+prim("cyl", "water", water_m, pond_c + Vector((0, 0, 0.045)), r=0.94, h=0.03, seg=64, scale=(1.62, 0.62, 1.0))
+lily_m = foliage_mat("#2a8a5a", "#7fd08a", "lily")
+for q in range(7):
+    a_ = rnd.uniform(0, 6.28); rr = rnd.uniform(0.2, 0.9)
+    lp_ = pond_c + Vector((math.cos(a_) * rr * 1.45, math.sin(a_) * rr * 0.55, 0.07))
+    prim("cyl", "lily", lily_m, lp_, r=0.11, h=0.01, seg=14)
+    if q % 2 == 0:
+        prim("sphere", "lotus", mat("lotus", "#ff9ad8", 0.5, 2.2), lp_ + Vector((0, 0, 0.04)), scale=(0.045, 0.045, 0.05), seg=10, rings=6)
+pl2 = bpy.data.lights.new("pondlight", 'POINT'); pl2.energy = 12; pl2.color = (1.0, 0.6, 0.9); pl2.shadow_soft_size = 0.3
+lo2 = bpy.data.objects.new("pondlight", pl2); link(lo2); lo2.location = pond_c + Vector((0, 0, 0.4))
+for q in range(10):
+    a_ = q * 0.63
+    inst("pstone", stone_mesh, rock_m, pond_c + Vector((math.cos(a_) * 1.72, math.sin(a_) * 0.68, 0.05)), (0.13, 0.11, 0.08), (0, 0, a_))
+
+# bottom band (below y 600) and left/right margins: denser, richer scenery since nothing can be built there
+for (fx, fy) in [(60, 520), (130, 595), (520, 690), (560, 655), (700, 700), (900, 690), (1160, 600), (1230, 660), (1240, 520), (420, 575), (1130, 700)]:
+    fern(fx, fy, rnd.uniform(0.9, 1.3))
+for (gx_, gy_, gk, gc) in [(40, 610, 1.2, "#7fe8ff"), (470, 668, 1.0, "#ff9ad8"), (780, 676, 1.3, "#7fe8ff"), (1180, 650, 1.1, "#c8a8ff"), (1250, 420, 0.9, "#7fe8ff"), (30, 330, 0.9, "#ff9ad8")]:
+    giant_mushroom(gx_, gy_, gk, gc)
+log(640, 668, 0.3)
+log(1030, 120, -0.2)
+sign(110, 400)
+fence(20, 470, 20, 560)
+fence(1262, 380, 1262, 470)
 
 # ------------------------------------------------------------------ gate (spawn) and Well (goal)
 gstone = mossy_rock_mat("#8a809e")
