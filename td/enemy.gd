@@ -338,9 +338,7 @@ func _draw() -> void:
 	if capturable:
 		var pr := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 160.0)
 		draw_arc(Vector2(0, -22 * scale_mul), 34.0 * scale_mul + pr * 3.0, 0, TAU, 32, Color(1.0, 0.85, 0.3, 0.9), 3.0, true)
-		var ly := -62.0 * scale_mul - 14.0
-		if global_position.y < 190.0:
-			ly = 34.0 * scale_mul + 8.0
+		var ly := 34.0 * scale_mul + 14.0  # below the creature so it never collides with the HP bar or RARE tag
 		draw_string_outline(ThemeDB.fallback_font, Vector2(-60, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 120, 14, 5, Color(0.1, 0.05, 0.2))
 		draw_string(ThemeDB.fallback_font, Vector2(-60, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 120, 14, Color(1, 0.95, 0.6))
 	if rare:

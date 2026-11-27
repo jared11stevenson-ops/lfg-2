@@ -360,6 +360,9 @@ func _plan(w: int) -> Array:
 		var r := RandomNumberGenerator.new()
 		r.seed = hash([run_seed, w])
 		plans[w] = Waves.build(lv, w, r, float(mut.count))
+		# replay tiers add raids: extra champions on later waves of levels that have one
+		if lv.has("champion") and ((tier >= 2 and w == 8) or (tier >= 4 and w in [3, 6])):
+			plans[w].insert(plans[w].size() / 2, "champion:" + String(lv.champion))
 	return plans[w]
 
 func _incoming_text(w: int) -> String:
@@ -779,6 +782,8 @@ func _end(result: String) -> void:
 			_goal("gold15")
 		if lives >= lives_start:
 			_goal("perfect")
+	if tier > 0:
+		lvl_lines.append("Replay Tier %d: enemies +%d%% HP, gold +%d%%, rare chance +%d%%%s" % [tier, tier * 6, tier * 10, tier * 3, ", extra champion raids" if tier >= 2 else ""])
 	if not goals_new.is_empty():
 		lvl_lines.append("Goal%s: %s  (+%d gold)" % ["s" if goals_new.size() > 1 else "", ", ".join(PackedStringArray(goals_new)), goals_new.size() * Session.GOAL_REWARD])
 	var gold_gain := int(float(wave * 15 + (100 if result == "won" else 0) + captures_run * 30) * (1.0 + 0.1 * float(tier)))
