@@ -177,6 +177,11 @@ func _open_setup(id: String) -> void:
 	var lv: Dictionary = Levels.LEVELS[id]
 	title_lbl.text = lv.name
 	rule_lbl.text = "%s\n%s" % [lv.blurb, lv.rule]
+	var gl := Session.goals_line(id)
+	if gl != "":
+		rule_lbl.text += "\n" + gl
+	for d in Rules.DIFF_ORDER:
+		diff_btns[d].text = "%s\n%s %d, HP x%.2f" % [Rules.DIFFICULTY[d].name, "gold" if lv.get("steal", false) else "lives", Rules.DIFFICULTY[d].lives, Rules.DIFFICULTY[d].hp]
 	Session.muts = []
 	_sync_setup()
 	setup.visible = true

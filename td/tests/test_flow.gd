@@ -60,12 +60,16 @@ func _run() -> void:
 			await create_timer(2.2).timeout
 	_check(S.unlocked.has("ally_shuckit") or S.unlocked.has("ally_glomm"), "captured creature unlocked")
 	_check(main.shop_ids.size() >= 2, "captured creature appears in the shop")
+	_check(S.goal_done("mossgate", "capture"), "capture goal completes on first capture")
+	_check(S.goals_line("mossgate").contains("✔ Capture a Shuckit"), "goals line shows the completed goal")
 	# finish the level: win, bank XP and gold
 	Engine.time_scale = 1.0
 	var gold0: int = S.gold
 	main.run_xp["tickindle"] = 120
 	main.wave = 10
+	main.lives = 20
 	main._end("won")
+	_check(S.goal_done("mossgate", "win") and S.goal_done("mossgate", "gold15") and S.goal_done("mossgate", "perfect"), "win goals complete")
 	await process_frame
 	_check(main.result_screen != null and is_instance_valid(main.result_screen), "result screen shows")
 	_check(S.gold > gold0, "gold earned")

@@ -12,6 +12,7 @@ static var best_wave := {}      # level -> best wave reached
 static var unlocked := {}       # ally tower id -> true
 static var xp := {}             # tower id -> banked XP (levels creatures up across runs)
 const MAX_LEVEL := 20
+static var mastery := {}        # "<level>_<goal>" -> true (one-time gold rewards)
 static var gold := 0            # persistent money earned from runs, spent in the Team screen
 static var team: Array = []     # chosen loadout (max 6); empty = everything unlocked
 static var rare_pity := 0       # runs since a rare encounter last appeared (raises the next chance)
@@ -36,6 +37,8 @@ static func load_save() -> void:
 			unlocked[k] = true
 		for k in cf.get_section_keys("xp"):
 			xp[k] = int(cf.get_value("xp", k, 0))
+		for k in cf.get_section_keys("mastery"):
+			mastery[k] = true
 		gold = int(cf.get_value("profile", "gold", 0))
 		lure_bonus = int(cf.get_value("profile", "lure_bonus", 0))
 		rare_pity = int(cf.get_value("profile", "rare_pity", 0))
@@ -57,6 +60,8 @@ static func _save() -> void:
 		cf.set_value("unlocked", k, true)
 	for k in xp:
 		cf.set_value("xp", k, xp[k])
+	for k in mastery:
+		cf.set_value("mastery", k, true)
 	cf.set_value("profile", "gold", gold)
 	cf.set_value("profile", "lure_bonus", lure_bonus)
 	cf.set_value("profile", "rare_pity", rare_pity)
@@ -166,6 +171,36 @@ static func note_rare(seen: bool) -> void:
 	load_save()
 	rare_pity = 0 if seen else rare_pity + 1
 	_save()
+
+const GOAL_REWARD := 60
+
+# Marks a level goal done. Returns true (and pays GOAL_REWARD gold) the first time only.
+static func complete_goal(level: String, goal: String) -> bool:
+	load_save()
+	var key := "%s_%s" % [level, goal]
+	if mastery.has(key):
+		return false
+	mastery[key] = true
+	gold += GOAL_REWARD
+	_save()
+	return true
+
+static func goal_done(level: String, goal: String) -> bool:
+	load_save()
+	return mastery.has("%s_%s" % [level, goal])
+
+static func goals_line(level: String) -> String:
+	var lv: Dictionary = load("res://levels.gd").LEVELS[level]
+	var goals: Array = lv.get("goals", [])
+	if goals.is_empty():
+		return ""
+	var done := 0
+	var parts := []
+	for g in goals:
+		var d := goal_done(level, g[0])
+		done += 1 if d else 0
+		parts.append("%s %s" % ["✔" if d else "·", g[1]])
+	return "Goals %d/%d (+%d gold each, once):  %s" % [done, goals.size(), GOAL_REWARD, "   ".join(PackedStringArray(parts))]
 
 static func add_gold(n: int) -> void:
 	load_save()

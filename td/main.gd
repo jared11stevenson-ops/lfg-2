@@ -97,6 +97,7 @@ var story_screen
 var boss_ui
 var gold_pile
 var captures_run := 0
+var goals_new: Array = []   # goal texts completed for the first time this run
 var capturing := 0         # capture animations in flight (the wave cannot end while one is running)
 var free_ids := {}          # tower id -> free placements left (granted by capturing it)
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
@@ -426,6 +427,13 @@ func _pick_lane() -> int:
 		"split": return spawn_idx % n
 	return rng.randi() % n
 
+func _goal(goal: String) -> void:
+	for g in lv.get("goals", []):
+		if g[0] == goal and Session.complete_goal(Session.level_id, goal):
+			goals_new.append(String(g[1]))
+			FxScript.text_at(self, Vector2(640, 250 + 30 * goals_new.size()), "Goal: %s  +%d gold" % [g[1], Session.GOAL_REWARD], Color("9fffa0"))
+			Sfx.play(self, "up", -8.0)
+
 func _cap_species(e) -> String:
 	return String(Creatures.ENEMIES[e.kind].get("capture_as", e.kind))
 
@@ -484,6 +492,9 @@ func _finish_capture(success: bool, e) -> void:
 		free_ids[id] = int(free_ids.get(id, 0)) + 1
 		run_xp[id] = int(run_xp.get(id, 0)) + (50 if (e.shiny or e.rare) else 25)
 		captures_run += 1
+		_goal("capture")
+		if e.rare:
+			_goal("rare")
 		FxScript.text_at(self, e.position + Vector2(0, -60), "Captured %s!%s" % [Creatures.TOWERS[id].name, " NEW" if fresh else ""], Color("ffe08a"))
 		Sfx.play(self, "up", -6.0)
 		Sfx.haptic(60)
@@ -669,6 +680,14 @@ func _end(result: String) -> void:
 				lvl_lines.append("   learned %s (%s)" % [mv.name, mv.desc])
 	if not lv.get("rare", {}).is_empty():
 		Session.note_rare(rare_seen)
+	if result == "won":
+		_goal("win")
+		if lives >= 15:
+			_goal("gold15")
+		if lives >= lives_start:
+			_goal("perfect")
+	if not goals_new.is_empty():
+		lvl_lines.append("Goal%s: %s  (+%d gold)" % ["s" if goals_new.size() > 1 else "", ", ".join(PackedStringArray(goals_new)), goals_new.size() * Session.GOAL_REWARD])
 	var gold_gain := wave * 15 + (100 if result == "won" else 0) + captures_run * 30
 	Session.add_gold(gold_gain)
 	lvl_lines.append("Gold +%d (total %d)" % [gold_gain, Session.gold])
@@ -677,7 +696,8 @@ func _end(result: String) -> void:
 		var rec := Session.record_win(Session.level_id, wave, lives, lives_start, endless)
 		rs.title = "The Well holds!" if not lv.get("steal", false) else "The gold is safe!"
 		rs.stars = int(rec.stars)
-		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], ("Gold kept: %d/%d" if lv.get("steal", false) else "Lives left: %d/%d") % [lives, lives_start], "Difficulty: %s" % Rules.DIFFICULTY[Session.diff].name] + lvl_lines
+		rs.lines = ["Waves cleared: %d/%d" % [wave, Levels.TOTAL_WAVES], ("Gold kept: %d/%d" if lv.get("steal", false) else "Lives left: %d/%d") % [lives, lives_start]]
+		rs.lines += lvl_lines
 		for a in rec.allies:
 			rs.ally_sprites.append(Creatures.TOWERS[a].sprite)
 			rs.ally_names.append(Creatures.TOWERS[a].name)
@@ -694,6 +714,8 @@ func _end(result: String) -> void:
 		rs.tip = tips[wave % tips.size()]
 		rs.story = String(lv.get("story", {}).get("lose", ""))
 		Sfx.play(self, "lose")
+	if rs.lines.size() > 6:
+		rs.lines = rs.lines.slice(0, 5) + [rs.lines[rs.lines.size() - 1]]
 	layer.add_child(rs)
 	layer.move_child(rs, retry_btn.get_index())
 	if tutorial != null and is_instance_valid(tutorial):
