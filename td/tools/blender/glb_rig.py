@@ -13,6 +13,7 @@ from rig import Rig, AXX, AXY, AXZ, FRAMES, sprite_camera
 kind, src, out_dir, name = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 preview = sys.argv[5] if len(sys.argv) > 5 else None
 SIZE, PPU = 256, 50.0
+SMOOTH_ITERS = 6
 
 # name, head, tail, parent, falloff radius
 SPECS = {
@@ -32,12 +33,13 @@ SPECS = {
     ("watch", (1.05, 0, 0.72), (1.1, 0, 0.3), "body", 0.22)]),
  "dug": dict(yaw_face=0, px_w=150, lift=0.35, YAW=-32.0, bones=[
     ("root", (0, 0, 0), (0, 0, 0.3), None, 0.01),
-    ("body", (-0.9, 0, 1.05), (0.45, 0, 1.1), "root", 0.55),
-    ("head", (0.45, 0, 1.1), (1.1, 0, 1.12), "body", 0.42),
+    ("body", (-0.9, 0, 1.05), (-0.25, 0, 1.07), "root", 0.42),
+    ("bodyF", (-0.25, 0, 1.07), (0.45, 0, 1.1), "body", 0.45),
+    ("head", (0.45, 0, 1.1), (1.1, 0, 1.12), "bodyF", 0.42),
     ("stalk", (0.85, 0, 1.45), (1.1, 0, 1.85), "head", 0.2),
     ("lantern", (1.1, 0, 1.85), (1.12, 0, 1.5), "stalk", 0.22),
-    ("flipP", (0.55, 0.4, 0.8), (0.75, 0.6, 0.5), "body", 0.28),
-    ("flipN", (0.55, -0.4, 0.8), (0.75, -0.6, 0.5), "body", 0.28),
+    ("flipP", (0.55, 0.4, 0.8), (0.75, 0.6, 0.5), "bodyF", 0.28),
+    ("flipN", (0.55, -0.4, 0.8), (0.75, -0.6, 0.5), "bodyF", 0.28),
     ("tail1", (-0.9, 0, 1.1), (-1.15, 0, 1.3), "body", 0.3),
     ("tail2", (-1.15, 0, 1.3), (-1.3, 0, 1.95), "tail1", 0.32)]),
  "bird": dict(yaw_face=270, px_w=150, lift=0.0, YAW=-40.0, bones=[
@@ -84,6 +86,17 @@ W[:, 0] = 0.0   # root carries no skin
 tot = W.sum(axis=1)
 W[tot < 1e-4, 1] = 1.0          # stray verts follow the body
 W /= W.sum(axis=1, keepdims=True)
+# smooth weights along the surface so limbs bend without tearing at thin parts
+ed = np.empty(len(mesh.data.edges) * 2, dtype=np.int32)
+mesh.data.edges.foreach_get("vertices", ed)
+ed = ed.reshape(-1, 2)
+for _ in range(SMOOTH_ITERS):
+    acc = np.zeros_like(W); cnt = np.zeros(len(W), dtype=np.float32)
+    np.add.at(acc, ed[:, 0], W[ed[:, 1]]); np.add.at(acc, ed[:, 1], W[ed[:, 0]])
+    np.add.at(cnt, ed[:, 0], 1.0); np.add.at(cnt, ed[:, 1], 1.0)
+    W = 0.5 * W + 0.5 * acc / np.maximum(cnt, 1.0)[:, None]
+    W[:, 0] = 0.0
+    W /= np.maximum(W.sum(axis=1, keepdims=True), 1e-6)
 for j, (n, *_r) in enumerate(S["bones"]):
     mesh.vertex_groups.new(name=n)
 for j, (n, *_r) in enumerate(S["bones"]):
@@ -102,67 +115,84 @@ def pose(r, state, t):
     s = math.sin(a)
     if kind == "cat":
         if state == "idle":
-            r.loc("root", (0, 0, 0.012 * s)); r.rot("body", AXY, -0.8 * s); r.rot("head", AXY, 1.4 * s)
-            r.rot("tail1", AXZ, 5 * s); r.rot("tail2", AXZ, 9 * math.sin(a + 0.8)); r.rot("tail3", AXZ, 12 * math.sin(a + 1.6))
-            r.rot("earP", AXX, 7 * max(0, math.sin(2 * a))); r.rot("earN", AXX, -6 * max(0, math.sin(2 * a + 1.5)))
-            r.rot("watch", AXY, 5 * math.sin(a + 0.5))
+            br = math.sin(a)
+            r.loc("root", (0, 0, 0.014 * br)); r.rot("body", AXY, -1.0 * br); r.rot("head", AXY, 1.8 * math.sin(a + 0.5))
+            r.scale("body", 1.0 + 0.014 * br)
+            r.rot("tail1", AXZ, 6 * br); r.rot("tail2", AXZ, 11 * math.sin(a + 0.8)); r.rot("tail3", AXZ, 15 * math.sin(a + 1.6))
+            r.rot("earP", AXX, 9 * max(0, math.sin(2 * a))); r.rot("earN", AXX, -8 * max(0, math.sin(2 * a + 1.5)))
+            r.rot("watch", AXY, 6 * math.sin(a + 0.5))
         elif state == "walk":
             for leg, ph in (("legFP", 0), ("legBN", 0), ("legFN", math.pi), ("legBP", math.pi)):
-                r.rot(leg, AXY, 24 * math.sin(a + ph))
-            r.loc("root", (0, 0, 0.05 * abs(s))); r.rot("body", AXX, 2.5 * s); r.rot("head", AXY, -3 * math.sin(2 * a))
-            r.rot("tail1", AXZ, 10 * s); r.rot("tail2", AXZ, 16 * math.sin(a - 0.7)); r.rot("tail3", AXZ, 18 * math.sin(a - 1.4))
-            r.rot("watch", AXY, 14 * math.sin(2 * a + 0.4))
+                r.rot(leg, AXY, 34 * math.sin(a + ph))
+                r.loc(leg, (0, 0, 0.16 * max(0.0, -math.cos(a + ph))))
+            r.loc("root", (0, 0, 0.07 * abs(math.sin(a)))); r.rot("body", AXX, 3.5 * math.sin(a)); r.rot("body", AXY, 2.0 * math.cos(2 * a))
+            r.rot("head", AXY, -2.5 * math.cos(2 * a)); r.rot("head", AXZ, 3 * math.sin(a))
+            r.rot("tail1", AXZ, 12 * math.sin(a)); r.rot("tail2", AXZ, 20 * math.sin(a - 0.8)); r.rot("tail3", AXZ, 24 * math.sin(a - 1.6))
+            r.rot("watch", AXY, 16 * math.sin(2 * a + 0.4)); r.rot("earP", AXX, 4 * math.sin(2 * a)); r.rot("earN", AXX, -4 * math.sin(2 * a))
         else:
-            k = [(-0.10, -0.05, -6, -8, 12, 20), (-0.18, -0.10, -9, -12, 20, 35), (0.18, 0.04, 12, 16, -38, -30), (0.08, 0.0, 6, 8, -16, -10), (0, 0, 0, 0, 0, 0)][min(int(t * 5), 4)]
+            k = [(-0.12, -0.07, -7, -10, 14, 24, 0.90, 1.06), (-0.22, -0.13, -11, -15, 24, 40, 0.86, 1.09), (0.20, 0.07, 8, 11, -42, -34, 1.10, 0.93), (0.10, 0.0, 7, 10, -18, -12, 1.03, 0.99), (0, 0, 0, 0, 0, 0, 1.0, 1.0)][min(int(t * 5), 4)]
             r.loc("root", (k[0], 0, k[1])); r.rot("body", AXY, k[2]); r.rot("head", AXY, k[3])
-            r.rot("legFP", AXY, k[4]); r.rot("legFN", AXY, k[4]); r.rot("legBP", AXY, -k[4] * 0.5); r.rot("legBN", AXY, -k[4] * 0.5)
-            r.rot("tail1", AXZ, k[5]); r.rot("tail2", AXZ, k[5] * 1.3); r.rot("tail3", AXZ, k[5] * 1.5); r.rot("watch", AXY, -k[3] * 1.5)
+            r.rot("legFP", AXY, k[4]); r.rot("legFN", AXY, k[4]); r.rot("legBP", AXY, -k[4] * 0.6); r.rot("legBN", AXY, -k[4] * 0.6)
+            r.rot("tail1", AXZ, k[5]); r.rot("tail2", AXZ, k[5] * 1.4); r.rot("tail3", AXZ, k[5] * 1.6); r.rot("watch", AXY, -k[3] * 1.6)
+            r.rot("earP", AXX, -k[5] * 0.5); r.rot("earN", AXX, k[5] * 0.5)
+            r.scale("body", k[6]) if False else None
+            r.pb_scale("body", (k[7], 1.0, k[6]))
     elif kind == "dug":
         if state == "idle":
-            r.loc("root", (0, 0, 0.045 * s)); r.rot("body", AXY, 1.5 * s); r.rot("head", AXY, 2.5 * math.sin(a + 0.4))
-            r.rot("tail1", AXY, 6 * math.sin(a - 0.5)); r.rot("tail2", AXY, 12 * math.sin(a - 1.0))
-            r.rot("flipP", AXX, 12 * s); r.rot("flipN", AXX, -12 * s)
-            r.rot("stalk", AXY, 5 * math.sin(a - 0.8)); r.rot("lantern", AXY, 9 * math.sin(a - 1.4))
+            br = math.sin(a)
+            r.loc("root", (0, 0, 0.05 * br)); r.rot("body", AXY, 1.8 * math.sin(a - 0.4)); r.rot("bodyF", AXY, 2.2 * math.sin(a)); r.rot("head", AXY, 3 * math.sin(a + 0.6))
+            r.rot("tail1", AXY, 8 * math.sin(a - 0.8)); r.rot("tail2", AXY, 15 * math.sin(a - 1.4))
+            r.rot("flipP", AXX, 14 * br); r.rot("flipN", AXX, -14 * br)
+            r.rot("stalk", AXY, 6 * math.sin(a - 0.8)); r.rot("lantern", AXY, 11 * math.sin(a - 1.5))
         elif state == "walk":
-            r.loc("root", (0, 0, 0.06 * s)); r.rot("body", AXY, -3 * math.sin(a + 0.6)); r.rot("head", AXY, 3 * math.sin(a + 1.0))
-            r.rot("tail1", AXY, 11 * s); r.rot("tail2", AXY, 18 * math.sin(a - 0.9))
-            r.rot("flipP", AXX, 24 * math.sin(a + 0.5)); r.rot("flipN", AXX, -24 * math.sin(a + 0.5))
-            r.rot("stalk", AXY, 6 * math.sin(a - 0.6)); r.rot("lantern", AXY, 12 * math.sin(a - 1.2))
+            r.loc("root", (0, 0, 0.07 * math.sin(a + 0.4)))
+            r.rot("bodyF", AXY, 5 * math.sin(a + 0.5)); r.rot("body", AXY, 8 * math.sin(a)); r.rot("head", AXY, -4 * math.sin(a + 0.5))
+            r.rot("tail1", AXY, 14 * math.sin(a - 0.7)); r.rot("tail2", AXY, 22 * math.sin(a - 1.4))
+            r.rot("flipP", AXX, 21 * math.sin(a + 0.4)); r.rot("flipN", AXX, -21 * math.sin(a + 0.4))
+            r.rot("stalk", AXY, 7 * math.sin(a - 0.6)); r.rot("lantern", AXY, 14 * math.sin(a - 1.3))
         else:
-            k = [(-6, 0.02, 10, 5, 8), (-14, 0.07, 28, 12, 14), (9, -0.05, -18, -18, -22), (4, 0.0, -6, -8, -10), (0, 0, 0, 0, 0)][min(int(t * 5), 4)]
-            r.rot("body", AXY, k[0]); r.loc("root", (0, 0, k[1])); r.rot("flipP", AXX, k[2]); r.rot("flipN", AXX, -k[2])
+            k = [(-6, 0.02, 12, 6, 9, 1.04, 0.98), (-15, 0.08, 24, 14, 15, 1.08, 0.95), (10, -0.06, -16, -20, -22, 0.94, 1.07), (4, 0.0, -8, -9, -10, 0.99, 1.02), (0, 0, 0, 0, 0, 1.0, 1.0)][min(int(t * 5), 4)]
+            r.rot("body", AXY, k[0] * 0.6); r.rot("bodyF", AXY, k[0]); r.loc("root", (0, 0, k[1])); r.rot("flipP", AXX, k[2]); r.rot("flipN", AXX, -k[2])
             r.rot("lantern", AXY, k[3]); r.rot("stalk", AXY, k[3] * 0.6); r.rot("tail1", AXY, k[4] * 0.6); r.rot("tail2", AXY, k[4] * 0.9); r.rot("head", AXY, -k[0] * 0.5)
+            r.pb_scale("bodyF", (k[5], 1.0, k[6]))
     elif kind == "bird":
         if state == "idle":
-            r.loc("root", (0, 0, 0.02 * s)); r.rot("body", AXY, -1.0 * s); r.rot("neck", AXY, 3 * math.sin(a + 0.5)); r.rot("head", AXY, 4 * math.sin(a + 1.0))
-            r.rot("crest", AXY, 8 * math.sin(a + 1.8)); r.rot("steam", AXZ, 9 * math.sin(a - 0.4)); r.rot("tail", AXY, 5 * math.sin(a - 0.7))
-            r.rot("wingP", AXX, 5 * math.sin(a + 0.2)); r.rot("wingN", AXX, -5 * math.sin(a + 0.2))
+            br = math.sin(a)
+            r.loc("root", (0, 0, 0.025 * br)); r.rot("body", AXY, -1.2 * br); r.rot("neck", AXY, 4 * math.sin(a + 0.5)); r.rot("head", AXY, 6 * math.sin(a + 1.0))
+            r.rot("crest", AXY, 10 * math.sin(a + 1.8)); r.rot("steam", AXZ, 11 * math.sin(a - 0.4)); r.rot("tail", AXY, 6 * math.sin(a - 0.7))
+            r.rot("wingP", AXX, 7 * math.sin(a + 0.2)); r.rot("wingN", AXX, -7 * math.sin(a + 0.2))
+            r.pb_scale("body", (1.0, 1.0, 1.0 + 0.016 * br))
         elif state == "walk":
-            r.rot("legN", AXY, 20 * s); r.rot("legP", AXY, -20 * s)
-            r.loc("root", (0, 0, 0.06 * abs(s))); r.rot("body", AXX, 2 * s); r.loc("neck", (0.07 * math.sin(a + 0.8), 0, 0))
-            r.rot("neck", AXY, -4 * math.sin(a + 0.8)); r.rot("head", AXY, 5 * math.sin(2 * a)); r.rot("crest", AXY, 12 * math.sin(2 * a + 0.9))
-            r.rot("wingP", AXX, 12 * math.sin(2 * a)); r.rot("wingN", AXX, -12 * math.sin(2 * a)); r.rot("tail", AXY, 8 * math.sin(a - 0.8)); r.rot("steam", AXZ, 14 * math.sin(a - 0.6))
+            r.rot("legN", AXY, 26 * math.sin(a)); r.rot("legP", AXY, -26 * math.sin(a))
+            r.loc("legN", (0, 0, 0.2 * max(0.0, -math.cos(a)))); r.loc("legP", (0, 0, 0.2 * max(0.0, math.cos(a))))
+            r.loc("root", (0, 0, 0.08 * abs(math.sin(a)))); r.rot("body", AXX, 3 * math.sin(a)); r.rot("body", AXY, 2.5 * math.cos(2 * a))
+            r.loc("neck", (0.11 * math.sin(a + 0.8), 0, 0)); r.rot("neck", AXY, -6 * math.sin(a + 0.8)); r.rot("head", AXY, 7 * math.sin(2 * a)); r.rot("crest", AXY, 15 * math.sin(2 * a + 0.9))
+            r.rot("wingP", AXX, 16 * math.sin(2 * a)); r.rot("wingN", AXX, -16 * math.sin(2 * a)); r.rot("tail", AXY, 10 * math.sin(a - 0.8)); r.rot("steam", AXZ, 18 * math.sin(a - 0.6))
         else:
-            k = [(-0.08, -0.03, -4, -8, 10), (-0.14, -0.05, -8, -14, 18), (0.22, 0.02, 10, 22, -14), (0.10, 0.0, 5, 10, -6), (0, 0, 0, 0, 0)][min(int(t * 5), 4)]
+            k = [(-0.10, -0.04, -5, -10, 14, 1.0, 0.92), (-0.18, -0.07, -9, -18, 26, 1.0, 0.88), (0.22, 0.05, 6, 18, -18, 0.96, 1.08), (0.10, 0.0, 5, 12, -8, 1.0, 1.02), (0, 0, 0, 0, 0, 1.0, 1.0)][min(int(t * 5), 4)]
             r.loc("root", (k[0], 0, k[1])); r.rot("body", AXY, k[2]); r.rot("neck", AXY, k[3] * 0.6); r.rot("head", AXY, k[3])
-            r.rot("crest", AXY, -k[3] * 0.8); r.rot("wingP", AXX, k[4]); r.rot("wingN", AXX, -k[4]); r.rot("tail", AXY, -k[2]); r.rot("steam", AXZ, k[4] * 0.8)
+            r.rot("crest", AXY, -k[3] * 0.9); r.rot("wingP", AXX, k[4]); r.rot("wingN", AXX, -k[4]); r.rot("tail", AXY, -k[2] * 1.4); r.rot("steam", AXZ, k[4] * 0.9)
+            r.pb_scale("body", (k[5], 1.0, k[6]))
     else:  # bat
         if state == "idle":
-            r.loc("root", (0, 0, 0.012 * s)); r.rot("body", AXY, -0.8 * s); r.rot("head", AXY, 2 * math.sin(a + 0.6))
-            r.rot("earA", AXX, 8 * math.sin(a + 0.3)); r.rot("earB", AXX, -8 * math.sin(a + 0.9))
-            r.rot("tail1", AXZ, 7 * s); r.rot("tail2", AXZ, 14 * math.sin(a - 0.9))
+            br = math.sin(a)
+            r.loc("root", (0, 0, 0.014 * br)); r.rot("body", AXY, -1.0 * br); r.rot("head", AXY, 2.6 * math.sin(a + 0.6))
+            r.rot("earA", AXX, 10 * math.sin(a + 0.3)); r.rot("earB", AXX, -10 * math.sin(a + 0.9))
+            r.rot("tail1", AXZ, 8 * br); r.rot("tail2", AXZ, 17 * math.sin(a - 0.9)); r.pb_scale("body", (1.0, 1.0, 1.0 + 0.014 * br))
         elif state == "walk":
             for leg, ph in (("legFP", 0), ("legBN", 0), ("legFN", math.pi), ("legBP", math.pi)):
-                r.rot(leg, AXY, 20 * math.sin(a + ph))
-            r.loc("root", (0, 0, 0.045 * abs(s))); r.rot("body", AXX, 2 * s); r.rot("head", AXY, -3 * math.sin(2 * a))
-            r.rot("earA", AXX, 12 * math.sin(2 * a)); r.rot("earB", AXX, -12 * math.sin(2 * a + 0.6))
-            r.rot("tail1", AXZ, 10 * s); r.rot("tail2", AXZ, 20 * math.sin(a - 0.8))
+                r.rot(leg, AXY, 28 * math.sin(a + ph))
+                r.loc(leg, (0, 0, 0.13 * max(0.0, -math.cos(a + ph))))
+            r.loc("root", (0, 0, 0.06 * abs(math.sin(a)))); r.rot("body", AXX, 2.5 * math.sin(a)); r.rot("body", AXY, 2 * math.cos(2 * a))
+            r.rot("head", AXY, -3.5 * math.cos(2 * a)); r.rot("head", AXZ, 3 * math.sin(a))
+            r.rot("earA", AXX, 15 * math.sin(2 * a)); r.rot("earB", AXX, -15 * math.sin(2 * a + 0.6))
+            r.rot("tail1", AXZ, 12 * math.sin(a)); r.rot("tail2", AXZ, 24 * math.sin(a - 0.8))
         else:
-            k = [(-0.08, -0.04, -5, -6, 16), (-0.14, -0.07, -8, -12, 28), (0.15, 0.03, 10, 18, -26), (0.06, 0.0, 5, 8, -12), (0, 0, 0, 0, 0)][min(int(t * 5), 4)]
+            k = [(-0.10, -0.05, -6, -8, 16, 1.0, 0.92), (-0.18, -0.09, -10, -14, 28, 1.0, 0.88), (0.18, 0.06, 7, 11, -28, 0.95, 1.1), (0.08, 0.0, 6, 9, -12, 1.0, 1.02), (0, 0, 0, 0, 0, 1.0, 1.0)][min(int(t * 5), 4)]
             r.loc("root", (k[0], 0, k[1])); r.rot("body", AXY, k[2]); r.rot("head", AXY, k[3])
             for leg in ("legFP", "legFN"):
                 r.rot(leg, AXY, -k[4] * 0.8)
-            r.rot("earA", AXX, k[4] * 0.5); r.rot("earB", AXX, -k[4] * 0.5); r.rot("tail1", AXZ, -k[4] * 0.4); r.rot("tail2", AXZ, -k[4] * 0.8)
+            r.rot("earA", AXX, k[4] * 0.6); r.rot("earB", AXX, -k[4] * 0.6); r.rot("tail1", AXZ, -k[4] * 0.5); r.rot("tail2", AXZ, -k[4]); r.pb_scale("body", (k[5], 1.0, k[6]))
 
 # ---- bake ----
 from PIL import Image, ImageFilter

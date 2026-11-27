@@ -91,6 +91,9 @@ class Rig:
         pb = self.arm.pose.bones[bone]
         pb.scale = Vector((k, k, k))
 
+    def pb_scale(self, bone, v):
+        self.arm.pose.bones[bone].scale = Vector(v)
+
     def key_all(self, frame):
         for pb in self.arm.pose.bones:
             pb.keyframe_insert('rotation_quaternion', frame=frame)
