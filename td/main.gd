@@ -26,6 +26,7 @@ const Ambient = preload("res://ambient.gd")
 const BossUi = preload("res://boss_ui.gd")
 const GoldPile = preload("res://gold_pile.gd")
 const CoinBurst = preload("res://coin_burst.gd")
+const DeathFx = preload("res://death_fx.gd")
 const TypeChart = preload("res://type_chart.gd")
 const SURGE_CD := 45.0
 const PATH_HALF := 34.0
@@ -632,6 +633,15 @@ func _on_died(e) -> void:
 	pf.scale = Vector2(1.4, 1.4) if e.is_boss else Vector2.ONE
 	add_child(pf)
 	FxScript.text_at(self, e.position + Vector2(0, -20), "+%d" % e.reward, Color("ffd23a"))
+	if not e.is_boss:
+		var dx = DeathFx.new()
+		dx.position = e.position
+		dx.sprite = e.sprite_id
+		dx.flip = e.face_left
+		dx.sc = 0.56 * e.scale_mul
+		dx.tint = e.tint
+		dx.lift = -16.0 if e.flying else 0.0
+		add_child(dx)
 	var cb = CoinBurst.new()
 	cb.position = e.position + Vector2(0, -14)
 	cb.n = 7 if (e.is_boss or e.elite or e.shiny or e.rare) else clampi(int(e.reward / 4) + 2, 2, 5)

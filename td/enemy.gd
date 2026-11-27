@@ -58,6 +58,7 @@ var tint := Color.WHITE
 var rare := false         # level rare encounter (e.g. Hutzin on Mossgate): worth catching
 var shiny := false        # rare gold variant: tougher, pays 3x, double XP when captured
 var capture_pct := 0
+var spawn_t := 0.0        # seconds since spawning (drives the pop-in)
 var held := false         # sealed in a Lure orb during the capture animation
 var capturable := false   # set by main each frame: weak enough, not a boss, and a defender species exists
 
@@ -179,6 +180,7 @@ func _zone_mult(delta: float) -> float:
 func _process(delta: float) -> void:
 	if dead or held:
 		return
+	spawn_t += delta
 	boost_t = maxf(0.0, boost_t - delta)
 	flash_t = maxf(0.0, flash_t - delta)
 	slow_t = maxf(0.0, slow_t - delta)
@@ -304,7 +306,9 @@ func _draw() -> void:
 	var frame := int(anim) if moving else int(Time.get_ticks_msec() / 160.0)
 	var hurt := Color(1.0, 0.55, 0.55) if flash_t > 0.0 else (Color(1.3, 1.1, 0.5) if shiny else (Color(1.0, 0.9, 0.55) if elite else tint))
 	var fl := sin(Time.get_ticks_msec() / 220.0 + anim) * 3.0 if flying else 0.0
-	PuppetLib.draw(self, sprite_id, state, frame, face_left, s * (1.0 + flash_t * 1.2), Vector2(0, lift + fl + 6), hurt)
+	var pop_in := minf(1.0, spawn_t / 0.35)
+	var pop_s := 1.0 + 0.25 * sin(pop_in * PI) * (1.0 - pop_in) if pop_in < 1.0 else 1.0
+	PuppetLib.draw(self, sprite_id, state, frame, face_left, s * (1.0 + flash_t * 1.2) * lerpf(0.4, 1.0, pop_in) * pop_s, Vector2(0, lift + fl + 6), Color(hurt.r, hurt.g, hurt.b, lerpf(0.0, 1.0, minf(1.0, pop_in * 1.6))))
 	if capturable:
 		var pr := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 160.0)
 		draw_arc(Vector2(0, -22 * scale_mul), 34.0 * scale_mul + pr * 3.0, 0, TAU, 32, Color(1.0, 0.85, 0.3, 0.9), 3.0, true)
