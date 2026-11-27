@@ -50,7 +50,7 @@ func _enter(s: String) -> void:
 		"place":
 			_say("Tap Tickindle below, then tap a glowing rune stone to preview where to place it.", [card.get_global_rect()] + _stone_rects())
 		"confirm":
-			_say("Tap the creature ghost again to place it. Stones boost whoever stands on them!", _pending_rect())
+			_say("Tap the ghost again to place it. Stones boost whoever stands on them: +15%, or +30% on a stone that matches your creature's type (Tickindle is Ember, so orange).", _pending_rect())
 		"start":
 			_say("Press Start wave to let the first creatures come.", [m.start_btn.get_global_rect()])
 		"watch":

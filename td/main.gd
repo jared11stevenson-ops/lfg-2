@@ -365,8 +365,11 @@ func _start_wave() -> void:
 	if wave_running or state != "play":
 		return
 	wave += 1
+	var prev_weather := weather
 	weather = lv.weather[(wave - 1) % lv.weather.size()]
 	Sfx.play(self, "horn")
+	if weather != "clear" and weather != prev_weather:
+		_announce_weather()
 	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
 	queue = _plan(wave).duplicate()
 	if wave == rare_wave:
@@ -381,6 +384,21 @@ func _start_wave() -> void:
 	start_btn.disabled = true
 	hint.visible = false
 	_refresh()
+
+# One-time-per-change note on how the weather affects the creatures you actually have out.
+func _announce_weather() -> void:
+	var hit := {}
+	for t in get_tree().get_nodes_in_group("towers"):
+		var m: float = Weather.mult(weather, t.def.types)
+		if absf(m - 1.0) > 0.01:
+			hit[String(t.def.name)] = m
+	var lines := String(Weather.WEATHER[weather].label)
+	FxScript.text_at(self, Vector2(640, 190), lines, Color("bfe4ff"))
+	var k := 0
+	for nm in hit:
+		k += 1
+		var up: bool = hit[nm] > 1.0
+		FxScript.text_at(self, Vector2(640, 190 + 30 * k), "%s %s%d%% in this weather" % [nm, "+" if up else "-", int(round(absf(hit[nm] - 1.0) * 100.0))], Color("9fffa0") if up else Color("ffb0a0"))
 
 func _roll_event() -> void:
 	event_id = ""
@@ -908,6 +926,9 @@ func _place(d: Dictionary, at: Vector2) -> void:
 	t.spent = c
 	t.position = at
 	add_child(t)
+	var sm: float = stone_mult(t)
+	if sm > 1.0:
+		FxScript.text_at(self, at + Vector2(0, -64), "Rune match! +30%" if sm > 1.2 else "Rune boost +15%", Color("ffe08a") if sm > 1.2 else Color("c8f0ff"))
 	Sfx.play(self, "place")
 	Sfx.haptic(25)
 	_refresh()
