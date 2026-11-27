@@ -60,4 +60,6 @@ Goal for 7 am (13:00 UTC): Level 1 feels finished. Every pass is brainstorm -> b
 - 07:30 Mipmapped sprite filtering for smoother fur/edges.
 - 07:50 Result screen rewrite; prefs persistence fix; touch targets; capture odds on ring; shadows; tower wind-up sync.
 - 08:00 Map v2 (leaf-puff trees, lily pond, glowing giant mushrooms, ferns, logs, signpost, fence); lane alignment re-verified; corrupt-save test.
+- 09:00 Quick start for new players, partial banking on early exit, weather/rune feedback, wave-cleared summary, coin bursts, enemy death + spawn animations. Balance sweep (18 runs): skill 0.4 wins 4/6, 0.6 wins 6/6, 0.8 wins 6/6.
+- Open: no audio audition (no device), no phone/Android test, Windows exe not run, creatures use baked static-mesh rigs with automatic skin weights.
 - (old) NEXT: rig/animation quality pass (weight smoothing, 2-bone legs, better walk/attack), then tutorial, UI, audio, mastery goals.
