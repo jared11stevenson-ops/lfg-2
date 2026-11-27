@@ -47,12 +47,15 @@ func _pile(p: Vector2, k: float = 1.0) -> void:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _orb_icon(p: Vector2) -> void:
-	draw_circle(p, 12.0, OUT)
-	draw_circle(p, 10.0, Color("ffd23a"))
-	draw_line(p + Vector2(-10, 0), p + Vector2(10, 0), OUT, 2.0)
-	draw_circle(p, 3.5, OUT)
-	draw_circle(p, 2.0, Color(0.8, 1, 0.9))
-	draw_circle(p + Vector2(-4, -5), 2.5, Color(1, 1, 1, 0.8))
+	# Lure charm: a glowing teal crystal on a golden loop (not a ball)
+	draw_arc(p + Vector2(0, -13), 5.5, 0, TAU, 14, OUT, 4.0, true)
+	draw_arc(p + Vector2(0, -13), 5.5, 0, TAU, 14, Color("ffd23a"), 2.0, true)
+	var gem := PackedVector2Array([p + Vector2(0, -10), p + Vector2(11, 0), p + Vector2(0, 14), p + Vector2(-11, 0)])
+	var gem_o := PackedVector2Array([p + Vector2(0, -13), p + Vector2(14, 0), p + Vector2(0, 17), p + Vector2(-14, 0)])
+	draw_colored_polygon(gem_o, OUT)
+	draw_colored_polygon(gem, Color("3fd8c0"))
+	draw_colored_polygon(PackedVector2Array([p + Vector2(0, -10), p + Vector2(-11, 0), p + Vector2(0, 2)]), Color("a8fff0"))
+	draw_line(p + Vector2(-11, 0), p + Vector2(11, 0), Color(1, 1, 1, 0.55), 1.5)
 
 func _heart(p: Vector2, col: Color, k: float = 1.0) -> void:
 	var s := k
