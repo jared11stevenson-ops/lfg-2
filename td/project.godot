@@ -21,6 +21,7 @@ window/handheld/orientation=0
 pointing/emulate_touch_from_mouse=true
 
 [rendering]
+textures/vram_compression/import_etc2_astc=true
 textures/canvas_textures/default_texture_filter=2
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
