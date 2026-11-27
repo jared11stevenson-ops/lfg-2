@@ -47,3 +47,29 @@ Flow: Start -> account (email + password) -> 3 profile slots -> Oak intro (pick 
 - **Dialogue boxes** have a green Next button at the lower right; a red Skip button appears in cutscenes.
 
 Take-aways for Wellfall Level 1: (1) one lane, one enemy species, four fixed tower spots and one starter is the entire first lesson; (2) tutorial is a short skippable drag-and-drop lesson; (3) the lose condition is visible and tactile (candies being carried off), which our coin pile now copies; (4) the first level ends with a payoff cutscene and an unlock.
+
+## Progress log: beating PTD1 story mode (Ruffle harness, tools/ptd_harness)
+**Beaten: Oak's Lab, Route 1.** Route 2 unlocked. Lost twice on Route 1 first (see below).
+
+### Economy and progression (read off the screens)
+- Money is **persistent** and earned per kill and per level (Oak's Lab + a few kills gave P74 to start; money is kept after a defeat).
+- **Level Up** costs money AND needs a full Exp bar: P30 (Lv5->6), P35 (6->7), P40 (7->8), i.e. 5 x (level+1). After a level-up the Exp bar empties.
+- **Relearn** a move P1,000; **TMs/HMs** P10,000; **PokeMart** sells Moon/Leaf/Thunder/Water/Fire stones at P10,000 each (evolution items). PokeCenter and Wiki are links to the website; Mystery Gift is a web redeem.
+- A new level-up can teach a move: Charmander Lv5 Scratch + Growl; **Lv7 learns Ember**.
+- **Move card fields**: Type, Attack Cooldown (frames), Attack Power, Category (Physical/Special), Accuracy, plus status data (Ember: burn chance 10%, burn power 20). Scratch: Normal, cooldown 18, power 40, Physical, accuracy 100%. Ember: Fire, cooldown 18, power 40, Special, accuracy 100%.
+- Team: 6 slots + Storage; sort by Level / Number / Name; a white or red up-arrow on a card means "enough Exp to level up".
+
+### Levels
+| Level | Waves | Layout | Enemies seen | Free spots | Win |
+|---|---|---|---|---|---|
+| Oak's Lab | 5 | 1 room, lane left to right to the candy pile | Rattata | 4 fixed squares | scripted Gary/Blastoise finale |
+| Route 1 | 6 | tall vertical map (zoom to 50% to see all), lane down the left, bend right, down to the candies | Rattata, Pidgey, more per wave | **12 fixed squares** | wave 6 triggers a story cutscene (Drowzee / mind-controlled boy), then the level ends |
+- Lose condition: all candies taken (6 shown as "x6"); Route 1 was LOST twice with a single Charmander at Lv6 (boss wave stole everything), WON with a Lv7 Charmander (Ember) placed at the bend of the lane.
+- Each level is preceded by a long dialogue cutscene (Skip button appears top-left in some).
+- Catching: the Poke Ball card at lower right is dragged onto an enemy (big ball cursor). I did not manage to land a catch by hand (the game runs in real time and my screenshots lag).
+
+### What to copy / change for Wellfall
+1. Persistent money + level-up cost that rises each level and is gated by Exp: copy (we have gold + XP; add the money cost curve).
+2. Move card with cooldown/power/category/accuracy/status: copy the data model; our moves are plain stat boosts.
+3. Fixed placement squares (4 then 12): our free placement is a bigger departure; fixed spots make balancing exact.
+4. Story cutscene as the win trigger instead of a boss fight: matches the user's "no boss" request.

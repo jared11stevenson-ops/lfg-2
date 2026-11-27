@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}#c{width:800px;height:600px}</style>
+<script src="ruffle.js"></script></head><body><div id="c"></div>
+<script>
+window.RufflePlayer = window.RufflePlayer || {};
+window.addEventListener("load", () => {
+  const ruffle = window.RufflePlayer.newest();
+  const p = ruffle.createPlayer();
+  p.style.width = "800px"; p.style.height = "600px";
+  document.getElementById("c").appendChild(p);
+  window.__p = p;
+  p.load({ url: (new URLSearchParams(location.search).get("swf") || "game.swf"), allowScriptAccess: true, unmuteOverlay: "hidden", splashScreen: false, letterbox: "off", contextMenu: "off" });
+});
+</script></body></html>
