@@ -249,6 +249,8 @@ func _build_ui() -> void:
 	intro.text = "%s\n%s" % [lv.name, lv.rule]
 	layer.add_child(intro)
 	Sfx.start_music(self)
+	Sfx.set_ambient(true)
+	Sfx.set_battle(false)
 
 func _build_shop() -> void:
 	shop_ids.clear()
@@ -368,6 +370,7 @@ func _start_wave() -> void:
 	spawn_idx = 0
 	spawn_cd = 0.0
 	wave_running = true
+	Sfx.set_battle(true)
 	rng.seed = hash([run_seed, wave, 77])
 	_roll_event()
 	start_btn.disabled = true
@@ -432,7 +435,7 @@ func _goal(goal: String) -> void:
 		if g[0] == goal and Session.complete_goal(Session.level_id, goal):
 			goals_new.append(String(g[1]))
 			FxScript.text_at(self, Vector2(640, 250 + 30 * goals_new.size()), "Goal: %s  +%d gold" % [g[1], Session.GOAL_REWARD], Color("9fffa0"))
-			Sfx.play(self, "up", -8.0)
+			Sfx.play(self, "goal", -6.0)
 
 func _cap_species(e) -> String:
 	return String(Creatures.ENEMIES[e.kind].get("capture_as", e.kind))
@@ -477,7 +480,7 @@ func _try_capture(e) -> void:
 	fx.from = Vector2(640, 700)
 	fx.done = _finish_capture.bind(e)
 	add_child(fx)
-	Sfx.play(self, "place", -6.0)
+	Sfx.play(self, "capture_throw", -6.0)
 	_refresh()
 
 func _finish_capture(success: bool, e) -> void:
@@ -496,7 +499,7 @@ func _finish_capture(success: bool, e) -> void:
 		if e.rare:
 			_goal("rare")
 		FxScript.text_at(self, e.position + Vector2(0, -60), "Captured %s!%s" % [Creatures.TOWERS[id].name, " NEW" if fresh else ""], Color("ffe08a"))
-		Sfx.play(self, "up", -6.0)
+		Sfx.play(self, "capture_ok", -4.0)
 		Sfx.haptic(60)
 		e.queue_free()
 		_build_shop()
@@ -506,7 +509,7 @@ func _finish_capture(success: bool, e) -> void:
 		e.add_to_group("enemies")
 		e.boost(2.5)
 		FxScript.text_at(self, e.position + Vector2(0, -50), "Broke free!", Color("ff9a9a"))
-		Sfx.play(self, "leak", -14.0)
+		Sfx.play(self, "capture_fail", -8.0)
 	_refresh()
 
 func _spawn() -> void:
@@ -634,13 +637,14 @@ func _on_leaked(e) -> void:
 	well_flash = 1.0
 	shake = 1.0 if e.leak < 5 else 2.0
 	Sfx.haptic(60 if e.leak < 5 else 140)
-	Sfx.play(self, "leak", -4.0)
+	Sfx.play(self, "steal" if gold_pile != null else "leak", -5.0)
 	_refresh()
 	if lives <= 0:
 		_end("lost")
 
 func _wave_done() -> void:
 	wave_running = false
+	Sfx.set_battle(false)
 	var inc := 0
 	for t in get_tree().get_nodes_in_group("towers"):
 		inc += int(t.st.income)
@@ -671,11 +675,13 @@ func _end(result: String) -> void:
 	var rs = ResultScreen.new()
 	rs.won = result == "won"
 	var lvl_lines: Array = []
+	var leveled := false
 	for id in run_xp:
 		var bonus := 40 if result == "won" else 0
 		var lv_change := Session.add_xp(String(id), int(run_xp[id]) + bonus)
 		if lv_change[1] > lv_change[0]:
 			lvl_lines.append("%s grew to Lv %d!" % [Creatures.TOWERS[id].name, lv_change[1]])
+			leveled = true
 			for mv in Moves.gained(Creatures.TOWERS[id].types, lv_change[0], lv_change[1]):
 				lvl_lines.append("   learned %s (%s)" % [mv.name, mv.desc])
 	if not lv.get("rare", {}).is_empty():
@@ -718,6 +724,8 @@ func _end(result: String) -> void:
 		rs.lines = rs.lines.slice(0, 5) + [rs.lines[rs.lines.size() - 1]]
 	layer.add_child(rs)
 	layer.move_child(rs, retry_btn.get_index())
+	if leveled:
+		get_tree().create_timer(1.1).timeout.connect(func(): Sfx.play(self, "levelup", -6.0))
 	if tutorial != null and is_instance_valid(tutorial):
 		tutorial.queue_free()
 	result_screen = rs

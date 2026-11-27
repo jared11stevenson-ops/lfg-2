@@ -70,7 +70,14 @@ const VOICES := {
 	"tentbat": [1300, 1500, "sine", 0.1], "dumbomaton": [320, 320, "square", 0.16], "colukite": [880, 440, "saw", 0.16], "gilamancer": [200, 330, "saw", 0.24],
 }
 
+static func _file_for(name: String) -> String:
+	var f := name.replace("|say", "").replace("|hurt", "_hurt").replace("|", "_")
+	return "res://audio/%s.wav" % f
+
 static func _make(name: String) -> AudioStreamWAV:
+	var fp := _file_for(name)
+	if ResourceLoader.exists(fp):
+		return load(fp)
 	if name.begins_with("v_"):
 		var sp := name.substr(2)
 		var v: Array = VOICES.get(sp.get_slice("|", 0), [400, 300, "square", 0.15])
@@ -181,8 +188,34 @@ static var _music_variant := -1
 static func voice(n: Node, species: String, hurt: bool = false, vol_db: float = -14.0) -> void:
 	play(n, "v_" + species + ("|hurt" if hurt else "|say"), vol_db, 120)
 
+static var _drums_player: AudioStreamPlayer
+static var _amb_player: AudioStreamPlayer
+
+static func _looped(path: String) -> AudioStreamWAV:
+	var d := (load(path) as AudioStreamWAV).duplicate() as AudioStreamWAV
+	d.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	d.loop_begin = 0
+	d.loop_end = int(round(d.get_length() * float(d.mix_rate)))
+	return d
+
+static func _mk_player(n: Node, stream: AudioStreamWAV, db: float) -> AudioStreamPlayer:
+	var p := AudioStreamPlayer.new()
+	p.bus = "Music"
+	p.stream = stream
+	p.volume_db = db
+	n.get_tree().root.add_child.call_deferred(p)
+	return p
+
 static func start_music(n: Node, variant: int = 0) -> void:
 	setup_buses()
+	if ResourceLoader.exists("res://audio/music_base.wav"):
+		if _music_player == null or not is_instance_valid(_music_player):
+			_music_player = _mk_player(n, _looped("res://audio/music_base.wav"), -11.0)
+			_drums_player = _mk_player(n, _looped("res://audio/music_drums.wav"), -60.0)
+			_amb_player = _mk_player(n, _looped("res://audio/ambient.wav"), -60.0)
+		if music_on:
+			_play_music.call_deferred()
+		return
 	if _music_player == null or not is_instance_valid(_music_player):
 		_music_player = AudioStreamPlayer.new()
 		_music_player.bus = "Music"
@@ -196,8 +229,19 @@ static func start_music(n: Node, variant: int = 0) -> void:
 		_play_music.call_deferred()
 
 static func _play_music() -> void:
-	if is_instance_valid(_music_player) and _music_player.is_inside_tree() and not _music_player.playing:
-		_music_player.play()
+	for p in [_music_player, _drums_player, _amb_player]:
+		if is_instance_valid(p) and p.is_inside_tree() and not p.playing:
+			p.play()
+
+# Battle intensity: the drum layer fades in while a wave is running.
+static func set_battle(on: bool) -> void:
+	if is_instance_valid(_drums_player) and _drums_player.is_inside_tree():
+		_drums_player.create_tween().tween_property(_drums_player, "volume_db", -9.0 if on else -60.0, 1.6)
+
+# Ambient bed (crickets, wind, chimes) for the battle scene; off in menus.
+static func set_ambient(on: bool) -> void:
+	if is_instance_valid(_amb_player) and _amb_player.is_inside_tree():
+		_amb_player.create_tween().tween_property(_amb_player, "volume_db", -13.0 if on else -60.0, 1.2)
 
 static func toggle_sound(n: Node) -> bool:
 	music_on = not music_on
