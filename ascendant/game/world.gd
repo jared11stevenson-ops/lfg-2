@@ -105,3 +105,8 @@ func civ_spot(civ_id: int, rng: RandomNumberGenerator) -> Vector2:
 signal civ_attacked(civ_id: int, victim)
 func civ_provoked(civ_id: int, victim) -> void:
 	civ_attacked.emit(civ_id, victim)
+
+func fx_ring(p: Vector2, c: Color, r: float) -> void:
+	if fx: fx.ring(p, c, r)
+func fx_text(p: Vector2, s: String, c: Color) -> void:
+	if fx: fx.text(p, s, c)

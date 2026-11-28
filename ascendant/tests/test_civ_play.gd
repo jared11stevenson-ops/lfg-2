@@ -39,5 +39,5 @@ func test_trade_for_knowledge() -> void:
 	check(ps.player.inv.get("silk", 0) == 0, "materials consumed")
 	# attacking a civ member sours relations
 	tribe.take_hit(1.0, ps.player, Vector2.ZERO)
-	check(float(ps.rep.get(civ["id"], 0.0)) < 0.0, "violence costs standing")
+	check(float(ps.rep.get(civ["id"], 0.0)) < 0.0, "violence costs standing (rep=%s tribe_civ=%d targetable=%s player=%s valid=%s hp=%s)" % [str(ps.rep), tribe.civ_id, str(tribe.targetable()), str(ps.player.is_player), str(is_instance_valid(tribe)), str(tribe.hp)])
 	ps.queue_free()
