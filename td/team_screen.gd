@@ -19,6 +19,7 @@ var toggle_btn: Button
 var candy_btn: Button
 var lure_btn: Button
 var msg: Label
+var exp_bar: ProgressBar
 
 func _ready() -> void:
 	size = Vector2(1280, 720)
@@ -40,6 +41,11 @@ func _ready() -> void:
 	candy_btn = _btn("", Vector2(960, 520), Vector2(290, 50), 18, Color("8a4fc0"), _candy)
 	lure_btn = _btn("", Vector2(700, 584), Vector2(250, 50), 18, Color("c4852b"), _lures)
 	msg = _lbl("", Vector2(700, 650), 18, Color("9fffa0"))
+	exp_bar = ProgressBar.new()
+	exp_bar.position = Vector2(700, 470)
+	exp_bar.size = Vector2(540, 22)
+	exp_bar.show_percentage = false
+	add_child(exp_bar)
 	for b in [toggle_btn, candy_btn, lure_btn]:
 		add_child(b)
 	refresh()
@@ -95,7 +101,7 @@ func refresh() -> void:
 		b.pressed.connect(func(): sel = id; Sfx.play(self, "click"); refresh())
 		UiStyle.style_btn(b, Color("2f6b3a") if id in team else Color("3a3f5a"), Color("d9892a"))
 		grid.add_child(b)
-	for j in range(own.size(), mini(Session.TEAM_MAX, own.size() + 3)):
+	for j in range(own.size(), Session.TEAM_MAX):
 		var ph := Button.new()
 		ph.text = "?\nCapture to unlock"
 		ph.disabled = true
@@ -123,7 +129,14 @@ func refresh() -> void:
 	else:
 		candy_btn.text = "Level up to %d: %d gold%s" % [l + 1, Session.level_cost(sel), "" if Session.xp_ready(sel) else "  (needs Exp)"]
 	lure_btn.text = "Lure Pack +2 (%d gold)" % LURE_COST
-	candy_btn.disabled = l >= Session.MAX_LEVEL
+	candy_btn.disabled = l >= Session.MAX_LEVEL or not Session.xp_ready(sel) or Session.gold < Session.level_cost(sel)
+	exp_bar.visible = l < Session.MAX_LEVEL
+	if l < Session.MAX_LEVEL:
+		var lo := float(Session.xp_for_level(l))
+		var hi := float(Session.xp_for_level(l + 1))
+		exp_bar.min_value = lo
+		exp_bar.max_value = hi
+		exp_bar.value = clampf(float(xp), lo, hi)
 	lure_btn.disabled = Session.gold < LURE_COST
 
 func _toggle() -> void:
