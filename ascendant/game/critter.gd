@@ -128,7 +128,10 @@ func take_hit(dmg: float, from, knock: Vector2) -> void:
 	if not targetable(): return
 	var armor: float = ph["armor"]
 	var d := dmg * (1.0 - 0.6 * armor) * (0.8 if burrowed else 1.0)
-	hp -= d; hurt = 1.0; vel += knock / maxf(mass * 4.0 + 1.0, 1.0)
+	hp -= d; hurt = 1.0
+	if world.has_meta("sfx"): (world.get_meta("sfx") as Synth.Bank).play("hit" if d > 2.0 else "bite", 0.7, 1.0 / (0.6 + mass))
+	if world.get_meta("show_numbers", true) and (from is Critter and ((from as Critter).is_player or is_player)): world.fx_text(position, str(int(d)), Color(1, 0.9, 0.6) if not is_player else Color(1, 0.4, 0.4))
+	vel += knock / maxf(mass * 4.0 + 1.0, 1.0)
 	if from is Critter:
 		aggro_to = from
 		if state != "flee" and carniv < 0.5 and rng.randf() < 0.7: state = "flee"; target = from

@@ -38,7 +38,9 @@ static func blank() -> PackedFloat32Array:
 	return g
 
 ## Bauplan-specific constraints (what the developmental program forbids / forces).
+const MANIP_CAP := [0.9, 0.55, 0.7, 0.65, 0.75, 0.7, 0.15]   # per body plan: what the anatomy can physically handle
 static func constrain(g: PackedFloat32Array, bp: int) -> void:
+	set_g(g, "c_manip", minf(get_g(g, "c_manip"), MANIP_CAP[bp]))
 	match bp:
 		BP.ARACH, BP.INSECT:
 			set_g(g, "size", minf(get_g(g, "size"), 0.8))     # tracheal/book-lung scaling limit
@@ -101,8 +103,9 @@ static func cognition(g: PackedFloat32Array) -> Dictionary:
 static func brain_cost(g: PackedFloat32Array) -> float:
 	var s := 0.0
 	for n in COG:
-		s += get_g(g, n)
-	return s / COG.size()
+		var v := get_g(g, n)
+		s += v * v          # extreme specialisation is expensive: the cost is convex
+	return s / COG.size() * 1.6
 
 static func random_for(bp: int, rng: RandomNumberGenerator, template: Dictionary = {}) -> PackedFloat32Array:
 	var g := blank()

@@ -1,0 +1,972 @@
+[
+  {
+    "alive": 40,
+    "civs": 2,
+    "civs_collapsed": 1,
+    "dawn_species": [
+      "Canopy Squirrel",
+      "Ash Rook"
+    ],
+    "extinct": 16,
+    "first_dawn": 407,
+    "infrastructure_harm_events": 0,
+    "known_techs": 10,
+    "ms": 56523,
+    "ms_per_tick": 94.205,
+    "ruins": 49,
+    "sapient": 2,
+    "seed": 10,
+    "series": [
+      {
+        "ever": 19,
+        "max_ci": 0.257334086656881,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 10,
+        "tick": 48,
+        "total": 12445.2962025265
+      },
+      {
+        "ever": 21,
+        "max_ci": 0.247636157062553,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 12,
+        "tick": 100,
+        "total": 94952.0007317869
+      },
+      {
+        "ever": 22,
+        "max_ci": 0.362844368458053,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 13,
+        "tick": 148,
+        "total": 261490.508627637
+      },
+      {
+        "ever": 25,
+        "max_ci": 0.344714439170512,
+        "max_ratchet": 15.7858187040303,
+        "sapient": 0,
+        "species": 16,
+        "tick": 200,
+        "total": 284435.681212291
+      },
+      {
+        "ever": 29,
+        "max_ci": 0.366600716884659,
+        "max_ratchet": 22.4342348735462,
+        "sapient": 0,
+        "species": 20,
+        "tick": 248,
+        "total": 366256.595770565
+      },
+      {
+        "ever": 33,
+        "max_ci": 0.385861042206268,
+        "max_ratchet": 45.5741151401197,
+        "sapient": 0,
+        "species": 24,
+        "tick": 300,
+        "total": 430736.654192506
+      },
+      {
+        "ever": 35,
+        "max_ci": 0.494606110417102,
+        "max_ratchet": 68.4114875717269,
+        "sapient": 0,
+        "species": 25,
+        "tick": 348,
+        "total": 457930.549595118
+      },
+      {
+        "ever": 39,
+        "max_ci": 0.450756715746637,
+        "max_ratchet": 65.2122737477815,
+        "sapient": 0,
+        "species": 28,
+        "tick": 400,
+        "total": 421552.219811999
+      },
+      {
+        "ever": 43,
+        "max_ci": 0.45888295847896,
+        "max_ratchet": 89.0024686400639,
+        "sapient": 1,
+        "species": 31,
+        "tick": 448,
+        "total": 564801.964094564
+      },
+      {
+        "ever": 48,
+        "max_ci": 0.458810135631384,
+        "max_ratchet": 113.295717382569,
+        "sapient": 1,
+        "species": 34,
+        "tick": 500,
+        "total": 407158.687823244
+      },
+      {
+        "ever": 51,
+        "max_ci": 0.492077451472671,
+        "max_ratchet": 130.620146955053,
+        "sapient": 2,
+        "species": 35,
+        "tick": 548,
+        "total": 497027.294808405
+      },
+      {
+        "ever": 56,
+        "max_ci": 0.503976552015999,
+        "max_ratchet": 162.592061207891,
+        "sapient": 2,
+        "species": 40,
+        "tick": 600,
+        "total": 424468.743459226
+      }
+    ],
+    "speciations": 41,
+    "structures": 125,
+    "styles": {
+      "cairn_spire": 1,
+      "dam": 1,
+      "granary": 23,
+      "lodge": 17,
+      "nest_cluster": 54,
+      "reed_paddy": 16,
+      "seed_plot": 4,
+      "trail": 8,
+      "workbench": 1
+    },
+    "wars": 0
+  },
+  {
+    "alive": 42,
+    "civs": 7,
+    "civs_collapsed": 1,
+    "dawn_species": [
+      "Glass Minnow",
+      "Glass Minnow",
+      "Glass Minnow",
+      "Upland Meadow Vole",
+      "Reed-Gnawer",
+      "Dune Hare",
+      "Marsh Quarry Ant"
+    ],
+    "extinct": 17,
+    "first_dawn": 301,
+    "infrastructure_harm_events": 0,
+    "known_techs": 17,
+    "ms": 69332,
+    "ms_per_tick": 115.553333333333,
+    "ruins": 4,
+    "sapient": 7,
+    "seed": 11,
+    "series": [
+      {
+        "ever": 19,
+        "max_ci": 0.236689453335167,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 11,
+        "tick": 48,
+        "total": 23301.667056909
+      },
+      {
+        "ever": 21,
+        "max_ci": 0.287183243906021,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 13,
+        "tick": 100,
+        "total": 242663.459170867
+      },
+      {
+        "ever": 23,
+        "max_ci": 0.280029152800516,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 15,
+        "tick": 148,
+        "total": 758720.71222163
+      },
+      {
+        "ever": 26,
+        "max_ci": 0.299120743847861,
+        "max_ratchet": 4.91192966181242,
+        "sapient": 0,
+        "species": 17,
+        "tick": 200,
+        "total": 692818.343875953
+      },
+      {
+        "ever": 30,
+        "max_ci": 0.381905562566149,
+        "max_ratchet": 20.4624755683472,
+        "sapient": 0,
+        "species": 21,
+        "tick": 248,
+        "total": 894016.037510442
+      },
+      {
+        "ever": 35,
+        "max_ci": 0.389663640570304,
+        "max_ratchet": 41.1593797750005,
+        "sapient": 0,
+        "species": 26,
+        "tick": 300,
+        "total": 1054978.34081141
+      },
+      {
+        "ever": 39,
+        "max_ci": 0.437875997773901,
+        "max_ratchet": 66.4486685364996,
+        "sapient": 2,
+        "species": 30,
+        "tick": 348,
+        "total": 840464.976138431
+      },
+      {
+        "ever": 43,
+        "max_ci": 0.506082227522073,
+        "max_ratchet": 87.2629300390991,
+        "sapient": 3,
+        "species": 33,
+        "tick": 400,
+        "total": 794638.106866297
+      },
+      {
+        "ever": 47,
+        "max_ci": 0.461517009343236,
+        "max_ratchet": 105.38108518217,
+        "sapient": 3,
+        "species": 33,
+        "tick": 448,
+        "total": 1044546.43727361
+      },
+      {
+        "ever": 51,
+        "max_ci": 0.437930180849326,
+        "max_ratchet": 129.337788195171,
+        "sapient": 4,
+        "species": 36,
+        "tick": 500,
+        "total": 962203.722701484
+      },
+      {
+        "ever": 55,
+        "max_ci": 0.510528915804025,
+        "max_ratchet": 154.381958740861,
+        "sapient": 4,
+        "species": 39,
+        "tick": 548,
+        "total": 1037452.89257606
+      },
+      {
+        "ever": 59,
+        "max_ci": 0.466933892069092,
+        "max_ratchet": 192.688648753278,
+        "sapient": 7,
+        "species": 42,
+        "tick": 600,
+        "total": 876438.405236885
+      }
+    ],
+    "speciations": 44,
+    "structures": 29,
+    "styles": {
+      "burrow_nook": 2,
+      "granary": 1,
+      "lodge": 23,
+      "mound_hut": 3
+    },
+    "wars": 0
+  },
+  {
+    "alive": 48,
+    "civs": 17,
+    "civs_collapsed": 0,
+    "dawn_species": [
+      "Thaw Quarry Ant",
+      "Thaw Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Thaw Quarry Ant",
+      "Swift Ash Rook",
+      "Quarry Ant",
+      "Dune Hare",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Marsh Squirrel",
+      "Ash Rook",
+      "Quarry Ant",
+      "Quarry Ant"
+    ],
+    "extinct": 13,
+    "first_dawn": 296,
+    "infrastructure_harm_events": 0,
+    "known_techs": 132,
+    "ms": 80093,
+    "ms_per_tick": 133.488333333333,
+    "ruins": 0,
+    "sapient": 17,
+    "seed": 12,
+    "series": [
+      {
+        "ever": 19,
+        "max_ci": 0.259897579304284,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 11,
+        "tick": 48,
+        "total": 56335.2416568458
+      },
+      {
+        "ever": 23,
+        "max_ci": 0.282907626499461,
+        "max_ratchet": 6.4045287461322,
+        "sapient": 0,
+        "species": 15,
+        "tick": 100,
+        "total": 464009.484416576
+      },
+      {
+        "ever": 24,
+        "max_ci": 0.418175446034748,
+        "max_ratchet": 6.94375532109181,
+        "sapient": 0,
+        "species": 16,
+        "tick": 148,
+        "total": 757819.702347674
+      },
+      {
+        "ever": 28,
+        "max_ci": 0.359191135602718,
+        "max_ratchet": 13.8781375628897,
+        "sapient": 0,
+        "species": 20,
+        "tick": 200,
+        "total": 936794.493720452
+      },
+      {
+        "ever": 31,
+        "max_ci": 0.431432647082221,
+        "max_ratchet": 22.9100244619946,
+        "sapient": 0,
+        "species": 23,
+        "tick": 248,
+        "total": 1014368.39427815
+      },
+      {
+        "ever": 36,
+        "max_ci": 0.473478894467003,
+        "max_ratchet": 37.9136948195621,
+        "sapient": 1,
+        "species": 28,
+        "tick": 300,
+        "total": 1036942.01342666
+      },
+      {
+        "ever": 40,
+        "max_ci": 0.509083868811701,
+        "max_ratchet": 52.8833652963449,
+        "sapient": 2,
+        "species": 31,
+        "tick": 348,
+        "total": 1255192.76969687
+      },
+      {
+        "ever": 44,
+        "max_ci": 0.465201995524552,
+        "max_ratchet": 65.6758668739842,
+        "sapient": 6,
+        "species": 34,
+        "tick": 400,
+        "total": 1523330.32480126
+      },
+      {
+        "ever": 48,
+        "max_ci": 0.500686255988411,
+        "max_ratchet": 80.8741072861718,
+        "sapient": 7,
+        "species": 37,
+        "tick": 448,
+        "total": 1407607.35629738
+      },
+      {
+        "ever": 52,
+        "max_ci": 0.465435712964253,
+        "max_ratchet": 90.9213714585729,
+        "sapient": 12,
+        "species": 41,
+        "tick": 500,
+        "total": 1802141.17731858
+      },
+      {
+        "ever": 56,
+        "max_ci": 0.490127748496637,
+        "max_ratchet": 109.99015891361,
+        "sapient": 14,
+        "species": 44,
+        "tick": 548,
+        "total": 1736739.00654871
+      },
+      {
+        "ever": 61,
+        "max_ci": 0.480173952724097,
+        "max_ratchet": 117.419642496144,
+        "sapient": 17,
+        "species": 48,
+        "tick": 600,
+        "total": 1682955.62912163
+      }
+    ],
+    "speciations": 46,
+    "structures": 1738,
+    "styles": {
+      "burrow_nook": 88,
+      "cairn_spire": 3,
+      "canopy_walk": 27,
+      "fungus_garden": 172,
+      "granary": 265,
+      "mound_hut": 925,
+      "nest_cluster": 107,
+      "seed_plot": 73,
+      "trail": 74,
+      "workbench": 4
+    },
+    "wars": 0
+  },
+  {
+    "alive": 40,
+    "civs": 37,
+    "civs_collapsed": 6,
+    "dawn_species": [
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Ash Rook",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Keen Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Ash Rook",
+      "Ash Rook",
+      "Keen Quarry Ant",
+      "Quarry Ant",
+      "Marsh Quarry Ant",
+      "Ash Rook",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Marsh Quarry Ant",
+      "Keen Quarry Ant",
+      "Quarry Ant",
+      "Marsh Quarry Ant",
+      "Quarry Ant",
+      "Ash Rook",
+      "Keen Quarry Ant",
+      "Ash Rook",
+      "Quarry Ant"
+    ],
+    "extinct": 19,
+    "first_dawn": 325,
+    "infrastructure_harm_events": 10,
+    "known_techs": 211,
+    "ms": 82021,
+    "ms_per_tick": 136.701666666667,
+    "ruins": 180,
+    "sapient": 37,
+    "seed": 13,
+    "series": [
+      {
+        "ever": 19,
+        "max_ci": 0.257333893821714,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 12,
+        "tick": 48,
+        "total": 71613.0859031266
+      },
+      {
+        "ever": 22,
+        "max_ci": 0.261396516128719,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 14,
+        "tick": 100,
+        "total": 688890.845201492
+      },
+      {
+        "ever": 23,
+        "max_ci": 0.262615993169264,
+        "max_ratchet": 0.241385059538975,
+        "sapient": 0,
+        "species": 15,
+        "tick": 148,
+        "total": 1283129.51844282
+      },
+      {
+        "ever": 26,
+        "max_ci": 0.389356470302887,
+        "max_ratchet": 14.1969026276747,
+        "sapient": 0,
+        "species": 18,
+        "tick": 200,
+        "total": 1261100.85324168
+      },
+      {
+        "ever": 30,
+        "max_ci": 0.488759782687238,
+        "max_ratchet": 29.1111355665938,
+        "sapient": 0,
+        "species": 22,
+        "tick": 248,
+        "total": 1651631.72449115
+      },
+      {
+        "ever": 34,
+        "max_ci": 0.478067829401795,
+        "max_ratchet": 27.5101866119154,
+        "sapient": 0,
+        "species": 26,
+        "tick": 300,
+        "total": 1634187.09060891
+      },
+      {
+        "ever": 38,
+        "max_ci": 0.548606985702245,
+        "max_ratchet": 41.7406019700628,
+        "sapient": 3,
+        "species": 28,
+        "tick": 348,
+        "total": 1798344.41835802
+      },
+      {
+        "ever": 42,
+        "max_ci": 0.493497521937857,
+        "max_ratchet": 71.7540878649627,
+        "sapient": 6,
+        "species": 31,
+        "tick": 400,
+        "total": 1392661.05602043
+      },
+      {
+        "ever": 46,
+        "max_ci": 0.514266508701503,
+        "max_ratchet": 81.9814400893042,
+        "sapient": 14,
+        "species": 32,
+        "tick": 448,
+        "total": 1642709.38177141
+      },
+      {
+        "ever": 51,
+        "max_ci": 0.572846701547244,
+        "max_ratchet": 104.297078083947,
+        "sapient": 18,
+        "species": 37,
+        "tick": 500,
+        "total": 1482150.11508145
+      },
+      {
+        "ever": 55,
+        "max_ci": 0.553779358136752,
+        "max_ratchet": 100.691006390428,
+        "sapient": 26,
+        "species": 39,
+        "tick": 548,
+        "total": 2230334.09143123
+      },
+      {
+        "ever": 59,
+        "max_ci": 0.549172176529068,
+        "max_ratchet": 107.755714241535,
+        "sapient": 37,
+        "species": 40,
+        "tick": 600,
+        "total": 2023945.47686195
+      }
+    ],
+    "speciations": 44,
+    "structures": 2232,
+    "styles": {
+      "burrow_nook": 49,
+      "cairn_spire": 2,
+      "canopy_walk": 56,
+      "forge_hollow": 1,
+      "fungus_garden": 171,
+      "granary": 246,
+      "hive_mound": 178,
+      "lodge": 182,
+      "mound_hut": 1053,
+      "nest_cluster": 189,
+      "root_cellar": 35,
+      "seed_plot": 55,
+      "trail": 12,
+      "workbench": 3
+    },
+    "wars": 5
+  },
+  {
+    "alive": 38,
+    "civs": 23,
+    "civs_collapsed": 3,
+    "dawn_species": [
+      "Quarry Ant",
+      "Venom Quarry Ant",
+      "Quarry Ant",
+      "Venom Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Ground Quarry Ant",
+      "Venom Quarry Ant",
+      "Ground Quarry Ant",
+      "Meadow Vole",
+      "Venom Quarry Ant",
+      "Venom Quarry Ant",
+      "Venom Quarry Ant",
+      "Ground Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Ground Quarry Ant",
+      "Venom Quarry Ant",
+      "Venom Quarry Ant",
+      "Quarry Ant",
+      "Venom Quarry Ant",
+      "Venom Quarry Ant",
+      "Venom Quarry Ant"
+    ],
+    "extinct": 21,
+    "first_dawn": 352,
+    "infrastructure_harm_events": 0,
+    "known_techs": 185,
+    "ms": 71686,
+    "ms_per_tick": 119.476666666667,
+    "ruins": 99,
+    "sapient": 23,
+    "seed": 14,
+    "series": [
+      {
+        "ever": 19,
+        "max_ci": 0.195236831139172,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 11,
+        "tick": 48,
+        "total": 91766.3541169427
+      },
+      {
+        "ever": 22,
+        "max_ci": 0.276046090122211,
+        "max_ratchet": 0.266705053551159,
+        "sapient": 0,
+        "species": 14,
+        "tick": 100,
+        "total": 383790.768565277
+      },
+      {
+        "ever": 23,
+        "max_ci": 0.288913574307705,
+        "max_ratchet": 4.95464416675776,
+        "sapient": 0,
+        "species": 15,
+        "tick": 148,
+        "total": 661364.995269411
+      },
+      {
+        "ever": 26,
+        "max_ci": 0.295627987728737,
+        "max_ratchet": 6.70849830143525,
+        "sapient": 0,
+        "species": 18,
+        "tick": 200,
+        "total": 796551.001053107
+      },
+      {
+        "ever": 30,
+        "max_ci": 0.361529972308814,
+        "max_ratchet": 18.779588752416,
+        "sapient": 0,
+        "species": 22,
+        "tick": 248,
+        "total": 1081940.73059156
+      },
+      {
+        "ever": 34,
+        "max_ci": 0.392191424080787,
+        "max_ratchet": 25.0527002941776,
+        "sapient": 0,
+        "species": 26,
+        "tick": 300,
+        "total": 1361161.87172324
+      },
+      {
+        "ever": 38,
+        "max_ci": 0.478550170891148,
+        "max_ratchet": 42.5753169002372,
+        "sapient": 0,
+        "species": 28,
+        "tick": 348,
+        "total": 912247.09352049
+      },
+      {
+        "ever": 42,
+        "max_ci": 0.521623929750558,
+        "max_ratchet": 61.6515779306759,
+        "sapient": 2,
+        "species": 32,
+        "tick": 400,
+        "total": 1673669.52547853
+      },
+      {
+        "ever": 46,
+        "max_ci": 0.56070281385645,
+        "max_ratchet": 78.3527685921054,
+        "sapient": 3,
+        "species": 32,
+        "tick": 448,
+        "total": 1271586.08030238
+      },
+      {
+        "ever": 51,
+        "max_ci": 0.554600711747318,
+        "max_ratchet": 90.2684983247716,
+        "sapient": 13,
+        "species": 35,
+        "tick": 500,
+        "total": 1674840.88366903
+      },
+      {
+        "ever": 55,
+        "max_ci": 0.567284802588773,
+        "max_ratchet": 99.4226272734464,
+        "sapient": 16,
+        "species": 37,
+        "tick": 548,
+        "total": 1563578.69441118
+      },
+      {
+        "ever": 59,
+        "max_ci": 0.578891378244469,
+        "max_ratchet": 118.879994606401,
+        "sapient": 23,
+        "species": 38,
+        "tick": 600,
+        "total": 1894738.2905173
+      }
+    ],
+    "speciations": 44,
+    "structures": 1452,
+    "styles": {
+      "burrow_nook": 53,
+      "cairn_spire": 1,
+      "fungus_garden": 102,
+      "granary": 154,
+      "lodge": 109,
+      "mound_hut": 1015,
+      "trail": 17,
+      "workbench": 1
+    },
+    "wars": 0
+  },
+  {
+    "alive": 48,
+    "civs": 43,
+    "civs_collapsed": 4,
+    "dawn_species": [
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Bright Squirrel",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Marsh Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Frost Reed-Gnawer",
+      "Upland Quarry Ant",
+      "Quarry Ant",
+      "Quarry Ant",
+      "Upland Quarry Ant",
+      "Marsh Quarry Ant",
+      "Upland Quarry Ant",
+      "Bright Squirrel",
+      "Quarry Ant",
+      "Upland Quarry Ant",
+      "Quarry Ant",
+      "Upland Quarry Ant",
+      "Quarry Ant",
+      "Upland Quarry Ant",
+      "Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Meadow Vole",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant",
+      "Upland Quarry Ant"
+    ],
+    "extinct": 12,
+    "first_dawn": 261,
+    "infrastructure_harm_events": 0,
+    "known_techs": 361,
+    "ms": 65684,
+    "ms_per_tick": 109.473333333333,
+    "ruins": 134,
+    "sapient": 43,
+    "seed": 15,
+    "series": [
+      {
+        "ever": 19,
+        "max_ci": 0.222620250161938,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 12,
+        "tick": 48,
+        "total": 31176.9172435151
+      },
+      {
+        "ever": 22,
+        "max_ci": 0.274060121750721,
+        "max_ratchet": 1.73268760668298,
+        "sapient": 0,
+        "species": 14,
+        "tick": 100,
+        "total": 392886.747080524
+      },
+      {
+        "ever": 23,
+        "max_ci": 0.350256118596564,
+        "max_ratchet": 4.7192736554796,
+        "sapient": 0,
+        "species": 15,
+        "tick": 148,
+        "total": 569053.044826941
+      },
+      {
+        "ever": 26,
+        "max_ci": 0.402532190530734,
+        "max_ratchet": 20.5256229351184,
+        "sapient": 0,
+        "species": 18,
+        "tick": 200,
+        "total": 581278.237796328
+      },
+      {
+        "ever": 30,
+        "max_ci": 0.427830263529913,
+        "max_ratchet": 31.916144153103,
+        "sapient": 0,
+        "species": 22,
+        "tick": 248,
+        "total": 705881.944839773
+      },
+      {
+        "ever": 35,
+        "max_ci": 0.426330501651204,
+        "max_ratchet": 55.5793058569835,
+        "sapient": 2,
+        "species": 27,
+        "tick": 300,
+        "total": 907077.889731513
+      },
+      {
+        "ever": 39,
+        "max_ci": 0.543309910236644,
+        "max_ratchet": 53.9593650752031,
+        "sapient": 3,
+        "species": 30,
+        "tick": 348,
+        "total": 822385.80300716
+      },
+      {
+        "ever": 43,
+        "max_ci": 0.491896068753473,
+        "max_ratchet": 72.8157451886708,
+        "sapient": 7,
+        "species": 33,
+        "tick": 400,
+        "total": 1155621.90822529
+      },
+      {
+        "ever": 47,
+        "max_ci": 0.557790765635712,
+        "max_ratchet": 100.301631370714,
+        "sapient": 10,
+        "species": 36,
+        "tick": 448,
+        "total": 1303821.93585474
+      },
+      {
+        "ever": 51,
+        "max_ci": 0.548197139200442,
+        "max_ratchet": 158.057017274535,
+        "sapient": 20,
+        "species": 40,
+        "tick": 500,
+        "total": 1359863.11757406
+      },
+      {
+        "ever": 55,
+        "max_ci": 0.56806914331655,
+        "max_ratchet": 175.21009197797,
+        "sapient": 34,
+        "species": 43,
+        "tick": 548,
+        "total": 1205448.3626597
+      },
+      {
+        "ever": 60,
+        "max_ci": 0.557792939927232,
+        "max_ratchet": 211.440029090963,
+        "sapient": 43,
+        "species": 48,
+        "tick": 600,
+        "total": 1212612.67643287
+      }
+    ],
+    "speciations": 45,
+    "structures": 3146,
+    "styles": {
+      "burrow_nook": 109,
+      "cairn_spire": 3,
+      "canopy_walk": 45,
+      "fungus_garden": 164,
+      "granary": 375,
+      "lodge": 303,
+      "mound_hut": 1955,
+      "seed_plot": 164,
+      "trail": 25,
+      "workbench": 3
+    },
+    "wars": 0
+  }
+]

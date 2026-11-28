@@ -1,0 +1,44 @@
+{
+ "id": "terrain.painterly_shader",
+ "family": "terrain",
+ "kind": "static",
+ "generator": "res://art/shaders/terrain.gdshader",
+ "seed": 0,
+ "params": {},
+ "state": "approved",
+ "creator": "lead",
+ "reviewer": "keeper",
+ "evidence_images": [
+  "res://assets/evidence/ui_title.png",
+  "res://assets/evidence/play2.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 7,
+   "evidence": "Coastline reads clearly in ui_title.png: dark inked shoreline with pale foam band separates water from grass at a glance."
+  },
+  "palette": {
+   "score": 7,
+   "evidence": "Water teal-blue, olive grass and warm dry patches sit in one muted watercolour range in ui_title.png; play2.png ground stays grey-green without clashing."
+  },
+  "readability": {
+   "score": 6,
+   "evidence": "Creatures and props remain legible over the terrain in both captures, but the grey rocky biome in play2.png is low contrast against the hare."
+  },
+  "cohesion": {
+   "score": 7,
+   "evidence": "Paper-like mottled texture matches the inked creature outlines and parchment UI panels in ui_title.png."
+  },
+  "distinctiveness": {
+   "score": 6,
+   "evidence": "Hand-inked coast with foam and mottling gives an own look in ui_title.png, though biome variety seen so far is only grass, water, rock."
+  },
+  "technical": {
+   "score": 6,
+   "evidence": "Smooth coast verified in ui_title.png; ui_new.png backdrop shows blocky pixelated water edge at a coarser data resolution, a known blemish."
+  }
+ },
+ "critical_failures": [],
+ "average_score": 6.5,
+ "notes": "Approved as static shader asset only. Pixelation in ui_new.png backdrop must be fixed before any future re-approval of new biomes."
+}

@@ -1,0 +1,44 @@
+{
+ "id": "prop.layer",
+ "family": "prop",
+ "kind": "static",
+ "generator": "res://sim/ecosim.gd",
+ "seed": 0,
+ "params": {},
+ "state": "quarantined",
+ "creator": "lead",
+ "reviewer": "keeper",
+ "evidence_images": [
+  "res://assets/evidence/play2.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 5,
+   "evidence": "Boulders in play2.png are near-identical round polygons repeated hundreds of times."
+  },
+  "palette": {
+   "score": 6,
+   "evidence": "Grey-brown stones fit the terrain palette in play2.png."
+  },
+  "readability": {
+   "score": 4,
+   "evidence": "Boulder density hides the player hare in play2.png; props compete with the subject."
+  },
+  "cohesion": {
+   "score": 5,
+   "evidence": "Dark outline rings are misregistered, drawn offset from several boulders in play2.png, breaking the inked look."
+  },
+  "distinctiveness": {
+   "score": 4,
+   "evidence": "No variety of rock form or surface detail; generic blobs."
+  },
+  "technical": {
+   "score": 5,
+   "evidence": "Offset double outline is a visible rendering bug."
+  }
+ },
+ "critical_failures": [
+  "outline ring offset from boulder fill (play2.png), visible at normal play zoom"
+ ],
+ "notes": "Prop layer is implemented in the play scene; critical finding must be fixed."
+}

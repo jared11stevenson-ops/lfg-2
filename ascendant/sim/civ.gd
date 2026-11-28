@@ -44,6 +44,14 @@ const COSTS := {"shelter": 8.0, "store": 6.0, "farm": 9.0, "water_work": 18.0, "
 
 static func found(sim: EcoSim, deme: Dictionary, r: int) -> Dictionary:
 	var sp: int = deme["sp"]
+	# a deme near a living civ of its own species joins it (one culture spreads; it does not re-found itself)
+	for c in sim.civs:
+		if c["collapsed"] < 0 and c["sp"] == sp:
+			for cr in c["regions"]:
+				if absi(cr % EcoSim.RW - r % EcoSim.RW) <= 3 and absi(cr / EcoSim.RW - r / EcoSim.RW) <= 3:
+					if not c["regions"].has(r): c["regions"].append(r)
+					deme["civ"] = c["id"]
+					return c
 	var bp: int = sim.species[sp]["bp"]
 	var caps := capabilities(deme["g"], bp)
 	var civ := {
@@ -133,7 +141,7 @@ static func _build(sim: EcoSim, civ: Dictionary, fedm: float) -> void:
 	var shelters := _count(civ, "shelter")
 	var need := ""
 	var per_region := float(civ["structures"].size()) / maxf(civ["regions"].size(), 1)
-	if per_region >= MAX_PER_REGION: return          # settlements fill their land; growth must come from expansion or tech
+	if per_region >= MAX_PER_REGION or civ["structures"].size() >= 160: return          # settlements fill their land; growth must come from expansion or tech
 	if shelters * SHELTER_CAP * (1.0 + 0.12 * civ["know"].size()) < pop: need = "shelter"
 	elif _count(civ, "store") < maxi(1, shelters / 3): need = "store"
 	elif (fedm < 0.8 or _count(civ, "farm") < shelters / 4) and caps["cultivate"] > 0.28: need = "farm"

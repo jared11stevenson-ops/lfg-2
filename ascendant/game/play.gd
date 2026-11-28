@@ -27,6 +27,7 @@ var focus := Vector2.ZERO
 var known: Dictionary = {}     # invention knowledge of THIS bloodline
 var craft_ui: CraftUI
 var items: Array = []        # Items owned by the bloodline (see core/item.gd)
+var sfx: Synth.Bank
 var props: PropLayer
 var structs: StructureLayer
 
@@ -51,6 +52,7 @@ func start_from_sim(s: EcoSim, arch_id: String, backdrop_mode: bool = false) -> 
 	cam.enabled = true
 	props = PropLayer.new(); props.world = world; props.cam = cam; props.z_index = 1
 	world.add_child(props)
+	sfx = Synth.Bank.new(); add_child(sfx); world.set_meta("sfx", sfx)
 	structs = StructureLayer.new(); structs.world = world; structs.cam = cam; structs.z_index = 2
 	world.add_child(structs)
 	var layer := CanvasLayer.new(); layer.layer = 10
@@ -117,6 +119,7 @@ func _on_died(c: Critter, killer) -> void:
 		cc.position = c.position; cc.food = clampf(0.4 + c.mass * 2.0, 0.4, 3.0); cc.art_ph = c.ph
 		world.add_child(cc); carcasses.append(cc)
 		cc.tree_exited.connect(func(): carcasses.erase(cc))
+	if sfx and is_instance_valid(player) and c.position.distance_to(player.position) < 600.0: sfx.play("death", 0.5, 1.0 / (0.6 + c.mass))
 	if c == player:
 		_player_died(killer)
 
@@ -157,6 +160,9 @@ func _become(c: Critter, new_line: bool = false) -> void:
 
 func _process(dt: float) -> void:
 	if not sim: return
+	if sfx and is_instance_valid(player):
+		var wet := 1.0 if world.is_water(player.position) else 0.0
+		sfx.set_beds(0.35, 0.1 + 0.4 * wet)
 	critters = critters.filter(func(c): return is_instance_valid(c))
 	world.set_meta("critters", critters)
 	spawn_t -= dt
@@ -196,7 +202,8 @@ func _player_input(dt: float) -> void:
 	p.move_dir = dir.normalized()
 	var mp := get_global_mouse_position()
 	p.aim = (mp - p.position).angle(); p.use_aim = true
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE): p.start_attack()
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE):
+		if p.start_attack(): sfx.play("swing", 0.5)
 	if Input.is_key_pressed(KEY_SHIFT): p.dodge()
 	if Input.is_key_pressed(KEY_G): gather(p, dt); p.move_dir *= 0.2
 	if Input.is_key_pressed(KEY_E):
@@ -207,7 +214,8 @@ func _player_input(dt: float) -> void:
 func _unhandled_key_input(ev: InputEvent) -> void:
 	if not (ev is InputEventKey and ev.pressed and not ev.echo) or not is_instance_valid(player): return
 	match ev.keycode:
-		KEY_Q: player.use_ability()
+		KEY_Q:
+			if player.use_ability(): sfx.play("swing", 0.6, 0.7)
 		KEY_Z: mate_pick += 1
 		KEY_R: try_mate(player)
 		KEY_TAB: observer = not observer

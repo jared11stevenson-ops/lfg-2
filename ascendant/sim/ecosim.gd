@@ -268,7 +268,7 @@ func fitness(g: PackedFloat32Array, bp: int, c: Dictionary) -> float:
 	var complex: float = 0.35 * c["div"] + 0.35 * c["amp"] + 0.3 * (1.0 - plantf)
 	var omni := 1.0 - absf(cr - 0.5) * 2.0
 	f += complex * (0.35 * T(g, "c_spatial") + 0.3 * T(g, "c_memory") + 0.2 * T(g, "c_curio") + 0.2 * T(g, "c_learn") * 0.8) * 1.1
-	f += T(g, "social") * (0.3 * T(g, "c_comm") * T(g, "c_coop")) * (0.3 + pp) * 1.2
+	f += T(g, "social") * (0.8 * T(g, "c_comm") * T(g, "c_coop")) * (0.35 + pp) * 1.2
 	f += omni * T(g, "c_manip") * T(g, "limb") * complex * 0.9
 	f += T(g, "c_plan") * c["amp"] * 0.35
 	return f
@@ -316,12 +316,12 @@ func _cognition_step(d: Dictionary, r: int, bp: int) -> void:
 	var g: PackedFloat32Array = d["g"]
 	var ci := cog_index(g)
 	var nn: float = d["n"]
-	var ok: bool = ci > 0.3 and nn > 25.0 and d["fed"] > 0.75 and T(g, "social") > 0.35
+	var ok: bool = ci > 0.26 and nn > 25.0 and d["fed"] > 0.65 and T(g, "social") > 0.3
 	if ok:
 		d["ratchet"] += ci * ci * 3.5
 	else:
 		d["ratchet"] = maxf(d["ratchet"] - 1.5, 0.0)
-	if d["civ"] < 0 and d["ratchet"] > 50.0 and ci > 0.38 and nn > 40.0 and (T(g, "c_manip") > 0.3 or T(g, "secrete") > 0.5 or T(g, "burrow") > 0.5):
+	if d["civ"] < 0 and d["ratchet"] > 40.0 and ci > 0.3 and nn > 40.0 and (T(g, "c_manip") > 0.3 or T(g, "secrete") > 0.5 or T(g, "burrow") > 0.5):
 		d["civ"] = sapient_events.size()
 		var ev := {"tick": tick, "region": r, "sp": d["sp"], "ci": ci, "n": nn}
 		Civ.found(self, d, r)

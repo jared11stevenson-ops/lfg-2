@@ -1,0 +1,47 @@
+{
+ "id": "creature.generator",
+ "family": "creature",
+ "kind": "runtime_generator",
+ "generator": "res://art/creature_art.gd",
+ "seed": 0,
+ "params": {},
+ "state": "quarantined",
+ "creator": "lead",
+ "reviewer": "keeper",
+ "evidence_images": [
+  "res://assets/evidence/lineup_v2.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 6,
+   "evidence": "Non-mammal plans (frog, spider, ant, bird, fish) have clear distinct silhouettes in lineup_v2.png; mammals collapse into near-identical elongated lizard shapes."
+  },
+  "palette": {
+   "score": 7,
+   "evidence": "Heritable palette is clamped to a dusk-watercolour gamut (Ink.palette); lineup_v2.png shows harmonious olive, rust, slate with violet shadows, no garish outliers."
+  },
+  "readability": {
+   "score": 5,
+   "evidence": "At lineup scale the vole, hare, gnawer, mole and squirrel are hard to tell apart; heads and ears are tiny dots and white whisker strokes."
+  },
+  "cohesion": {
+   "score": 7,
+   "evidence": "Shared outline weight, hue-shifted shading and cast shadow unify all 15 animals in lineup_v2.png."
+  },
+  "distinctiveness": {
+   "score": 6,
+   "evidence": "Illuminated-bestiary look is its own, but the mammal row repeats one template with a different tail."
+  },
+  "technical": {
+   "score": 6,
+   "evidence": "No per-output deterministic render check exists; only phenotype determinism is unit-tested."
+  }
+ },
+ "critical_failures": [],
+ "validated_output_space": {
+  "description": "NOT YET VALIDATED: no automated check of rendered outputs across seeds exists.",
+  "outputs_validated": 0,
+  "deterministic_check_passed": false
+ },
+ "notes": "Held in quarantine: mammal heads/ears/limbs weak, no deterministic output validation."
+}

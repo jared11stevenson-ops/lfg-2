@@ -1,0 +1,26 @@
+{
+ "id": "creature.plan.mammal",
+ "family": "creature",
+ "kind": "runtime_generator",
+ "generator": "res://art/creature_art.gd",
+ "seed": 0,
+ "params": {},
+ "state": "rejected",
+ "creator": "lead",
+ "reviewer": "keeper",
+ "evidence_images": [
+  "res://assets/evidence/lineup_v2.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 3,
+   "evidence": "Vole, hare, gnawer, mole, squirrel, stoat in lineup_v2.png share one salamander-like body with a pad or whip tail; mammals not recognisable as mammals."
+  },
+  "readability": {
+   "score": 4,
+   "evidence": "Ears and snouts are indistinct; the hare has no long ears or hind legs, so species cannot be told apart at game scale (play2.png)."
+  }
+ },
+ "critical_failures": [],
+ "rejection_reason": "Mammal body plan reads as lizard/newt: no ears, weak heads, limbs sprawl sideways. Redesign required (ears, head shape, upright limb posture)."
+}

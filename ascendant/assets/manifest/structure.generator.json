@@ -1,0 +1,47 @@
+{
+ "id": "structure.generator",
+ "family": "structure",
+ "kind": "runtime_generator",
+ "generator": "res://art/structure_art.gd",
+ "seed": 0,
+ "params": {},
+ "state": "quarantined",
+ "creator": "lead",
+ "reviewer": "keeper",
+ "evidence_images": [
+  "res://assets/evidence/structure_gallery_v1.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 6,
+   "evidence": "Mound, web, dam, spiral and thorn ring in structure_gallery_v1.png have different outlines; several mound types (rows 1 and 2, cols 1-3) are similar brown blobs."
+  },
+  "palette": {
+   "score": 7,
+   "evidence": "Muted earth, silk-white and violet accents match the creature gamut in structure_gallery_v1.png."
+  },
+  "readability": {
+   "score": 6,
+   "evidence": "Icons read at gallery scale; the faint dotted arc (row 2 col 8) and the shallow dam arcs are nearly invisible on the green ground."
+  },
+  "cohesion": {
+   "score": 8,
+   "evidence": "Same lighting and ink rule as creatures; ruined variants in rows 3-4 add moss and rubble consistently."
+  },
+  "distinctiveness": {
+   "score": 6,
+   "evidence": "Web and thorn ring are distinct; mounds are generic."
+  },
+  "technical": {
+   "score": 5,
+   "evidence": "No deterministic output validation; ruin variants only checked by eye."
+  }
+ },
+ "critical_failures": [],
+ "validated_output_space": {
+  "description": "NOT YET VALIDATED: no automated check across seeds or species exists.",
+  "outputs_validated": 0,
+  "deterministic_check_passed": false
+ },
+ "notes": "Close to approvable; needs a deterministic output test and larger evidence at game zoom."
+}

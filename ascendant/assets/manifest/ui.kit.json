@@ -1,0 +1,47 @@
+{
+ "id": "ui.kit",
+ "family": "ui",
+ "kind": "static",
+ "generator": "res://ui/ui_kit.gd",
+ "seed": 0,
+ "params": {},
+ "state": "quarantined",
+ "creator": "lead",
+ "reviewer": "keeper",
+ "evidence_images": [
+  "res://assets/evidence/ui_title.png",
+  "res://assets/evidence/ui_new.png",
+  "res://assets/evidence/craft_bench.png",
+  "res://assets/evidence/craft_items.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 6,
+   "evidence": "Parchment panels with gold corner studs are distinct in ui_new.png."
+  },
+  "palette": {
+   "score": 7,
+   "evidence": "Cream, ink-navy and gold read as one family with the world art in ui_title.png."
+  },
+  "readability": {
+   "score": 4,
+   "evidence": "ui_new.png clips text ('Meadow Vol', 'Canopy Squir', 'gra'); the old 'THE WORLD' label overlaps the title; craft_bench.png HUD is half-hidden behind the modal and 'Pack' text is cramped."
+  },
+  "cohesion": {
+   "score": 7,
+   "evidence": "Same ink outline and drop shadows as creatures."
+  },
+  "distinctiveness": {
+   "score": 6,
+   "evidence": "Illuminated parchment look is consistent but cards are plain tiled boxes."
+  },
+  "technical": {
+   "score": 5,
+   "evidence": "Cards overlap neighbours' borders in ui_new.png; label truncation without ellipsis."
+  }
+ },
+ "critical_failures": [
+  "text clipped and truncated on world-creation cards (ui_new.png)",
+  "stale label overlapping the title (ui_new.png)"
+ ]
+}
