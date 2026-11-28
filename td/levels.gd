@@ -33,7 +33,7 @@ const LEVELS := {
 	"frostrun": {
 		"name": "Frostrun Pass", "style": "snow", "blurb": "Switchbacks under the White Lantern. Ice patches make the herd slide.",
 		"rule": "Ice patches speed enemies up. Spirit towers love the cold.", "lane_mode": "random", "hp_mult": 1.08, "coins": 250,
-		"colors": {"g1": "#2a3b78", "g2": "#6f93d0", "accent": "#d8f0ff", "path": "#aab8e0", "edge": "#27356a", "glow": "#bfe8ff", "moon": "#e8f4ff"},
+		"colors": {"g1": "#2a3b78", "g2": "#6f93d0", "accent": "#d8f0ff", "path": "#aab8e0", "edge": "#27356a", "glow": "#5f9ad0", "moon": "#e8f4ff"},
 		"weather": ["snow", "snow", "clear", "snow", "snow", "clear", "snow", "snow", "clear", "snow"],
 		"paths": [[[-40, 140], [900, 140], [900, 300], [240, 300], [240, 470], [1000, 470], [1000, 330], [1320, 330]]],
 		"stones": [[560, 220, "frost"], [560, 390, "spirit"], [1100, 250, "gale"], [130, 420, "ember"]],
