@@ -15,6 +15,18 @@ static func shadow(ci: CanvasItem, k: float = 1.0, base: Vector2 = Vector2(0, 8)
 	ci.draw_circle(Vector2.ZERO, 13.0, Color(0.02, 0.0, 0.06, 0.2))
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
+# Starts loading every frame of the given sprite ids in the background so a species' first appearance never hitches.
+static func prewarm(ids: Array) -> void:
+	for id in ids:
+		var m := meta(String(id))
+		for state in FRAMES:
+			var n := int(m.counts.get(state, FRAMES[state])) if not m.is_empty() else int(FRAMES[state])
+			for i in n:
+				var key := "%s_%s_%d" % [id, state, i]
+				var bpath := BLENDER_DIR + key + ".png"
+				if ResourceLoader.exists(bpath):
+					ResourceLoader.load_threaded_request(bpath)
+
 static func tex(id: String, state: String, i: int) -> Texture2D:
 	var key := "%s_%s_%d" % [id, state, i]
 	if not _cache.has(key):

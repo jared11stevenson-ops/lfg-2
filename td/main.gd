@@ -157,6 +157,14 @@ func _ready() -> void:
 	tier = Session.tier(Session.level_id)
 	_pick_bounty()
 	paths = Levels.to_paths(lv)
+	var warm := []
+	for r in lv.roster:
+		warm.append(String(Creatures.ENEMIES[r[0]].get("sprite", r[0])))
+	for tid in Session.team_ids():
+		warm.append(String(Creatures.TOWERS[tid].sprite))
+	if String(lv.get("boss", "")) != "":
+		warm.append(String(lv.boss))
+	PuppetLib.prewarm(warm)
 	lane_count = paths.size()
 	if lv.has("flank"):
 		paths.append(Levels.to_paths({"paths": [lv.flank.path]})[0])  # a second entrance (blocks placement too)
