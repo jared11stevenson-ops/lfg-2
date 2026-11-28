@@ -96,3 +96,15 @@ func fx_ring(p: Vector2, c: Color, r: float) -> void:
 	if fx: fx.ring(p, c, r)
 func fx_text(p: Vector2, s: String, c: Color) -> void:
 	if fx: fx.text(p, s, c)
+
+func civ_spot(civ_id: int, rng: RandomNumberGenerator) -> Vector2:
+	if civ_id < 0 or civ_id >= sim.civs.size(): return Vector2.ZERO
+	var st: Array = sim.civs[civ_id]["structures"]
+	if st.is_empty(): return Vector2.ZERO
+	var s: Dictionary = st[rng.randi() % st.size()]
+	if s["state"] != "alive": return Vector2.ZERO
+	return Vector2(s["tile"].x * TILE + 16.0, s["tile"].y * TILE + 16.0)
+
+signal civ_attacked(civ_id: int, victim)
+func civ_provoked(civ_id: int, victim) -> void:
+	civ_attacked.emit(civ_id, victim)

@@ -24,6 +24,8 @@ var autoplay_input := true      # false => bots drive the player
 var sim_busy := false
 var backdrop := false
 var focus := Vector2.ZERO
+var rep: Dictionary = {}       # civ id -> standing of the bloodline (-2..2)
+var searched: Dictionary = {}  # ruin keys already searched
 var known: Dictionary = {}     # invention knowledge of THIS bloodline
 var craft_ui: CraftUI
 var items: Array = []        # Items owned by the bloodline (see core/item.gd)
@@ -47,6 +49,7 @@ func start_from_sim(s: EcoSim, arch_id: String, backdrop_mode: bool = false) -> 
 	world.build(sim)
 	world.set_meta("critters", critters)
 	world.set_meta("carcasses", carcasses)
+	world.civ_attacked.connect(_on_civ_attacked)
 	cam = Camera2D.new(); cam.position_smoothing_enabled = true; cam.position_smoothing_speed = 7.0
 	add_child(cam)
 	cam.enabled = true
@@ -217,6 +220,8 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 		KEY_Q:
 			if player.use_ability(): sfx.play("swing", 0.6, 0.7)
 		KEY_Z: mate_pick += 1
+		KEY_T: interact_civ(player)
+		KEY_X: search_ruin(player)
 		KEY_R: try_mate(player)
 		KEY_TAB: observer = not observer
 		KEY_C: _toggle_craft("craft")
@@ -287,6 +292,84 @@ func mate_traits(p: Critter, o: Critter) -> Array:
 	diffs.sort_custom(func(a, b): return absf(a[1]) > absf(b[1]))
 	return diffs.slice(0, 3)
 
+func _on_civ_attacked(civ_id: int, victim) -> void:
+	rep[civ_id] = float(rep.get(civ_id, 0.0)) - 0.5
+	for c in critters:
+		var o: Critter = c
+		if is_instance_valid(o) and o.civ_id == civ_id and is_instance_valid(player) and o.position.distance_to(victim.position) < 450.0:
+			o.aggro_to = player; o.state = "hunt"; o.target = player
+	if is_instance_valid(player): world.fx_text(player.position, "The %s remember this." % sim.civs[civ_id]["name"], Color(1, 0.5, 0.5))
+	chronicle.append("You struck a member of %s. Their standing toward your line falls." % sim.civs[civ_id]["name"])
+
+## Trade for knowledge: a civ member teaches a technique your body can use, for the materials it needs.
+func interact_civ(p: Critter) -> void:
+	var near: Critter = null; var bd := 160.0
+	for c in critters:
+		var o: Critter = c
+		if is_instance_valid(o) and o != p and o.civ_id >= 0 and p.position.distance_to(o.position) < bd: bd = p.position.distance_to(o.position); near = o
+	if near == null:
+		world.fx_text(p.position, "no one to talk to", Color(1, 0.8, 0.6)); return
+	var civ: Dictionary = sim.civs[near.civ_id]
+	var r: float = float(rep.get(near.civ_id, 0.0))
+	if r < -0.4:
+		world.fx_text(p.position, "They will not deal with you.", Color(1, 0.5, 0.5)); near.aggro_to = p; return
+	if near.sp != p.sp and civ["bp"] != p.bp and r < 0.5:
+		pass  # cross-species dealings are allowed but cost more below
+	var offered := []
+	for fn in civ["know"]:
+		if known.has(fn): continue
+		var d: Dictionary = civ["know"][fn]
+		if not Invention.evaluate(fn, d["design"], p.genome)["ok"]: continue
+		offered.append(fn)
+	if offered.is_empty():
+		rep[near.civ_id] = r + 0.1
+		world.fx_text(p.position, "They have nothing you can use (or you know it all).", Color(0.9, 0.9, 0.7)); return
+	var fn: String = offered[0]
+	var d: Dictionary = civ["know"][fn]
+	var need := {}
+	for role in d["design"]: need[d["design"][role]] = need.get(d["design"][role], 0) + 1
+	for m in need:
+		if p.inv.get(m, 0) < need[m]:
+			world.fx_text(p.position, "They'll teach the %s for: %s" % [d["name"], ", ".join(need.keys().map(func(k): return "%d %s" % [need[k], k]))], Color(1, 0.9, 0.6)); return
+	for m in need: p.inv[m] -= need[m]
+	known[fn] = {"score": d["score"], "design": d["design"].duplicate(), "name": d["name"]}
+	rep[near.civ_id] = r + 0.4
+	p.train("c_learn", 0.01)
+	chronicle.append("%s teach you the %s." % [civ["name"], d["name"]])
+	world.fx_text(p.position, "Learned: " + d["name"], Color(0.6, 1.0, 0.7))
+	if sfx: sfx.play("chime", 0.6)
+
+## Rediscovery: abandoned structures hold artifacts and the memory of dead technologies.
+func search_ruin(p: Critter) -> void:
+	for civ in sim.civs:
+		var i := 0
+		for s in civ["structures"]:
+			i += 1
+			if s["state"] != "ruin": continue
+			var pos := Vector2(s["tile"].x * GameWorld.TILE + 16.0, s["tile"].y * GameWorld.TILE + 16.0)
+			if pos.distance_to(p.position) > 70.0: continue
+			var key := "%d_%d" % [civ["id"], i]
+			if searched.has(key):
+				world.fx_text(p.position, "already searched", Color(0.8, 0.8, 0.8)); return
+			searched[key] = true
+			var fns: Array = civ["know"].keys()
+			if fns.is_empty() or rng.randf() < 0.3:
+				world.fx_text(p.position, "only rubble and roots", Color(0.8, 0.8, 0.8)); return
+			var fn: String = fns[rng.randi() % fns.size()]
+			var d: Dictionary = civ["know"][fn]
+			var it := Item.create(fn, d["design"], clampf(d["score"], 0.3, 0.95), civ["leader"], civ["founded"], sim.species[civ["sp"]]["name"])
+			it.owners = [civ["leader"], "the dead of " + civ["name"]]
+			it.log_event(sim.tick, "found", "Recovered from the ruins of %s by %s." % [civ["name"], p.display_name()], 1.5)
+			items.append(it)
+			chronicle.append("You unearth a %s in the ruins of %s." % [it.name, civ["name"]])
+			world.fx_text(p.position, "Found: " + it.name, Color(0.9, 0.8, 0.4))
+			if not known.has(fn) and Invention.evaluate(fn, d["design"], p.genome)["ok"]:
+				known[fn] = {"score": d["score"], "design": d["design"].duplicate(), "name": d["name"]}
+				chronicle.append("Studying it, your line rediscovers the %s." % d["name"])
+			if sfx: sfx.play("chime", 0.6)
+			return
+	world.fx_text(p.position, "nothing to search here", Color(0.8, 0.8, 0.8))
+
 func try_mate(p: Critter) -> bool:
 	if p.mate_cd > 0.0 or not p.is_adult() or p.energy < 0.45: return false
 	var cands := mate_candidates(p)
@@ -335,6 +418,7 @@ func _spawn_around(initial: bool) -> void:
 					for i in Genome.N: g[i] = clampf(g[i] + rng.randfn(0.0, d["sd"]), 0.0, 1.0)
 					Genome.constrain(g, bp)
 					var c := _make_critter(g, bp, d["sp"], world.region_center(r), -1.0)
+					c.civ_id = d.get("civ", -1)
 					c.position = world.random_land_near(world.region_center(r), 120.0, rng, bp == Genome.BP.FISH)
 					cur += 1
 					if is_instance_valid(player) and c.position.distance_to(player.position) < 260.0 and not backdrop:
@@ -362,6 +446,7 @@ func load_game(d: Dictionary) -> void:
 	var layer := CanvasLayer.new(); layer.layer = 10; add_child(layer)
 	hud = Hud.new(); hud.play = self; layer.add_child(hud)
 	generation = d["generation"]; bloodline_id = d["bloodline"]; chronicle = d["chronicle"]; season_t = d["season_t"]; deaths = d["deaths"]; _ev_seen = d["ev_seen"]
+	rep = d.get("rep", {}); searched = d.get("searched", {}); known = d.get("known", {})
 	for idict in d["items"]: items.append(Item.from_dict(idict))
 	for k in d["kin"]:
 		var c := Critter.new()

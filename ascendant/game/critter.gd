@@ -32,6 +32,7 @@ var kills := 0
 var weapon: Dictionary = {}   # equipped: {item: Item, reach, power}
 var inv: Dictionary = {}      # material -> count
 var given_name := ""
+var civ_id := -1
 var practice: Dictionary = {}   # gene -> accumulated practice (shapes offspring)
 var mate_cd := 0.0
 var think_t := 0.0
@@ -134,6 +135,7 @@ func take_hit(dmg: float, from, knock: Vector2) -> void:
 	vel += knock / maxf(mass * 4.0 + 1.0, 1.0)
 	if from is Critter:
 		aggro_to = from
+		if civ_id >= 0 and (from as Critter).is_player: world.call("civ_provoked", civ_id, self)
 		if state != "flee" and carniv < 0.5 and rng.randf() < 0.7: state = "flee"; target = from
 	if from is Critter and is_player == false and ph["toxin"] > 0.5 and rng.randf() < 0.5:
 		(from as Critter).stun = maxf((from as Critter).stun, 0.8 * ph["toxin"])
@@ -304,6 +306,9 @@ func _think(dt: float) -> void:
 		if energy < 0.55 and carniv < 0.8 and rng.randf() < 0.6: state = "graze"
 		elif position.distance_to(wander_to) < 24.0 or rng.randf() < 0.05:
 			wander_to = world.random_land_near(position, 260.0, rng, bp == Genome.BP.FISH)
+			if civ_id >= 0 and rng.randf() < 0.75:
+				var home := world.civ_spot(civ_id, rng)
+				if home != Vector2.ZERO: wander_to = home + Vector2(rng.randf_range(-70, 70), rng.randf_range(-70, 70))
 			state = "wander" if rng.randf() < 0.6 else "graze"
 	_act(dt)
 

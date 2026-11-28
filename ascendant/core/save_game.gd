@@ -13,7 +13,7 @@ static func write(slot: String, play: PlayScene) -> bool:
 			kin.append(_critter_dict(c))
 	var d := {"v": 1, "sim": play.sim.save_dict(), "kin": kin, "player_id": play.player.id if is_instance_valid(play.player) else -1,
 		"generation": play.generation, "bloodline": play.bloodline_id, "chronicle": play.chronicle, "season_t": play.season_t, "deaths": play.deaths, "ev_seen": play._ev_seen,
-		"items": play.items.map(func(i): return i.to_dict()), "stamp": Time.get_datetime_string_from_system(), "year": play.year()}
+		"rep": play.rep, "searched": play.searched, "known": play.known, "items": play.items.map(func(i): return i.to_dict()), "stamp": Time.get_datetime_string_from_system(), "year": play.year()}
 	var f := FileAccess.open(path(slot) + ".tmp", FileAccess.WRITE)
 	if f == null: return false
 	f.store_var(d, false)
