@@ -46,7 +46,7 @@ const RACES := [
 		"mult": {"food": 1.55, "wood": 1.1, "ore": 0.8, "goods": 0.8, "lore": 0.8, "gold": 0.9, "might": 0.95},
 		"traits": {"aggression": 0.3, "greed": 0.3, "openness": 0.55, "fertility": 0.22, "lifespan": 26},
 		"like": ["ogre", "goblin"], "dislike": ["elf"],
-		"model": Q + "Velociraptor.fbx", "rig": "native", "height": 0.95, "squash": Vector3(1, 1, 1),
+		"model": Q + "Velociraptor.fbx", "rig": "native", "fix": 0.3, "height": 0.95, "squash": Vector3(1, 1, 1),
 		"bcolor": "green", "decor": "swamp",
 	},
 	{
