@@ -272,9 +272,9 @@ func fitness(g: PackedFloat32Array, bp: int, c: Dictionary) -> float:
 	f += omni * T(g, "c_manip") * T(g, "limb") * complex * 0.9
 	f += T(g, "c_plan") * c["amp"] * 0.35
 	# niche-specific cognitive payoffs (different bodies reward different minds)
-	f += T(g, "burrow") * c["soil"] * (0.5 * T(g, "c_spatial") + 0.5 * T(g, "c_plan")) * 0.7      # tunnel navigation & planning
-	f += T(g, "secrete") * (0.5 * T(g, "c_plan") + 0.5 * T(g, "c_manip")) * 0.7                     # silk engineering
-	f += T(g, "aqua") * T(g, "social") * T(g, "c_coop") * 0.4 * c["water"]                         # schooling coordination
+	f += T(g, "burrow") * c["soil"] * (0.5 * T(g, "c_spatial") + 0.5 * T(g, "c_plan")) * 0.3      # tunnel navigation & planning
+	f += T(g, "secrete") * (0.5 * T(g, "c_plan") + 0.5 * T(g, "c_manip")) * 0.3                     # silk engineering
+	f += T(g, "aqua") * T(g, "social") * T(g, "c_coop") * 0.4 * c["water"] * 0.5                   # schooling coordination
 	return f
 
 func _select(d: Dictionary, ctx: Dictionary, bp: int, r: int) -> void:
