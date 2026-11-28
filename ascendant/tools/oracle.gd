@@ -31,8 +31,20 @@ func _initialize():
 		for ev in sim.sapient_events:
 			if first_dawn < 0: first_dawn = ev["tick"]
 			dawn_names.append(sim.species[ev["sp"]]["name"])
-		var res := {"seed": seed_, "alive": alive, "extinct": ext, "speciations": spec_events, "sapient": sim.sapient_events.size(), "first_dawn": first_dawn, "dawn_species": dawn_names, "ms": ms, "ms_per_tick": float(ms) / int(args["ticks"]), "series": series}
+		var civ_n := sim.civs.size(); var collapsed := 0; var structs := 0; var ruins := 0; var inv := 0; var wars := 0; var harms := 0; var styles := {}
+		for c in sim.civs:
+			if c["collapsed"] >= 0: collapsed += 1
+			inv += c["know"].size()
+			for st in c["structures"]:
+				structs += 1
+				if st["state"] == "ruin": ruins += 1
+				styles[st["style"]] = styles.get(st["style"], 0) + 1
+		for e in sim.events:
+			if e["type"] == "war": wars += 1
+			if e["type"] == "harm": harms += 1
+		var res := {"civs": civ_n, "civs_collapsed": collapsed, "structures": structs, "ruins": ruins, "known_techs": inv, "wars": wars, "infrastructure_harm_events": harms, "styles": styles, "seed": seed_, "alive": alive, "extinct": ext, "speciations": spec_events, "sapient": sim.sapient_events.size(), "first_dawn": first_dawn, "dawn_species": dawn_names, "ms": ms, "ms_per_tick": float(ms) / int(args["ticks"]), "series": series}
 		results.append(res)
+		print("   civs=%d collapsed=%d structs=%d ruins=%d techs=%d wars=%d harm=%d styles=%s" % [civ_n, collapsed, structs, ruins, inv, wars, harms, str(styles)])
 		print("seed %d: alive=%d ext=%d spec=%d dawn=%d@%d %s | %.1f ms/tick | final total=%.0f maxci=%.2f" % [seed_, alive, ext, spec_events, sim.sapient_events.size(), first_dawn, str(dawn_names), res["ms_per_tick"], series[-1]["total"], series[-1]["max_ci"]])
 	if args["out"] != "":
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://" + args["out"].get_base_dir()))

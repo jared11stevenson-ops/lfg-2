@@ -21,6 +21,7 @@ var generation := 1
 var autoplay_input := true      # false => bots drive the player
 var sim_busy := false
 var props: PropLayer
+var structs: StructureLayer
 
 func start_new(seed_: int, arch_id: String, history_ticks: int = 120) -> void:
 	rng.seed = seed_ * 31 + 5
@@ -37,6 +38,8 @@ func start_new(seed_: int, arch_id: String, history_ticks: int = 120) -> void:
 	cam.enabled = true
 	props = PropLayer.new(); props.world = world; props.cam = cam; props.z_index = 1
 	world.add_child(props)
+	structs = StructureLayer.new(); structs.world = world; structs.cam = cam; structs.z_index = 2
+	world.add_child(structs)
 	var layer := CanvasLayer.new(); layer.layer = 10
 	add_child(layer)
 	hud = Hud.new(); hud.play = self

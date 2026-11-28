@@ -23,6 +23,9 @@ var pops: Array = []             # per region: Array of deme Dictionaries
 var events: Array = []           # {tick,type,text,sp,region}
 var stats_hist: Array = []
 var sapient_events: Array = []
+var civs: Array = []
+var last_global_split := -99
+var stab := PackedFloat32Array()
 
 func idx(x: int, y: int) -> int: return y * RW + x
 func in_bounds(x: int, y: int) -> bool: return x >= 0 and y >= 0 and x < RW and y < RH
@@ -32,7 +35,7 @@ func generate(seed_in: int, founders: Array = Archetypes.LIST) -> void:
 	seed_ = seed_in
 	rng.seed = seed_
 	var n := RW * RH
-	for a in [elev, moist, temp, water, trees, soil, fert, plant, plant_k, season_amp]:
+	for a in [elev, moist, temp, water, trees, soil, fert, plant, plant_k, season_amp, stab]:
 		a.resize(n)
 	var ne := FastNoiseLite.new(); ne.seed = seed_; ne.frequency = 0.045; ne.fractal_octaves = 4
 	var nm := FastNoiseLite.new(); nm.seed = seed_ + 11; nm.frequency = 0.06; nm.fractal_octaves = 3
@@ -60,9 +63,10 @@ func generate(seed_in: int, founders: Array = Archetypes.LIST) -> void:
 		plant_k[i] = 900.0 * fert[i] * (0.4 + 0.6 * soil[i]) * (1.0 + trees[i] * 0.5) + (400.0 * water[i] if water[i] > 0.3 else 0.0)  # algae/reeds
 		plant[i] = plant_k[i] * 0.6
 		season_amp[i] = clampf(absf(temp[i] - 0.5) * 1.2 + 0.1, 0.0, 1.0)
+		stab[i] = 1.0
 	pops.clear()
 	for i in n: pops.append([])
-	species.clear(); events.clear(); tick = 0
+	species.clear(); events.clear(); civs.clear(); sapient_events.clear(); tick = 0
 	# seed founders into suitable regions
 	for a in founders:
 		var sid := _new_species(a["name"], a["bp"], -1, a["id"])
@@ -113,6 +117,8 @@ func step() -> void:
 	for r in n:
 		_step_region(r, sphase)
 	_migrate()
+	for c in civs: Civ.step(self, c)
+	if tick % 3 == 0: Civ.interact(self)
 	if tick % 6 == 0:
 		_speciate()
 	_cull()
@@ -318,6 +324,7 @@ func _cognition_step(d: Dictionary, r: int, bp: int) -> void:
 	if d["civ"] < 0 and d["ratchet"] > 50.0 and ci > 0.38 and nn > 40.0 and (T(g, "c_manip") > 0.3 or T(g, "secrete") > 0.5 or T(g, "burrow") > 0.5):
 		d["civ"] = sapient_events.size()
 		var ev := {"tick": tick, "region": r, "sp": d["sp"], "ci": ci, "n": nn}
+		Civ.found(self, d, r)
 		sapient_events.append(ev)
 		events.append({"tick": tick, "type": "dawn", "text": "%s awaken to shared culture" % species[d["sp"]]["name"], "sp": d["sp"], "region": r})
 
@@ -399,10 +406,10 @@ func _speciate() -> void:
 		var main_mean := _comp_mean(main)
 		for ci in range(1, arr.size()):
 			var comp: Array = arr[ci]
-			if _comp_n(comp) < 25.0: continue
+			if _comp_n(comp) < 40.0 or tick - last_global_split < 10: continue
 			if tick - int(species[sp].get('last_split', -999)) < 160: continue
 			if Genome.distance(main_mean, _comp_mean(comp)) < 0.2: continue
-			species[sp]['last_split'] = tick
+			species[sp]['last_split'] = tick; last_global_split = tick
 			var bp: int = species[sp]["bp"]
 			var nm := _species_name(species[sp]["name"], _comp_mean(comp), main_mean, bp)
 			var nsp := _new_species(nm, bp, sp, species[sp]["arch"])
