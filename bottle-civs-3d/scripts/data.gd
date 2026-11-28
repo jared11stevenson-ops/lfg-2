@@ -19,7 +19,7 @@ const RACES := [
 		"mult": {"food": 1.25, "wood": 1.15, "ore": 0.7, "goods": 1.0, "lore": 1.3, "gold": 1.0, "might": 0.9},
 		"traits": {"aggression": 0.2, "greed": 0.3, "openness": 0.7, "fertility": 0.10, "lifespan": 60},
 		"like": ["human", "wizard"], "dislike": ["orc", "goblin", "dwarf"],
-		"model": Q + "Elf_Female.glb", "rig": "ual", "height": 0.9, "squash": Vector3(1, 1, 1),
+		"model": K + "Ranger.glb", "rig": "kaykit", "height": 0.9, "squash": Vector3(1, 1, 1),
 		"bcolor": "green", "decor": "forest",
 	},
 	{
@@ -46,7 +46,7 @@ const RACES := [
 		"mult": {"food": 1.55, "wood": 1.1, "ore": 0.8, "goods": 0.8, "lore": 0.8, "gold": 0.9, "might": 0.95},
 		"traits": {"aggression": 0.3, "greed": 0.3, "openness": 0.55, "fertility": 0.22, "lifespan": 26},
 		"like": ["ogre", "goblin"], "dislike": ["elf"],
-		"model": Q + "Velociraptor.fbx", "rig": "native", "fix": 0.3, "height": 0.95, "squash": Vector3(1, 1, 1),
+		"model": K + "Rogue.glb", "rig": "kaykit", "height": 0.85, "squash": Vector3(1, 1, 1), "tint": Color(0.55, 0.95, 0.45),
 		"bcolor": "green", "decor": "swamp",
 	},
 	{
@@ -82,7 +82,7 @@ const RACES := [
 		"mult": {"food": 1.0, "wood": 1.3, "ore": 1.1, "goods": 0.8, "lore": 0.5, "gold": 1.2, "might": 1.3},
 		"traits": {"aggression": 0.5, "greed": 0.4, "openness": 0.5, "fertility": 0.12, "lifespan": 36},
 		"like": ["orc", "lizard", "dwarf"], "dislike": ["wizard"], "hp": 2.0, "brew": true,
-		"model": Q + "Orc_Female.glb", "rig": "ual", "height": 1.3, "squash": Vector3(1.25, 1.0, 1.25), "tint": Color(1.0, 0.82, 0.55),
+		"model": K + "Knight.glb", "rig": "kaykit", "height": 1.3, "squash": Vector3(1.35, 1.0, 1.35), "tint": Color(1.0, 0.8, 0.5),
 		"bcolor": "red", "decor": "tavern",
 	},
 	{
@@ -108,5 +108,5 @@ const RACES := [
 # Two jars exist but are still sealed - future content.
 const SEALED := [
 	{"id": "chort", "name": "Chorts", "jar": "Sealed Jar XI", "color": Color("e8613a"), "model": K + "Rogue_Hooded.glb", "rig": "kaykit", "height": 0.8},
-	{"id": "angel", "name": "Angels", "jar": "Sealed Jar XII", "color": Color("f6e27a"), "model": K + "Ranger.glb", "rig": "kaykit", "height": 0.8},
+	{"id": "angel", "name": "Angels", "jar": "Sealed Jar XII", "color": Color("f6e27a"), "model": K + "Skeleton_Mage.glb", "rig": "kaykit", "height": 0.8},
 ]

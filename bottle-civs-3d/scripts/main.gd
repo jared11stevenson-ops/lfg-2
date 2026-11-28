@@ -324,6 +324,12 @@ func _run_shot() -> void:
 	# let animations / smoothing settle
 	for i in int(args.get("frames", 60)):
 		await get_tree().process_frame
+	if args.has("focus"):
+		var jj: BCJar = jars[int(args.focus)]
+		print("DEBUG actors in jar: ", jj.actors.size(), " pop ", sim.civs[int(args.focus)].citizens.size())
+		for id in jj.actors.keys().slice(0, 3):
+			var ac: BCActor = jj.actors[id]
+			print("  actor ", id, " gpos ", ac.global_position, " scale ", ac.scale, " model_scale ", ac.model.scale, " vis ", ac.is_visible_in_tree())
 	var img := get_viewport().get_texture().get_image()
 	img.save_png(args.shot)
 	print("shot saved ", args.shot, " day ", sim.day, " t ", sim.t(), " locked ", sim.locked, " pop ", sim.total_pop())
