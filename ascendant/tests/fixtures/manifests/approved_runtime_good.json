@@ -1,0 +1,47 @@
+{
+ "id": "fx.gen.good",
+ "family": "creature",
+ "kind": "runtime_generator",
+ "generator": "res://tests/fixtures/dummy_gen.gd",
+ "seed": 1,
+ "params": {},
+ "state": "approved",
+ "creator": "lead-agent",
+ "reviewer": "critic-agent",
+ "evidence_images": [
+  "res://tests/fixtures/evidence/ok_render.png",
+  "res://tests/fixtures/evidence/ok_render2.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 8,
+   "evidence": "silhouette: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "palette": {
+   "score": 8,
+   "evidence": "palette: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "readability": {
+   "score": 8,
+   "evidence": "readability: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "cohesion": {
+   "score": 8,
+   "evidence": "cohesion: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "distinctiveness": {
+   "score": 8,
+   "evidence": "distinctiveness: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "technical": {
+   "score": 8,
+   "evidence": "technical: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  }
+ },
+ "critical_failures": [],
+ "validated_output_space": {
+  "description": "Creatures from seeds 0..999 with body plans quadruped/hexapod; each output checked for bounds, nonempty silhouette, palette contrast.",
+  "outputs_validated": 1000,
+  "deterministic_check_passed": true
+ }
+}

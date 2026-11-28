@@ -1,0 +1,14 @@
+{
+ "id": "fx.q.ok",
+ "family": "creature",
+ "kind": "static",
+ "generator": "res://tests/fixtures/dummy_gen.gd",
+ "seed": 1,
+ "params": {},
+ "state": "quarantined",
+ "creator": "lead-agent",
+ "reviewer": "",
+ "evidence_images": [],
+ "scores": {},
+ "critical_failures": []
+}

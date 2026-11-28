@@ -1,0 +1,41 @@
+{
+ "id": "fx.bad.hidden",
+ "family": "creature",
+ "kind": "static",
+ "generator": "res://tests/fixtures/dummy_gen.gd",
+ "seed": 1,
+ "params": {},
+ "state": "approved",
+ "creator": "lead-agent",
+ "reviewer": "critic-agent",
+ "evidence_images": [
+  "res://tests/fixtures/evidence/ok_render.png"
+ ],
+ "scores": {
+  "silhouette": {
+   "score": 10,
+   "evidence": "silhouette: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "palette": {
+   "score": 10,
+   "evidence": "palette: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "readability": {
+   "score": 3,
+   "evidence": "readability: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "cohesion": {
+   "score": 8,
+   "evidence": "cohesion: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "distinctiveness": {
+   "score": 8,
+   "evidence": "distinctiveness: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  },
+  "technical": {
+   "score": 8,
+   "evidence": "technical: Silhouette reads at 48px against dark biome ground; limb count and tail arc distinguish it from sibling species in the render sheet."
+  }
+ },
+ "critical_failures": []
+}

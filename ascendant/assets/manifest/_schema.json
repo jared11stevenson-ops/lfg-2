@@ -1,0 +1,21 @@
+{
+  "$comment": "Asset manifest schema. Enforced by assets/asset_gate_lib.gd (this file is documentation; the gate is authoritative). Files starting with _ are ignored by the gate and registry.",
+  "required": ["id", "family", "kind", "generator", "state", "creator"],
+  "id": "unique string, e.g. creature.hexapod.v1",
+  "family": "creature|plant|terrain|structure|item|ui|vfx|audio|...",
+  "kind": "static | runtime_generator",
+  "generator": "res:// path of the script/scene that produces the asset",
+  "seed": "int (required for runtime_generator unless params given)",
+  "params": "object, generator parameters",
+  "state": "quarantined | approved | rejected",
+  "creator": "who made it",
+  "reviewer": "who reviewed; for approval must be non-empty and != creator (case-insensitive)",
+  "evidence_images": "list of res:// PNGs of REAL renders, each file must exist, be loadable, >= 64x64 (required for approval)",
+  "scores": {"<category>": {"score": "0..10", "evidence": ">= 40 chars specific written justification, not generic"}},
+  "required_score_categories": ["silhouette", "palette", "readability", "cohesion", "distinctiveness", "technical"],
+  "score_floor": 6,
+  "critical_failures": "list; MUST be present for approval and MUST be empty",
+  "average_score": "optional; if present must match computed mean (average never overrides a below-floor category)",
+  "validated_output_space": {"description": ">= 40 chars: what range of outputs was validated", "outputs_validated": "int >= 1", "deterministic_check_passed": "must be true"},
+  "rejection_reason": "required when state == rejected"
+}
