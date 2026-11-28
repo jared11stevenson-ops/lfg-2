@@ -52,10 +52,20 @@ static func _ik(hip: Vector2, foot: Vector2, l1: float, l2: float, side: float) 
 	var mid := hip + dir * a
 	return mid + Vector2(-dir.y, dir.x) * h * side
 
-static func _eye(b: Ink.Batch, item: CanvasItem, p: Vector2, r: float, pal: Dictionary, rot: float, slit: bool = false) -> void:
-	Ink.dome(b, p, r, r, 0.0, Color(0.96, 0.93, 0.82), rot, 12)
-	Ink.dome(b, p + Vector2(r * 0.12, 0), r * 0.68, r * 0.68 * (0.45 if slit else 1.0), 0.0, pal["eye"], rot, 12)
-	Ink.dome(b, p + Vector2(r * 0.18, 0), r * 0.38, r * 0.38 * (0.35 if slit else 1.0), 0.0, Color(0.05, 0.04, 0.08), rot, 10)
+## kind: 0 round, 1 vertical slit (hunters/reptiles), 2 horizontal bar (grazers). Iris tint follows the palette.
+static func _eye(b: Ink.Batch, item: CanvasItem, p: Vector2, r: float, pal: Dictionary, rot: float, kind: Variant = 0) -> void:
+	var k: int = (1 if kind else 0) if kind is bool else int(kind)
+	var iris: Color = pal["eye"].lerp(pal["base"].lightened(0.3), 0.5)
+	Ink.dome(b, p, r, r, 0.0, Color(0.93, 0.9, 0.8) if k != 2 else iris.lightened(0.12), rot, 12)
+	if k == 0:
+		Ink.dome(b, p + Vector2(r * 0.12, 0), r * 0.7, r * 0.7, 0.0, iris, rot, 12)
+		Ink.dome(b, p + Vector2(r * 0.18, 0), r * 0.38, r * 0.38, 0.0, Color(0.05, 0.04, 0.08), rot, 10)
+	elif k == 1:
+		Ink.dome(b, p + Vector2(r * 0.1, 0), r * 0.78, r * 0.78, 0.0, iris, rot, 12)
+		Ink.dome(b, p + Vector2(r * 0.12, 0), r * 0.16, r * 0.62, 0.0, Color(0.05, 0.04, 0.08), rot, 10)
+	else:
+		Ink.dome(b, p + Vector2(r * 0.1, 0), r * 0.55, r * 0.85, 0.0, iris, rot, 12)
+		Ink.dome(b, p + Vector2(r * 0.12, 0), r * 0.18, r * 0.55, PI / 2.0, Color(0.05, 0.04, 0.08), rot, 10)
 
 static func _eye_hi(item: CanvasItem, p: Vector2, r: float) -> void:
 	item.draw_circle(p + Vector2(r * 0.05, -r * 0.3), maxf(r * 0.17, 0.5), Color(1, 1, 1, 0.9))
@@ -250,7 +260,7 @@ static func _quad(item: CanvasItem, rid: RID, under: Ink.Batch, over: Ink.Batch,
 	# eyes
 	var er2: float = hr * (0.2 + 0.13 * ph["eye_size"])
 	var eyepos := spl[int(hf * 0.66 * (spl.size() - 1))]
-	var eyes_slit: bool = reptile or ph["pat"] == 1 and ph["climb"] > 0.5
+	var eyes_slit: int = 1 if (reptile or ph["carniv"] > 0.7) else (2 if ph["carniv"] < 0.25 else 0)
 	var epos := [eyepos + Vector2(0, hr * 0.62), eyepos + Vector2(0, -hr * 0.62)]
 	# nose
 	var nose_p: Vector2 = spl[0]
