@@ -42,3 +42,7 @@ Civilizations emerged in 5/5 worlds at ~year 100. Civ species per world: Ash Roo
 - t8 (before niche payoffs): civs in 5/5 worlds at ~year 100; only rook/hare/reed-gnawer; 1-4 civs per world.
 - t9 (niche payoffs x0.7): too easy: first civ ~year 36, 66-206 deme-dawns, up to 11 civs; but diversity appeared (mole, minnow, squirrel, vole).
 - t10 (x0.3, current): first civ ~year 38-67; civs per world 4-8; species per world 4-8 across ant, squirrel, vole, minnow, hare, rook, reed-gnawer. Spiders/frogs/toads/skinks/stoats still never found a civ. KEPT as current setting: diversity is better; timing is early, so "Mature world" (80y) starts with civs already present. Open: slow the pace (year 100+) and decide whether civ-less carnivores are an acceptable evolutionary outcome (probably yes: predators rarely need cumulative culture).
+
+## Tick 7
+- tools/gen_validate.gd (run via tools/shot.sh): 7 body plans x 8 random genomes = 56/56 deterministic (pixel-identical), bounded, non-degenerate (docs/validation/creature_gen.json). Validates STRUCTURE, not beauty; no negative control yet. Runtime: invalid phenotypes are repaired at spawn (test_invalid_body_is_repaired_at_spawn).
+- Keeper critique top actions still open: mammals read as lizards, UI text clipping on world cards, grey biome contrast, uniform ringed eyes, civ camera framing.
