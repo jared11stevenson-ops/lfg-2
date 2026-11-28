@@ -18,3 +18,15 @@ Genome(47 loci)->Phenotype->procedural creature art; EcoSim (plants, predation, 
 7. Multiplayer: ENet authoritative server; ONLY claim after two real clients tested.
 8. Oracle: branching timelines, bot playstyles, perf benchmarks.
 9. Art debt: mammal heads/ears, fur look, evolved-descendant lineup, ruin/structure variety.
+
+## Update after build cycle 2 (evidence-driven)
+DONE since: civilization layer + art, materials/invention/items, save/load, title/new world/settings/pause, crafting UI, heirloom ledger, mate chooser + practice inheritance, civ trade/provoke/ruin search, contextual hints, procedural audio, mammal heads, bot playtest tool (tools/playtest.gd), 771 test checks green.
+
+Oracle findings still open:
+- t6/t7: sapience in every world by ~tick 300, but ants dominated every world before COG_CAP per body plan (t7 run in progress: docs/oracle/t7.json). CHECK diversity of dawn species; want worlds dominated by different species (aquatic/subterranean/avian).
+- `dawn` events are per-deme (inflated 20-46); civ count now bounded (2-11). Report per-civ in oracle.
+- No wars/infrastructure-harm events in most worlds: relations only drop through harm; add resource-contention and border pressure triggers.
+- Per-tick cost 100-150 ms with ~45 species: OK for 45s seasons but spiky; move sim.step to a Thread or time-slice regions.
+Playtest findings (docs/playtest/run1.json, 200s each): all 8 bot runs survived, player almost never killed by predators -> RISK TOO LOW in the first minutes; raise predator pressure near player / add predator pursuit. Hunters (stoat) got only 8 kills in 200s.
+
+Next priorities: (1) risk/danger tuning + death-by-predator test; (2) civ diversity tuning; (3) player-visible civ members: tools, weapons carried; (4) combat telegraph visuals; (5) multiplayer prototype (server-authoritative ENet) — NOT claimed until two real clients tested; (6) Keeper agent resume (it hit a rate limit; resume with SendMessage to a2b47c30385fb1b71) for critique + quarantine manifests + checklist.
