@@ -50,8 +50,10 @@ func setup(p_race: Dictionary) -> void:
 		_scene_cache[path] = load(path)
 	model = (_scene_cache[path] as PackedScene).instantiate()
 	add_child(model)
-	var sc: float = p_race.scale
 	var sq: Vector3 = p_race.get("squash", Vector3.ONE)
+	# normalise any imported model to the race's target height (assets use wildly different units)
+	var h := _model_height(model)
+	var sc: float = float(p_race.height) / maxf(h, 0.0001)
 	model.scale = Vector3(sc * sq.x, sc * sq.y, sc * sq.z)
 	skeleton = _find_skeleton(model)
 	_apply_tint()
@@ -82,6 +84,21 @@ func setup(p_race: Dictionary) -> void:
 		anim_lib = _lib_cache[path]
 		player.add_animation_library("", anim_lib)
 	play("idle", randf() * 2.0)
+
+func _model_height(m: Node3D) -> float:
+	var lo := INF
+	var hi := -INF
+	var inv := m.transform.affine_inverse() if m.is_inside_tree() else Transform3D.IDENTITY
+	for mi in m.find_children("*", "MeshInstance3D", true, false):
+		var n: MeshInstance3D = mi
+		var t := Transform3D.IDENTITY
+		var cur: Node = n
+		while cur != null and cur != m.get_parent():
+			if cur is Node3D: t = (cur as Node3D).transform * t
+			cur = cur.get_parent()
+		var bb: AABB = t * n.get_aabb()
+		lo = minf(lo, bb.position.y); hi = maxf(hi, bb.end.y)
+	return (hi - lo) if hi > lo else 1.0
 
 func _apply_tint() -> void:
 	if not race.has("tint"): return

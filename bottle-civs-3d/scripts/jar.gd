@@ -250,7 +250,7 @@ func _build_sealed() -> void:
 	add_child(a)
 	a.setup(race)
 	a.position = Vector3(0, 0.1, 0)
-	a.scale = Vector3.ONE * 6.0
+	a.scale = Vector3.ONE * 5.5
 	a.set_speed(0.25)
 	for mi in a.model.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).material_override = BCAssets.emissive(Color(0.02, 0.02, 0.05), 0.0)
@@ -300,7 +300,7 @@ func update_visuals(dt: float, time_now: float) -> void:
 	if selected and not locked: target_open = 1.0
 	lid_open = move_toward(lid_open, target_open, dt * 0.6)
 	var eased := lid_open * lid_open * (3.0 - 2.0 * lid_open)
-	lid_pivot.rotation_degrees.x = -eased * 108.0
+	lid_pivot.scale.z = lerpf(1.0, 0.04, eased)
 	for b in bolts:
 		var side := 1.0 if b.position.x > 0 else -1.0
 		b.position.x = side * lerpf(HALF_X - 0.8, HALF_X + 0.1, 1.0 - eased)

@@ -2,8 +2,8 @@ class_name BCCamRig
 extends Node3D
 ## Orbit camera for the Wall. Wheel = zoom, right-drag = orbit, middle-drag / WASD = pan, Esc = overview.
 
-const OVERVIEW_TARGET := Vector3(0, 1.5, 0)
-const OVERVIEW_DIST := 96.0
+const OVERVIEW_TARGET := Vector3(0, 0.5, 2.0)
+const OVERVIEW_DIST := 118.0
 const OVERVIEW_PITCH := -38.0
 
 var cam: Camera3D

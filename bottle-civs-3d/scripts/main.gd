@@ -59,10 +59,10 @@ func _build_environment() -> void:
 	env.background_color = Color(0.02, 0.02, 0.03)
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 0.9
+	env.ambient_light_energy = 0.55
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.tonemap_exposure = 1.05
+	env.tonemap_exposure = 0.85
 	env.tonemap_white = 6.0
 	env.glow_enabled = true
 	env.glow_intensity = 0.8
@@ -211,9 +211,9 @@ func _update_lighting(dt: float) -> void:
 	elif t < 0.05: day_f = clampf(0.2 + t / 0.05 * 0.8, 0.0, 1.0)
 	if sim.locked: day_f = minf(day_f, 0.12)
 	var f := lerpf(0.12, 1.0, day_f)
-	sun.light_energy = lerpf(sun.light_energy, 1.5 * f, minf(1.0, dt * 2.0))
+	sun.light_energy = lerpf(sun.light_energy, 1.0 * f, minf(1.0, dt * 2.0))
 	sun.light_color = Color(0.55, 0.62, 1.0).lerp(Color(1.0, 0.96, 0.9), f)
-	env.ambient_light_energy = lerpf(env.ambient_light_energy, 0.25 + 0.7 * f, minf(1.0, dt * 2.0))
+	env.ambient_light_energy = lerpf(env.ambient_light_energy, 0.2 + 0.4 * f, minf(1.0, dt * 2.0))
 	env.fog_light_color = Color(0.08, 0.1, 0.2).lerp(Color(0.45, 0.5, 0.62), f)
 
 func _update_tubes(dt: float) -> void:

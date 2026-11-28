@@ -19,7 +19,7 @@ const RACES := [
 		"mult": {"food": 1.25, "wood": 1.15, "ore": 0.7, "goods": 1.0, "lore": 1.3, "gold": 1.0, "might": 0.9},
 		"traits": {"aggression": 0.2, "greed": 0.3, "openness": 0.7, "fertility": 0.10, "lifespan": 60},
 		"like": ["human", "wizard"], "dislike": ["orc", "goblin", "dwarf"],
-		"model": Q + "Elf_Female.glb", "rig": "ual", "scale": 0.40, "squash": Vector3(1, 1, 1),
+		"model": Q + "Elf_Female.glb", "rig": "ual", "height": 0.9, "squash": Vector3(1, 1, 1),
 		"bcolor": "green", "decor": "forest",
 	},
 	{
@@ -28,7 +28,7 @@ const RACES := [
 		"mult": {"food": 0.85, "wood": 0.9, "ore": 1.7, "goods": 1.35, "lore": 0.9, "gold": 1.1, "might": 1.1},
 		"traits": {"aggression": 0.4, "greed": 0.8, "openness": 0.35, "fertility": 0.10, "lifespan": 45},
 		"like": ["human", "ogre"], "dislike": ["elf", "goblin"],
-		"model": K + "Barbarian.glb", "rig": "kaykit", "scale": 0.30, "squash": Vector3(1.2, 0.82, 1.2),
+		"model": K + "Barbarian.glb", "rig": "kaykit", "height": 0.7, "squash": Vector3(1.2, 0.82, 1.2),
 		"bcolor": "yellow", "decor": "mountain",
 	},
 	{
@@ -37,7 +37,7 @@ const RACES := [
 		"mult": {"food": 1.0, "wood": 1.0, "ore": 1.0, "goods": 1.0, "lore": 1.0, "gold": 1.4, "might": 1.0},
 		"traits": {"aggression": 0.35, "greed": 0.5, "openness": 0.85, "fertility": 0.14, "lifespan": 30},
 		"like": ["elf", "dwarf", "wizard"], "dislike": ["orc", "imp"], "tradeBonus": 1.25, "charm": 1.5,
-		"model": K + "Knight.glb", "rig": "kaykit", "scale": 0.30, "squash": Vector3(1, 1, 1),
+		"model": K + "Knight.glb", "rig": "kaykit", "height": 0.8, "squash": Vector3(1, 1, 1),
 		"bcolor": "blue", "decor": "town",
 	},
 	{
@@ -46,7 +46,7 @@ const RACES := [
 		"mult": {"food": 1.55, "wood": 1.1, "ore": 0.8, "goods": 0.8, "lore": 0.8, "gold": 0.9, "might": 0.95},
 		"traits": {"aggression": 0.3, "greed": 0.3, "openness": 0.55, "fertility": 0.22, "lifespan": 26},
 		"like": ["ogre", "goblin"], "dislike": ["elf"],
-		"model": Q + "Velociraptor.fbx", "rig": "native", "scale": 18.0, "squash": Vector3(1, 1, 1),
+		"model": Q + "Velociraptor.fbx", "rig": "native", "height": 0.95, "squash": Vector3(1, 1, 1),
 		"bcolor": "green", "decor": "swamp",
 	},
 	{
@@ -55,7 +55,7 @@ const RACES := [
 		"mult": {"food": 0.9, "wood": 1.0, "ore": 1.0, "goods": 0.9, "lore": 0.6, "gold": 0.8, "might": 1.5},
 		"traits": {"aggression": 0.9, "greed": 0.5, "openness": 0.3, "fertility": 0.17, "lifespan": 28},
 		"like": ["ogre", "goblin"], "dislike": ["elf", "human", "dwarf"], "soldierShare": 0.4,
-		"model": Q + "Orc_Male.glb", "rig": "ual", "scale": 0.40, "squash": Vector3(1, 1, 1),
+		"model": Q + "Orc_Male.glb", "rig": "ual", "height": 1.0, "squash": Vector3(1, 1, 1),
 		"bcolor": "red", "decor": "war",
 	},
 	{
@@ -64,7 +64,7 @@ const RACES := [
 		"mult": {"food": 0.9, "wood": 1.0, "ore": 1.0, "goods": 1.5, "lore": 1.0, "gold": 1.0, "might": 0.8},
 		"traits": {"aggression": 0.55, "greed": 0.9, "openness": 0.5, "fertility": 0.24, "lifespan": 20},
 		"like": ["orc", "imp", "lizard"], "dislike": ["elf", "dwarf"], "plunder": 1.4,
-		"model": Q + "Puglin.glb", "rig": "ual", "scale": 0.55, "squash": Vector3(1, 1, 1),
+		"model": Q + "Puglin.glb", "rig": "ual", "height": 0.65, "squash": Vector3(1, 1, 1),
 		"bcolor": "yellow", "decor": "scrap",
 	},
 	{
@@ -73,7 +73,7 @@ const RACES := [
 		"mult": {"food": 0.4, "wood": 1.0, "ore": 1.2, "goods": 1.0, "lore": 1.0, "gold": 0.7, "might": 1.1},
 		"traits": {"aggression": 0.65, "greed": 0.2, "openness": 0.2, "fertility": 0.0, "lifespan": 400},
 		"like": ["imp"], "dislike": ["elf", "human", "lizard"], "eats": 0.15, "raiseDead": true,
-		"model": K + "Skeleton_Warrior.glb", "rig": "kaykit", "scale": 0.30, "squash": Vector3(1, 1, 1),
+		"model": K + "Skeleton_Warrior.glb", "rig": "kaykit", "height": 0.8, "squash": Vector3(1, 1, 1),
 		"bcolor": "green", "decor": "ruins",
 	},
 	{
@@ -82,7 +82,7 @@ const RACES := [
 		"mult": {"food": 1.0, "wood": 1.3, "ore": 1.1, "goods": 0.8, "lore": 0.5, "gold": 1.2, "might": 1.3},
 		"traits": {"aggression": 0.5, "greed": 0.4, "openness": 0.5, "fertility": 0.12, "lifespan": 36},
 		"like": ["orc", "lizard", "dwarf"], "dislike": ["wizard"], "hp": 2.0, "brew": true,
-		"model": Q + "Orc_Female.glb", "rig": "ual", "scale": 0.62, "squash": Vector3(1.25, 1.0, 1.25), "tint": Color(1.0, 0.82, 0.55),
+		"model": Q + "Orc_Female.glb", "rig": "ual", "height": 1.3, "squash": Vector3(1.25, 1.0, 1.25), "tint": Color(1.0, 0.82, 0.55),
 		"bcolor": "red", "decor": "tavern",
 	},
 	{
@@ -91,7 +91,7 @@ const RACES := [
 		"mult": {"food": 0.9, "wood": 0.9, "ore": 0.9, "goods": 1.1, "lore": 1.1, "gold": 1.3, "might": 0.7},
 		"traits": {"aggression": 0.35, "greed": 0.85, "openness": 0.6, "fertility": 0.20, "lifespan": 24},
 		"like": ["goblin", "skeleton"], "dislike": ["wizard", "human"], "spy": true, "hp": 0.7,
-		"model": Q + "Imp.glb", "rig": "ual", "scale": 0.40, "squash": Vector3(1, 1, 1),
+		"model": Q + "Imp.glb", "rig": "ual", "height": 0.65, "squash": Vector3(1, 1, 1),
 		"bcolor": "red", "decor": "hell",
 	},
 	{
@@ -100,13 +100,13 @@ const RACES := [
 		"mult": {"food": 0.9, "wood": 0.8, "ore": 0.8, "goods": 1.15, "lore": 1.9, "gold": 1.0, "might": 0.8},
 		"traits": {"aggression": 0.25, "greed": 0.45, "openness": 0.55, "fertility": 0.08, "lifespan": 70},
 		"like": ["elf", "human"], "dislike": ["imp", "ogre"], "techBonus": 1.5, "hp": 0.8,
-		"model": K + "Mage.glb", "rig": "kaykit", "scale": 0.30, "squash": Vector3(1, 1, 1),
+		"model": K + "Mage.glb", "rig": "kaykit", "height": 0.85, "squash": Vector3(1, 1, 1),
 		"bcolor": "blue", "decor": "arcane",
 	},
 ]
 
 # Two jars exist but are still sealed - future content.
 const SEALED := [
-	{"id": "chort", "name": "Chorts", "jar": "Sealed Jar XI", "color": Color("e8613a"), "model": K + "Rogue_Hooded.glb", "rig": "kaykit", "scale": 0.30},
-	{"id": "angel", "name": "Angels", "jar": "Sealed Jar XII", "color": Color("f6e27a"), "model": K + "Ranger.glb", "rig": "kaykit", "scale": 0.30},
+	{"id": "chort", "name": "Chorts", "jar": "Sealed Jar XI", "color": Color("e8613a"), "model": K + "Rogue_Hooded.glb", "rig": "kaykit", "height": 0.8},
+	{"id": "angel", "name": "Angels", "jar": "Sealed Jar XII", "color": Color("f6e27a"), "model": K + "Ranger.glb", "rig": "kaykit", "height": 0.8},
 ]
