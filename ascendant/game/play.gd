@@ -20,6 +20,7 @@ var deaths := 0
 var generation := 1
 var autoplay_input := true      # false => bots drive the player
 var sim_busy := false
+var items: Array = []        # Items owned by the bloodline (see core/item.gd)
 var props: PropLayer
 var structs: StructureLayer
 
@@ -243,3 +244,31 @@ func _spawn_around(initial: bool) -> void:
 			if cc != player and cc.bloodline < 0 and cc.position.distance_to(player.position) > 2300.0:
 				cc.died.disconnect(_on_died)
 				critters.erase(cc); cc.queue_free()
+
+## Resume from a SaveGame dictionary.
+func load_game(d: Dictionary) -> void:
+	sim = EcoSim.new()
+	sim.load_dict(d["sim"])
+	rng.seed = sim.seed_ * 31 + sim.tick
+	world = GameWorld.new(); add_child(world); world.build(sim)
+	world.set_meta("critters", critters); world.set_meta("carcasses", carcasses)
+	cam = Camera2D.new(); cam.position_smoothing_enabled = true; cam.position_smoothing_speed = 7.0
+	add_child(cam); cam.enabled = true
+	props = PropLayer.new(); props.world = world; props.cam = cam; props.z_index = 1; world.add_child(props)
+	structs = StructureLayer.new(); structs.world = world; structs.cam = cam; structs.z_index = 2; world.add_child(structs)
+	var layer := CanvasLayer.new(); layer.layer = 10; add_child(layer)
+	hud = Hud.new(); hud.play = self; layer.add_child(hud)
+	generation = d["generation"]; bloodline_id = d["bloodline"]; chronicle = d["chronicle"]; season_t = d["season_t"]; deaths = d["deaths"]; _ev_seen = d["ev_seen"]
+	for idict in d["items"]: items.append(Item.from_dict(idict))
+	for k in d["kin"]:
+		var c := Critter.new()
+		c.setup(k["g"], k["bp"], k["sp"], sim.species[k["sp"]]["name"], world, 0.5)
+		c.id = k["id"]; Critter.next_id = maxi(Critter.next_id, c.id + 1)
+		c.position = k["pos"]; c.age_s = k["age"]; c.hp = k["hp"]; c.energy = k["energy"]; c.bloodline = k["bloodline"]; c.gen = k["gen"]; c.parents = k["parents"]; c.kills = k["kills"]
+		world.add_child(c); critters.append(c); c.died.connect(_on_died)
+		if c.id == d["player_id"]:
+			c.is_player = true; player = c
+	if player == null: observer = true
+	else:
+		cam.position = player.position; _set_player_cam()
+	_spawn_around(true)

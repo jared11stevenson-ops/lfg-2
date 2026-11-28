@@ -473,3 +473,16 @@ func _record() -> void:
 			if ci > maxci: maxci = ci
 			if d["ratchet"] > ratch: ratch = d["ratchet"]
 	stats_hist.append({"tick": tick, "species": tot.size(), "total": tot.values().reduce(func(a, b): return a + b, 0.0), "max_ci": maxci, "max_ratchet": ratch, "sapient": sapient_events.size(), "ever": species.size()})
+
+# ------------------------------------------------------------------ persistence
+func save_dict() -> Dictionary:
+	return {"v": 1, "seed": seed_, "tick": tick, "rng_state": rng.state, "elev": elev, "moist": moist, "temp": temp, "water": water, "trees": trees, "soil": soil, "fert": fert,
+		"plant": plant, "plant_k": plant_k, "season_amp": season_amp, "stab": stab, "species": species, "pops": pops, "events": events, "sapient": sapient_events, "civs": civs,
+		"stats": stats_hist, "lgs": last_global_split}
+
+func load_dict(d: Dictionary) -> void:
+	seed_ = d["seed"]; tick = d["tick"]; rng.seed = seed_; rng.state = d["rng_state"]
+	elev = d["elev"]; moist = d["moist"]; temp = d["temp"]; water = d["water"]; trees = d["trees"]; soil = d["soil"]; fert = d["fert"]
+	plant = d["plant"]; plant_k = d["plant_k"]; season_amp = d["season_amp"]; stab = d["stab"]
+	species = d["species"]; pops = d["pops"]; events = d["events"]; sapient_events = d["sapient"]; civs = d["civs"]
+	stats_hist = d["stats"]; last_global_split = d["lgs"]

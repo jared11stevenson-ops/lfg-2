@@ -1,6 +1,7 @@
 
 extends RefCounted
 ## Base class for tests. Methods named test_* are run by run_all.gd.
+var tree_root: Node = null
 var passes := 0
 var failures: Array[String] = []
 
