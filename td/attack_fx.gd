@@ -84,3 +84,24 @@ static func draw(ci: CanvasItem, who: String, types: Array, meta: Dictionary, k:
 			for i in 3:
 				var y := -9.0 + 9.0 * i
 				ci.draw_line(m3 + Vector2((-6.0 - 18.0 * k) * d, y) * u, m3 + Vector2((-28.0 - 40.0 * k) * d, y + 1.0) * u, Color(0.82, 0.95, 0.9, 0.7 * fade), 2.0 * u, true)
+		"glomm":        # Stone/Frost: claw slam sends a ring of ice shards and a frost shockwave along the ground
+			var m4 := _a(meta, "muzzle", flip, s, off)
+			var gnd := m4 + Vector2(10.0 * d, 18.0) * u
+			ci.draw_set_transform(gnd, 0.0, Vector2(1.0, 0.4))
+			for i in 2:
+				var kk3 := clampf(k * 1.25 - 0.15 * i, 0.0, 1.0)
+				ci.draw_arc(Vector2.ZERO, (14.0 + 70.0 * kk3) * u, 0, TAU, 40, Color(0.78, 0.94, 1.0, 0.75 * (1.0 - kk3)), 5.0 * u * (1.0 - 0.5 * kk3), true)
+			ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			for i in 9:
+				var an := -PI * (0.05 + 0.11 * i) * (1.0 if not flip else -1.0)
+				var dirv := Vector2(cos(an), sin(an))
+				var base_p := gnd + dirv * (8.0 + 34.0 * k) * u * Vector2(1.0, 0.7)
+				var tip := base_p + dirv * (10.0 + 16.0 * (1.0 - k)) * u
+				ci.draw_line(base_p, tip, Color(0.7, 0.92, 1.0, 0.95 * fade), 4.0 * u * fade + 1.0, true)
+				ci.draw_line(base_p, base_p + (tip - base_p) * 0.55, Color(1, 1, 1, 0.9 * fade), 1.8 * u, true)
+			ci.draw_circle(m4, (9.0 - 6.0 * k) * u, Color(0.92, 0.98, 1.0, 0.9 * fade))
+			var dm := _a(meta, "dome", flip, s, off)
+			for i in 5:
+				var a6 := TAU * float(i) / 5.0 + k * 3.0
+				ci.draw_circle(dm + Vector2(cos(a6), sin(a6)) * (8.0 + 14.0 * k) * u, (2.2 - 1.4 * k) * u, Color(0.85, 0.96, 1.0, 0.9 * fade))
+
