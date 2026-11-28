@@ -108,6 +108,8 @@ var free_ids := {}          # tower id -> free placements left (granted by captu
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
 const CAPTURE_HP := 0.5
+var wave_leaks := 0          # gold lost this wave (for the wave summary and the flawless bonus)
+var wave_caps := 0           # captures this wave
 var gift_pending := false     # wave 2 of Level 1 carries a pre-weakened Shuckit so the first capture is taught, not hoped for
 var lane_count := 1          # real lanes; a flank path (late-wave second entrance) sits after them in paths[]
 var tier := 0                # replay tier of this level (0..5): each clear makes waves tougher, rares likelier, gold richer
@@ -382,6 +384,8 @@ func _start_wave() -> void:
 	if wave_running or state != "play":
 		return
 	wave += 1
+	wave_leaks = 0
+	wave_caps = 0
 	var prev_weather := weather
 	weather = lv.weather[(wave - 1) % lv.weather.size()]
 	Sfx.play(self, "horn")
@@ -567,6 +571,7 @@ func _finish_capture(success: bool, e) -> void:
 		free_ids[id] = int(free_ids.get(id, 0)) + 1
 		run_xp[id] = int(run_xp.get(id, 0)) + (50 if (e.shiny or e.rare) else 25)
 		captures_run += 1
+		wave_caps += 1
 		_goal("capture")
 		if e.rare:
 			_goal("rare")
@@ -728,6 +733,7 @@ func _on_leaked(e) -> void:
 	if state != "play":
 		return
 	lives -= e.leak
+	wave_leaks += int(e.leak)
 	if gold_pile != null:
 		gold_pile.steal(e.sprite_id, mini(int(e.leak), 3), e.position, e.scale_mul)
 		gold_pile.set_gold(lives)
@@ -754,6 +760,11 @@ func _wave_done() -> void:
 	if wave < Levels.TOTAL_WAVES or endless:
 		FxScript.text_at(self, Vector2(640, 250), "Wave %d cleared!" % wave, Color("ffffff"))
 		FxScript.text_at(self, Vector2(640, 282), "+%d coins%s" % [bonus, "   +1 Lure" if lure_up else ""], Color("ffe08a"))
+		var recap := "Leaked %d   Captured %d" % [wave_leaks, wave_caps]
+		if wave_leaks == 0:
+			coins += 25
+			recap = "Flawless wave! +25 coins   Captured %d" % wave_caps
+		FxScript.text_at(self, Vector2(640, 316), recap, Color("9fffd0") if wave_leaks == 0 else Color("c8d4ff"))
 	for t in get_tree().get_nodes_in_group("towers"):
 		FxScript.text_at(self, t.position + Vector2(0, -52), "+%d XP" % (10 + 2 * int(t.tiers.a + t.tiers.b)), Color("9fe8ff"))
 	for t in get_tree().get_nodes_in_group("towers"):

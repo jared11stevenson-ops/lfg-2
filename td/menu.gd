@@ -187,6 +187,9 @@ func _open_setup(id: String) -> void:
 	var gl := Session.goals_line(id)
 	if gl != "":
 		rule_lbl.text += "\n" + gl
+	if lv.has("tower_cap"):
+		var tr := Session.tier(id)
+		rule_lbl.text += "\nReplay Tier %d/5%s" % [tr, "  (clear it again: +6%% enemy HP, +10%% gold, +3%% rare chance, raids at tier 2+)" if tr < 5 else "  MAX"]
 	for d in Rules.DIFF_ORDER:
 		diff_btns[d].text = "%s\n%s %d, HP x%.2f" % [Rules.DIFFICULTY[d].name, "gold" if lv.get("steal", false) else "lives", Rules.DIFFICULTY[d].lives, Rules.DIFFICULTY[d].hp]
 	Session.muts = []
