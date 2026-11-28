@@ -17,6 +17,7 @@ const Backdrop = preload("res://backdrop.gd")
 const PuppetLib = preload("res://puppet_lib.gd")
 const SettingsPanel = preload("res://settings_panel.gd")
 const HudBar = preload("res://hud_bar.gd")
+const FriendCard = preload("res://friend_card.gd")
 const ResultScreen = preload("res://result_screen.gd")
 const Tutorial = preload("res://tutorial.gd")
 const Moves = preload("res://moves.gd")
@@ -200,15 +201,15 @@ func _build_ui() -> void:
 	layer.add_child(hud_bar)
 	boss_ui = BossUi.new()
 	layer.add_child(boss_ui)
-	start_btn = _button("Start wave", Vector2(1060, 636), Vector2(200, 64), 24, Color("c4552b"), _start_wave)
+	start_btn = _button("Start wave", Vector2(1030, 624), Vector2(230, 84), 28, Color("c4552b"), _start_wave)
 	layer.add_child(start_btn)
-	speed_btn = _button("", Vector2(1100, 8), Vector2(160, 52), 22, Color("3a4a6b"), _cycle_speed)
+	speed_btn = _button("", Vector2(1110, 8), Vector2(150, 52), 22, Color("3a4a6b"), _cycle_speed)
 	layer.add_child(speed_btn)
-	sound_btn = _button("Sound: On" if Sfx.music_on else "Sound: Off", Vector2(1100, 64), Vector2(160, 46), 19, Color("3a4a6b"), func(): sound_btn.text = "Sound: On" if Sfx.toggle_sound(self) else "Sound: Off")
+	sound_btn = _button("Sound: On" if Sfx.music_on else "Sound: Off", Vector2(1110, 64), Vector2(150, 40), 16, Color("3a4a6b"), func(): sound_btn.text = "Sound: On" if Sfx.toggle_sound(self) else "Sound: Off")
 	layer.add_child(sound_btn)
-	pause_btn = _button("Menu", Vector2(970, 8), Vector2(120, 52), 22, Color("3a4a6b"), _toggle_pause)
+	pause_btn = _button("Menu", Vector2(990, 8), Vector2(110, 52), 22, Color("3a4a6b"), _toggle_pause)
 	layer.add_child(pause_btn)
-	surge_btn = _button("", Vector2(1060, 556), Vector2(200, 64), 20, Color("2a6f9a"), _surge)
+	surge_btn = _button("", Vector2(1060, 500), Vector2(200, 76), 20, Color("2a6f9a"), _surge)
 	surge_btn.visible = not bool(mut.nosurge)
 	layer.add_child(surge_btn)
 	banner = _label(Vector2(340, 250), 48)
@@ -386,6 +387,8 @@ func _start_wave() -> void:
 	if weather != "clear" and weather != prev_weather:
 		_announce_weather()
 	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
+	if lv.has("flank") and wave == int(lv.flank.wave) - 2:
+		FxScript.text_at(self, Vector2(640, 300), "Tip: from wave %d a second entrance opens at the bottom right." % int(lv.flank.wave), Color("ffb070"))
 	if lv.has("flank") and wave == int(lv.flank.wave):
 		FxScript.text_at(self, Vector2(640, 300), "Warning: some thieves now slip in from the south!", Color("ffb070"))
 	queue = _plan(wave).duplicate()
@@ -565,6 +568,12 @@ func _finish_capture(success: bool, e) -> void:
 			_goal("rare")
 		FxScript.text_at(self, e.position + Vector2(0, -60), "Captured %s!%s" % [Creatures.TOWERS[id].name, " NEW" if fresh else ""], Color("ffe08a"))
 		Sfx.play(self, "capture_ok", -4.0)
+		if fresh:
+			var fc = FriendCard.new()
+			fc.sprite = String(Creatures.TOWERS[id].sprite)
+			fc.title = String(Creatures.TOWERS[id].name)
+			fc.subtitle = " / ".join(PackedStringArray(Array(Creatures.TOWERS[id].types).map(func(t): return String(t).capitalize())))
+			start_btn.get_parent().add_child(fc)
 		Sfx.haptic(60)
 		e.queue_free()
 		_build_shop()
@@ -1002,6 +1011,15 @@ func _draw() -> void:
 		var pulse := 0.5 + 0.5 * sin(clock * 2.0 + s.pos.x)
 		var col: Color = TypeChart.COLORS[s.type]
 		draw_arc(s.pos, 46.0 + pulse * 3.0, 0, TAU, 40, Color(col.r, col.g, col.b, 0.35 + 0.3 * pulse), 3.0, true)
+	if lv.has("flank") and wave < int(lv.flank.wave) - 1:
+		var fpath: PackedVector2Array = paths[lane_count]
+		for i in range(fpath.size() - 1):
+			var seg_len := fpath[i].distance_to(fpath[i + 1])
+			var dir := fpath[i].direction_to(fpath[i + 1])
+			var d := 0.0
+			while d < seg_len:
+				draw_line(fpath[i] + dir * d, fpath[i] + dir * minf(d + 12.0, seg_len), Color(1.0, 0.65, 0.35, 0.22), 4.0)
+				d += 26.0
 	if lv.has("flank") and wave >= int(lv.flank.wave) - 1:
 		# pulsing chevrons mark the second entrance once it is about to open
 		var fp: Vector2 = paths[lane_count][1]
