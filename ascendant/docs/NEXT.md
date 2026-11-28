@@ -34,3 +34,6 @@ Next priorities: (1) risk/danger tuning + death-by-predator test; (2) civ divers
 ## Tick 3 result (playtest run 3, docs/playtest/run3.json)
 Fixed: predators' close-range attacks always missed (facing check on ~0 distance) and metabolism drained ~3x too fast (predators starved in ~25s). Test `test_predation` proves a hungry stoat kills an idle vole.
 Effect: world deaths per 240s fell from 25-34 to 0-8 (less starvation churn), but NO bot player died to a predator in 9 runs. Danger is still low for fleeing bots. Next: ambush/pack predators, predator density near player, check whether wild prey ever die to predators in the headless sim (log kill counts by cause), possibly raise world churn back via harsher winters.
+
+## Tick 4 Oracle (docs/oracle/t8.json, seeds 30-34, 500 seasons, current build)
+Civilizations emerged in 5/5 worlds at ~year 100. Civ species per world: Ash Rook | Dune Hare | Ash Rook | Ash Rook+Hare | Reed-Gnawer. Ant dominance is gone (COG_CAP worked). Remaining problem: still only 3 founder species ever become civilizations (rook, hare, reed-gnawer); never spiders, moles, frogs, squirrels. Rooks win 3/5. Next: per-niche cognition benefits for burrowers (mole), silk-weavers (spider), amphibians; check per-species ci distributions; per-tick cost 115-155ms.
