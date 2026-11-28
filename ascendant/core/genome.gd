@@ -38,9 +38,12 @@ static func blank() -> PackedFloat32Array:
 	return g
 
 ## Bauplan-specific constraints (what the developmental program forbids / forces).
+const COG_CAP := [1.0, 0.65, 0.6, 0.5, 0.85, 0.7, 0.6]    # neuron budget per body plan
 const MANIP_CAP := [0.9, 0.55, 0.7, 0.65, 0.75, 0.7, 0.15]   # per body plan: what the anatomy can physically handle
 static func constrain(g: PackedFloat32Array, bp: int) -> void:
 	set_g(g, "c_manip", minf(get_g(g, "c_manip"), MANIP_CAP[bp]))
+	for cn in COG:
+		set_g(g, cn, minf(get_g(g, cn), COG_CAP[bp]))
 	match bp:
 		BP.ARACH, BP.INSECT:
 			set_g(g, "size", minf(get_g(g, "size"), 0.8))     # tracheal/book-lung scaling limit

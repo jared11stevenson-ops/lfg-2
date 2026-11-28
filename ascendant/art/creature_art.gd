@@ -144,7 +144,8 @@ static func _quad(item: CanvasItem, rid: RID, under: Ink.Batch, over: Ink.Batch,
 	var breath := sin(pose.get("t", 0.0) * 2.2) * 0.02
 	var ink: Color = pal["ink"]
 	var lw := _line_w(ph)
-	var hf: float = 0.17 + 0.13 * ph["snout"] + (0.04 if reptile else 0.0)
+	var hf: float = 0.24 + 0.12 * ph["snout"] + (0.04 if reptile else 0.0)
+	var hr: float = maxf(ph["head_r"], W * (0.8 if reptile else 0.95))
 	var N := 18
 	var spine := PackedVector2Array(); var widths := PackedFloat32Array()
 	var amp := L * (0.07 if reptile else 0.025) * (0.3 + spd)
@@ -154,14 +155,16 @@ static func _quad(item: CanvasItem, rid: RID, under: Ink.Batch, over: Ink.Batch,
 		var y := _undulate(t, phase, amp) + turn * L * 0.12 * t * t
 		spine.append(Vector2(x, y))
 		var w: float
-		var hr: float = ph["head_r"]
 		if t < hf:
 			var k := t / hf
-			w = lerpf(hr * 0.28, hr, pow(smoothstep(0.0, 1.0, k), 0.65))
-			if ph["snout"] > 0.5: w = lerpf(hr * 0.2, hr, pow(k, 1.15))
-		elif t < hf + 0.1:
-			var k2 := (t - hf) / 0.1
-			w = lerpf(hr, W * 0.82, smoothstep(0.0, 1.0, k2))
+			if k < 0.7:
+				w = hr * (0.2 + 0.85 * smoothstep(0.0, 1.0, k / 0.7))
+				if ph["snout"] > 0.5: w = hr * (0.16 + 0.89 * pow(k / 0.7, 1.4))
+			else:
+				w = hr * lerpf(1.05, 0.7, smoothstep(0.0, 1.0, (k - 0.7) / 0.3))
+		elif t < hf + 0.09:
+			var k2 := (t - hf) / 0.09
+			w = lerpf(hr * 0.7, W * 0.85, smoothstep(0.0, 1.0, k2))
 		else:
 			var k3 := (t - hf - 0.1) / (1.0 - hf - 0.1)
 			w = W * (0.82 + 0.18 * sin(k3 * PI * 0.9)) * (1.0 - 0.6 * pow(k3, 3.0)) * (1.0 + breath)
@@ -235,22 +238,20 @@ static func _quad(item: CanvasItem, rid: RID, under: Ink.Batch, over: Ink.Batch,
 	# --- head details
 	var head_i := int(hf * 0.55 * (spl.size() - 1))
 	var hp: Vector2 = spl[head_i]
-	var hr: float = ph["head_r"]
-	# ears
+	# ears (drawn behind the cranium so only the outer lobe shows)
 	var er: float = ph["ear"]
 	if er > 0.05:
-		var ear_i := int(hf * 0.95 * (spl.size() - 1))
-		var ep: Vector2 = spl[ear_i]
+		var ep: Vector2 = spl[int(hf * 0.8 * (spl.size() - 1))]
 		for s in [-1, 1]:
-			var ex := ep + Vector2(-hr * 0.35, s * hr * 0.88)
-			var elen := hr * (0.6 + er * 1.3)
-			Ink.dome(over, ex, elen * 0.55, elen * 0.8 * 0.6 + 1, s * 0.5, pal["base"].lerp(pal["dark"], 0.2), rot, 12)
-			Ink.dome(over, ex + Vector2(0, s * 0.5), elen * 0.34, elen * 0.28, s * 0.5, pal["accent"].lightened(0.2), rot, 8)
+			var elen: float = hr * (0.55 + 1.1 * er)
+			var ex: Vector2 = ep + Vector2(-hr * 0.25, s * hr * 1.08)
+			Ink.dome(under, ex, elen * 0.62, elen * 0.5, s * 0.9, pal["base"].lerp(pal["dark"], 0.15), rot, 14)
+			Ink.dome(under, ex + Vector2(0, s * elen * 0.06), elen * 0.4, elen * 0.28, s * 0.9, pal["accent"].lightened(0.25), rot, 10)
 	# eyes
-	var er2: float = hr * (0.3 + 0.2 * ph["eye_size"])
-	var eyepos := spl[int(hf * 0.78 * (spl.size() - 1))]
+	var er2: float = hr * (0.2 + 0.13 * ph["eye_size"])
+	var eyepos := spl[int(hf * 0.66 * (spl.size() - 1))]
 	var eyes_slit: bool = reptile or ph["pat"] == 1 and ph["climb"] > 0.5
-	var epos := [eyepos + Vector2(hr * 0.1, hr * 0.55), eyepos + Vector2(hr * 0.1, -hr * 0.55)]
+	var epos := [eyepos + Vector2(0, hr * 0.62), eyepos + Vector2(0, -hr * 0.62)]
 	# nose
 	var nose_p: Vector2 = spl[0]
 	Ink.dome(over, nose_p + Vector2(-hr * 0.15, 0), hr * 0.22, hr * 0.18, 0.0, Color(0.1, 0.07, 0.1), rot, 8)

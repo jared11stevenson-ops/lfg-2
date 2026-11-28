@@ -1,0 +1,132 @@
+[
+  {
+    "alive_s": 200.000000000011,
+    "causes": {
+      "old age": 2
+    },
+    "critters": 90,
+    "deaths": 24,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 2,
+    "species": "vole",
+    "steps": 4000,
+    "style": "hunter"
+  },
+  {
+    "alive_s": 200.000000000011,
+    "causes": {
+      "old age": 1
+    },
+    "critters": 90,
+    "deaths": 23,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 2,
+    "species": "vole",
+    "steps": 4000,
+    "style": "cautious"
+  },
+  {
+    "alive_s": 200.000000000011,
+    "causes": {
+      "old age": 3
+    },
+    "critters": 92,
+    "deaths": 23,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 4,
+    "species": "vole",
+    "steps": 4000,
+    "style": "breeder"
+  },
+  {
+    "alive_s": 200.000000000011,
+    "causes": {
+      "old age": 2
+    },
+    "critters": 91,
+    "deaths": 24,
+    "end_state": "playing",
+    "items": 9,
+    "kills": 0,
+    "known": [
+      "float"
+    ],
+    "max_gen": 3,
+    "species": "vole",
+    "steps": 4000,
+    "style": "inventor"
+  },
+  {
+    "alive_s": 200.000000000011,
+    "causes": {
+      "old age": 1
+    },
+    "critters": 90,
+    "deaths": 28,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 8,
+    "known": [],
+    "max_gen": 2,
+    "species": "stoat",
+    "steps": 4000,
+    "style": "hunter"
+  },
+  {
+    "alive_s": 200.000000000011,
+    "causes": {},
+    "critters": 90,
+    "deaths": 15,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 1,
+    "species": "stoat",
+    "steps": 4000,
+    "style": "cautious"
+  },
+  {
+    "alive_s": 200.000000000011,
+    "causes": {
+      "old age": 1
+    },
+    "critters": 95,
+    "deaths": 13,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 2,
+    "species": "stoat",
+    "steps": 4000,
+    "style": "breeder"
+  },
+  {
+    "alive_s": 200.000000000011,
+    "causes": {
+      "old age": 1
+    },
+    "critters": 89,
+    "deaths": 22,
+    "end_state": "playing",
+    "items": 2,
+    "kills": 0,
+    "known": [
+      "bind"
+    ],
+    "max_gen": 2,
+    "species": "stoat",
+    "steps": 4000,
+    "style": "inventor"
+  }
+]

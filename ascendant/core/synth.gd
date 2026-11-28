@@ -98,5 +98,6 @@ class Bank extends Node:
 		v.stream = Synth.make(kind); v.pitch_scale = pitch * randf_range(0.93, 1.07)
 		v.volume_db = linear_to_db(clampf(vol * Settings.sfx, 0.0001, 1.0)); v.play()
 	func set_beds(wind: float, water: float) -> void:
+		if beds.is_empty(): return
 		beds["wind"].volume_db = linear_to_db(clampf(wind * Settings.music, 0.0001, 1.0))
 		beds["water"].volume_db = linear_to_db(clampf(water * Settings.music, 0.0001, 1.0))
