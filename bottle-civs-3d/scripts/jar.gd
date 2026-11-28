@@ -315,8 +315,8 @@ func update_visuals(dt: float, time_now: float) -> void:
 		return
 	var civ: BCSim.Civ = sim.civs[idx]
 	# interior light: brighter and warmer at night
-	var le := 1.1
-	if locked: le = 2.6 + 0.25 * sin(time_now * 1.7 + idx)
+	var le := 0.4
+	if locked: le = 1.7 + 0.2 * sin(time_now * 1.7 + idx)
 	var lc2: Color = race.color.lerp(Color(1.0, 0.82, 0.55), 0.55) if locked else race.color.lerp(Color.WHITE, 0.55)
 	light.light_energy = lerpf(light.light_energy, le, minf(1.0, dt * 3.0))
 	light.light_color = light.light_color.lerp(lc2, minf(1.0, dt * 3.0))
