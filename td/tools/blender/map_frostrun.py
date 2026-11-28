@@ -105,7 +105,7 @@ def lane_mat():
     nt.links.new(tc.outputs["Object"], edge.inputs["Vector"])
     sepc = node(nt, "ShaderNodeSeparateColor"); nt.links.new(cell.outputs["Color"], sepc.inputs["Color"])
     sand = ramp(nt, [(0.0, "#5c76a3"), (1.0, "#93aed0")]); nt.links.new(sepc.outputs["Red"], sand.inputs["Fac"])
-    mort = ramp(nt, [(0.02, "#2f4272"), (0.09, "#ffffff")]); nt.links.new(edge.outputs["Distance"], mort.inputs["Fac"])
+    mort = ramp(nt, [(0.02, "#566fa2"), (0.09, "#ffffff")]); nt.links.new(edge.outputs["Distance"], mort.inputs["Fac"])
     nz = node(nt, "ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 5.0; nz.inputs["Detail"].default_value = 6
     nt.links.new(tc.outputs["Object"], nz.inputs["Vector"])
     mx1 = node(nt, "ShaderNodeMix"); mx1.data_type = "RGBA"; mx1.blend_type = "MULTIPLY"; mx1.inputs["Factor"].default_value = 1.0
@@ -323,13 +323,13 @@ for i in range(len(PATH) - 1):
 # ------------------------------------------------------------------ ice slicks (match the game's ice zones: they speed enemies up)
 slick_m = bpy.data.materials.new("slick"); slick_m.use_nodes = True
 nt = slick_m.node_tree; sb = nt.nodes["Principled BSDF"]
-sb.inputs["Base Color"].default_value = hexc("#bfe8ff"); sb.inputs["Roughness"].default_value = 0.05
+sb.inputs["Base Color"].default_value = hexc("#5fd0ff"); sb.inputs["Roughness"].default_value = 0.04
 try:
-    sb.inputs["Emission Color"].default_value = hexc("#9fe8ff"); sb.inputs["Emission Strength"].default_value = 0.35
+    sb.inputs["Emission Color"].default_value = hexc("#4fc8ff"); sb.inputs["Emission Strength"].default_value = 1.1
 except Exception:
     pass
 for (ix, iy) in ICE:
-    prim("cyl", "slick", slick_m, G(ix, iy, 0.09), r=0.62, h=0.012, seg=40, scale=(1.0, 0.7, 1.0))
+    prim("cyl", "slick", slick_m, G(ix, iy, 0.09), r=0.78, h=0.012, seg=40, scale=(1.0, 0.66, 1.0))
     for q in range(6):
         a_ = q * 1.05 + ix
         prim("cube", "crack", mat("crack", "#ffffff", 0.2, 0.6), G(ix + math.cos(a_) * 26, iy + math.sin(a_) * 20, 0.1), scale=(0.18, 0.008, 0.004), rot=(0, 0, a_))
@@ -337,9 +337,10 @@ for (ix, iy) in ICE:
 # ------------------------------------------------------------------ rune pads
 for (sx, sy, col) in STONES:
     c = G(sx, sy, 0.06)
-    prim("cyl", "pad", mossy_rock_mat("#7f90b6"), c + Vector((0, 0, 0.04)), r=0.5, h=0.09, seg=48)
+    prim("cyl", "pad", mossy_rock_mat("#34446f"), c + Vector((0, 0, 0.04)), r=0.5, h=0.09, seg=48)
     prim("cyl", "padtop", mat("padtop", "#6b6288", 0.6), c + Vector((0, 0, 0.1)), r=0.42, h=0.03, seg=48)
-    prim("torus", "padring", mat("padglow_" + col, col, 0.4, 3.5), c + Vector((0, 0, 0.125)), R=0.34, r=0.018, seg=64)
+    prim("torus", "padring", mat("padglow_" + col, col, 0.4, 9.0), c + Vector((0, 0, 0.125)), R=0.34, r=0.026, seg=64)
+    prim("cyl", "padhalo", mat("padhalo_" + col, col, 0.4, 2.2), c + Vector((0, 0, 0.1)), r=0.4, h=0.02, seg=48)
     for k in range(4):
         a_ = k * math.pi / 2 + math.pi / 4
         prim("cube", "padrune", mat("padglow_" + col, col, 0.4, 3.5), c + Vector((math.cos(a_) * 0.17, math.sin(a_) * 0.17, 0.125)), scale=(0.2, 0.028, 0.012), rot=(0, 0, a_))
