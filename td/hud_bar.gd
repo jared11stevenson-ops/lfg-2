@@ -141,7 +141,9 @@ func _draw() -> void:
 	if m.tier > 0:
 		_txt("Replay Tier %d" % m.tier, Vector2(584, 130), 18, Color("ffd23a"))
 	if m.event_id != "":
-		_txt(String(Rules.EVENTS[m.event_id].name), Vector2(584, 70), 22, Color("ffd23a"))
-		_txt(String(Rules.EVENTS[m.event_id].get("desc", "")), Vector2(584, 92), 16, Color("ffe8b0"))
+		var chip4 := Rect2(584, 50, 190, 52)
+		draw_style_box(panel_sb, chip4)
+		_txt(String(Rules.EVENTS[m.event_id].name), Vector2(594, 72), 18, Color("ffd23a"))
+		_txt(String(Rules.EVENTS[m.event_id].get("desc", "")), Vector2(594, 94), 13, Color("ffe8b0"))
 	if m.Session.diff != "normal":
 		_txt(String(Rules.DIFFICULTY[m.Session.diff].name), Vector2(584, 100), 20, Color("ff9a8a"))

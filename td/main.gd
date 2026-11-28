@@ -111,6 +111,13 @@ var free_ids := {}          # tower id -> free placements left (granted by captu
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
 const CAPTURE_HP := 0.5
+const CALL_CD := 40.0
+const CALL_LEN := 7.0
+var call_cd := 0.0           # Lure Call: for a few seconds enemies up to 75% HP can be captured, at better odds
+var call_t := 0.0
+var call_btn: Button
+func capture_hp() -> float:
+	return 0.75 if call_t > 0.0 else CAPTURE_HP
 var bounty := {}             # optional per-run side goal: {kind, target, reward, label}
 var flawless_waves := 0
 var perf_t := 0.0
@@ -252,6 +259,8 @@ func _build_ui() -> void:
 	layer.add_child(sound_btn)
 	pause_btn = _button("Menu", Vector2(990, 8), Vector2(110, 52), 22, Color("3a4a6b"), _toggle_pause)
 	layer.add_child(pause_btn)
+	call_btn = _button("", Vector2(1060, 414), Vector2(200, 76), 20, Color("2a8a7a"), _lure_call)
+	layer.add_child(call_btn)
 	surge_btn = _button("", Vector2(1060, 500), Vector2(200, 76), 20, Color("2a6f9a"), _surge)
 	surge_btn.visible = not bool(mut.nosurge)
 	layer.add_child(surge_btn)
@@ -516,6 +525,10 @@ func _process(delta: float) -> void:
 	intro.modulate.a = clampf(intro_t / 1.2, 0.0, 1.0) if not pause_menu.visible else 0.0
 	red_flash = maxf(0.0, red_flash - delta)
 	surge_cd = maxf(0.0, surge_cd - delta)
+	call_cd = maxf(0.0, call_cd - delta)
+	call_t = maxf(0.0, call_t - delta)
+	call_btn.disabled = call_cd > 0.0 or not wave_running
+	call_btn.text = ("Lure Call\n(+capture range)" if call_cd <= 0.0 else "Call in %ds" % ceili(call_cd)) if call_t <= 0.0 else "Calling %.0fs" % call_t
 	surge_btn.disabled = surge_cd > 0.0 or not wave_running
 	surge_btn.text = "Well Surge\n(stun + damage)" if surge_cd <= 0.0 else "Surge in %ds" % ceili(surge_cd)
 	shake = maxf(0.0, shake - delta * 2.5)
@@ -593,7 +606,7 @@ func _cap_species(e) -> String:
 
 func _update_capturable() -> void:
 	for e in get_tree().get_nodes_in_group("enemies"):
-		var ok: bool = not e.dead and not e.is_boss and e.hp / e.max_hp <= CAPTURE_HP and Session.tower_for(_cap_species(e)) != ""
+		var ok: bool = not e.dead and not e.is_boss and e.hp / e.max_hp <= capture_hp() and Session.tower_for(_cap_species(e)) != ""
 		if ok and not e.capturable and not capture_hint_shown:
 			capture_hint_shown = true
 			var shown := int(Session.settings.get("capture_hints", 0))
@@ -614,7 +627,7 @@ func _capturable_at(p: Vector2):
 	return best
 
 func capture_chance(e) -> float:
-	return clampf(lerpf(0.9, 0.45, e.hp / e.max_hp / CAPTURE_HP) + (0.1 if e.shiny else 0.0) + (0.15 if e.rare else 0.0), 0.45, 0.97)
+	return clampf(lerpf(0.9, 0.45, minf(1.0, e.hp / e.max_hp / CAPTURE_HP)) + (0.1 if e.shiny else 0.0) + (0.08 if call_t > 0.0 else 0.0) + (0.15 if e.rare else 0.0), 0.45, 0.97)
 
 func _try_capture(e) -> void:
 	if lures <= 0:
@@ -959,6 +972,19 @@ func _go_endless() -> void:
 	start_btn.disabled = false
 	FxScript.text_at(self, Vector2(640, 300), "Endless mode: the Wells never stop!", Color("ffd23a"))
 	_refresh()
+
+func _lure_call() -> void:
+	if call_cd > 0.0 or not wave_running or state != "play":
+		return
+	call_cd = CALL_CD
+	call_t = CALL_LEN
+	Sfx.play(self, "capture_throw", -3.0)
+	FxScript.text_at(self, Vector2(640, 300), "Lure Call! Enemies up to 75% HP can be captured.", Color("a8fff0"))
+	var pf = PoofScript.new()
+	pf.col = Color("7fffd8")
+	pf.position = Vector2(640, 360)
+	pf.scale = Vector2(7, 7)
+	add_child(pf)
 
 func _surge() -> void:
 	if surge_cd > 0.0 or not wave_running or state != "play" or bool(mut.nosurge):
