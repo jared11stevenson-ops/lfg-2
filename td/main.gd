@@ -18,6 +18,7 @@ const PuppetLib = preload("res://puppet_lib.gd")
 const SettingsPanel = preload("res://settings_panel.gd")
 const HudBar = preload("res://hud_bar.gd")
 const FriendCard = preload("res://friend_card.gd")
+const SpeciesCard = preload("res://species_card.gd")
 const ResultScreen = preload("res://result_screen.gd")
 const Tutorial = preload("res://tutorial.gd")
 const Moves = preload("res://moves.gd")
@@ -545,7 +546,7 @@ func _update_capturable() -> void:
 func _capturable_at(p: Vector2):
 	var best = null
 	for e in get_tree().get_nodes_in_group("enemies"):
-		if e.capturable and not e.dead and e.position.distance_to(p + Vector2(0, 14)) < 62.0:
+		if e.capturable and not e.dead and e.position.distance_to(p + Vector2(0, 14)) < 80.0:
 			if best == null or e.position.distance_to(p) < best.position.distance_to(p):
 				best = e
 	return best
@@ -631,6 +632,18 @@ func _spawn() -> void:
 		pass
 	else:
 		d = Creatures.ENEMIES[kind]
+	var seen_key := "seen_" + kind
+	var first_sight := not boss and not rare_spawn and not bool(Session.settings.get(seen_key, false))
+	if first_sight:
+		Session.settings[seen_key] = true
+		Session.save_prefs()
+	if first_sight and wave >= 2:
+		var sc_ = SpeciesCard.new()
+		sc_.sprite = String(d.get("sprite", kind))
+		sc_.title = String(d.name)
+		sc_.body = String(d.get("blurb", ""))
+		sc_.types = " / ".join(PackedStringArray(Array(d.get("types", [])).map(func(t): return String(t).capitalize())))
+		start_btn.get_parent().add_child(sc_)
 	var lane := _pick_lane()
 	var path: PackedVector2Array = paths[lane]
 	var fl: Dictionary = lv.get("flank", {})
@@ -920,7 +933,7 @@ func _dist_to_paths(p: Vector2) -> float:
 
 func _snap(p: Vector2) -> Vector2:
 	for s in stones:
-		if p.distance_to(s.pos) < 46.0:
+		if p.distance_to(s.pos) < 58.0:
 			return s.pos
 	return p
 
@@ -939,7 +952,7 @@ func _valid_spot(p: Vector2) -> bool:
 
 func _tower_at(p: Vector2):
 	for n in get_tree().get_nodes_in_group("towers"):
-		if n.position.distance_to(p) < 46.0:
+		if n.position.distance_to(p) < 58.0:
 			return n
 	return null
 
@@ -999,7 +1012,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 			_deselect_tower()
 			return
 		# Tap once to preview the spot, tap the preview again to place (precise on touch screens).
-		if has_pending and p.distance_to(pending) < 46.0 and coins >= _cost(d) and _valid_spot(pending):
+		if has_pending and p.distance_to(pending) < 60.0 and coins >= _cost(d) and _valid_spot(pending):
 			_place(d, pending)
 			has_pending = false
 		elif _valid_spot(sp):

@@ -1,4 +1,5 @@
 extends Node2D
+const HitFx = preload("res://hit_fx.gd")
 var target: Node2D
 var tower
 var dmg := 1.0
@@ -17,6 +18,10 @@ func _process(delta: float) -> void:
 	var d := position.distance_to(target.position)
 	var step := speed * delta
 	if step >= d:
+		var fx = HitFx.new()
+		fx.col = color
+		fx.position = target.position + Vector2(0, -22)
+		get_parent().add_child(fx)
 		if is_instance_valid(tower):
 			tower.resolve_hit(self, target)
 		else:
