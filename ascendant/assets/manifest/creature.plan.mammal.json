@@ -5,22 +5,23 @@
  "generator": "res://art/creature_art.gd",
  "seed": 0,
  "params": {},
- "state": "rejected",
+ "state": "quarantined",
  "creator": "lead",
  "reviewer": "keeper",
  "evidence_images": [
+  "res://assets/evidence/mammals_v1.png",
   "res://assets/evidence/lineup_v2.png"
  ],
  "scores": {
   "silhouette": {
-   "score": 3,
-   "evidence": "Vole, hare, gnawer, mole, squirrel, stoat in lineup_v2.png share one salamander-like body with a pad or whip tail; mammals not recognisable as mammals."
+   "score": 4,
+   "evidence": "mammals_v1.png: v2 rejection partly addressed (round pink ears on hare, whiskers, tail variety) but all six still share one flat sausage torso with sideways stick legs."
   },
   "readability": {
    "score": 4,
-   "evidence": "Ears and snouts are indistinct; the hare has no long ears or hind legs, so species cannot be told apart at game scale (play2.png)."
+   "evidence": "Oversized glossy blue eyes dominate heads in mammals_v1.png; in play3.png the hare-like animals read as insects or lizards at game zoom."
   }
  },
  "critical_failures": [],
- "rejection_reason": "Mammal body plan reads as lizard/newt: no ears, weak heads, limbs sprawl sideways. Redesign required (ears, head shape, upright limb posture)."
+ "notes": "Re-submitted after v2 rejection; still below floor, cannot be approved. Needs upright limb posture, real head/snout shape, scaled eyes."
 }

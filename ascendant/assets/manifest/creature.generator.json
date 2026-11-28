@@ -9,7 +9,9 @@
  "creator": "lead",
  "reviewer": "keeper",
  "evidence_images": [
-  "res://assets/evidence/lineup_v2.png"
+  "res://assets/evidence/lineup_v2.png",
+  "res://assets/evidence/mammals_v1.png",
+  "res://assets/evidence/play3.png"
  ],
  "scores": {
   "silhouette": {

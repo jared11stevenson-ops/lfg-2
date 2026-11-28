@@ -9,7 +9,8 @@
  "creator": "lead",
  "reviewer": "keeper",
  "evidence_images": [
-  "res://assets/evidence/play2.png"
+  "res://assets/evidence/play2.png",
+  "res://assets/evidence/civ_real_seed12.png"
  ],
  "scores": {
   "silhouette": {
@@ -40,5 +41,5 @@
  "critical_failures": [
   "outline ring offset from boulder fill (play2.png), visible at normal play zoom"
  ],
- "notes": "Prop layer is implemented in the play scene; critical finding must be fixed."
+ "notes": "play3.png shows trees/flowers are good; rock boulders (play2.png) remain the problem."
 }

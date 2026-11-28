@@ -9,7 +9,8 @@
  "creator": "lead",
  "reviewer": "keeper",
  "evidence_images": [
-  "res://assets/evidence/structure_gallery_v1.png"
+  "res://assets/evidence/structure_gallery_v1.png",
+  "res://assets/evidence/civ_real_seed12.png"
  ],
  "scores": {
   "silhouette": {
@@ -22,7 +23,7 @@
   },
   "readability": {
    "score": 6,
-   "evidence": "Icons read at gallery scale; the faint dotted arc (row 2 col 8) and the shallow dam arcs are nearly invisible on the green ground."
+   "evidence": "civ_real_seed12.png: nest clusters, granaries and ant mounds read well at world zoom; faint dotted arc and shallow dam arcs in structure_gallery_v1.png stay nearly invisible."
   },
   "cohesion": {
    "score": 8,
