@@ -7,7 +7,7 @@ const INK := Color(0.16, 0.12, 0.2)
 const GOLD := Color(0.78, 0.6, 0.22)
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	UiKit.fit(self)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _process(_dt: float) -> void:
@@ -51,6 +51,21 @@ func _draw() -> void:
 			draw_string(f, r.position + Vector2(8, 46), abil[i][1], HORIZONTAL_ALIGNMENT_LEFT, 90, 12, INK)
 			var cd: float = clampf(abil[i][2], 0, 1)
 			if cd > 0.0: draw_rect(Rect2(r.position + Vector2(0, 62 * (1.0 - cd)), Vector2(98, 62 * cd)), Color(0.1, 0.1, 0.2, 0.35))
+	# mate chooser readout
+	if is_instance_valid(p):
+		var cands := play.mate_candidates(p)
+		if not cands.is_empty():
+			var o: Critter = cands[play.mate_pick % cands.size()]
+			var mr := Rect2(size.x * 0.5 - 190, 14, 380, 74)
+			_panel(mr, 0.92)
+			draw_string(f, mr.position + Vector2(12, 24), "Potential mate %d/%d — %s" % [play.mate_pick % cands.size() + 1, cands.size(), o.display_name()], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, INK)
+			var tr2 := play.mate_traits(p, o)
+			var tx := 12.0
+			for d in tr2:
+				var col := Color(0.2, 0.5, 0.3) if d[1] > 0 else UiKit.RUST
+				draw_string(f, mr.position + Vector2(tx, 48), "%s %s%d%%" % [d[0], "+" if d[1] > 0 else "−", int(absf(d[1]) * 100)], HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
+				tx += 118
+			draw_string(f, mr.position + Vector2(12, 66), "Z cycle · R pair · your young inherit a blend (+ your practice)", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, INK.lightened(0.3))
 	# world clock + stats
 	var alive := 0
 	for s in play.sim.species: if s["extinct"] < 0: alive += 1

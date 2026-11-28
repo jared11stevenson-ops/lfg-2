@@ -6,6 +6,12 @@ const INK := Color(0.16, 0.12, 0.2)
 const GOLD := Color(0.78, 0.6, 0.22)
 const RUST := Color(0.66, 0.27, 0.2)
 
+## Controls parented to a CanvasLayer get no layout rect: pin them to the viewport explicitly.
+static func fit(c: Control) -> void:
+	var apply := func(): c.position = Vector2.ZERO; c.size = c.get_viewport_rect().size
+	apply.call()
+	c.get_viewport().size_changed.connect(apply)
+
 static func panel(c: CanvasItem, r: Rect2, a: float = 0.95) -> void:
 	var sh := r; sh.position += Vector2(4, 6)
 	c.draw_rect(sh, Color(0, 0, 0, 0.3 * a))

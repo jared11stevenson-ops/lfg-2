@@ -29,7 +29,10 @@ var flying := false; var burrowed := false; var buff_t := 0.0
 var carniv := 0.0; var mass := 0.1
 var rng := RandomNumberGenerator.new()
 var kills := 0
-var weapon: Dictionary = {}   # equipped item (see game/items.gd)
+var weapon: Dictionary = {}   # equipped: {item: Item, reach, power}
+var inv: Dictionary = {}      # material -> count
+var given_name := ""
+var practice: Dictionary = {}   # gene -> accumulated practice (shapes offspring)
 var mate_cd := 0.0
 var think_t := 0.0
 var aggro_to: Critter = null
@@ -53,6 +56,23 @@ func setup(g: PackedFloat32Array, bp_: int, sp_: int, name_: String, w: GameWorl
 	heading = rng.randf() * TAU
 	wander_to = position
 	return self
+
+func display_name() -> String:
+	if given_name == "":
+		var a := ["Ka", "Ti", "Mo", "Ra", "Su", "Vi", "Ne", "Lo", "Ba", "Ze", "Qu", "Wi"]
+		var b := ["r", "n", "l", "x", "s", "m", "th", "k"]
+		given_name = a[id % a.size()] + a[(id * 7 + 3) % a.size()].to_lower() + b[(id * 5) % b.size()]
+	return given_name
+
+func train(gene: String, amt: float) -> void:
+	practice[gene] = minf(float(practice.get(gene, 0.0)) + amt, 0.12)
+
+func carry_cap() -> int:
+	return clampi(int(3 + 10.0 * ph["strength"] * (0.5 + ph["dex"]) * (0.6 if ph["flies"] else 1.0)), 2, 24)
+func inv_count() -> int:
+	var n := 0
+	for k in inv: n += inv[k]
+	return n
 
 func maturity() -> float: return clampf(age_s / (life_s * 0.12), 0.0, 1.0)
 func is_adult() -> bool: return maturity() >= 1.0
@@ -91,8 +111,15 @@ func _do_lunge() -> void:
 		var d := o.position - position
 		if d.length() > reach + o.radius(): continue
 		if absf(angle_difference(heading, d.angle())) > 1.0: continue
+		var was := o.hp
 		o.take_hit(dmg, self, dir * 220.0 * (1.0 + ph["strength"] * 0.2))
 		hit = true
+		if not weapon.is_empty():
+			var it: Item = weapon["item"]
+			it.wear = minf(it.wear + 0.004, 1.0)
+			if o.hp <= 0.0 or o.is_queued_for_deletion():
+				it.record_kill(o.sp_name, int(world.sim.tick))
+				world.fx_text(o.position, it.display_name() + " claims another", Color(1.0, 0.85, 0.4))
 	cooldown = 0.45 if is_player else 1.1 - 0.4 * ph["bite"] / 2.0
 	if hit and not weapon.is_empty():
 		weapon["hits"] = int(weapon.get("hits", 0)) + 1

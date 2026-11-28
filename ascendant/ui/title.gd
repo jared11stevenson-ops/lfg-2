@@ -21,7 +21,7 @@ var card_rects: Array = []
 var seed_rect := Rect2()
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	UiKit.fit(self)
 	rng.randomize()
 	seed_text = str(rng.randi() % 100000)
 	save_info = SaveGame.summary("autosave")

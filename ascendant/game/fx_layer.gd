@@ -6,7 +6,10 @@ var texts: Array = []
 func ring(p: Vector2, c: Color, r: float) -> void:
 	rings.append({"p": p, "c": c, "r": r, "t": 0.0})
 func text(p: Vector2, s: String, c: Color) -> void:
-	texts.append({"p": p, "s": s, "c": c, "t": 0.0})
+	var stack := 0
+	for t in texts:
+		if t["p"].distance_to(p) < 60.0: stack += 1
+	texts.append({"p": p + Vector2(0, -22 * stack), "s": s, "c": c, "t": 0.0})
 func _process(dt: float) -> void:
 	for r in rings: r["t"] += dt * 2.2
 	for t in texts: t["t"] += dt

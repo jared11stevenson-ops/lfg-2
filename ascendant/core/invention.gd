@@ -6,8 +6,8 @@ extends RefCounted
 
 ## role weights: property -> weight (negative = must be low). `need`: minimum body capability.
 const FUNCS := {
-	"cut":     {"roles": {"edge": {"sharp": 1.0, "hard": 0.5, "brit": -0.4}, "haft": {"tens": 0.4, "flex": 0.2, "dens": -0.2}}, "bind": "haft", "need": {"c_manip": 0.3}, "verb": "cutter"},
-	"pierce":  {"roles": {"point": {"sharp": 0.9, "hard": 0.6, "brit": -0.5}, "shaft": {"tens": 0.6, "dens": -0.4, "flex": 0.1}}, "need": {"c_manip": 0.3}, "verb": "spear"},
+	"cut":     {"roles": {"edge": {"sharp": 1.0, "hard": 0.5, "brit": -0.4}, "haft": {"tens": 0.4, "flex": 0.2, "dens": -0.2}}, "bind": "haft", "need": {"c_manip": 0.24}, "verb": "cutter"},
+	"pierce":  {"roles": {"point": {"sharp": 0.9, "hard": 0.6, "brit": -0.5}, "shaft": {"tens": 0.6, "dens": -0.4, "flex": 0.1}}, "need": {"c_manip": 0.24}, "verb": "spear"},
 	"pound":   {"roles": {"head": {"dens": 0.9, "hard": 0.6, "brit": -0.3}, "haft": {"tens": 0.5, "hard": 0.2}}, "need": {"c_manip": 0.25, "strength": 0.3}, "verb": "maul"},
 	"dig":     {"roles": {"blade": {"hard": 0.7, "sharp": 0.3, "brit": -0.4}, "haft": {"tens": 0.4}}, "need": {"c_manip": 0.2}, "verb": "digger"},
 	"bind":    {"roles": {"strand": {"tens": 1.0, "flex": 0.7}}, "need": {"c_manip": 0.2}, "verb": "cordage"},

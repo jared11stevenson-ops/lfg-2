@@ -16,12 +16,16 @@ var bloodline_id := 0
 var heirs: Array = []          # critter ids queued as heirs
 var chronicle: Array = []      # player-visible history lines
 var observer := false
+var mate_pick := 0
+var mate_cands: Array = []
 var deaths := 0
 var generation := 1
 var autoplay_input := true      # false => bots drive the player
 var sim_busy := false
 var backdrop := false
 var focus := Vector2.ZERO
+var known: Dictionary = {}     # invention knowledge of THIS bloodline
+var craft_ui: CraftUI
 var items: Array = []        # Items owned by the bloodline (see core/item.gd)
 var props: PropLayer
 var structs: StructureLayer
@@ -125,6 +129,10 @@ func _player_died(killer) -> void:
 		if is_instance_valid(c) and c.bloodline == bloodline_id and c != player and not c.is_queued_for_deletion():
 			if best == null or c.maturity() > best.maturity(): best = c
 	if best:
+		for it in items:
+			it.transfer(best.display_name(), "inherited", sim.tick)
+		best.inv = player.inv.duplicate()
+		if not player.weapon.is_empty(): equip(best, player.weapon["item"])
 		_become(best)
 		chronicle.append("Your heir takes up the line (gen %d)." % generation)
 	else:
@@ -190,6 +198,7 @@ func _player_input(dt: float) -> void:
 	p.aim = (mp - p.position).angle(); p.use_aim = true
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE): p.start_attack()
 	if Input.is_key_pressed(KEY_SHIFT): p.dodge()
+	if Input.is_key_pressed(KEY_G): gather(p, dt); p.move_dir *= 0.2
 	if Input.is_key_pressed(KEY_E):
 		if p.carniv > 0.2 and p.eat_carcass(dt): pass
 		else: p._graze(dt)
@@ -199,27 +208,95 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 	if not (ev is InputEventKey and ev.pressed and not ev.echo) or not is_instance_valid(player): return
 	match ev.keycode:
 		KEY_Q: player.use_ability()
+		KEY_Z: mate_pick += 1
 		KEY_R: try_mate(player)
 		KEY_TAB: observer = not observer
+		KEY_C: _toggle_craft("craft")
+		KEY_I: _toggle_craft("items")
+		KEY_F: _secrete(player)
 
-func try_mate(p: Critter) -> bool:
-	if p.mate_cd > 0.0 or not p.is_adult() or p.energy < 0.45: return false
-	var best: Critter = null; var bd := 140.0 + p.radius()
+func _toggle_craft(tab: String) -> void:
+	if craft_ui:
+		craft_ui.queue_free(); craft_ui = null; get_tree().paused = false; return
+	craft_ui = CraftUI.new(); craft_ui.play = self; craft_ui.tab = tab; craft_ui.process_mode = Node.PROCESS_MODE_ALWAYS
+	craft_ui.closed.connect(func(): craft_ui.queue_free(); craft_ui = null; get_tree().paused = false)
+	hud.get_parent().add_child(craft_ui)
+	get_tree().paused = true
+
+func equip(c: Critter, it: Item) -> void:
+	if it == null:
+		c.weapon = {}; return
+	var reach: float = {"pierce": 24.0, "cut": 10.0, "pound": 6.0, "dig": 8.0}.get(it.func_id, 0.0)
+	var power: float = it.power() * {"pierce": 1.0, "cut": 1.1, "pound": 1.3, "dig": 0.6}.get(it.func_id, 0.3) + 0.0
+	c.weapon = {"item": it, "reach": reach, "power": maxf(power, 0.0)}
+
+## Gather raw materials from the ground you stand on (physical limits: carrying capacity, body type).
+func gather(p: Critter, dt: float) -> void:
+	p.set_meta("gather_t", float(p.get_meta("gather_t", 0.0)) + dt)
+	if float(p.get_meta("gather_t")) < 1.0: return
+	p.set_meta("gather_t", 0.0)
+	if p.inv_count() >= p.carry_cap():
+		world.fx_text(p.position, "can't carry more", Color(1, 0.7, 0.5)); return
+	var t := world.tile_of(p.position)
+	var ti := t.y * GameWorld.TW + t.x
+	var e := world.elev[ti]; var tr := world.tree_n[ti]
+	var opts: Array = []
+	for cc in carcasses:
+		if is_instance_valid(cc) and cc.position.distance_to(p.position) < 60.0: opts.append_array(["bone", "chitin", "fur"])
+	if e < 0.38: opts.append_array(["reed", "clay", "shell", "mud"])
+	if tr > 0.1: opts.append_array(["wood", "leaf", "resin"] if tr > 0.5 else ["wood", "leaf"])
+	if e > 0.58: opts.append_array(["stone", "flint", "flint"])
+	if opts.is_empty(): opts.append_array(["fiber", "mud"])
+	var m: String = opts[rng.randi() % opts.size()]
+	if m == "resin" and tr < 0.5: m = "wood"
+	p.inv[m] = p.inv.get(m, 0) + 1
+	p.train("c_spatial", 0.002)
+	world.fx_text(p.position, "+ " + m, Color(0.85, 0.95, 0.7))
+
+func _secrete(p: Critter) -> void:
+	var sec: float = p.ph["secrete"]
+	if sec < 0.45 or p.energy < 0.25 or p.inv_count() >= p.carry_cap():
+		world.fx_text(p.position, "can't secrete" if sec < 0.45 else "too tired/full", Color(1, 0.8, 0.6)); return
+	var m := "silk" if p.bp == Genome.BP.ARACH or sec > 0.7 else "wax"
+	p.inv[m] = p.inv.get(m, 0) + 1; p.energy -= 0.12
+	world.fx_text(p.position, "+ " + m, Color(0.95, 0.95, 1.0))
+
+func mate_candidates(p: Critter) -> Array:
+	var out: Array = []
 	for c in critters:
 		var o: Critter = c
 		if o == p or not is_instance_valid(o) or o.sp != p.sp or not o.is_adult() or o.mate_cd > 0.0 or o.energy < 0.4: continue
-		var d := p.position.distance_to(o.position)
-		if d < bd: bd = d; best = o
+		if p.position.distance_to(o.position) < 220.0 + p.radius(): out.append(o)
+	out.sort_custom(func(a, b): return a.position.distance_to(p.position) < b.position.distance_to(p.position))
+	return out
+
+## The three traits where a prospective mate differs most from you (what you'd be choosing).
+func mate_traits(p: Critter, o: Critter) -> Array:
+	var diffs: Array = []
+	for n in ["size", "speed", "strength", "armor", "vision", "smell", "toxin", "camo", "c_manip", "c_comm", "c_coop", "c_plan", "c_learn", "metab", "lifespan", "fertility", "burrow", "aqua", "climb"]:
+		var d: float = Genome.get_g(o.genome, n) - Genome.get_g(p.genome, n)
+		diffs.append([n, d])
+	diffs.sort_custom(func(a, b): return absf(a[1]) > absf(b[1]))
+	return diffs.slice(0, 3)
+
+func try_mate(p: Critter) -> bool:
+	if p.mate_cd > 0.0 or not p.is_adult() or p.energy < 0.45: return false
+	var cands := mate_candidates(p)
+	var best: Critter = null
+	if not cands.is_empty(): best = cands[mate_pick % cands.size()]
 	if best == null:
 		world.fx_text(p.position, "no mate near", Color(1, 0.8, 0.5)); return false
 	var litter := clampi(int(round(0.8 + p.ph["bite"] * 0.0 + Genome.get_g(p.genome, "fertility") * 3.0 / (0.6 + p.mass * 0.4))), 1, 5)
 	for i in litter:
 		var g := Genome.cross(p.genome, best.genome, rng)
+		# practice shapes the young: what the parent trained leans the offspring that way (bounded)
+		for gn in p.practice: Genome.set_g(g, gn, Genome.get_g(g, gn) + float(p.practice[gn]) * 0.5)
 		g = Genome.mutate(g, p.bp, rng, 0.14, 0.05)
 		var kid := _make_critter(g, p.bp, p.sp, p.position + Vector2(rng.randf_range(-30, 30), rng.randf_range(-30, 30)), 0.0)
 		kid.bloodline = p.bloodline if p.bloodline >= 0 else -1
 		kid.gen = p.gen + 1; kid.parents = [p.id, best.id]
 		kid.energy = 0.7
+	if not p.practice.is_empty(): chronicle.append("Your practiced skills echo in the young."); p.practice.clear()
 	p.mate_cd = 25.0; best.mate_cd = 25.0; p.energy -= 0.25; best.energy -= 0.2
 	world.fx_text(p.position, "%d young!" % litter, Color(1, 0.7, 0.8))
 	for d in sim.pops[world.region_of(p.position)]:

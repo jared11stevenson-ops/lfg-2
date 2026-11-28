@@ -3,7 +3,7 @@ extends Control
 signal action(id: String)
 var btns: Array = []
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	UiKit.fit(self)
 	for i in 3:
 		var b := UiKit.Btn.new(); b.id = ["resume", "save", "title"][i]; b.label = ["Resume", "Save world", "Save & return to title"][i]
 		b.rect = Rect2(size.x * 0.5 - 170, 260 + i * 66, 340, 52); btns.append(b)

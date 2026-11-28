@@ -5,7 +5,8 @@ extends RefCounted
 ## from the species' genes; settlement forms and layers (surface / underground / aquatic / elevated)
 ## fall out of those scores and the terrain. No two species share a build menu.
 
-const SHELTER_CAP := 14.0
+const SHELTER_CAP := 70.0   # individuals housed per shelter (pop units are demographic, not heads)
+const MAX_PER_REGION := 22
 
 static func capabilities(g: PackedFloat32Array, bp: int) -> Dictionary:
 	var T := func(n: String) -> float: return g[Genome.IDX[n]]
@@ -131,7 +132,9 @@ static func _build(sim: EcoSim, civ: Dictionary, fedm: float) -> void:
 	var pop: float = civ["pop"]
 	var shelters := _count(civ, "shelter")
 	var need := ""
-	if shelters * SHELTER_CAP < pop: need = "shelter"
+	var per_region := float(civ["structures"].size()) / maxf(civ["regions"].size(), 1)
+	if per_region >= MAX_PER_REGION: return          # settlements fill their land; growth must come from expansion or tech
+	if shelters * SHELTER_CAP * (1.0 + 0.12 * civ["know"].size()) < pop: need = "shelter"
 	elif _count(civ, "store") < maxi(1, shelters / 3): need = "store"
 	elif (fedm < 0.8 or _count(civ, "farm") < shelters / 4) and caps["cultivate"] > 0.28: need = "farm"
 	elif caps["water"] > 0.4 and _count(civ, "water_work") < 1 and shelters >= 3: need = "water_work"
