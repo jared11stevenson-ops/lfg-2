@@ -14,7 +14,7 @@ BONES += legb("MP", (-0.2, 0.8, 0.65), (-0.2, 1.2, 0.42), (-0.2, 1.3, 0.1), "bod
 BONES += ctl("BP", (-0.97, 1.05, 0.1), (-0.97, 1.9, 0.95)) + ctl("BN", (-0.97, -1.05, 0.1), (-0.97, -1.9, 0.95))
 BONES += ctl("MP", (-0.2, 1.3, 0.1), (-0.2, 2.0, 0.95)) + ctl("MN", (-0.2, -1.3, 0.1), (-0.2, -2.0, 0.95))
 GLOMM = dict(glb="/tmp/claude-0/gt/new/snow_monster.plain.glb", yaw=-32.0,
-             spec=dict(origin_dx=10, yaw_face=0, px_w=150, lift=0.0, bones=BONES, ratio=0.03, legs=legs_spec(("BP", "BN", "MP", "MN"), dict(BP=1, BN=-1, MP=1, MN=-1))),
+             spec=dict(origin_dx=10, yaw_face=0, px_w=138, lift=0.0, bones=BONES, ratio=0.03, legs=legs_spec(("BP", "BN", "MP", "MN"), dict(BP=1, BN=-1, MP=1, MN=-1))),
              counts={"idle": 8, "walk": 12, "attack": 8}, period={"idle": 2.6, "walk": 0.9, "attack": 0.85}, strike=3, walk_units=1.2)
 NEUTRAL = {"BP": (0.0, 0.0), "BN": (0.0, 0.0), "MP": (0.0, 0.0), "MN": (0.0, 0.0)}
 PHASE = {"BP": 0.0, "MN": 0.0, "BN": 0.5, "MP": 0.5}
