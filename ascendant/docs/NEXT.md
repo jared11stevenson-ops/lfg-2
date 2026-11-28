@@ -37,3 +37,8 @@ Effect: world deaths per 240s fell from 25-34 to 0-8 (less starvation churn), bu
 
 ## Tick 4 Oracle (docs/oracle/t8.json, seeds 30-34, 500 seasons, current build)
 Civilizations emerged in 5/5 worlds at ~year 100. Civ species per world: Ash Rook | Dune Hare | Ash Rook | Ash Rook+Hare | Reed-Gnawer. Ant dominance is gone (COG_CAP worked). Remaining problem: still only 3 founder species ever become civilizations (rook, hare, reed-gnawer); never spiders, moles, frogs, squirrels. Rooks win 3/5. Next: per-niche cognition benefits for burrowers (mole), silk-weavers (spider), amphibians; check per-species ci distributions; per-tick cost 115-155ms.
+
+## Tick 5 Oracle tuning log (same seeds 30-34, 500 seasons)
+- t8 (before niche payoffs): civs in 5/5 worlds at ~year 100; only rook/hare/reed-gnawer; 1-4 civs per world.
+- t9 (niche payoffs x0.7): too easy: first civ ~year 36, 66-206 deme-dawns, up to 11 civs; but diversity appeared (mole, minnow, squirrel, vole).
+- t10 (x0.3, current): first civ ~year 38-67; civs per world 4-8; species per world 4-8 across ant, squirrel, vole, minnow, hare, rook, reed-gnawer. Spiders/frogs/toads/skinks/stoats still never found a civ. KEPT as current setting: diversity is better; timing is early, so "Mature world" (80y) starts with civs already present. Open: slow the pace (year 100+) and decide whether civ-less carnivores are an acceptable evolutionary outcome (probably yes: predators rarely need cumulative culture).
