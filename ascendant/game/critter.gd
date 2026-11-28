@@ -293,7 +293,7 @@ func _think(dt: float) -> void:
 		var seen: float = d * (1.0 + o.ph["camo"] * 1.2)
 		if seen > sight: continue
 		if o.carniv > 0.55 and o.mass > mass * 0.4 and o.energy < 0.85 + 0.3 and d < td and (carniv < 0.55 or o.mass > mass * 1.4) : threat = o; td = d
-		if carniv > 0.45 and o.carniv < 0.75 and o.mass < mass * 2.2 and o.mass > mass * 0.002 and (energy < 0.7) and d < pd: prey = o; pd = d
+		if carniv > 0.45 and o.carniv < 0.75 and o.mass < mass * 2.2 and o.mass > mass * 0.002 and (energy < 0.7 + 0.28 * carniv) and d < pd: prey = o; pd = d
 	if aggro_to and is_instance_valid(aggro_to) and carniv > 0.45 and aggro_to.mass < mass * 3.0:
 		prey = aggro_to; pd = position.distance_to(aggro_to.position)
 	if threat and (carniv < 0.55 or threat.mass > mass * 1.4):
