@@ -108,6 +108,7 @@ func _build_ground() -> void:
 				if w[0] == r and w[1] == c: is_water = true
 			var t := BCAssets.tile("hex_water" if is_water else "hex_grass")
 			t.position = Vector3(x, 0, z)
+			if not is_water: BCAssets.tint_green(t)
 			root.add_child(t)
 
 func _build_glass_and_frame() -> void:
@@ -133,7 +134,7 @@ func _build_glass_and_frame() -> void:
 	for sx in [-1, 1]:
 		add_child(BCAssets.box(Vector3(0.45, 0.35, HALF_Z * 2), frame_mat, Vector3(sx * HALF_X, H, 0)))
 	# glowing LED strip along the front rim in the civ colour
-	led_mat = BCAssets.emissive(race.color, 2.5)
+	led_mat = BCAssets.emissive(race.color, 1.0)
 	led = BCAssets.box(Vector3(HALF_X * 2 - 0.4, 0.14, 0.1), led_mat, Vector3(0, H + 0.2, HALF_Z + 0.26))
 	add_child(led)
 	# lid: hinged at the back edge, seals at dusk

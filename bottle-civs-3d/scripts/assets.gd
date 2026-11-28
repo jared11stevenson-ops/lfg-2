@@ -80,3 +80,16 @@ static func box(size: Vector3, mat: Material, pos: Vector3 = Vector3.ZERO) -> Me
 	mi.material_override = mat
 	mi.position = pos
 	return mi
+
+static var _grass_mat: StandardMaterial3D
+
+## Grade the pale grass tile toward green (colour-multiplies the original atlas material).
+static func tint_green(n: Node) -> void:
+	for mi in n.find_children("*", "MeshInstance3D", true, false):
+		var m: MeshInstance3D = mi
+		if _grass_mat == null:
+			var base := m.get_active_material(0)
+			if base is StandardMaterial3D:
+				_grass_mat = base.duplicate()
+				_grass_mat.albedo_color = Color(0.55, 0.92, 0.45)
+		if _grass_mat != null: m.material_override = _grass_mat

@@ -53,7 +53,7 @@ func setup(p_race: Dictionary) -> void:
 	var sq: Vector3 = p_race.get("squash", Vector3.ONE)
 	# normalise any imported model to the race's target height (assets use wildly different units)
 	var h := _model_height(model)
-	var sc: float = float(p_race.height) / maxf(h, 0.0001)
+	var sc: float = float(p_race.height) * 1.7 / maxf(h, 0.0001)
 	model.scale = Vector3(sc * sq.x, sc * sq.y, sc * sq.z)
 	skeleton = _find_skeleton(model)
 	_apply_tint()
