@@ -39,7 +39,7 @@ const LEVELS := {
 		"stones": [[560, 220, "frost"], [560, 390, "spirit"], [1100, 250, "gale"], [130, 420, "ember"]],
 		"zones": [{"pos": [450, 140], "r": 80, "kind": "ice"}, {"pos": [750, 140], "r": 80, "kind": "ice"}, {"pos": [600, 300], "r": 80, "kind": "ice"}],
 		"roster": [["shuckit", 1, 7], ["shuckit_pup", 2, 4], ["glomm", 2, 6], ["icewake", 4, 2], ["shuckit_alpha", 5, 2]],
-		"boss": "glomm", "boss_extra": {"shield": 180.0, "leak": 6}, "boss_mult": 4.0, "early": [0.6, 0.7, 0.78, 0.74, 0.78, 0.8, 0.8, 0.8, 0.76, 0.9], "art": "res://art/maps/frostrun.png", "tower_cap": 10,
+		"boss": "glomm", "boss_extra": {"shield": 180.0, "leak": 6}, "boss_mult": 3.6, "early": [0.6, 0.7, 0.78, 0.74, 0.78, 0.8, 0.8, 0.8, 0.76, 0.9], "art": "res://art/maps/frostrun.png", "tower_cap": 10,
 		"goals": [["win", "Clear all 10 waves"], ["gold15", "Finish with 15+ lives"], ["perfect", "Lose no lives at all"], ["capture", "Capture a Glomm"]],
 		"story": {
 			"intro": [

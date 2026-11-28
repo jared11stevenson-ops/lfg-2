@@ -108,6 +108,7 @@ var free_ids := {}          # tower id -> free placements left (granted by captu
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
 const CAPTURE_HP := 0.5
+var ice_tip_shown := false
 var wave_leaks := 0          # gold lost this wave (for the wave summary and the flawless bonus)
 var wave_caps := 0           # captures this wave
 var gift_pending := false     # wave 2 of Level 1 carries a pre-weakened Shuckit so the first capture is taught, not hoped for
@@ -392,6 +393,10 @@ func _start_wave() -> void:
 	if weather != "clear" and weather != prev_weather:
 		_announce_weather()
 	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
+	if wave == Levels.TOTAL_WAVES and String(lv.get("boss", "")) != "":
+		lures = mini(lures + 1, 6)
+		FxScript.text_at(self, Vector2(640, 340), "Final wave! The Elder arrives. +1 Lure.", Color("ff9a9a"))
+		Sfx.play(self, "boss", -8.0)
 	if wave == 5 and lv.has("champion"):
 		lures = mini(lures + 1, 6)
 		FxScript.text_at(self, Vector2(640, 340), "Alpha raid! A champion leads this wave. +1 Lure.", Color("ffb040"))
@@ -467,6 +472,16 @@ func _process(delta: float) -> void:
 	surge_btn.text = "Well Surge\n(stun + damage)" if surge_cd <= 0.0 else "Surge in %ds" % ceili(surge_cd)
 	shake = maxf(0.0, shake - delta * 2.5)
 	position = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 9.0 if bool(Session.settings.shake) else Vector2.ZERO
+	if state == "play" and wave_running and not ice_tip_shown and not zones.is_empty():
+		for e in get_tree().get_nodes_in_group("enemies"):
+			if not bool(e.flying):
+				for z in zones:
+					if String(z.kind) == "ice" and e.position.distance_to(z.pos) < float(z.r):
+						ice_tip_shown = true
+						FxScript.text_at(self, e.position + Vector2(0, -70), "Ice! Enemies slide faster here.", Color("bfe8ff"))
+						break
+			if ice_tip_shown:
+				break
 	if state == "play" and wave_running:
 		spawn_cd -= delta
 		if to_spawn > 0 and spawn_cd <= 0.0:

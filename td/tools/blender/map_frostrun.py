@@ -337,7 +337,7 @@ for (ix, iy) in ICE:
 # ------------------------------------------------------------------ rune pads
 for (sx, sy, col) in STONES:
     c = G(sx, sy, 0.06)
-    prim("cyl", "pad", mossy_rock_mat("#34446f"), c + Vector((0, 0, 0.04)), r=0.5, h=0.09, seg=48)
+    prim("cyl", "pad", mat("padbase_" + col, col, 0.5, 0.35), c + Vector((0, 0, 0.04)), r=0.5, h=0.09, seg=48)
     prim("cyl", "padtop", mat("padtop", "#6b6288", 0.6), c + Vector((0, 0, 0.1)), r=0.42, h=0.03, seg=48)
     prim("torus", "padring", mat("padglow_" + col, col, 0.4, 9.0), c + Vector((0, 0, 0.125)), R=0.34, r=0.026, seg=64)
     prim("cyl", "padhalo", mat("padhalo_" + col, col, 0.4, 2.2), c + Vector((0, 0, 0.1)), r=0.4, h=0.02, seg=48)
