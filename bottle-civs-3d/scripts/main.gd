@@ -23,6 +23,8 @@ var selected := -1
 var hover := -1
 var args := {}
 var clock_now := 0.0
+var menu: BCMenu
+var battle_view: BCBattleView = null
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -44,8 +46,24 @@ func _ready() -> void:
 	hud.civ_picked.connect(_select)
 	hud.overview_pressed.connect(func(): _select(-1))
 	hud.set_speed_ui(speed, paused)
+	hud.command.connect(_on_command)
+	menu = BCMenu.new()
+	add_child(menu)
+	menu.picked.connect(_on_picked)
+	menu.fight.connect(_on_fight)
+	menu.auto_resolve.connect(func(): sim.auto_resolve_pending())
+	menu.restart.connect(func(): get_tree().reload_current_scene())
+	menu.keep_watching.connect(func(): sim.game_over_flag = false; sim.player = -1; paused = false)
+	sim.tactical_battle.connect(_on_tactical)
+	sim.game_over.connect(_on_game_over)
 	if args.has("shot"):
+		if args.has("player"): _on_picked(int(args.player))
 		_run_shot()
+	elif args.has("player"):
+		_on_picked(int(args.player))
+	else:
+		paused = true
+		menu.show_title()
 
 # ------------------------------------------------------------------ scene
 func _build_environment() -> void:
@@ -223,6 +241,7 @@ func _update_tubes(dt: float) -> void:
 		var war: bool = sim.civs[tb.a].war.has(tb.b)
 		var c := Color(0.35, 1.0, 0.75) if active else Color(1.0, 0.2, 0.15)
 		if war and active: c = Color(1.0, 0.45, 0.25)
+		elif active and sim.civs[tb.a].allies.has(tb.b): c = Color(0.35, 0.6, 1.0)
 		var mat: StandardMaterial3D = m.material_override
 		mat.albedo_color = mat.albedo_color.lerp(c, minf(1.0, dt * 4.0))
 		mat.emission = mat.albedo_color
@@ -294,11 +313,15 @@ func _unhandled_input(ev: InputEvent) -> void:
 		var h := _pick(ev.position)
 		for k in jars.size(): jars[k].hovered = (k == h)
 	elif ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+		if battle_view != null:
+			battle_view.handle_click(cam.cam.project_ray_origin(ev.position), cam.cam.project_ray_normal(ev.position))
+			return
 		var h2 := _pick(ev.position)
 		_select(h2)
 	elif ev is InputEventKey and ev.pressed:
 		match ev.keycode:
-			KEY_ESCAPE: _select(-1)
+			KEY_ESCAPE:
+				if battle_view == null: _select(-1)
 			KEY_SPACE: paused = not paused; hud.set_speed_ui(speed, paused)
 			KEY_1: speed = 1.0; paused = false; hud.set_speed_ui(speed, paused)
 			KEY_2: speed = 2.0; paused = false; hud.set_speed_ui(speed, paused)
@@ -318,7 +341,19 @@ func _run_shot() -> void:
 		while not sim.locked and guard < 800000:
 			sim.step(0.1); guard += 1
 		for i in 40: sim.step(0.1)
-	if args.has("focus"):
+	if args.has("title"): menu.show_title()
+	if args.has("battle"):
+		var att: BCSim.Civ = sim.civs[4]
+		var members: Array = sim.soldiers_of(att).slice(0, 4)
+		var bp := BCSim.Party.new()
+		bp.kind = "raid"; bp.from = 4; bp.to = 2; bp.members = members
+		for m in members: m.party = bp; m.loc = 2
+		sim.pending_battle = bp
+		_on_fight()
+		_select(2)
+		cam.g_pitch = -62.0
+		cam.jump_to_goal()
+	if args.has("focus") and not args.has("battle"):
 		_select(int(args.focus))
 		cam.jump_to_goal()
 	# let animations / smoothing settle
@@ -334,3 +369,60 @@ func _run_shot() -> void:
 	img.save_png(args.shot)
 	print("shot saved ", args.shot, " day ", sim.day, " t ", sim.t(), " locked ", sim.locked, " pop ", sim.total_pop())
 	get_tree().quit()
+
+
+# ------------------------------------------------------------------ player layer
+func _on_picked(idx: int) -> void:
+	sim.set_player(idx)
+	paused = false
+	hud.set_speed_ui(speed, paused)
+	if idx >= 0:
+		jars[idx].plaque.text = "* " + jars[idx].race.jar.to_upper() + " *"
+		_select(idx)
+	hud.refresh()
+
+func _on_command(kind: String, arg) -> void:
+	var res := {"ok": false, "msg": "?"}
+	match kind:
+		"policy": res = sim.act_policy(arg)
+		"build": res = sim.act_build(arg)
+		"diplo": res = sim.act_diplo(arg[0], arg[1])
+	hud.show_toast(res.msg, res.ok)
+	hud.last_actions_key = ""
+	hud.refresh()
+
+func _on_tactical(p: BCSim.Party) -> void:
+	var from: BCSim.Civ = sim.civs[p.from]
+	var to: BCSim.Civ = sim.civs[p.to]
+	var mine_att: bool = p.from == sim.player
+	var text := ("Your warband (%d) reaches %s." if mine_att else "%s raiders (%d) are at the gates of %s!") % ([p.members.size(), to.name] if mine_att else [from.name, p.members.size(), to.name])
+	text += "\nFight the battle yourself, or let the generals decide?"
+	cam.focus(jar_origin(p.to))
+	cam.g_pitch = -62.0
+	_select(p.to)
+	menu.show_battle_prompt(text)
+
+func _on_fight() -> void:
+	var p: BCSim.Party = sim.pending_battle
+	if p == null: return
+	var b := BCBattle.new(sim, p)
+	battle_view = BCBattleView.new()
+	battle_view.start(jars[p.to], b, 0 if p.from == sim.player else 1)
+	battle_view.finished.connect(func(aw, aa, da, dall):
+		battle_view = null
+		sim.resolve_tactical(aa, da, dall, aw)
+		hud.last_actions_key = ""
+		hud.refresh())
+
+func _on_game_over(w: int, kind: String) -> void:
+	var good := w == sim.player and sim.player >= 0
+	var title := "VICTORY" if good else "DEFEAT"
+	var text := ""
+	match kind:
+		"wonder": text = "The Great Work is complete." if good else "%s completed the Great Work first." % sim.civs[w].name
+		"concord": text = "Every living civilization stands beside you. The Wall is united."
+		"domination": text = "No jar remains but yours. The Wall is yours."
+		"extinction": text = "Your civilization has died out."
+	text += "\n\nDay %d - battles %d - trades %d - hybrids %d" % [sim.day, sim.stats.battles, sim.stats.trades, sim.stats.hybrids]
+	if sim.player < 0: title = "THE WALL HAS A WINNER"
+	menu.show_game_over(title, text, good or sim.player < 0)

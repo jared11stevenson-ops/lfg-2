@@ -64,6 +64,8 @@ var shake := 0.0
 var pending_actor_budget := 2
 var rect_aabb: AABB
 var selected := false
+var battle_mode := false
+var dead_civ := false
 var hovered := false
 var ring: MeshInstance3D
 
@@ -355,6 +357,11 @@ func update_visuals(dt: float, time_now: float) -> void:
 	ring.visible = selected or hovered
 	ring.material_override.albedo_color = Color(1.0, 0.85, 0.35) if selected else Color(1, 1, 1)
 	ring.material_override.emission = ring.material_override.albedo_color
+	if battle_mode or not civ.alive:
+		actor_root.visible = false
+		if not civ.alive: _mark_annexed()
+		return
+	actor_root.visible = true
 	_sync_actors(dt, civ)
 
 func _start_fx(kind: String) -> void:
@@ -438,3 +445,13 @@ func _drive_actor(a: BCActor, cit: BCSim.Citizen, dt: float) -> void:
 			"soldier": a.play("idle2")
 			_: a.play("idle")
 		if visitor and sim.locked: a.play("talk")
+
+func _mark_annexed() -> void:
+	if dead_civ: return
+	dead_civ = true
+	for id in actors.keys():
+		(actors[id] as Node).queue_free()
+	actors.clear()
+	plaque.text = race.jar.to_upper() + " (ANNEXED)"
+	plaque.modulate = Color(0.55, 0.55, 0.6)
+	led_mat.albedo_color = Color(0.3, 0.3, 0.35)

@@ -66,6 +66,13 @@ class Civ extends RefCounted:
 	var role_count: Dictionary = {}
 	var launches := 0
 	var last_raid: Dictionary = {}
+	var allies: Dictionary = {}
+	var policy := "balanced"
+	var barracks := 0
+	var walls := 0
+	var wonder := 0            # days of work completed on the Great Work (0 = not started)
+	var wonder_started := false
+	var annexed_by := -1
 	var stats := {"births": 0, "hybrid_births": 0, "deaths": 0, "kills": 0, "losses": 0, "raids": 0, "defended": 0,
 		"trades": 0, "envoys": 0, "plunder": 0.0, "raised": 0}
 
@@ -83,6 +90,25 @@ var decisions_done := 0
 var stats := {"battles": 0, "trades": 0, "hybrids": 0, "envoys": 0, "spies": 0}
 var event_serial := 0
 
+const AP_MAX := 3
+const WONDER_DAYS := 8
+const POLICIES := {
+	"balanced": {},
+	"economy": {"farm": 1.3, "trade": 1.5, "wood": 1.2},
+	"industry": {"mine": 1.7, "craft": 1.7, "wood": 1.4},
+	"scholar": {"study": 2.4, "trade": 1.1},
+	"military": {"soldier": 2.4},
+}
+var player := -1
+var ap := AP_MAX
+var tactical_enabled := true
+var pending_battle = null
+var winner := -1
+var win_kind := ""
+var game_over_flag := false
+
+signal tactical_battle(party)
+signal game_over(winner_id: int, kind: String)
 signal event_logged(ev: Dictionary)
 signal battle(civ_a: int, civ_b: int, night: bool)
 signal birth(civ_id: int, hybrid: bool)
@@ -221,6 +247,7 @@ func fertility_of(c: Citizen) -> float:
 
 # ---------- main loop ----------
 func step(dt: float) -> void:
+	if pending_battle != null or game_over_flag: return
 	dt = minf(dt, 0.25)
 	clock += dt
 	if clock >= DAY_LEN:
@@ -249,6 +276,7 @@ func _new_day() -> void:
 			p.state = "back"; p.p = 1.0; p.dir = -1
 			for m in p.members: m.loc = -1
 	for c in civs:
+		if not c.alive: continue
 		var eat := float(c.race.get("eats", 1.0))
 		for cit in c.citizens.duplicate():
 			cit.age += 1.0
@@ -289,17 +317,22 @@ func _new_day() -> void:
 			_spawn_citizen(c, {c.id: 1.0}, 3.0, -1)
 		for o in civs:
 			if o == c: continue
+			if not o.alive: continue
 			c.rel[o.id] += (_base_rel(c, o) - c.rel[o.id]) * 0.04
+			if c.allies.has(o.id): c.rel[o.id] = maxf(c.rel[o.id], 45.0)
 			if c.war.has(o.id) and day >= c.war[o.id]:
 				c.war.erase(o.id); o.war.erase(c.id)
 				c.rel[o.id] = maxf(c.rel[o.id], -10.0)
 				o.rel[c.id] = maxf(o.rel[c.id], -10.0)
 				log_event("%s and %s agree to a truce." % [c.name, o.name], "peace", [c.id, o.id])
+	ap = AP_MAX
 	_assign_roles(false)
 	log_event("Day %d dawns. The jars unlock." % day, "sys")
+	_check_victory()
 
 func _dawn_births() -> void:
 	for c in civs:
+		if not c.alive: continue
 		for b in c.pending_births:
 			var target: Civ = civs[b.home]
 			_spawn_citizen(target, b.blood, 0.0, b.home)
@@ -311,6 +344,7 @@ func _dawn_births() -> void:
 			birth.emit(b.home, b.hybrid)
 		c.pending_births = []
 	for c in civs:
+		if not c.alive: continue
 		var fert: float = c.race.traits.fertility
 		if fert <= 0.0: continue
 		var adults: Array = c.citizens.filter(func(x): return is_adult(x) and x.loc == c.id)
@@ -329,6 +363,7 @@ func _dawn_births() -> void:
 
 func _assign_roles(initial: bool) -> void:
 	for c in civs:
+		if not c.alive: continue
 		var adults: Array = c.citizens.filter(func(x): return is_adult(x))
 		for x in c.citizens:
 			if not is_adult(x): x.role = "child"
@@ -351,6 +386,8 @@ func _assign_roles(initial: bool) -> void:
 			"soldier": (0.25 + c.race.traits.aggression * 0.9 * shr) * (1.6 if at_war else 1.0) * m.might,
 		}
 		if c.race.id == "skeleton": w.farm = 0.4
+		var pm: Dictionary = POLICIES.get(c.policy, {})
+		for k in pm: w[k] *= pm[k]
 		var sum := 0.0
 		for k in w: sum += w[k]
 		var quota := {}
@@ -406,6 +443,7 @@ func power(list: Array) -> float:
 
 func _decide() -> void:
 	for c in shuffled(civs):
+		if not c.alive or c.id == player: continue
 		if c.launches >= 1 and r() < 0.6: continue
 		var choices: Array = [{"w": 0.9, "act": "none"}]
 		var sold := soldiers_of(c)
@@ -413,6 +451,7 @@ func _decide() -> void:
 		var my_sur := surplus(c)
 		for j_id in c.links:
 			var o: Civ = civs[j_id]
+			if not o.alive: continue
 			var busy := false
 			for p in parties:
 				if p.from == c.id and p.to == j_id and p.state != "done": busy = true
@@ -432,7 +471,7 @@ func _decide() -> void:
 			if not at_war and rel > -30:
 				var wt: float = (0.5 if (give != "" and take != "") else 0.08) + c.race.traits.openness * 0.7 + c.race.traits.greed * 0.4 + (0.6 if c.race.has("tradeBonus") else 0.0) + rel / 150.0
 				choices.append({"w": maxf(0.02, wt), "act": "trade", "to": j_id, "give": give, "take": take})
-			if day >= 4 and sold.size() >= RAIDER_MIN and o.citizens.size() >= 8 and c.last_raid.get(j_id, -1) != day and not (not o.war.has(c.id) and o.citizens.size() < c.citizens.size() * 0.35):
+			if not c.allies.has(j_id) and day >= 4 and sold.size() >= RAIDER_MIN and o.citizens.size() >= 8 and c.last_raid.get(j_id, -1) != day and not (not o.war.has(c.id) and o.citizens.size() < c.citizens.size() * 0.35):
 				var ratio := clampf(my_pow / maxf(2.0, their_pow), 0.3, 2.5)
 				var hostile := 1.0 if rel < 20.0 else 0.12
 				var need := (0.5 if c.stock.food < c.citizens.size() * 3.0 else 0.0) + (0.2 if c.race.traits.greed > 0.6 else 0.0)
@@ -534,7 +573,13 @@ func _arrive(p: Party) -> void:
 		m.state = "walk"
 	match p.kind:
 		"trade": _do_trade(p, from, to)
-		"raid": _do_battle(p, from, to, false)
+		"raid":
+			if tactical_enabled and (p.from == player or p.to == player):
+				p.host_t = 9999.0
+				pending_battle = p
+				tactical_battle.emit(p)
+			else:
+				_do_battle(p, from, to, false)
 		"envoy":
 			var gain := 8.0 * float(from.race.get("charm", 1.0)) * float(to.race.get("charm", 1.0))
 			from.rel[to.id] += gain; to.rel[from.id] += gain
@@ -614,8 +659,8 @@ func _do_battle(p: Party, from: Civ, to: Civ, night: bool) -> void:
 	var atk: Array = p.members.duplicate()
 	var def_sold: Array = to.citizens.filter(func(x): return x.role == "soldier" and x.loc == to.id and x.party == null)
 	var def_other: Array = to.citizens.filter(func(x): return x.role != "soldier" and is_adult(x) and x.loc == to.id and x.party == null)
-	var a_pow := power(atk) * (1.0 + from.tech * 0.06) * (0.75 if night else 1.0)
-	var d_pow := (power(def_sold) + 0.22 * power(def_other)) * (1.0 + to.tech * 0.06) * (1.3 if night else 1.15)
+	var a_pow := power(atk) * (1.0 + from.tech * 0.06 + from.barracks * 0.12) * (0.75 if night else 1.0)
+	var d_pow := (power(def_sold) + 0.22 * power(def_other)) * (1.0 + to.tech * 0.06 + to.barracks * 0.12 + to.walls * 0.12) * (1.3 if night else 1.15)
 	a_pow = maxf(0.1, a_pow); d_pow = maxf(0.1, d_pow)
 	var ratio := a_pow / d_pow
 	var cf_d := clampf(0.32 * ratio * rr(0.7, 1.3), 0.04, 0.85)
@@ -623,6 +668,11 @@ func _do_battle(p: Party, from: Civ, to: Civ, night: bool) -> void:
 	var attacker_wins := cf_d > cf_a
 	var a_dead := _kill_pick(atk, cf_a)
 	var d_kill: Array = _kill_pick(def_sold, cf_d) + _kill_pick(def_other, cf_d * 0.35)
+	_finish_battle(p, from, to, night, attacker_wins, a_dead, d_kill, ratio)
+
+## Shared by auto-resolve and tactical battles: applies casualties, loot, captives and diplomacy fallout.
+func _finish_battle(p: Party, from: Civ, to: Civ, night: bool, attacker_wins: bool, a_dead: Array, d_kill: Array, ratio: float) -> void:
+	var atk: Array = p.members.duplicate()
 	var d_set := {}
 	for x in d_kill: d_set[x] = true
 	var dead := 0
@@ -800,3 +850,259 @@ func total_pop() -> int:
 	var n := 0
 	for c in civs: n += c.citizens.size()
 	return n
+
+
+# =====================================================================================
+# Player layer: action points, policy, building, diplomacy, annexation, victory
+# =====================================================================================
+func set_player(id: int) -> void:
+	player = id
+	ap = AP_MAX
+	if id >= 0:
+		log_event("You rule %s, home of the %s. You have %d actions each day." % [civs[id].name, civs[id].race.name, AP_MAX], "sys", [id])
+
+func pc() -> Civ: return civs[player] if player >= 0 else null
+
+func _res(ok: bool, msg: String) -> Dictionary:
+	return {"ok": ok, "msg": msg}
+
+func _spend() -> bool:
+	if ap <= 0: return false
+	ap -= 1
+	return true
+
+func _pay(c: Civ, cost: Dictionary) -> bool:
+	for k in cost:
+		if c.stock[k] < cost[k]: return false
+	for k in cost: c.stock[k] -= cost[k]
+	return true
+
+func _cost_text(cost: Dictionary) -> String:
+	var parts: Array = []
+	for k in cost: parts.append("%d %s" % [cost[k], k])
+	return ", ".join(parts)
+
+func act_policy(pol: String) -> Dictionary:
+	var c := pc()
+	if c == null or not POLICIES.has(pol): return _res(false, "No such policy.")
+	c.policy = pol
+	_assign_roles(false)
+	log_event("%s adopts a %s policy." % [c.name, pol], "sys", [c.id])
+	return _res(true, "Policy set to %s." % pol)
+
+const BUILD_COST := {
+	"house": {"wood": 14, "goods": 6},
+	"barracks": {"ore": 20, "wood": 15, "goods": 8},
+	"walls": {"ore": 25, "goods": 15},
+	"wonder": {"gold": 220, "goods": 140, "lore": 140},
+}
+
+func act_build(kind: String) -> Dictionary:
+	var c := pc()
+	if c == null or not BUILD_COST.has(kind): return _res(false, "Unknown project.")
+	if ap <= 0: return _res(false, "No actions left today.")
+	match kind:
+		"house": if c.houses >= 9: return _res(false, "No room for more houses.")
+		"barracks": if c.barracks >= 5: return _res(false, "Barracks are fully upgraded.")
+		"walls": if c.walls >= 5: return _res(false, "Walls are fully upgraded.")
+		"wonder":
+			if c.wonder_started: return _res(false, "The Great Work is already underway.")
+			if c.tech < 5: return _res(false, "Needs tech level 5.")
+	if not _pay(c, BUILD_COST[kind]): return _res(false, "Needs %s." % _cost_text(BUILD_COST[kind]))
+	_spend()
+	match kind:
+		"house": c.houses += 1
+		"barracks": c.barracks += 1
+		"walls": c.walls += 1
+		"wonder":
+			c.wonder_started = true
+			log_event("%s begins the Great Work! %d days to completion." % [c.name, WONDER_DAYS], "tech", [c.id])
+	return _res(true, "Built: %s." % kind)
+
+func _link_ok(c: Civ, t: int) -> bool:
+	return t >= 0 and t < civs.size() and civs[t].alive and c.links.has(t)
+
+func _busy(a: int, b: int) -> bool:
+	for p in parties:
+		if p.from == a and p.to == b and p.state != "done": return true
+	return false
+
+func act_diplo(kind: String, t: int) -> Dictionary:
+	var c := pc()
+	if c == null: return _res(false, "Spectating.")
+	if ap <= 0: return _res(false, "No actions left today.")
+	if locked: return _res(false, "The jars are locked for the night.")
+	if not _link_ok(c, t): return _res(false, "That jar is not connected to yours.")
+	var o: Civ = civs[t]
+	var at_war: bool = c.war.has(t)
+	match kind:
+		"trade":
+			if at_war: return _res(false, "You are at war.")
+			if _busy(c.id, t): return _res(false, "A party is already on its way.")
+			var mine := surplus(c)
+			var theirs := surplus(o)
+			var give := ""; var take := ""; var gv := 4.0; var tv := 4.0
+			for res in BCData.RES:
+				if mine[res] > gv: gv = mine[res]; give = res
+			for res in BCData.RES:
+				if res != give and theirs[res] > tv: tv = theirs[res]; take = res
+			if give == "": return _res(false, "You have no surplus to trade.")
+			_spend()
+			_launch(c, {"act": "trade", "to": t, "give": give, "take": take})
+			return _res(true, "A caravan sets out to %s." % o.name)
+		"envoy":
+			if at_war: return _res(false, "You are at war.")
+			if _busy(c.id, t): return _res(false, "A party is already on its way.")
+			_spend()
+			_launch(c, {"act": "envoy", "to": t})
+			return _res(true, "Envoys depart for %s." % o.name)
+		"gift":
+			if c.stock.gold < 20: return _res(false, "A gift costs 20 gold.")
+			c.stock.gold -= 20; o.stock.gold += 20
+			_spend()
+			c.rel[t] += 14.0; o.rel[c.id] += 14.0
+			log_event("%s sends a gift of gold to %s." % [c.name, o.name], "trade", [c.id, t])
+			return _res(true, "Gift delivered (+relations).")
+		"ally":
+			if c.allies.has(t): return _res(false, "Already allied.")
+			if at_war: return _res(false, "You are at war.")
+			if c.rel[t] < 55.0: return _res(false, "They do not trust you enough (needs 55 relations).")
+			if c.stock.gold < 10: return _res(false, "An alliance feast costs 10 gold.")
+			c.stock.gold -= 10
+			_spend()
+			if r() < 0.45 + o.race.traits.openness * 0.5:
+				c.allies[t] = true; o.allies[c.id] = true
+				c.rel[t] += 10.0; o.rel[c.id] += 10.0
+				log_event("%s and %s sign an alliance!" % [c.name, o.name], "peace", [c.id, t])
+				return _res(true, "Alliance sealed with the %s." % o.race.name)
+			return _res(false, "They decline for now.")
+		"break":
+			if not c.allies.has(t): return _res(false, "Not allied.")
+			_spend()
+			c.allies.erase(t); o.allies.erase(c.id)
+			c.rel[t] -= 30.0; o.rel[c.id] -= 30.0
+			log_event("%s breaks its alliance with %s." % [c.name, o.name], "war", [c.id, t])
+			return _res(true, "Alliance broken.")
+		"war":
+			if at_war: return _res(false, "Already at war.")
+			_spend()
+			c.allies.erase(t); o.allies.erase(c.id)
+			c.war[t] = day + 3; o.war[c.id] = day + 3
+			c.rel[t] -= 40.0; o.rel[c.id] -= 40.0
+			log_event("%s declares war on %s!" % [c.name, o.name], "war", [c.id, t])
+			return _res(true, "War declared on %s." % o.name)
+		"peace":
+			if not at_war: return _res(false, "You are not at war.")
+			_spend()
+			var chance := 0.3 + clampf((c.rel[t] + 60.0) / 200.0, 0.0, 0.4) + (0.2 if o.race.traits.aggression < 0.4 else 0.0)
+			if r() < chance:
+				c.war.erase(t); o.war.erase(c.id)
+				c.rel[t] = maxf(c.rel[t], -10.0); o.rel[c.id] = maxf(o.rel[c.id], -10.0)
+				log_event("%s and %s agree to a truce." % [c.name, o.name], "peace", [c.id, t])
+				return _res(true, "Truce agreed.")
+			return _res(false, "%s refuse your offer." % o.race.name)
+		"raid":
+			if c.allies.has(t): return _res(false, "They are your ally.")
+			if _busy(c.id, t): return _res(false, "A party is already on its way.")
+			if soldiers_of(c).size() < RAIDER_MIN: return _res(false, "You need at least %d soldiers at home." % RAIDER_MIN)
+			_spend()
+			_launch(c, {"act": "raid", "to": t})
+			return _res(true, "Your warband marches on %s." % o.name)
+		"spy":
+			if not c.race.get("spy", false): return _res(false, "Only Imps can spy.")
+			if _busy(c.id, t): return _res(false, "A party is already on its way.")
+			_spend()
+			_launch(c, {"act": "spy", "to": t})
+			return _res(true, "A spy slips into %s." % o.name)
+		"annex":
+			if not at_war: return _res(false, "You can only annex a civilization you are at war with.")
+			if o.citizens.size() > 14: return _res(false, "They are too populous to annex (14 or fewer).")
+			if power(soldiers_of(c)) < 1.5 * (power(soldiers_of(o)) + 1.0): return _res(false, "Your soldiers are not strong enough.")
+			_spend()
+			_annex(c, o)
+			return _res(true, "%s is annexed." % o.name)
+	return _res(false, "Unknown action.")
+
+func _annex(c: Civ, t: Civ) -> void:
+	for p in parties.duplicate():
+		if p.from == t.id:
+			for m in p.members: m.party = null
+			p.members = []
+			p.state = "done"
+		elif p.to == t.id:
+			p.state = "back"; p.dir = -1
+			for m in p.members: m.loc = -1
+	for cit in t.citizens.duplicate():
+		t.citizens.erase(cit)
+		cit.home = c.id; cit.loc = c.id; cit.party = null; cit.role = "farm"; cit.pos = Vector2(100, 140)
+		c.citizens.append(cit)
+		_set_work(cit)
+	for k in t.stock:
+		c.stock[k] += t.stock[k] * 0.5
+		t.stock[k] = 0.0
+	t.alive = false
+	t.annexed_by = c.id
+	for o in civs:
+		o.allies.erase(t.id); o.war.erase(t.id)
+	log_event("%s has been annexed by %s." % [t.name, c.name], "war", [c.id, t.id])
+
+# ---- tactical battle resolution -------------------------------------------------
+func resolve_tactical(atk_alive: Array, def_alive: Array, def_all: Array, attacker_wins: bool) -> void:
+	var p: Party = pending_battle
+	if p == null: return
+	pending_battle = null
+	var from: Civ = civs[p.from]
+	var to: Civ = civs[p.to]
+	var a_dead: Array = p.members.filter(func(x): return not atk_alive.has(x))
+	var d_dead: Array = def_all.filter(func(x): return not def_alive.has(x))
+	_finish_battle(p, from, to, false, attacker_wins, a_dead, d_dead, 1.0)
+	p.host_t = 6.0
+
+func auto_resolve_pending() -> void:
+	var p: Party = pending_battle
+	if p == null: return
+	pending_battle = null
+	_do_battle(p, civs[p.from], civs[p.to], false)
+	p.host_t = 6.0
+
+# ---- victory ---------------------------------------------------------------------
+func _end_game(w: int, kind: String) -> void:
+	if game_over_flag: return
+	game_over_flag = true
+	winner = w
+	win_kind = kind
+	log_event("GAME OVER: %s" % kind, "sys")
+	game_over.emit(w, kind)
+
+func _check_victory() -> void:
+	if game_over_flag: return
+	for c in civs:
+		if not c.alive: continue
+		if c.wonder_started:
+			if c.citizens.size() < 8: c.wonder = maxi(0, c.wonder - 1)
+			else: c.wonder += 1
+			if c.wonder >= WONDER_DAYS:
+				log_event("%s completes the Great Work!" % c.name, "tech", [c.id])
+				_end_game(c.id, "wonder")
+				return
+		elif c.id != player and c.tech >= 5 and c.stock.gold >= 220 and c.stock.goods >= 140 and c.stock.lore >= 140 and r() < 0.2:
+			_pay(c, BUILD_COST.wonder)
+			c.wonder_started = true
+			log_event("%s begins the Great Work! Stop them before day %d." % [c.name, day + WONDER_DAYS], "tech", [c.id])
+	if player < 0: return
+	var me: Civ = civs[player]
+	if not me.alive or me.citizens.size() <= 1:
+		_end_game(-1, "extinction")
+		return
+	var others := 0
+	var bound := 0
+	var conquered := 0
+	for c in civs:
+		if c == me: continue
+		if not c.alive:
+			conquered += 1
+			continue
+		others += 1
+		if me.allies.has(c.id): bound += 1
+	if others == 0 or (bound == others and conquered + bound >= civs.size() - 1 and bound >= 1):
+		_end_game(player, "domination" if bound == 0 else "concord")

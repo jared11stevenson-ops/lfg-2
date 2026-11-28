@@ -6,6 +6,7 @@ signal speed_changed(mult: float)
 signal pause_toggled
 signal civ_picked(idx: int)
 signal overview_pressed
+signal command(kind: String, arg)
 
 const KIND_COL := {
 	"war": "#ff8a78", "trade": "#ffd35a", "birth": "#9ee6a8", "sys": "#8fa8ff", "peace": "#7ee0d0",
@@ -24,6 +25,12 @@ var log_view: RichTextLabel
 var pause_btn: Button
 var speed_btns: Array = []
 var selected := -1
+var ap_label: Label
+var actions: VBoxContainer
+var toast: Label
+var toast_t := 0.0
+var last_inspector := ""
+var last_actions_key := ""
 var _accum := 0.0
 
 func _panel(bg: Color = Color(0.06, 0.05, 0.08, 0.78)) -> StyleBoxFlat:
@@ -62,6 +69,7 @@ func build(p_sim: BCSim) -> void:
 	time_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hb.add_child(time_bar)
 	phase_label = Label.new(); phase_label.custom_minimum_size = Vector2(110, 0); hb.add_child(phase_label)
+	ap_label = Label.new(); ap_label.add_theme_font_size_override("font_size", 18); ap_label.add_theme_color_override("font_color", Color("ffd35a")); hb.add_child(ap_label)
 	pause_btn = Button.new(); pause_btn.text = "Pause"; pause_btn.pressed.connect(func(): pause_toggled.emit()); hb.add_child(pause_btn)
 	for m in [1, 2, 4, 8, 20]:
 		var b := Button.new(); b.text = "%dx" % m; b.toggle_mode = true
@@ -97,11 +105,27 @@ func build(p_sim: BCSim) -> void:
 	right.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
 	right.offset_right = -12; right.offset_left = -340; right.offset_top = 72; right.offset_bottom = -170
 	root.add_child(right)
+	var rvb := VBoxContainer.new()
+	rvb.add_theme_constant_override("separation", 6)
+	right.add_child(rvb)
 	inspector = RichTextLabel.new()
 	inspector.bbcode_enabled = true
 	inspector.fit_content = false
 	inspector.scroll_active = true
-	right.add_child(inspector)
+	inspector.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	rvb.add_child(inspector)
+	actions = VBoxContainer.new()
+	actions.add_theme_constant_override("separation", 3)
+	rvb.add_child(actions)
+	toast = Label.new()
+	toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	toast.offset_top = 70
+	toast.add_theme_font_size_override("font_size", 20)
+	toast.add_theme_color_override("font_outline_color", Color.BLACK)
+	toast.add_theme_constant_override("outline_size", 8)
+	toast.visible = false
+	root.add_child(toast)
 	# ---- event log (bottom)
 	var bottom := PanelContainer.new()
 	bottom.add_theme_stylebox_override("panel", _panel())
@@ -133,12 +157,23 @@ func refresh(force: bool = false) -> void:
 	time_bar.value = sim.t()
 	phase_label.text = "locked (night)" if sim.locked else "open (day)"
 	phase_label.add_theme_color_override("font_color", Color("ff8a78") if sim.locked else Color("9ee6a8"))
+	if sim.player >= 0:
+		var me: BCSim.Civ = sim.civs[sim.player]
+		ap_label.text = "Actions %d/%d" % [sim.ap, BCSim.AP_MAX]
+		if me.wonder_started: ap_label.text += "   Great Work %d/%d" % [me.wonder, BCSim.WONDER_DAYS]
+	else:
+		ap_label.text = "Spectating"
 	world_label.text = "pop %d   battles %d   trades %d   hybrids %d" % [sim.total_pop(), sim.stats.battles, sim.stats.trades, sim.stats.hybrids]
 	for i in 12:
 		if i < sim.civs.size():
 			var c: BCSim.Civ = sim.civs[i]
-			var war := "  X" if c.war.size() > 0 else ""
-			roster_btns[i].text = "%-12s %3d%s" % [c.name, c.citizens.size(), war]
+			var tag := ""
+			if not c.alive: tag = "  annexed"
+			elif i == sim.player: tag = "  YOU"
+			elif sim.player >= 0 and sim.civs[sim.player].allies.has(i): tag = "  ally"
+			elif sim.player >= 0 and sim.civs[sim.player].war.has(i): tag = "  WAR"
+			elif c.wonder_started: tag = "  wonder"
+			roster_btns[i].text = "%-11s %3d%s" % [c.name, c.citizens.size(), tag]
 		else:
 			roster_btns[i].text = "%s  [sealed]" % BCData.SEALED[i - 10].jar
 			roster_btns[i].disabled = false
@@ -150,11 +185,13 @@ func _bar(v: float) -> String:
 
 func _refresh_inspector() -> void:
 	if selected < 0:
-		inspector.text = "[b]The Wall[/b]\n[color=#a89878]Twelve glass habitats, ten awake. By day the tubes between jars are open: caravans trade, raiders raid, envoys carry romance. At dusk every jar seals shut - whoever is still outside is locked in the neighbour's jar until dawn.\n\nClick a jar (or a name on the left) to inspect it.\nRight-drag orbit, wheel zoom, WASD pan, Esc overview.[/color]"
+		_set_inspector("[b]The Wall[/b]\n[color=#a89878]Twelve glass habitats, ten awake. By day the tubes between jars are open: caravans trade, raiders raid, envoys carry romance. At dusk every jar seals shut - whoever is still outside is locked in the neighbour's jar until dawn.\n\nClick a jar (or a name on the left) to inspect it.\nRight-drag orbit, wheel zoom, WASD pan, Esc overview.[/color]" + _objectives())
+		_build_actions()
 		return
 	if selected >= sim.civs.size():
 		var s: Dictionary = BCData.SEALED[selected - 10]
-		inspector.text = "[b][color=#8b8ba8]%s[/color][/b]\n[color=#a89878]Sealed. The %s are not awake yet.[/color]" % [s.jar, s.name]
+		_set_inspector("[b][color=#8b8ba8]%s[/color][/b]\n[color=#a89878]Sealed. The %s are not awake yet.[/color]" % [s.jar, s.name])
+		_build_actions()
 		return
 	var c: BCSim.Civ = sim.civs[selected]
 	var r: Dictionary = c.race
@@ -176,4 +213,92 @@ func _refresh_inspector() -> void:
 		var o: BCSim.Civ = sim.civs[j]
 		var w := " [color=#ff6a55]WAR[/color]" if c.war.has(j) else ""
 		t += "[color=%s]%-11s[/color] %4d %s%s\n" % [o.race.color.to_html(false), o.race.name, int(c.rel[j]), _bar(c.rel[j]), w]
+	_set_inspector(t)
+	_build_actions()
+
+
+func _set_inspector(t: String) -> void:
+	if t == last_inspector: return
+	last_inspector = t
+	var sc := inspector.get_v_scroll_bar().value
 	inspector.text = t
+	inspector.get_v_scroll_bar().value = sc
+
+func _objectives() -> String:
+	if sim.player < 0: return ""
+	var t := "\n\n[b]How to win[/b]\n[color=#c8bca0]- Great Work: build it (tech 5, 220 gold, 140 goods, 140 lore) and keep 8+ citizens for %d days.\n- Concord: ally with every living civilization (or annex the rest).\n- Domination: annex them all.[/color]\n[b]Rival Great Works[/b]\n" % BCSim.WONDER_DAYS
+	var any := false
+	for c in sim.civs:
+		if c.alive and c.wonder_started and c.id != sim.player:
+			any = true
+			t += "[color=#ff8a78]%s: %d/%d days[/color]\n" % [c.name, c.wonder, BCSim.WONDER_DAYS]
+	if not any: t += "[color=#8a7f6c]none yet[/color]\n"
+	return t
+
+func _add_btn(parent: Node, text: String, kind: String, arg, tip: String = "") -> void:
+	var b := Button.new()
+	b.text = text
+	b.tooltip_text = tip
+	b.pressed.connect(func(): command.emit(kind, arg))
+	parent.add_child(b)
+
+func _row(parent: Node) -> HBoxContainer:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 3)
+	parent.add_child(h)
+	return h
+
+func _build_actions() -> void:
+	var key := "%d|%d|%d|%d" % [selected, sim.player, sim.ap, sim.locked]
+	if sim.player >= 0 and selected >= 0 and selected < sim.civs.size():
+		var me0: BCSim.Civ = sim.civs[sim.player]
+		var c0: BCSim.Civ = sim.civs[selected]
+		key += "|%d%d%d|%d" % [me0.war.has(selected), me0.allies.has(selected), c0.alive, me0.policy.hash()]
+	if key == last_actions_key: return
+	last_actions_key = key
+	for ch in actions.get_children(): ch.queue_free()
+	if sim.player < 0 or selected < 0 or selected >= sim.civs.size(): return
+	var me: BCSim.Civ = sim.civs[sim.player]
+	if selected == sim.player:
+		var l := Label.new(); l.text = "Policy (free)"; l.add_theme_color_override("font_color", Color(0.7, 0.65, 0.55)); actions.add_child(l)
+		var r1 := _row(actions)
+		for p in ["balanced", "economy", "industry", "scholar", "military"]:
+			_add_btn(r1, p.capitalize() + (" *" if me.policy == p else ""), "policy", p)
+		var l2 := Label.new(); l2.text = "Build (1 action each)"; l2.add_theme_color_override("font_color", Color(0.7, 0.65, 0.55)); actions.add_child(l2)
+		var r2 := _row(actions)
+		_add_btn(r2, "House", "build", "house", "14 wood, 6 goods")
+		_add_btn(r2, "Barracks %d/5" % me.barracks, "build", "barracks", "20 ore, 15 wood, 8 goods: +12% army strength")
+		var r3 := _row(actions)
+		_add_btn(r3, "Walls %d/5" % me.walls, "build", "walls", "25 ore, 15 goods: +12% defence")
+		_add_btn(r3, "Great Work", "build", "wonder", "220 gold, 140 goods, 140 lore, tech 5")
+		return
+	var c: BCSim.Civ = sim.civs[selected]
+	if not c.alive: return
+	if not me.links.has(selected):
+		var l3 := Label.new(); l3.text = "Not connected to your jar."; l3.add_theme_color_override("font_color", Color(0.7, 0.65, 0.55)); actions.add_child(l3)
+		return
+	var lb := Label.new(); lb.text = "Diplomacy with %s (1 action each, day only)" % c.name; lb.add_theme_color_override("font_color", Color(0.7, 0.65, 0.55)); actions.add_child(lb)
+	var ra := _row(actions)
+	_add_btn(ra, "Trade", "diplo", ["trade", selected], "Send a caravan: swap your surplus for theirs")
+	_add_btn(ra, "Envoy", "diplo", ["envoy", selected], "+relations, chance of hybrid children")
+	_add_btn(ra, "Gift", "diplo", ["gift", selected], "20 gold: +14 relations")
+	var rb := _row(actions)
+	if me.allies.has(selected): _add_btn(rb, "Break alliance", "diplo", ["break", selected])
+	else: _add_btn(rb, "Ally", "diplo", ["ally", selected], "Needs 55+ relations and 10 gold")
+	if me.war.has(selected): _add_btn(rb, "Sue for peace", "diplo", ["peace", selected])
+	else: _add_btn(rb, "Declare war", "diplo", ["war", selected])
+	var rc := _row(actions)
+	_add_btn(rc, "Raid (tactical)", "diplo", ["raid", selected], "Send your soldiers; fight the battle yourself")
+	_add_btn(rc, "Annex", "diplo", ["annex", selected], "At war, target 14 pop or fewer, your army 1.5x stronger")
+	if me.race.get("spy", false): _add_btn(rc, "Spy", "diplo", ["spy", selected])
+
+func show_toast(text: String, good: bool) -> void:
+	toast.text = text
+	toast.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6) if good else Color(1.0, 0.6, 0.5))
+	toast.visible = true
+	toast_t = 3.0
+
+func _process(dt: float) -> void:
+	if toast_t > 0.0:
+		toast_t -= dt
+		if toast_t <= 0.0: toast.visible = false

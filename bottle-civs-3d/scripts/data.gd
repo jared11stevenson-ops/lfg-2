@@ -19,7 +19,7 @@ const RACES := [
 		"mult": {"food": 1.25, "wood": 1.15, "ore": 0.7, "goods": 1.0, "lore": 1.3, "gold": 1.0, "might": 0.9},
 		"traits": {"aggression": 0.2, "greed": 0.3, "openness": 0.7, "fertility": 0.10, "lifespan": 60},
 		"like": ["human", "wizard"], "dislike": ["orc", "goblin", "dwarf"],
-		"model": K + "Ranger.glb", "rig": "kaykit", "height": 0.9, "squash": Vector3(1, 1, 1),
+		"model": "res://assets/characters/outfits/Female_Ranger.gltf", "rig": "ual", "height": 1.0, "squash": Vector3(1, 1, 1),
 		"bcolor": "green", "decor": "forest",
 	},
 	{
@@ -82,7 +82,7 @@ const RACES := [
 		"mult": {"food": 1.0, "wood": 1.3, "ore": 1.1, "goods": 0.8, "lore": 0.5, "gold": 1.2, "might": 1.3},
 		"traits": {"aggression": 0.5, "greed": 0.4, "openness": 0.5, "fertility": 0.12, "lifespan": 36},
 		"like": ["orc", "lizard", "dwarf"], "dislike": ["wizard"], "hp": 2.0, "brew": true,
-		"model": K + "Knight.glb", "rig": "kaykit", "height": 1.3, "squash": Vector3(1.35, 1.0, 1.35), "tint": Color(1.0, 0.8, 0.5),
+		"model": "res://assets/characters/outfits/Male_Peasant.gltf", "rig": "ual", "height": 1.4, "squash": Vector3(1.3, 1.0, 1.3), "tint": Color(1.0, 0.82, 0.6),
 		"bcolor": "red", "decor": "tavern",
 	},
 	{
