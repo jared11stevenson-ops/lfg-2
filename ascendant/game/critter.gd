@@ -44,6 +44,11 @@ func setup(g: PackedFloat32Array, bp_: int, sp_: int, name_: String, w: GameWorl
 	id = Critter.next_id; Critter.next_id += 1
 	genome = g; bp = bp_; sp = sp_; sp_name = name_; world = w
 	ph = Phenotype.build(g, bp)
+	var tries := 0
+	while not Phenotype.validate(ph).is_empty() and tries < 4:
+		# invalid body: pull morphology genes toward the species-neutral midpoint and rebuild (never render it)
+		for i in 10: g[i] = lerpf(g[i], 0.5, 0.5)
+		genome = g; ph = Phenotype.build(g, bp); tries += 1
 	ph["seed"] = id
 	rng.seed = id * 7919 + sp
 	carniv = ph["carniv"]; mass = ph["mass"]

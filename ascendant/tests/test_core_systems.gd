@@ -73,3 +73,13 @@ func test_item_legend_is_earned() -> void:
 	var back := Item.from_dict(it.to_dict())
 	assert_eq(back.kills, it.kills, "round-trips through save")
 	check(back.history.size() == it.history.size(), "history survives save")
+
+func test_invalid_body_is_repaired_at_spawn() -> void:
+	var ps := PlayScene.new(); ps.autoplay_input = false
+	tree_root.add_child(ps); ps.start_new(61, "vole", 10)
+	var g := Genome.blank()
+	for i in 10: g[i] = 1.0           # extreme morphology: huge head/limbs/girth
+	var c := Critter.new()
+	c.setup(g, Genome.BP.QUAD, 0, "Test", ps.world, 0.5)
+	check(Phenotype.validate(c.ph).is_empty(), "spawned body is valid after repair")
+	c.free(); ps.queue_free()

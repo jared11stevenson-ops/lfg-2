@@ -1,0 +1,61 @@
+{
+  "bauplans": {
+    "amphibian": {
+      "fill_range": [
+        0.35,
+        0.46
+      ],
+      "of": 8,
+      "ok": 8
+    },
+    "arachnid": {
+      "fill_range": [
+        0.46,
+        0.54
+      ],
+      "of": 8,
+      "ok": 8
+    },
+    "avian": {
+      "fill_range": [
+        0.66,
+        0.72
+      ],
+      "of": 8,
+      "ok": 8
+    },
+    "fish": {
+      "fill_range": [
+        0.49,
+        0.53
+      ],
+      "of": 8,
+      "ok": 8
+    },
+    "insect": {
+      "fill_range": [
+        0.44,
+        0.7
+      ],
+      "of": 8,
+      "ok": 8
+    },
+    "quadruped": {
+      "fill_range": [
+        0.45,
+        0.66
+      ],
+      "of": 8,
+      "ok": 8
+    },
+    "reptile": {
+      "fill_range": [
+        0.34,
+        0.48
+      ],
+      "of": 8,
+      "ok": 8
+    }
+  },
+  "failures": []
+}
