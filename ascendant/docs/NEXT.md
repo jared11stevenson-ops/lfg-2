@@ -30,3 +30,7 @@ Oracle findings still open:
 Playtest findings (docs/playtest/run1.json, 200s each): all 8 bot runs survived, player almost never killed by predators -> RISK TOO LOW in the first minutes; raise predator pressure near player / add predator pursuit. Hunters (stoat) got only 8 kills in 200s.
 
 Next priorities: (1) risk/danger tuning + death-by-predator test; (2) civ diversity tuning; (3) player-visible civ members: tools, weapons carried; (4) combat telegraph visuals; (5) multiplayer prototype (server-authoritative ENet) — NOT claimed until two real clients tested; (6) Keeper agent resume (it hit a rate limit; resume with SendMessage to a2b47c30385fb1b71) for critique + quarantine manifests + checklist.
+
+## Tick 3 result (playtest run 3, docs/playtest/run3.json)
+Fixed: predators' close-range attacks always missed (facing check on ~0 distance) and metabolism drained ~3x too fast (predators starved in ~25s). Test `test_predation` proves a hungry stoat kills an idle vole.
+Effect: world deaths per 240s fell from 25-34 to 0-8 (less starvation churn), but NO bot player died to a predator in 9 runs. Danger is still low for fleeing bots. Next: ambush/pack predators, predator density near player, check whether wild prey ever die to predators in the headless sim (log kill counts by cause), possibly raise world churn back via harsher winters.
