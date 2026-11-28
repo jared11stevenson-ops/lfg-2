@@ -20,7 +20,6 @@ const RACES := [
 		"traits": {"aggression": 0.2, "greed": 0.3, "openness": 0.7, "fertility": 0.10, "lifespan": 60},
 		"like": ["human", "wizard"], "dislike": ["orc", "goblin", "dwarf"],
 		"model": "res://assets/characters/outfits/Female_Ranger.gltf", "rig": "ual", "height": 1.0, "squash": Vector3(1, 1, 1),
-		"props": [["bow_withString", "hand_l", Vector3(0, 90, 0), 1.0]],
 		"bcolor": "green", "decor": "forest",
 	},
 	{
@@ -57,7 +56,7 @@ const RACES := [
 		"traits": {"aggression": 0.9, "greed": 0.5, "openness": 0.3, "fertility": 0.17, "lifespan": 28},
 		"like": ["ogre", "goblin"], "dislike": ["elf", "human", "dwarf"], "soldierShare": 0.4,
 		"model": Q + "Orc_Male.glb", "rig": "ual", "height": 1.0, "squash": Vector3(1, 1, 1),
-		"props": [["axe_2handed", "hand_r", Vector3(0, 0, 0), 1.0]],
+		"props": [["axe_2handed", "hand_r", Vector3(0, 0, 0), 0.55]],
 		"bcolor": "red", "decor": "war",
 	},
 	{
@@ -67,7 +66,7 @@ const RACES := [
 		"traits": {"aggression": 0.55, "greed": 0.9, "openness": 0.5, "fertility": 0.24, "lifespan": 20},
 		"like": ["orc", "imp", "lizard"], "dislike": ["elf", "dwarf"], "plunder": 1.4,
 		"model": Q + "Puglin.glb", "rig": "ual", "height": 0.65, "squash": Vector3(1, 1, 1),
-		"props": [["dagger", "hand_r", Vector3(0, 0, 0), 1.1]],
+		"props": [["dagger", "hand_r", Vector3(0, 0, 0), 0.6]],
 		"bcolor": "yellow", "decor": "scrap",
 	},
 	{
@@ -86,7 +85,7 @@ const RACES := [
 		"traits": {"aggression": 0.5, "greed": 0.4, "openness": 0.5, "fertility": 0.12, "lifespan": 36},
 		"like": ["orc", "lizard", "dwarf"], "dislike": ["wizard"], "hp": 2.0, "brew": true,
 		"model": "res://assets/characters/outfits/Male_Peasant.gltf", "rig": "ual", "height": 1.4, "squash": Vector3(1.3, 1.0, 1.3), "tint": Color(1.0, 0.82, 0.6),
-		"props": [["mug_full", "hand_r", Vector3(0, 0, 0), 1.6]],
+		"props": [["mug_full", "hand_r", Vector3(0, 0, 0), 0.55]],
 		"bcolor": "red", "decor": "tavern",
 	},
 	{
@@ -96,7 +95,7 @@ const RACES := [
 		"traits": {"aggression": 0.35, "greed": 0.85, "openness": 0.6, "fertility": 0.20, "lifespan": 24},
 		"like": ["goblin", "skeleton"], "dislike": ["wizard", "human"], "spy": true, "hp": 0.7,
 		"model": Q + "Imp.glb", "rig": "ual", "height": 0.65, "squash": Vector3(1, 1, 1),
-		"props": [["dagger", "hand_r", Vector3(0, 0, 0), 1.0]],
+		"props": [["dagger", "hand_r", Vector3(0, 0, 0), 0.6]],
 		"bcolor": "red", "decor": "hell",
 	},
 	{
