@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bottled Civilizations</title>
+<style>
+  :root { --bg:#120e0a; --panel:#1c1611; --line:#3a2d20; --txt:#e8dcc4; --dim:#a89878; --gold:#ffd35a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:14px system-ui,sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+  header { display:flex; align-items:center; gap:14px; padding:8px 14px; background:var(--panel); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  h1 { font-size:16px; margin:0; color:var(--gold); letter-spacing:.5px; }
+  #clock { display:flex; align-items:center; gap:8px; min-width:220px; }
+  #bar { flex:1; height:10px; background:#2b2118; border-radius:5px; position:relative; overflow:hidden; min-width:100px; }
+  #bar i { position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,#ffd35a,#ff9d3a); width:0; }
+  #bar b { position:absolute; top:0; bottom:0; right:0; width:28%; background:#2a2f6a; }
+  button { background:#2b2118; color:var(--txt); border:1px solid var(--line); border-radius:6px; padding:5px 10px; cursor:pointer; font:inherit; }
+  button:hover { border-color:var(--gold); } button.on { background:#5a431f; border-color:var(--gold); }
+  main { flex:1; display:flex; min-height:0; }
+  #stage { flex:1; min-width:0; display:flex; align-items:center; justify-content:center; padding:8px; }
+  canvas { max-width:100%; max-height:100%; aspect-ratio:3/2; image-rendering:pixelated; border-radius:8px; border:1px solid var(--line); cursor:pointer; }
+  aside { width:340px; background:var(--panel); border-left:1px solid var(--line); display:flex; flex-direction:column; min-height:0; }
+  #info { padding:10px 12px; border-bottom:1px solid var(--line); overflow:auto; max-height:52%; }
+  #info h2 { margin:0 0 2px; font-size:16px; } .dim { color:var(--dim); } small { font-size:12px; }
+  .row { display:flex; justify-content:space-between; gap:8px; } .chips { display:flex; flex-wrap:wrap; gap:4px; margin:6px 0; }
+  .chip { background:#2b2118; border-radius:4px; padding:2px 6px; font-size:12px; }
+  .rel { display:flex; align-items:center; gap:6px; font-size:12px; margin:2px 0; }
+  .rel .n { width:84px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .rel .b { flex:1; height:6px; background:#2b2118; position:relative; border-radius:3px; }
+  .rel .b i { position:absolute; top:0; bottom:0; border-radius:3px; }
+  #log { flex:1; overflow:auto; padding:8px 12px; font-size:12px; line-height:1.4; }
+  #log div { padding:2px 0; border-bottom:1px dotted #2b2118; } .k-war{color:#ff8a78} .k-trade{color:#ffd35a} .k-birth{color:#9ee6a8} .k-sys{color:#8fa8ff} .k-peace{color:#7ee0d0} .k-spy{color:#d49bff} .k-death{color:#9a8f80} .k-tech{color:#7fd1ff}
+  #load { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:18px; z-index:9; }
+  @media (max-width:900px){ main{flex-direction:column} aside{width:auto;height:40%;border-left:0;border-top:1px solid var(--line)} }
+</style>
+</head>
+<body>
+<div id="load">Uncorking the jars… <span id="pct" style="margin-left:8px"></span></div>
+<header>
+  <h1>🍶 Bottled Civilizations</h1>
+  <div id="clock"><span id="day">Day 1</span><div id="bar"><i></i><b></b></div><span id="phase">☀ open</span></div>
+  <div>
+    <button id="pause">⏸</button>
+    <button data-s="1" class="on">1×</button><button data-s="2">2×</button><button data-s="4">4×</button><button data-s="8">8×</button><button data-s="20">20×</button>
+  </div>
+  <span class="dim" id="world"></span>
+</header>
+<main>
+  <div id="stage"><canvas id="c"></canvas></div>
+  <aside><div id="info"></div><div id="log"></div></aside>
+</main>
+<script src="js/data.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
