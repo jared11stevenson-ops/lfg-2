@@ -124,7 +124,7 @@ func _draw() -> void:
 	var cap: int = m.tower_cap()
 	var chip2 := Rect2(784, 10, 176, 34)
 	draw_style_box(panel_sb, chip2)
-	_txt("Squares %d/%d" % [nt, cap], Vector2(796, 36), 20, Color("ff9a8a") if nt >= cap else Color("c8f0b8"))
+	_txt("Towers %d/%d" % [nt, cap], Vector2(796, 36), 20, Color("ff9a8a") if nt >= cap else Color("c8f0b8"))
 	if m.tier > 0:
 		_txt("Replay Tier %d" % m.tier, Vector2(584, 130), 18, Color("ffd23a"))
 	if m.event_id != "":

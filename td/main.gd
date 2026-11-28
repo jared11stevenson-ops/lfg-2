@@ -107,6 +107,7 @@ var free_ids := {}          # tower id -> free placements left (granted by captu
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
 const CAPTURE_HP := 0.5
+var gift_pending := false     # wave 2 of Level 1 carries a pre-weakened Shuckit so the first capture is taught, not hoped for
 var lane_count := 1          # real lanes; a flank path (late-wave second entrance) sits after them in paths[]
 var tier := 0                # replay tier of this level (0..5): each clear makes waves tougher, rares likelier, gold richer
 func tower_cap() -> int:
@@ -388,6 +389,7 @@ func _start_wave() -> void:
 	if lv.has("flank") and wave == int(lv.flank.wave):
 		FxScript.text_at(self, Vector2(640, 300), "Warning: some thieves now slip in from the south!", Color("ffb070"))
 	queue = _plan(wave).duplicate()
+	gift_pending = lv.has("gift") and wave == 2 and not Session.unlocked.has(Session.tower_for(String(lv.gift))) and queue.has(String(lv.gift))
 	if wave == rare_wave:
 		queue.insert(randi_range(1, maxi(1, queue.size() - 1)), "rare:" + String(lv.rare.id))
 	to_spawn = queue.size()
@@ -605,6 +607,10 @@ func _spawn() -> void:
 	if bool(d.get("flying", false)):
 		path = PackedVector2Array([path[0], path[path.size() - 1]])
 	var en = _make_enemy(d, path, wave, true, boss)
+	if gift_pending and kind == String(lv.get("gift", "")) and not boss and not rare_spawn:
+		gift_pending = false
+		en.hp = en.max_hp * 0.42
+		FxScript.text_at(self, Vector2(640, 300), "A worn-out Shuckit! Tap its ring to Lure it and make a friend.", Color("ffe08a"))
 	if boss:
 		boss_ui.show_intro(String(d.name).replace("Elder ", ""), String(lv.get("story", {}).get("boss", "")), String(d.get("sprite", kind.substr(5) if kind.begins_with("boss:") else kind)))
 		boss_ui.track(en, String(d.name))

@@ -1,5 +1,5 @@
 # Wellfall TD
-Godot 4.7 tower defense: **10 levels, 20 creatures**, hand-drawn 2D cartoon art. Open the `td/` folder in Godot 4.7 and press F5, or run the exported build.
+Godot 4.7 tower defense: **10 levels, 20 creatures to capture (one starter)**, hand-drawn 2D cartoon art. Open the `td/` folder in Godot 4.7 and press F5, or run the exported build.
 
 ## What's in
 - **20 original creatures** (`docs/lore_v2.md`), all animated 2D puppets with their own personality. 3 starters you raise from day one; the other 17 are wild herd species that you befriend as allies by clearing levels.

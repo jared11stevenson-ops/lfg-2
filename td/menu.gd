@@ -268,7 +268,7 @@ func _draw() -> void:
 		_draw_bestiary()
 		return
 	_text("WELLFALL", Vector2(24, 76), 72, Color("ffe36a"))
-	_text("Tower defense for the last Wells  -  10 levels, 20 creatures", Vector2(28, 104), 20, Color("e8d8ff"))
+	_text("Tower defense for the last Wells  -  10 levels, capture them all", Vector2(28, 104), 20, Color("e8d8ff"))
 	for i in Levels.ORDER.size():
 		_draw_card(i)
 	var n_open := 0

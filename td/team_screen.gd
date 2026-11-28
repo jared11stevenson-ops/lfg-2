@@ -95,6 +95,15 @@ func refresh() -> void:
 		b.pressed.connect(func(): sel = id; Sfx.play(self, "click"); refresh())
 		UiStyle.style_btn(b, Color("2f6b3a") if id in team else Color("3a3f5a"), Color("d9892a"))
 		grid.add_child(b)
+	for j in range(own.size(), mini(Session.TEAM_MAX, own.size() + 3)):
+		var ph := Button.new()
+		ph.text = "?\nCapture to unlock"
+		ph.disabled = true
+		ph.add_theme_font_size_override("font_size", 15)
+		ph.size = Vector2(196, 92)
+		ph.position = Vector2(40 + (j % 3) * 208, 110 + (j / 3) * 102)
+		UiStyle.style_btn(ph, Color("22243a"), Color("3a3f5a"))
+		grid.add_child(ph)
 	var d: Dictionary = Creatures.TOWERS[sel]
 	var l := Session.level_of(sel)
 	var xp := int(Session.xp.get(sel, 0))
@@ -103,7 +112,7 @@ func refresh() -> void:
 		txt += "Exp %d / %d to unlock Lv %d%s\n" % [xp, Session.xp_for_level(l + 1), l + 1, "  READY" if Session.xp_ready(sel) else ""]
 	txt += "Attack: %s   Power %.0f   Cooldown %.1fs   Accuracy 100%%   %s\n" % [String(d.types[0]).capitalize(), float(d.dmg) * Session.level_mult(sel), 1.0 / maxf(0.1, float(d.rate)), Moves.category(String(d.types[0]))]
 	if "ember" in d.types:
-		txt += "Burn chance 10%% (burn damage over time)\n"
+		txt += "Burn chance 10% (burn damage over time)\n"
 	txt += "Damage x%.2f   Speed x%.2f\n\nMoves:\n" % [Session.level_mult(sel), 1.0 + 0.03 * (l - 1)]
 	for m in Moves.for_type(String(d.types[0])):
 		txt += "  %s Lv %d  %s (%s)\n" % ["✔" if l >= int(m.lvl) else "·", m.lvl, m.name, m.desc]
