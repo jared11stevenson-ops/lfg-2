@@ -38,7 +38,7 @@ const LEVELS := {
 		"paths": [[[-40, 140], [900, 140], [900, 300], [240, 300], [240, 470], [1000, 470], [1000, 560], [1320, 560]]],
 		"stones": [[560, 220, "frost"], [560, 390, "spirit"], [1100, 250, "gale"], [130, 420, "ember"]],
 		"zones": [{"pos": [450, 140], "r": 80, "kind": "ice"}, {"pos": [750, 140], "r": 80, "kind": "ice"}, {"pos": [600, 300], "r": 80, "kind": "ice"}],
-		"roster": [["shuckit", 1, 8], ["glomm", 2, 5], ["ptarmitten", 3, 4], ["zapnose", 4, 3], ["hoardillo", 7, 3]],
+		"roster": [["shuckit", 1, 7], ["shuckit_pup", 2, 4], ["glomm", 2, 6], ["shuckit_alpha", 5, 2]],
 		"boss": "glomm", "boss_extra": {"shield": 300.0},
 	},
 	"emberflats": {
