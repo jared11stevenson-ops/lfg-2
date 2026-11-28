@@ -97,6 +97,8 @@ func _process(delta: float) -> void:
 		taught_capture = true
 		resume = step
 		_enter("capture")
+	if m.wave >= 3 and step in ["intro", "place", "confirm", "start", "watch"]:
+		_enter("done")   # the player is clearly past the basics; never leave a stale prompt on screen
 	match step:
 		"capture":
 			targets = _capturable_rects()
@@ -106,7 +108,9 @@ func _process(delta: float) -> void:
 			if timer > 4.5:
 				_enter("place")
 		"place":
-			if m.has_pending:
+			if towers >= 1:
+				_enter("start")
+			elif m.has_pending:
 				_enter("confirm")
 			else:
 				targets = [m.cards.get("tickindle").get_global_rect()] + _stone_rects()
