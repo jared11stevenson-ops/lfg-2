@@ -19,7 +19,13 @@ func _ready() -> void:
 	panel_sb.set_border_width_all(3)
 	panel_sb.border_color = Color("3a2a5a")
 
+var _acc := 0.0
 func _process(delta: float) -> void:
+	_acc += delta
+	if _acc < (0.05 if m != null and m.Session.low_gfx() else 0.033):
+		return   # redraw at ~30 Hz (20 Hz in low graphics): text shaping is the HUD's main cost
+	delta = _acc
+	_acc = 0.0
 	if m != null:
 		coins_shown = lerpf(coins_shown, float(m.coins), clampf(delta * 10.0, 0.0, 1.0))
 		if absf(coins_shown - m.coins) < 0.6:

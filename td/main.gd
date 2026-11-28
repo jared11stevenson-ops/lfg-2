@@ -19,6 +19,8 @@ const SettingsPanel = preload("res://settings_panel.gd")
 const HudBar = preload("res://hud_bar.gd")
 const FriendCard = preload("res://friend_card.gd")
 const SpeciesCard = preload("res://species_card.gd")
+const WaveBanner = preload("res://wave_banner.gd")
+const Confetti = preload("res://confetti.gd")
 const ResultScreen = preload("res://result_screen.gd")
 const Tutorial = preload("res://tutorial.gd")
 const Moves = preload("res://moves.gd")
@@ -111,6 +113,9 @@ var capture_hint_shown := false
 const CAPTURE_HP := 0.5
 var bounty := {}             # optional per-run side goal: {kind, target, reward, label}
 var flawless_waves := 0
+var perf_t := 0.0
+var perf_frames := 0
+var perf_checked := 0
 var ice_tip_shown := false
 var wave_leaks := 0          # gold lost this wave (for the wave summary and the flawless bonus)
 var wave_caps := 0           # captures this wave
@@ -166,7 +171,7 @@ func _ready() -> void:
 	run_seed = Session.run_seed if Session.run_seed != 0 else randi()
 	Session.run_seed = 0
 	backdrop_vp = Backdrop.make(self, lv)
-	if lv.has("art"):
+	if lv.has("art") and not Session.low_gfx():
 		var amb = Ambient.new()
 		amb.well = paths[0][paths[0].size() - 1] + Vector2(0, -4)
 		amb.glow = Color(lv.colors.glow)
@@ -418,14 +423,23 @@ func _start_wave() -> void:
 	Sfx.play(self, "horn")
 	if weather != "clear" and weather != prev_weather:
 		_announce_weather()
-	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
+	var wb = WaveBanner.new()
+	wb.title = "Wave %d" % wave
+	if wave == Levels.TOTAL_WAVES and not endless:
+		wb.title = "FINAL WAVE"
+		wb.tint = Color("ff8a7a")
+		wb.sub = "Hold the line!"
+	elif wave == 5 and lv.has("champion"):
+		wb.sub = "A champion leads this wave"
+		wb.tint = Color("ffd070")
+	start_btn.get_parent().add_child(wb)
 	if wave == Levels.TOTAL_WAVES and String(lv.get("boss", "")) != "":
 		lures = mini(lures + 1, 6)
-		FxScript.text_at(self, Vector2(640, 340), "Final wave! The Elder arrives. +1 Lure.", Color("ff9a9a"))
+		FxScript.text_at(self, Vector2(640, 380), "The Elder arrives. +1 Lure.", Color("ff9a9a"))
 		Sfx.play(self, "boss", -8.0)
 	if wave == 5 and lv.has("champion"):
 		lures = mini(lures + 1, 6)
-		FxScript.text_at(self, Vector2(640, 340), "Alpha raid! A champion leads this wave. +1 Lure.", Color("ffb040"))
+		FxScript.text_at(self, Vector2(640, 380), "Alpha raid! +1 Lure.", Color("ffb040"))
 	if lv.has("flank") and wave == int(lv.flank.wave) - 2:
 		FxScript.text_at(self, Vector2(640, 300), "Tip: from wave %d a second entrance opens at the bottom right." % int(lv.flank.wave), Color("ffb070"))
 	if lv.has("flank") and wave == int(lv.flank.wave):
@@ -498,6 +512,21 @@ func _process(delta: float) -> void:
 	surge_btn.text = "Well Surge\n(stun + damage)" if surge_cd <= 0.0 else "Surge in %ds" % ceili(surge_cd)
 	shake = maxf(0.0, shake - delta * 2.5)
 	position = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake * 9.0 if bool(Session.settings.shake) else Vector2.ZERO
+	if state == "play" and wave_running and not Session.low_gfx() and perf_checked < 3:
+		perf_t += delta
+		perf_frames += 1
+		if perf_t >= 4.0:
+			var fps := float(perf_frames) / perf_t
+			perf_t = 0.0
+			perf_frames = 0
+			perf_checked += 1
+			if fps < 40.0 and Engine.time_scale <= 1.01:
+				Session.settings["low_gfx"] = true
+				Session.save_prefs()
+				for c in get_children():
+					if c is Ambient:
+						c.queue_free()
+				FxScript.text_at(self, Vector2(640, 200), "Running slow: switched to Low graphics (Menu > Settings).", Color("ffd0a0"))
 	if state == "play" and wave_running and not ice_tip_shown and not zones.is_empty():
 		for e in get_tree().get_nodes_in_group("enemies"):
 			if not bool(e.flying):
@@ -879,6 +908,7 @@ func _end(result: String) -> void:
 	var layer: CanvasLayer = start_btn.get_parent()
 	if result == "won":
 		var rec := Session.record_win(Session.level_id, wave, lives, lives_start, endless)
+		add_child(Confetti.new())
 		rs.title = "The Well holds!" if not lv.get("steal", false) else "The gold is safe!"
 		rs.stars = int(rec.stars)
 		rs.lines = ["Waves %d/%d     %s" % [wave, Levels.TOTAL_WAVES, ("Gold kept %d/%d" if lv.get("steal", false) else "Lives left %d/%d") % [lives, lives_start]]]
@@ -1135,19 +1165,29 @@ func _draw() -> void:
 		draw_rect(Rect2(0, 0, 1280, 720), Color(1, 0.1, 0.1, red_flash * 0.3))
 
 func _draw_weather() -> void:
+	var low := Session.low_gfx()
 	match weather:
 		"rain":
 			draw_rect(Rect2(0, 0, 1280, 720), Color(0.1, 0.15, 0.3, 0.16))
-			for i in 110:
-				var x := fmod(i * 97.0 + clock * 90.0, 1300.0) - 10.0
+			var pts := PackedVector2Array()
+			for i in (50 if low else 110):
+				var x := fmod(i * 97.0 * (2.2 if low else 1.0) + clock * 90.0, 1300.0) - 10.0
 				var y := fmod(i * 53.0 + clock * 720.0, 760.0) - 20.0
-				draw_line(Vector2(x, y), Vector2(x - 6, y + 16), Color(0.7, 0.85, 1.0, 0.5), 2.0)
+				pts.append(Vector2(x, y))
+				pts.append(Vector2(x - 6, y + 16))
+			draw_multiline(pts, Color(0.7, 0.85, 1.0, 0.5), 2.0)
 		"snow":
 			draw_rect(Rect2(0, 0, 1280, 720), Color(0.8, 0.9, 1.0, 0.07))
-			for i in 90:
-				var x := fmod(i * 131.0 + clock * 25.0 + sin(clock + i) * 18.0, 1300.0)
-				var y := fmod(i * 61.0 + clock * 70.0, 760.0) - 20.0
-				draw_circle(Vector2(x, y), 2.0 + (i % 3), Color(1, 1, 1, 0.85))
+			var d2 := PackedVector2Array(); var d3 := PackedVector2Array(); var d4 := PackedVector2Array()
+			for i in (45 if low else 90):
+				var ii := i * (2 if low else 1)
+				var x := fmod(ii * 131.0 + clock * 25.0 + sin(clock + ii) * 18.0, 1300.0)
+				var y := fmod(ii * 61.0 + clock * 70.0, 760.0) - 20.0
+				var arr := d2 if ii % 3 == 0 else (d3 if ii % 3 == 1 else d4)
+				arr.append(Vector2(x - 1.0, y)); arr.append(Vector2(x + 1.0, y))
+			draw_multiline(d2, Color(1, 1, 1, 0.85), 4.0)
+			draw_multiline(d3, Color(1, 1, 1, 0.85), 5.0)
+			draw_multiline(d4, Color(1, 1, 1, 0.85), 6.0)
 		"heat":
 			draw_rect(Rect2(0, 0, 1280, 720), Color(1.0, 0.55, 0.15, 0.09))
 			for i in 40:

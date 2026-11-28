@@ -22,7 +22,7 @@ static var lure_bonus := 0      # extra Lures for the next run (bought with gold
 const TEAM_MAX := 6
 static var dev_all := false     # testing: unlock everything
 static var _loaded := false
-static var settings := {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true, "tutorial_done": false, "damage_text": true, "auto_wave": false}
+static var settings := {"music": 0.8, "sfx": 0.9, "haptics": true, "shake": true, "tutorial_done": false, "damage_text": true, "auto_wave": false, "low_gfx": false}
 static var no_save := false     # set by headless tests
 
 static func load_save() -> void:
@@ -86,6 +86,9 @@ static func _save() -> void:
 	for k in settings:
 		cf.set_value("prefs", k, settings[k])
 	cf.save("user://wellfall.cfg")
+
+static func low_gfx() -> bool:
+	return bool(settings.get("low_gfx", false))
 
 static func save_prefs() -> void:
 	_save()
