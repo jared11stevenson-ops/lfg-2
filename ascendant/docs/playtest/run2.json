@@ -1,0 +1,144 @@
+[
+  {
+    "alive_s": 240.00000000002,
+    "causes": {
+      "old age": 2
+    },
+    "critters": 90,
+    "deaths": 29,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 2,
+    "species": "vole",
+    "steps": 4800,
+    "style": "cautious"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {
+      "old age": 2
+    },
+    "critters": 91,
+    "deaths": 34,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 3,
+    "species": "vole",
+    "steps": 4800,
+    "style": "breeder"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {
+      "old age": 2
+    },
+    "critters": 90,
+    "deaths": 28,
+    "end_state": "playing",
+    "items": 9,
+    "kills": 0,
+    "known": [
+      "float"
+    ],
+    "max_gen": 2,
+    "species": "vole",
+    "steps": 4800,
+    "style": "inventor"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {
+      "old age": 1
+    },
+    "critters": 90,
+    "deaths": 12,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 2,
+    "species": "hare",
+    "steps": 4800,
+    "style": "cautious"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {},
+    "critters": 90,
+    "deaths": 5,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 1,
+    "species": "hare",
+    "steps": 4800,
+    "style": "breeder"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {},
+    "critters": 90,
+    "deaths": 9,
+    "end_state": "playing",
+    "items": 1,
+    "kills": 0,
+    "known": [
+      "armor"
+    ],
+    "max_gen": 1,
+    "species": "hare",
+    "steps": 4800,
+    "style": "inventor"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {},
+    "critters": 92,
+    "deaths": 23,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 1,
+    "species": "rook",
+    "steps": 4800,
+    "style": "cautious"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {
+      "old age": 1
+    },
+    "critters": 90,
+    "deaths": 23,
+    "end_state": "playing",
+    "items": 0,
+    "kills": 0,
+    "known": [],
+    "max_gen": 2,
+    "species": "rook",
+    "steps": 4800,
+    "style": "breeder"
+  },
+  {
+    "alive_s": 240.00000000002,
+    "causes": {},
+    "critters": 90,
+    "deaths": 26,
+    "end_state": "playing",
+    "items": 1,
+    "kills": 0,
+    "known": [
+      "preserve"
+    ],
+    "max_gen": 1,
+    "species": "rook",
+    "steps": 4800,
+    "style": "inventor"
+  }
+]
