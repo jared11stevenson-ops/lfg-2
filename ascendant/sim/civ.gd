@@ -31,6 +31,7 @@ static func capabilities(g: PackedFloat32Array, bp: int) -> Dictionary:
 	return caps
 
 static func shelter_style(caps: Dictionary, bp: int) -> String:
+	if bp == Genome.BP.FISH: return "reed_raft_town"
 	if bp == Genome.BP.INSECT and caps["excavate"] > 0.35 and caps["deposit"] > 0.25: return "hive_mound"
 	if bp == Genome.BP.ARACH or (caps["bind"] > 0.55 and caps["home_layer"] == "elevated"): return "web_hall"
 	if bp == Genome.BP.AVIAN: return "nest_cluster"
@@ -175,7 +176,7 @@ static func _style_for(civ: Dictionary, need: String) -> String:
 	match need:
 		"shelter": return shelter_style(caps, bp)
 		"store": return "root_cellar" if caps["excavate"] > 0.4 else ("silk_cocoon_store" if caps["bind"] > 0.5 else "granary")
-		"farm": return "fungus_garden" if bp == Genome.BP.INSECT else ("reed_paddy" if caps["water"] > 0.35 else "seed_plot")
+		"farm": return "fish_weir" if bp == Genome.BP.FISH else "fungus_garden" if bp == Genome.BP.INSECT else ("reed_paddy" if caps["water"] > 0.35 else "seed_plot")
 		"water_work": return "dam" if caps["deposit"] > 0.3 else "canal"
 		"road": return "tunnel_net" if caps["excavate"] > 0.5 else ("silk_line" if caps["bind"] > 0.5 else ("canopy_walk" if caps["home_layer"] == "elevated" else "trail"))
 		"defense": return "tripline_net" if caps["bind"] > 0.45 else ("spike_ring" if caps["deposit"] > 0.3 else "thorn_hedge")

@@ -19,3 +19,9 @@ See MANDATE_CHECKLIST.md.
 
 ## Session log
 - 2026-11-28 keeper: harness, gate, registry, fixtures, docs stubs.
+
+## Lead session log — build night 1 (verified by running unless marked)
+- VERIFIED: Godot 4.7 headless + software-GL screenshots (tools/shot.sh). `tools/run_tests.sh`: 765 checks pass (genome constraints, ancestry, phenotype validity for all archetypes, sim determinism, silk gating, property-based invention, item legend, save/load round trip incl. post-load determinism).
+- VERIFIED (captures): creature lineup (captures/lineup_v2.png), structure gallery (CONSTRUCTED FIXTURE), title screen with live simulated backdrop (ui_title.png), world creation (ui_new.png), crafting workbench (craft_bench.png), real ant civilization from sim output (civ_real_seed12.png).
+- VERIFIED (Oracle, docs/oracle/*.json): ecosystem runs 600-1000 seasons at ~100-180 ms/season (1024 regions); sapience emerged in different species per world (ants, rooks, minnows, hares, voles); fixes driven by Oracle: speciation rate limiter, shelter-demand explosion, per-deme civ spam -> merge, fish with no architecture, cognition genes drifting to 1.0 (anatomical manipulator caps + convex brain cost).
+- KNOWN FAILURES / NOT DONE: mammal art weak (heads/ears); no multiplayer (NOT implemented — no claim); no tutorial hints yet; player cannot yet interact with civilizations directly (trade/diplomacy/raids as gameplay); ruins have no loot/rediscovery; no bot playstyle suite; audio untested by ear (synth only); mobile perf unmeasured.
