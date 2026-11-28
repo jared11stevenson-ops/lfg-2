@@ -42,8 +42,11 @@ func _initialize():
 		for e in sim.events:
 			if e["type"] == "war": wars += 1
 			if e["type"] == "harm": harms += 1
-		var res := {"civs": civ_n, "civs_collapsed": collapsed, "structures": structs, "ruins": ruins, "known_techs": inv, "wars": wars, "infrastructure_harm_events": harms, "styles": styles, "seed": seed_, "alive": alive, "extinct": ext, "speciations": spec_events, "sapient": sim.sapient_events.size(), "first_dawn": first_dawn, "dawn_species": dawn_names, "ms": ms, "ms_per_tick": float(ms) / int(args["ticks"]), "series": series}
+		var civ_species := {}
+		for c in sim.civs: civ_species[sim.species[c["sp"]]["name"]] = civ_species.get(sim.species[c["sp"]]["name"], 0) + 1
+		var res := {"civ_species": civ_species, "civs": civ_n, "civs_collapsed": collapsed, "structures": structs, "ruins": ruins, "known_techs": inv, "wars": wars, "infrastructure_harm_events": harms, "styles": styles, "seed": seed_, "alive": alive, "extinct": ext, "speciations": spec_events, "sapient": sim.sapient_events.size(), "first_dawn": first_dawn, "dawn_species": dawn_names, "ms": ms, "ms_per_tick": float(ms) / int(args["ticks"]), "series": series}
 		results.append(res)
+		print("   civ species=%s" % str(civ_species))
 		print("   civs=%d collapsed=%d structs=%d ruins=%d techs=%d wars=%d harm=%d styles=%s" % [civ_n, collapsed, structs, ruins, inv, wars, harms, str(styles)])
 		print("seed %d: alive=%d ext=%d spec=%d dawn=%d@%d %s | %.1f ms/tick | final total=%.0f maxci=%.2f" % [seed_, alive, ext, spec_events, sim.sapient_events.size(), first_dawn, str(dawn_names), res["ms_per_tick"], series[-1]["total"], series[-1]["max_ci"]])
 	if args["out"] != "":
