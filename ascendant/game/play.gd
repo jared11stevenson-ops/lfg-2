@@ -24,6 +24,10 @@ var autoplay_input := true      # false => bots drive the player
 var sim_busy := false
 var backdrop := false
 var focus := Vector2.ZERO
+var hints_done: Dictionary = {}
+var current_hint := ""
+var hint_t := 0.0
+var acted: Dictionary = {}
 var rep: Dictionary = {}       # civ id -> standing of the bloodline (-2..2)
 var searched: Dictionary = {}  # ruin keys already searched
 var known: Dictionary = {}     # invention knowledge of THIS bloodline
@@ -173,6 +177,7 @@ func _process(dt: float) -> void:
 		spawn_t = 0.6
 		_spawn_around(false)
 	season_t += dt
+	_hint_tick(dt)
 	if season_t >= (SEASON_SECONDS if not backdrop else 9.0):
 		season_t = 0.0
 		sim.step()
@@ -186,6 +191,57 @@ func _process(dt: float) -> void:
 			cam.position = focus
 
 var _ev_seen := 0
+## Contextual teaching: show the one most relevant, not-yet-learned control; never a wall of text.
+func _hint_tick(dt: float) -> void:
+	hint_t -= dt
+	if hint_t > 0.0 or not Settings.hints or not is_instance_valid(player) or backdrop: return
+	hint_t = 1.0
+	if current_hint != "":
+		hint_age += 1.0
+		if hint_age < 14.0: return
+		hint_age = 0.0; current_hint = ""; return
+	var p := player
+	var cands := [
+		["move", "WASD to move · mouse to aim", true],
+		["graze", "Hungry? Hold E on open ground to graze (or on a carcass to eat)", p.energy < 0.6 and p.carniv < 0.7],
+		["eatmeat", "Carnivores: hold E beside a carcass to feed", p.carniv > 0.5 and p.energy < 0.6],
+		["strike", "Left-click or Space to strike. Shift dodges — it makes you untouchable for a moment", _any_near(p, 380.0)],
+		["ability", "Q uses your body's special move: " + p.ability_name(), p.is_adult() and _any_near(p, 380.0)],
+		["gather", "Hold G to gather materials from the land — then press C to invent", p.is_adult() and Genome.get_g(p.genome, "c_manip") > 0.22],
+		["mate", "R to pair with a nearby mate — Z cycles who. Your young inherit a blend, shaped by what you practise", p.is_adult() and not mate_candidates(p).is_empty()],
+		["ruin", "Ruins hold lost knowledge — stand in one and press X to search", _near_ruin(p)],
+		["civ", "A settled people lives here. T trades with them — they teach what your body can use", _near_civ(p)],
+	]
+	for c in cands:
+		if c[2] and not hints_done.has(c[0]) and not (c[0] != "move" and not acted.has("move")):
+			current_hint = c[1]; hints_done[c[0]] = hints_done.get(c[0], 0) + 1
+			hint_key = c[0]; hint_age = 0.0
+			return
+
+var hint_key := ""
+var hint_age := 0.0
+func note_action(k: String) -> void:
+	acted[k] = true
+	var map := {"move": "move", "graze": "graze", "strike": "strike", "ability": "ability", "gather": "gather", "mate": "mate", "ruin": "ruin", "civ": "civ", "eatmeat": "eatmeat"}
+	if map.has(k): hints_done[map[k]] = 99
+	if hint_key == k: current_hint = ""
+
+func _any_near(p: Critter, r: float) -> bool:
+	for c in critters:
+		var o: Critter = c
+		if is_instance_valid(o) and o != p and o.sp != p.sp and p.position.distance_to(o.position) < r: return true
+	return false
+func _near_ruin(p: Critter) -> bool:
+	for civ in sim.civs:
+		for s in civ["structures"]:
+			if s["state"] == "ruin" and Vector2(s["tile"].x * 32.0 + 16.0, s["tile"].y * 32.0 + 16.0).distance_to(p.position) < 160.0: return true
+	return false
+func _near_civ(p: Critter) -> bool:
+	for c in critters:
+		var o: Critter = c
+		if is_instance_valid(o) and o != p and o.civ_id >= 0 and p.position.distance_to(o.position) < 220.0: return true
+	return false
+
 func _chronicle_new_events() -> void:
 	while _ev_seen < sim.events.size():
 		var e: Dictionary = sim.events[_ev_seen]; _ev_seen += 1
@@ -203,13 +259,15 @@ func _player_input(dt: float) -> void:
 	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT): dir.x -= 1
 	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT): dir.x += 1
 	p.move_dir = dir.normalized()
+	if dir != Vector2.ZERO: note_action("move")
 	var mp := get_global_mouse_position()
 	p.aim = (mp - p.position).angle(); p.use_aim = true
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE):
-		if p.start_attack(): sfx.play("swing", 0.5)
+		if p.start_attack(): sfx.play("swing", 0.5); note_action("strike")
 	if Input.is_key_pressed(KEY_SHIFT): p.dodge()
-	if Input.is_key_pressed(KEY_G): gather(p, dt); p.move_dir *= 0.2
+	if Input.is_key_pressed(KEY_G): note_action("gather"); gather(p, dt); p.move_dir *= 0.2
 	if Input.is_key_pressed(KEY_E):
+		note_action("graze"); note_action("eatmeat")
 		if p.carniv > 0.2 and p.eat_carcass(dt): pass
 		else: p._graze(dt)
 		p.move_dir *= 0.2
@@ -218,11 +276,11 @@ func _unhandled_key_input(ev: InputEvent) -> void:
 	if not (ev is InputEventKey and ev.pressed and not ev.echo) or not is_instance_valid(player): return
 	match ev.keycode:
 		KEY_Q:
-			if player.use_ability(): sfx.play("swing", 0.6, 0.7)
+			if player.use_ability(): sfx.play("swing", 0.6, 0.7); note_action("ability")
 		KEY_Z: mate_pick += 1
-		KEY_T: interact_civ(player)
-		KEY_X: search_ruin(player)
-		KEY_R: try_mate(player)
+		KEY_T: note_action("civ"); interact_civ(player)
+		KEY_X: note_action("ruin"); search_ruin(player)
+		KEY_R: note_action("mate"); try_mate(player)
 		KEY_TAB: observer = not observer
 		KEY_C: _toggle_craft("craft")
 		KEY_I: _toggle_craft("items")

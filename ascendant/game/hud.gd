@@ -43,12 +43,12 @@ func _draw() -> void:
 		_bar(Vector2(26, 120), 170, p.age_s / p.life_s, Color(0.45, 0.4, 0.7), "Age")
 		# ability bar
 		var abil := [["LMB", "Strike", p.cooldown / 0.6], ["Shift", "Dodge", 1.0 - p.stamina if p.stamina < 0.25 else 0.0], ["Q", p.ability_name(), p.abil_cd / 3.5], ["R", "Mate", p.mate_cd / 25.0], ["E", "Graze/Eat", 0.0]]
-		var x0 := size.x * 0.5 - abil.size() * 52.0
+		var x0 := size.x * 0.5 - abil.size() * 52.0 + 90.0
 		for i in abil.size():
 			var r := Rect2(x0 + i * 104, size.y - 78, 98, 62)
 			_panel(r, 0.95)
 			draw_string(f, r.position + Vector2(8, 22), abil[i][0], HORIZONTAL_ALIGNMENT_LEFT, -1, 16, GOLD.darkened(0.3))
-			draw_string(f, r.position + Vector2(8, 46), abil[i][1], HORIZONTAL_ALIGNMENT_LEFT, 90, 12, INK)
+			draw_string(f, r.position + Vector2(8, 46), abil[i][1], HORIZONTAL_ALIGNMENT_LEFT, 86, 11, INK)
 			var cd: float = clampf(abil[i][2], 0, 1)
 			if cd > 0.0: draw_rect(Rect2(r.position + Vector2(0, 62 * (1.0 - cd)), Vector2(98, 62 * cd)), Color(0.1, 0.1, 0.2, 0.35))
 	# mate chooser readout
@@ -74,12 +74,17 @@ func _draw() -> void:
 	draw_string(f, tr.position + Vector2(12, 26), "Year %d · %s" % [play.year(), play.season_name()], HORIZONTAL_ALIGNMENT_LEFT, -1, 17, INK)
 	draw_string(f, tr.position + Vector2(12, 46), "%d species alive · %d lost" % [alive, play.sim.species.size() - alive], HORIZONTAL_ALIGNMENT_LEFT, -1, 12, INK.lightened(0.2))
 	draw_string(f, tr.position + Vector2(12, 62), "%d dawns of mind" % play.sim.sapient_events.size(), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, INK.lightened(0.2))
+	# teaching hint
+	if play.current_hint != "" and is_instance_valid(p):
+		var hr := Rect2(size.x * 0.5 - 330, size.y - 148, 660, 44)
+		_panel(hr, 0.9)
+		draw_string(f, hr.position + Vector2(16, 28), play.current_hint, HORIZONTAL_ALIGNMENT_CENTER, 628, 15, INK)
 	# chronicle
 	var lines: Array = play.chronicle.slice(-5)
 	if lines.size() > 0:
-		var cr := Rect2(14, size.y - 28 - lines.size() * 18, 440, 20 + lines.size() * 18)
+		var cr := Rect2(14, size.y - 28 - lines.size() * 18, 340, 20 + lines.size() * 18)
 		_panel(cr, 0.8)
 		for i in lines.size():
-			draw_string(f, cr.position + Vector2(12, 22 + i * 18), lines[i], HORIZONTAL_ALIGNMENT_LEFT, 420, 12, INK)
+			draw_string(f, cr.position + Vector2(12, 22 + i * 18), lines[i], HORIZONTAL_ALIGNMENT_LEFT, 320, 11, INK)
 	if not is_instance_valid(p) and play.observer:
 		draw_string(f, Vector2(size.x * 0.5 - 120, 60), "OBSERVING THE WORLD", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(1, 1, 1))
