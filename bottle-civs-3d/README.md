@@ -16,6 +16,13 @@ Pick a civilization on the title screen (or Spectate). You get 3 actions per day
 - **Raids involving you** are fought as turn-based hex battles (click a unit, green = move, red = attack, flanking +25%, Defend halves damage, 10 rounds), or auto-resolved.
 - **Win**: complete the Great Work (tech 5, 220 gold, 140 goods, 140 lore, then 8 days with 8+ citizens), ally with every living civ (Concord), or annex them all (Domination). AI civs also race for the Great Work. **Lose**: your civ dies out or a rival finishes first.
 
+Also in the game:
+- **Race specials** (1 action, 3-day recharge, button on your jar): Verdant Bloom, Mother Lode, Grand Market, Mass Hatching, War Cry, Salvage Run, Raise Legion, Ale Feast, Sow Discord, Arcane Surge.
+- **Night guests**: choose to Host trapped visitors (friendly, hybrid children possible) or Ransom them (10 gold each, costs relations).
+- **The Wall-keeper**: random dawn events (crumbs, shaken jar, sunbeam, cold snap, glittering debris).
+- **Difficulty**: Easy (4 actions, gentler AI) / Normal / Hard (aggressive AI, faster rival wonders).
+- **Audio** (CC0): day/night music cross-fade, lid/lock/battle/trade sounds. M mutes.
+
 Bot playthrough: `godot --headless --script tools/playtest.gd -- <civ> <seed> <days> [agg]`
 
 ## Layout
@@ -25,4 +32,4 @@ Bot playthrough: `godot --headless --script tools/playtest.gd -- <civ> <seed> <d
 All third-party CC0, none made in-house - see `assets/CREDITS.md`.
 
 ## Known gaps
-Stylised low-poly, not photoreal. Only a subset of citizens is shown per jar (max 16). Per-civ visual identity is mostly tint/props on shared KayKit models; the free Quaternius Elf/Orc/Imp/Puglin models are bare base meshes and are used only for orcs, goblins and imps. No save/load and no audio yet (no clearly-licensed free audio was imported). Only checked via software-rendered screenshots and headless bot runs, never on a real GPU.
+Stylised low-poly, not photoreal. Only a subset of citizens is shown per jar (max 16). Per-civ visual identity is mostly tint/props on shared KayKit models; the free Quaternius Elf/Orc/Imp/Puglin models are bare base meshes and are used only for orcs, goblins and imps. No save/load yet. Only checked via software-rendered screenshots and headless bot runs, never on a real GPU.
