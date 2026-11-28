@@ -69,6 +69,7 @@ func build(p_game: RGame) -> void:
 	sel_panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	sel_panel.offset_left = 8; sel_panel.offset_bottom = -8; sel_panel.offset_top = -240; sel_panel.offset_right = 430
 	sel_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	sel_panel.visible = false
 	root.add_child(sel_panel)
 	var sc := ScrollContainer.new(); sel_panel.add_child(sc)
 	sel_box = VBoxContainer.new(); sel_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL; sc.add_child(sel_box)

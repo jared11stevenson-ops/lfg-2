@@ -158,7 +158,7 @@ func _overlay_mm(mesh: Mesh, y: float) -> MultiMesh:
 	mm.instance_count = RData.MAP_W * RData.MAP_H
 	for i in mm.instance_count:
 		var p := Hex.world(i % RData.MAP_W, i / RData.MAP_W)
-		mm.set_instance_transform(i, Transform3D(Basis(Vector3.UP, deg_to_rad(30.0)), p + Vector3(0, y, 0)))
+		mm.set_instance_transform(i, Transform3D(Basis(Vector3.UP, 0.0), p + Vector3(0, y, 0)))
 		mm.set_instance_color(i, Color(0, 0, 0, 0))
 	var mi := MultiMeshInstance3D.new()
 	mi.multimesh = mm
@@ -220,7 +220,7 @@ func _show_range() -> void:
 	while hl_pool.size() < tiles_to_mark.size():
 		var mi := MeshInstance3D.new()
 		var cm := CylinderMesh.new(); cm.top_radius = 1.0; cm.bottom_radius = 1.0; cm.height = 0.04; cm.radial_segments = 6
-		mi.mesh = cm; mi.rotation_degrees.y = 30.0
+		mi.mesh = cm
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi)
 		hl_pool.append(mi)
