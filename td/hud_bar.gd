@@ -85,7 +85,7 @@ func _draw() -> void:
 		_txt(str(maxi(0, m.lives)), Vector2(172, 40), 28, Color.WHITE)
 	_orb_icon(Vector2(246, 28))
 	_txt(str(m.lures), Vector2(264, 40), 26, Color("ffe08a") if m.lures > 0 else Color("8a7a9a"))
-	_txt("Lures", Vector2(284, 38), 14, Color("a8fff0"))
+	_txt("Lures", Vector2(284, 38), 16, Color("a8fff0"))
 	var total := Levels.TOTAL_WAVES
 	for i in total:
 		var c := Vector2(332 + i * 22, 30)
@@ -130,6 +130,6 @@ func _draw() -> void:
 		_txt("Replay Tier %d" % m.tier, Vector2(584, 130), 18, Color("ffd23a"))
 	if m.event_id != "":
 		_txt(String(Rules.EVENTS[m.event_id].name), Vector2(584, 70), 22, Color("ffd23a"))
-		_txt(String(Rules.EVENTS[m.event_id].get("desc", "")), Vector2(584, 92), 14, Color("ffe8b0"))
+		_txt(String(Rules.EVENTS[m.event_id].get("desc", "")), Vector2(584, 92), 16, Color("ffe8b0"))
 	if m.Session.diff != "normal":
 		_txt(String(Rules.DIFFICULTY[m.Session.diff].name), Vector2(584, 100), 20, Color("ff9a8a"))

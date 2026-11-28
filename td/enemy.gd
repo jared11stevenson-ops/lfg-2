@@ -339,8 +339,8 @@ func _draw() -> void:
 		var pr := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 160.0)
 		draw_arc(Vector2(0, -22 * scale_mul), 34.0 * scale_mul + pr * 3.0, 0, TAU, 32, Color(1.0, 0.85, 0.3, 0.9), 3.0, true)
 		var ly := 34.0 * scale_mul + 14.0  # below the creature so it never collides with the HP bar or RARE tag
-		draw_string_outline(ThemeDB.fallback_font, Vector2(-60, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 120, 14, 5, Color(0.1, 0.05, 0.2))
-		draw_string(ThemeDB.fallback_font, Vector2(-60, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 120, 14, Color(1, 0.95, 0.6))
+		draw_string_outline(ThemeDB.fallback_font, Vector2(-70, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 140, 18, 6, Color(0.1, 0.05, 0.2))
+		draw_string(ThemeDB.fallback_font, Vector2(-70, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 140, 18, Color(1, 0.95, 0.6))
 	if not held and not dead and not capturable and path.size() > 1 and position.distance_to(path[path.size() - 1]) < 200.0 and not is_boss:
 		# about to grab gold: warn the player there is still time to stop it
 		var wp := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 110.0)
