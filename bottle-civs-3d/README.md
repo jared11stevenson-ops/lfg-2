@@ -9,11 +9,20 @@ Open this folder in Godot 4.7 and press play (`scenes/main.tscn`). Controls: cli
 Headless soak test: `godot --headless --script tools/soak.gd -- 100 3`
 Screenshot test: `godot res://scenes/main.tscn -- --seed=3 --days=3 --at=0.3 --focus=2 --shot=/tmp/a.png --lowfx`
 
+## How to play
+Pick a civilization on the title screen (or Spectate). You get 3 actions per day (they refresh at dawn):
+- **Your jar** (click it): set a policy (free), build houses, barracks (+army), walls (+defence) or the Great Work.
+- **A connected jar**: trade, send envoys, gift, ally, declare war / sue for peace, raid, annex (at war, target 14 pop or fewer), spy (Imps).
+- **Raids involving you** are fought as turn-based hex battles (click a unit, green = move, red = attack, flanking +25%, Defend halves damage, 10 rounds), or auto-resolved.
+- **Win**: complete the Great Work (tech 5, 220 gold, 140 goods, 140 lore, then 8 days with 8+ citizens), ally with every living civ (Concord), or annex them all (Domination). AI civs also race for the Great Work. **Lose**: your civ dies out or a rival finishes first.
+
+Bot playthrough: `godot --headless --script tools/playtest.gd -- <civ> <seed> <days> [agg]`
+
 ## Layout
-`scripts/sim.gd` simulation (no scene access), `jar.gd` terrarium + citizens, `actor.gd` animated character with shared-rig retargeting, `main.gd` room/wall/tubes/loop, `hud.gd`, `cam.gd`.
+`scripts/sim.gd` simulation (no scene access), `jar.gd` terrarium + citizens, `actor.gd` animated character with shared-rig retargeting, `main.gd` room/wall/tubes/loop, `hud.gd`, `cam.gd`, `battle.gd` + `battle_view.gd` (tactics), `menu.gd` (title, battle prompt, game over).
 
 ## Assets
 All third-party CC0, none made in-house - see `assets/CREDITS.md`.
 
 ## Known gaps
-Stylised low-poly, not photoreal. Only a subset of citizens is shown per jar (max 16). Per-civ visual identity is mostly tint/props on shared KayKit models; the free Quaternius Elf/Orc/Imp/Puglin models are bare base meshes and are used only for orcs, goblins and imps. No player control or tactical war mode yet.
+Stylised low-poly, not photoreal. Only a subset of citizens is shown per jar (max 16). Per-civ visual identity is mostly tint/props on shared KayKit models; the free Quaternius Elf/Orc/Imp/Puglin models are bare base meshes and are used only for orcs, goblins and imps. No save/load and no audio yet (no clearly-licensed free audio was imported). Only checked via software-rendered screenshots and headless bot runs, never on a real GPU.
