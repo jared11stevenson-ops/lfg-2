@@ -74,7 +74,7 @@ func build(p_sim: BCSim) -> void:
 	var left := PanelContainer.new()
 	left.add_theme_stylebox_override("panel", _panel())
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	left.offset_left = 12; left.offset_top = 72; left.offset_bottom = -250; left.offset_right = 214
+	left.offset_left = 12; left.offset_top = 72; left.offset_bottom = -170; left.offset_right = 214
 	root.add_child(left)
 	roster = VBoxContainer.new()
 	roster.add_theme_constant_override("separation", 3)
@@ -95,7 +95,7 @@ func build(p_sim: BCSim) -> void:
 	var right := PanelContainer.new()
 	right.add_theme_stylebox_override("panel", _panel())
 	right.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
-	right.offset_right = -12; right.offset_left = -372; right.offset_top = 72; right.offset_bottom = -250
+	right.offset_right = -12; right.offset_left = -340; right.offset_top = 72; right.offset_bottom = -170
 	root.add_child(right)
 	inspector = RichTextLabel.new()
 	inspector.bbcode_enabled = true
@@ -106,7 +106,7 @@ func build(p_sim: BCSim) -> void:
 	var bottom := PanelContainer.new()
 	bottom.add_theme_stylebox_override("panel", _panel())
 	bottom.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bottom.offset_left = 12; bottom.offset_right = -12; bottom.offset_bottom = -10; bottom.offset_top = -236
+	bottom.offset_left = 12; bottom.offset_right = -12; bottom.offset_bottom = -10; bottom.offset_top = -160
 	root.add_child(bottom)
 	log_view = RichTextLabel.new()
 	log_view.bbcode_enabled = true

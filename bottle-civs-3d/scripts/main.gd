@@ -121,7 +121,7 @@ func _build_room() -> void:
 		add_child(trim)
 	# overhead strip lights (emissive panels) for cool highlights on the glass
 	for i in 5:
-		add_child(BCAssets.box(Vector3(60, 0.3, 3), BCAssets.emissive(Color(0.8, 0.9, 1.0), 4.0), Vector3(0, 40, -50 + i * 24)))
+		add_child(BCAssets.box(Vector3(60, 0.3, 3), BCAssets.emissive(Color(0.8, 0.9, 1.0), 4.0), Vector3(0, 80, -50 + i * 24)))
 
 func _build_wall() -> void:
 	for i in 12:
