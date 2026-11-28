@@ -32,14 +32,14 @@ const LEVELS := {
 	},
 	"frostrun": {
 		"name": "Frostrun Pass", "style": "snow", "blurb": "Switchbacks under the White Lantern. Ice patches make the herd slide.",
-		"rule": "Ice patches speed enemies up. Spirit towers love the cold.", "lane_mode": "random", "hp_mult": 1.08, "coins": 250,
+		"rule": "Ice patches speed enemies up. Spirit towers love the cold.", "lane_mode": "random", "hp_mult": 1.08, "coins": 300,
 		"colors": {"g1": "#2a3b78", "g2": "#6f93d0", "accent": "#d8f0ff", "path": "#aab8e0", "edge": "#27356a", "glow": "#5f9ad0", "moon": "#e8f4ff"},
 		"weather": ["snow", "snow", "clear", "snow", "snow", "clear", "snow", "snow", "clear", "snow"],
 		"paths": [[[-40, 140], [900, 140], [900, 300], [240, 300], [240, 470], [1000, 470], [1000, 330], [1320, 330]]],
 		"stones": [[560, 220, "frost"], [560, 390, "spirit"], [1100, 250, "gale"], [130, 420, "ember"]],
 		"zones": [{"pos": [450, 140], "r": 80, "kind": "ice"}, {"pos": [750, 140], "r": 80, "kind": "ice"}, {"pos": [600, 300], "r": 80, "kind": "ice"}],
-		"roster": [["shuckit", 1, 7], ["shuckit_pup", 2, 4], ["glomm", 2, 6], ["shuckit_alpha", 5, 2]],
-		"boss": "glomm", "boss_extra": {"shield": 220.0}, "boss_mult": 4.5, "early": [0.6, 0.7, 0.78, 0.82, 0.82, 0.85, 0.86, 0.86, 0.88, 0.95], "art": "res://art/maps/frostrun.png", "tower_cap": 10,
+		"roster": [["shuckit", 1, 7], ["shuckit_pup", 2, 4], ["glomm", 2, 6], ["icewake", 4, 2], ["shuckit_alpha", 5, 2]],
+		"boss": "glomm", "boss_extra": {"shield": 180.0, "leak": 6}, "boss_mult": 4.0, "early": [0.6, 0.7, 0.78, 0.74, 0.78, 0.8, 0.8, 0.8, 0.76, 0.9], "art": "res://art/maps/frostrun.png", "tower_cap": 10,
 		"goals": [["win", "Clear all 10 waves"], ["gold15", "Finish with 15+ lives"], ["perfect", "Lose no lives at all"], ["capture", "Capture a Glomm"]],
 		"story": {
 			"intro": [
