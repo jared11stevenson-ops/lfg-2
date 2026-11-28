@@ -103,7 +103,7 @@ func build(p_sim: BCSim) -> void:
 	var right := PanelContainer.new()
 	right.add_theme_stylebox_override("panel", _panel())
 	right.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
-	right.offset_right = -12; right.offset_left = -340; right.offset_top = 72; right.offset_bottom = -170
+	right.offset_right = -12; right.offset_left = -380; right.offset_top = 72; right.offset_bottom = -170
 	root.add_child(right)
 	var rvb := VBoxContainer.new()
 	rvb.add_theme_constant_override("separation", 6)
@@ -242,18 +242,18 @@ func _add_btn(parent: Node, text: String, kind: String, arg, tip: String = "") -
 	b.pressed.connect(func(): command.emit(kind, arg))
 	parent.add_child(b)
 
-func _row(parent: Node) -> HBoxContainer:
-	var h := HBoxContainer.new()
+func _row(parent: Node) -> HFlowContainer:
+	var h := HFlowContainer.new()
 	h.add_theme_constant_override("separation", 3)
 	parent.add_child(h)
 	return h
 
 func _build_actions() -> void:
-	var key := "%d|%d|%d|%d" % [selected, sim.player, sim.ap, sim.locked]
+	var key := "%d|%d|%d|%d" % [selected, sim.player, sim.ap, int(sim.locked)]
 	if sim.player >= 0 and selected >= 0 and selected < sim.civs.size():
 		var me0: BCSim.Civ = sim.civs[sim.player]
 		var c0: BCSim.Civ = sim.civs[selected]
-		key += "|%d%d%d|%d" % [me0.war.has(selected), me0.allies.has(selected), c0.alive, me0.policy.hash()]
+		key += "|%d%d%d|%d" % [int(me0.war.has(selected)), int(me0.allies.has(selected)), int(c0.alive), me0.policy.hash()]
 	if key == last_actions_key: return
 	last_actions_key = key
 	for ch in actions.get_children(): ch.queue_free()

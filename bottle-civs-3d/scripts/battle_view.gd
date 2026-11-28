@@ -71,11 +71,11 @@ func _build_units() -> void:
 		actors[u] = a
 		var l := Label3D.new()
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		l.font_size = 40
+		l.font_size = 30
 		l.pixel_size = 0.012
 		l.outline_size = 10
 		l.no_depth_test = true
-		l.position = Vector3(0, 2.4, 0)
+		l.position = Vector3(0, 2.1, 0)
 		a.add_child(l)
 		labels[u] = l
 		# team ring
