@@ -111,7 +111,7 @@ func _do_lunge() -> void:
 		if o == self or not is_instance_valid(o) or not o.targetable(): continue
 		var d := o.position - position
 		if d.length() > reach + o.radius(): continue
-		if absf(angle_difference(heading, d.angle())) > 1.0: continue
+		if d.length() > 10.0 and absf(angle_difference(heading, d.angle())) > 1.0: continue
 		var was := o.hp
 		o.take_hit(dmg, self, dir * 220.0 * (1.0 + ph["strength"] * 0.2))
 		hit = true
@@ -220,7 +220,7 @@ func tick(dt: float) -> void:
 		if windup <= 0.0: _do_lunge()
 	# metabolism
 	var drain: float = ph["upkeep"] * 0.0016 * (2.2 if flying else 1.0) * (1.0 + vel.length() / maxf(ph["speed"], 1.0) * 0.6)
-	energy -= drain * dt * 4.0
+	energy -= drain * dt * 1.4
 	if energy <= 0.0:
 		energy = 0.0
 		hp -= dt * 0.6
@@ -326,6 +326,8 @@ func _act(dt: float) -> void:
 				heading = lerp_angle(heading, d.angle(), clampf(dt * 8.0, 0, 1))
 				if d.length() < ph["L"] * 0.55 + target.radius() and cooldown <= 0.0 and windup <= 0.0:
 					start_attack()
+				elif d.length() < ph["L"] * 3.5 and d.length() > ph["L"] * 1.0 and abil_cd <= 0.0 and carniv > 0.5 and ability_name() in ["Pounce", "Tail burst"]:
+					heading = d.angle(); use_ability()
 			else: state = "wander"
 		"graze":
 			move_dir = Vector2.ZERO
