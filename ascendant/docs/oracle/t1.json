@@ -1,0 +1,172 @@
+[
+  {
+    "alive": 144,
+    "dawn_species": [],
+    "extinct": 27,
+    "first_dawn": -1,
+    "ms": 40900,
+    "ms_per_tick": 102.25,
+    "sapient": 0,
+    "seed": 1,
+    "series": [
+      {
+        "ever": 24,
+        "max_ci": 0.264009279216301,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 17,
+        "tick": 48,
+        "total": 32946.8574034205
+      },
+      {
+        "ever": 34,
+        "max_ci": 0.239165579623875,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 27,
+        "tick": 100,
+        "total": 458160.809766003
+      },
+      {
+        "ever": 42,
+        "max_ci": 0.292635649093143,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 35,
+        "tick": 148,
+        "total": 980475.707898009
+      },
+      {
+        "ever": 56,
+        "max_ci": 0.280610682515169,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 47,
+        "tick": 200,
+        "total": 1096782.02447447
+      },
+      {
+        "ever": 80,
+        "max_ci": 0.274842387087005,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 70,
+        "tick": 248,
+        "total": 1288916.28756342
+      },
+      {
+        "ever": 105,
+        "max_ci": 0.294545985345006,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 93,
+        "tick": 300,
+        "total": 1235977.51288873
+      },
+      {
+        "ever": 136,
+        "max_ci": 0.354303189227976,
+        "max_ratchet": 5.37118062255039,
+        "sapient": 0,
+        "species": 114,
+        "tick": 348,
+        "total": 1358421.14453757
+      },
+      {
+        "ever": 171,
+        "max_ci": 0.307965513099788,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 144,
+        "tick": 400,
+        "total": 1398031.30598273
+      }
+    ],
+    "speciations": 156
+  },
+  {
+    "alive": 129,
+    "dawn_species": [],
+    "extinct": 36,
+    "first_dawn": -1,
+    "ms": 37481,
+    "ms_per_tick": 93.7025,
+    "sapient": 0,
+    "seed": 2,
+    "series": [
+      {
+        "ever": 21,
+        "max_ci": 0.209849722524673,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 11,
+        "tick": 48,
+        "total": 32322.3416669855
+      },
+      {
+        "ever": 29,
+        "max_ci": 0.234959394859349,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 19,
+        "tick": 100,
+        "total": 479995.463068081
+      },
+      {
+        "ever": 39,
+        "max_ci": 0.345990707537946,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 28,
+        "tick": 148,
+        "total": 740982.782936515
+      },
+      {
+        "ever": 56,
+        "max_ci": 0.28288682528251,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 45,
+        "tick": 200,
+        "total": 770529.389577126
+      },
+      {
+        "ever": 80,
+        "max_ci": 0.352892016350978,
+        "max_ratchet": 0.435864713214907,
+        "sapient": 0,
+        "species": 65,
+        "tick": 248,
+        "total": 770031.426878969
+      },
+      {
+        "ever": 105,
+        "max_ci": 0.457847824084212,
+        "max_ratchet": 3.23244413642101,
+        "sapient": 0,
+        "species": 85,
+        "tick": 300,
+        "total": 1244736.77227725
+      },
+      {
+        "ever": 131,
+        "max_ci": 0.413417421579713,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 107,
+        "tick": 348,
+        "total": 966596.147597813
+      },
+      {
+        "ever": 165,
+        "max_ci": 0.430753121540617,
+        "max_ratchet": 0.0,
+        "sapient": 0,
+        "species": 129,
+        "tick": 400,
+        "total": 980060.688614357
+      }
+    ],
+    "speciations": 150
+  }
+]
