@@ -126,6 +126,12 @@ func _draw() -> void:
 	var chip2 := Rect2(784, 10, 176, 34)
 	draw_style_box(panel_sb, chip2)
 	_txt("Towers %d/%d" % [nt, cap], Vector2(796, 36), 20, Color("ff9a8a") if nt >= cap else Color("c8f0b8"))
+	if not m.bounty.is_empty():
+		var chip3 := Rect2(784, 50, 176, 30)
+		draw_style_box(panel_sb, chip3)
+		var done: bool = m.bounty_done()
+		var prog: int = mini(m.bounty_progress(), int(m.bounty.target))
+		_txt(("Bounty done +%d" % int(m.bounty.reward)) if done else "%s %d/%d" % [String(m.bounty.label), prog, int(m.bounty.target)], Vector2(794, 72), 14, Color("ffe36a") if done else Color("e8d8ff"))
 	if m.tier > 0:
 		_txt("Replay Tier %d" % m.tier, Vector2(584, 130), 18, Color("ffd23a"))
 	if m.event_id != "":

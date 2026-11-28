@@ -109,12 +109,36 @@ var free_ids := {}          # tower id -> free placements left (granted by captu
 var run_xp := {}            # tower id -> XP earned this run (banked at the end)
 var capture_hint_shown := false
 const CAPTURE_HP := 0.5
+var bounty := {}             # optional per-run side goal: {kind, target, reward, label}
+var flawless_waves := 0
 var ice_tip_shown := false
 var wave_leaks := 0          # gold lost this wave (for the wave summary and the flawless bonus)
 var wave_caps := 0           # captures this wave
 var gift_pending := false     # wave 2 of Level 1 carries a pre-weakened Shuckit so the first capture is taught, not hoped for
 var lane_count := 1          # real lanes; a flank path (late-wave second entrance) sits after them in paths[]
 var tier := 0                # replay tier of this level (0..5): each clear makes waves tougher, rares likelier, gold richer
+func bounty_progress() -> int:
+	match String(bounty.get("kind", "")):
+		"capture": return captures_run
+		"flawless": return flawless_waves
+		"tiers":
+			var n := 0
+			for t in get_tree().get_nodes_in_group("towers"):
+				n += int(t.tiers.a) + int(t.tiers.b)
+			return n
+	return 0
+
+func bounty_done() -> bool:
+	return not bounty.is_empty() and bounty_progress() >= int(bounty.target)
+
+func _pick_bounty() -> void:
+	var opts := [
+		{"kind": "capture", "target": 2, "reward": 60, "label": "Catch 2"},
+		{"kind": "flawless", "target": 4, "reward": 50, "label": "Flawless waves"},
+		{"kind": "tiers", "target": 5, "reward": 40, "label": "Upgrades"},
+	]
+	bounty = opts[randi() % opts.size()]
+
 func tower_cap() -> int:
 	# every friend you capture makes room for one more defender (up to +4), so catching never wastes a catch
 	return int(lv.get("tower_cap", 12)) + mini(4, captures_run)
@@ -126,6 +150,7 @@ func _ready() -> void:
 	Session.init_ui()
 	lv = Levels.LEVELS[Session.level_id]
 	tier = Session.tier(Session.level_id)
+	_pick_bounty()
 	paths = Levels.to_paths(lv)
 	lane_count = paths.size()
 	if lv.has("flank"):
@@ -790,6 +815,7 @@ func _wave_done() -> void:
 		FxScript.text_at(self, Vector2(640, 282), "+%d coins%s" % [bonus, "   +1 Lure" if lure_up else ""], Color("ffe08a"))
 		var recap := "Leaked %d   Captured %d" % [wave_leaks, wave_caps]
 		if wave_leaks == 0:
+			flawless_waves += 1
 			coins += 25
 			recap = "Flawless wave! +25 coins   Captured %d" % wave_caps
 		FxScript.text_at(self, Vector2(640, 316), recap, Color("9fffd0") if wave_leaks == 0 else Color("c8d4ff"))
@@ -845,6 +871,9 @@ func _end(result: String) -> void:
 	if not goals_new.is_empty():
 		lvl_lines.append("Goal%s: %s  (+%d gold)" % ["s" if goals_new.size() > 1 else "", ", ".join(PackedStringArray(goals_new)), goals_new.size() * Session.GOAL_REWARD])
 	var gold_gain := int(float(wave * 15 + (100 if result == "won" else 0) + captures_run * 30) * (1.0 + 0.1 * float(tier)))
+	if bounty_done():
+		gold_gain += int(bounty.reward)
+		lvl_lines.append("Bounty done: %s  (+%d gold)" % [bounty.label, int(bounty.reward)])
 	Session.add_gold(gold_gain)
 	lvl_lines.append("Gold +%d (total %d)" % [gold_gain, Session.gold])
 	var layer: CanvasLayer = start_btn.get_parent()

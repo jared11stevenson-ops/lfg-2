@@ -9,6 +9,7 @@ signal leaked(e)
 
 var path: PackedVector2Array
 var zones: Array = []
+var on_ice := false
 var kind := "shuckit"
 var sprite_id := "shuckit"
 var seg := 0
@@ -173,13 +174,16 @@ func advance(px: float) -> void:
 
 func _zone_mult(delta: float) -> float:
 	var m := 1.0
+	on_ice = false
 	if flying:
 		return m
 	for z in zones:
 		if position.distance_to(z.pos) < float(z.r):
 			match String(z.kind):
 				"bog": m *= 0.6
-				"ice": m *= 1.35
+				"ice":
+					m *= 1.35
+					on_ice = true
 				"belt": m *= 1.5
 				"burn": take_damage(7.0 * delta)
 	return m
@@ -341,6 +345,10 @@ func _draw() -> void:
 		var ly := 34.0 * scale_mul + 14.0  # below the creature so it never collides with the HP bar or RARE tag
 		draw_string_outline(ThemeDB.fallback_font, Vector2(-70, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 140, 18, 6, Color(0.1, 0.05, 0.2))
 		draw_string(ThemeDB.fallback_font, Vector2(-70, ly), "Capture %d%%" % capture_pct, HORIZONTAL_ALIGNMENT_CENTER, 140, 18, Color(1, 0.95, 0.6))
+	if on_ice and not dead:
+		for i in 4:
+			var tx := -18.0 - 16.0 * i
+			draw_line(Vector2(tx * (-1.0 if face_left else 1.0), -6.0 - 5.0 * i), Vector2((tx - 22.0) * (-1.0 if face_left else 1.0), -6.0 - 5.0 * i), Color(0.75, 0.93, 1.0, 0.7 - 0.15 * i), 3.0 - 0.5 * i, true)
 	if not held and not dead and not capturable and path.size() > 1 and position.distance_to(path[path.size() - 1]) < 200.0 and not is_boss:
 		# about to grab gold: warn the player there is still time to stop it
 		var wp := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 110.0)
