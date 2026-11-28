@@ -4,6 +4,7 @@ extends Node2D
 const TILE := 32.0
 const TPR := 8
 const TW := EcoSim.RW * TPR   # tiles across
+const SS := 3                 # data-texture supersampling per tile
 var sim: EcoSim
 var elev := PackedFloat32Array()
 var water := PackedFloat32Array()
@@ -21,7 +22,8 @@ func build(s: EcoSim) -> void:
 	var n := TW * TW
 	elev.resize(n); water.resize(n); tree_n.resize(n)
 	var noise := FastNoiseLite.new(); noise.seed = s.seed_ + 99; noise.frequency = 0.09; noise.fractal_octaves = 3
-	data_img = Image.create(TW, TW, false, Image.FORMAT_RGBA8)
+	data_img = Image.create(TW, TW, false, Image.FORMAT_RGBAF)
+	var hi := Image.create(TW * SS, TW * SS, false, Image.FORMAT_RGBAF)
 	for ty in TW:
 		for tx in TW:
 			var fx := (tx + 0.5) / TPR - 0.5; var fy := (ty + 0.5) / TPR - 0.5
@@ -36,7 +38,15 @@ func build(s: EcoSim) -> void:
 			var i := ty * TW + tx
 			elev[i] = e; water[i] = w; tree_n[i] = tr * (1.0 if e > 0.35 and e < 0.62 else 0.0)
 			data_img.set_pixel(tx, ty, Color(clampf(e, 0, 1), m, w, t))
-	data_tex = ImageTexture.create_from_image(data_img)
+	for hy in TW * SS:
+		for hx in TW * SS:
+			var fx2 := (hx + 0.5) / SS - 0.5; var fy2 := (hy + 0.5) / SS - 0.5
+			var ix := clampi(int(floor(fx2)), 0, TW - 1); var iy := clampi(int(floor(fy2)), 0, TW - 1)
+			var jx := mini(ix + 1, TW - 1); var jy := mini(iy + 1, TW - 1)
+			var ax2 := clampf(fx2 - ix, 0.0, 1.0); var ay2 := clampf(fy2 - iy, 0.0, 1.0)
+			var c00 := data_img.get_pixel(ix, iy); var c10 := data_img.get_pixel(jx, iy); var c01 := data_img.get_pixel(ix, jy); var c11 := data_img.get_pixel(jx, jy)
+			hi.set_pixel(hx, hy, c00.lerp(c10, ax2).lerp(c01.lerp(c11, ax2), ay2))
+	data_tex = ImageTexture.create_from_image(hi)
 	mat = ShaderMaterial.new()
 	mat.shader = load("res://art/shaders/terrain.gdshader")
 	mat.set_shader_parameter("world_data", data_tex)
@@ -44,6 +54,7 @@ func build(s: EcoSim) -> void:
 	var rect := ColorRect.new()
 	rect.size = Vector2(world_px(), world_px())
 	rect.material = mat
+	rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	add_child(rect)
 	fx = FxLayer.new(); fx.z_index = 100; add_child(fx)
 

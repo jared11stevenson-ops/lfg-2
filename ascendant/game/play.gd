@@ -20,15 +20,23 @@ var deaths := 0
 var generation := 1
 var autoplay_input := true      # false => bots drive the player
 var sim_busy := false
+var backdrop := false
+var focus := Vector2.ZERO
 var items: Array = []        # Items owned by the bloodline (see core/item.gd)
 var props: PropLayer
 var structs: StructureLayer
 
 func start_new(seed_: int, arch_id: String, history_ticks: int = 120) -> void:
-	rng.seed = seed_ * 31 + 5
-	sim = EcoSim.new()
-	sim.generate(seed_)
-	for i in history_ticks: sim.step()
+	var s := EcoSim.new()
+	s.generate(seed_)
+	for i in history_ticks: s.step()
+	start_from_sim(s, arch_id)
+
+## Begin play on an already-generated (pre-historied) simulation.
+func start_from_sim(s: EcoSim, arch_id: String, backdrop_mode: bool = false) -> void:
+	sim = s
+	rng.seed = sim.seed_ * 31 + 5
+	backdrop = backdrop_mode
 	world = GameWorld.new()
 	add_child(world)
 	world.build(sim)
@@ -45,6 +53,13 @@ func start_new(seed_: int, arch_id: String, history_ticks: int = 120) -> void:
 	add_child(layer)
 	hud = Hud.new(); hud.play = self
 	layer.add_child(hud)
+	if backdrop:
+		observer = true
+		focus = world.region_center(sim.idx(EcoSim.RW / 2, EcoSim.RH / 2))
+		cam.zoom = Vector2(0.9, 0.9); cam.position = focus
+		_chronicle_new_events()
+		_spawn_around(true)
+		return
 	_found_bloodline(arch_id)
 	_spawn_around(true)
 
@@ -141,7 +156,7 @@ func _process(dt: float) -> void:
 		spawn_t = 0.6
 		_spawn_around(false)
 	season_t += dt
-	if season_t >= SEASON_SECONDS:
+	if season_t >= (SEASON_SECONDS if not backdrop else 9.0):
 		season_t = 0.0
 		sim.step()
 		_chronicle_new_events()
@@ -149,7 +164,9 @@ func _process(dt: float) -> void:
 		cam.position = player.position
 		if autoplay_input: _player_input(dt)
 	elif observer:
-		pass
+		if backdrop or true:
+			focus += Vector2(cos(Time.get_ticks_msec() * 0.00004), sin(Time.get_ticks_msec() * 0.00003)) * 18.0 * dt
+			cam.position = focus
 
 var _ev_seen := 0
 func _chronicle_new_events() -> void:
@@ -210,7 +227,7 @@ func try_mate(p: Critter) -> bool:
 	return true
 
 func _spawn_around(initial: bool) -> void:
-	var pr := world.region_of(player.position if is_instance_valid(player) else Vector2.ZERO)
+	var pr := world.region_of(player.position if is_instance_valid(player) else focus)
 	var px := pr % EcoSim.RW; var py := pr / EcoSim.RW
 	var have := {}
 	for c in critters:
@@ -235,13 +252,14 @@ func _spawn_around(initial: bool) -> void:
 					var c := _make_critter(g, bp, d["sp"], world.region_center(r), -1.0)
 					c.position = world.random_land_near(world.region_center(r), 120.0, rng, bp == Genome.BP.FISH)
 					cur += 1
-					if is_instance_valid(player) and c.position.distance_to(player.position) < 260.0:
+					if is_instance_valid(player) and c.position.distance_to(player.position) < 260.0 and not backdrop:
 						c.position += (c.position - player.position).normalized() * 260.0
 	# despawn far critters (their demes persist in the simulation)
-	if is_instance_valid(player):
+	var anchor := player.position if is_instance_valid(player) else focus
+	if true:
 		for c in critters:
 			var cc: Critter = c
-			if cc != player and cc.bloodline < 0 and cc.position.distance_to(player.position) > 2300.0:
+			if cc != player and cc.bloodline < 0 and cc.position.distance_to(anchor) > 2300.0:
 				cc.died.disconnect(_on_died)
 				critters.erase(cc); cc.queue_free()
 

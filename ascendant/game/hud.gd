@@ -29,7 +29,7 @@ func _bar(p: Vector2, w: float, v: float, col: Color, label: String) -> void:
 	draw_string(f, p + Vector2(w + 8, 11), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, INK)
 
 func _draw() -> void:
-	if play == null or play.sim == null: return
+	if play == null or play.sim == null or play.backdrop: return
 	var f := ThemeDB.fallback_font
 	var p := play.player
 	if is_instance_valid(p):
