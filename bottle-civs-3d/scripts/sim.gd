@@ -73,6 +73,9 @@ class Civ extends RefCounted:
 	var wonder := 0            # days of work completed on the Great Work (0 = not started)
 	var wonder_started := false
 	var annexed_by := -1
+	var special_cd := 0
+	var war_cry := 0
+	var guest_stance := "host"
 	var stats := {"births": 0, "hybrid_births": 0, "deaths": 0, "kills": 0, "losses": 0, "raids": 0, "defended": 0,
 		"trades": 0, "envoys": 0, "plunder": 0.0, "raised": 0}
 
@@ -100,6 +103,8 @@ const POLICIES := {
 	"military": {"soldier": 2.4},
 }
 var player := -1
+var difficulty := 1          # 0 easy, 1 normal, 2 hard
+var ap_max := AP_MAX
 var ap := AP_MAX
 var tactical_enabled := true
 var pending_battle = null
@@ -107,6 +112,7 @@ var winner := -1
 var win_kind := ""
 var game_over_flag := false
 
+signal world_event(title: String, text: String)
 signal tactical_battle(party)
 signal game_over(winner_id: int, kind: String)
 signal event_logged(ev: Dictionary)
@@ -325,7 +331,11 @@ func _new_day() -> void:
 				c.rel[o.id] = maxf(c.rel[o.id], -10.0)
 				o.rel[c.id] = maxf(o.rel[c.id], -10.0)
 				log_event("%s and %s agree to a truce." % [c.name, o.name], "peace", [c.id, o.id])
-	ap = AP_MAX
+	ap = ap_max
+	for c in civs:
+		if c.special_cd > 0: c.special_cd -= 1
+		if c.war_cry > 0: c.war_cry -= 1
+	_world_event()
 	_assign_roles(false)
 	log_event("Day %d dawns. The jars unlock." % day, "sys")
 	_check_victory()
@@ -476,6 +486,7 @@ func _decide() -> void:
 				var hostile := 1.0 if rel < 20.0 else 0.12
 				var need := (0.5 if c.stock.food < c.citizens.size() * 3.0 else 0.0) + (0.2 if c.race.traits.greed > 0.6 else 0.0)
 				var wt: float = c.race.traits.aggression * 0.95 * ratio * hostile * (1.8 if at_war else 1.0) + need * hostile
+				if j_id == player: wt *= [0.55, 1.0, 1.5][difficulty]
 				if wt > 0.04: choices.append({"w": wt, "act": "raid", "to": j_id})
 			if not at_war and rel > -10.0 and c.race.traits.fertility > 0.0 and o.race.traits.fertility > 0.0:
 				var wt: float = c.race.traits.openness * (0.9 if rel > 10.0 else 0.25) * float(c.race.get("charm", 1.0)) * (1.3 if o.race.like.has(c.race.id) else 0.8)
@@ -659,8 +670,8 @@ func _do_battle(p: Party, from: Civ, to: Civ, night: bool) -> void:
 	var atk: Array = p.members.duplicate()
 	var def_sold: Array = to.citizens.filter(func(x): return x.role == "soldier" and x.loc == to.id and x.party == null)
 	var def_other: Array = to.citizens.filter(func(x): return x.role != "soldier" and is_adult(x) and x.loc == to.id and x.party == null)
-	var a_pow := power(atk) * (1.0 + from.tech * 0.06 + from.barracks * 0.12) * (0.75 if night else 1.0)
-	var d_pow := (power(def_sold) + 0.22 * power(def_other)) * (1.0 + to.tech * 0.06 + to.barracks * 0.12 + to.walls * 0.12) * (1.3 if night else 1.15)
+	var a_pow := power(atk) * (1.0 + from.tech * 0.06 + from.barracks * 0.12 + (0.25 if from.war_cry > 0 else 0.0)) * (0.75 if night else 1.0)
+	var d_pow := (power(def_sold) + 0.22 * power(def_other)) * (1.0 + to.tech * 0.06 + to.barracks * 0.12 + to.walls * 0.12 + (0.25 if to.war_cry > 0 else 0.0)) * (1.3 if night else 1.15)
 	a_pow = maxf(0.1, a_pow); d_pow = maxf(0.1, d_pow)
 	var ratio := a_pow / d_pow
 	var cf_d := clampf(0.32 * ratio * rr(0.7, 1.3), 0.04, 0.85)
@@ -773,6 +784,12 @@ func _night_mingle() -> void:
 		var host: Civ = civs[p.to]
 		var from: Civ = civs[p.from]
 		if from.war.has(host.id): continue
+		if host.guest_stance == "hostage":
+			var n: int = p.members.size()
+			host.stock.gold += 10.0 * n
+			from.rel[host.id] -= 15.0; host.rel[from.id] -= 6.0
+			log_event("%s holds %d traveller(s) of %s hostage overnight and demands ransom." % [host.name, n, from.name], "war", [host.id, from.id])
+			continue
 		var rel: float = from.rel[host.id]
 		for g in p.members:
 			if not is_adult(g) or fertility_of(g) <= 0.0: continue
@@ -855,11 +872,16 @@ func total_pop() -> int:
 # =====================================================================================
 # Player layer: action points, policy, building, diplomacy, annexation, victory
 # =====================================================================================
+func set_difficulty(d: int) -> void:
+	difficulty = clampi(d, 0, 2)
+	ap_max = 4 if difficulty == 0 else AP_MAX
+	ap = ap_max
+
 func set_player(id: int) -> void:
 	player = id
-	ap = AP_MAX
+	ap = ap_max
 	if id >= 0:
-		log_event("You rule %s, home of the %s. You have %d actions each day." % [civs[id].name, civs[id].race.name, AP_MAX], "sys", [id])
+		log_event("You rule %s, home of the %s. You have %d actions each day." % [civs[id].name, civs[id].race.name, ap_max], "sys", [id])
 
 func pc() -> Civ: return civs[player] if player >= 0 else null
 
@@ -1085,7 +1107,7 @@ func _check_victory() -> void:
 				log_event("%s completes the Great Work!" % c.name, "tech", [c.id])
 				_end_game(c.id, "wonder")
 				return
-		elif c.id != player and c.tech >= 5 and c.stock.gold >= 220 and c.stock.goods >= 140 and c.stock.lore >= 140 and r() < 0.2:
+		elif c.id != player and c.tech >= 5 and c.stock.gold >= 220 and c.stock.goods >= 140 and c.stock.lore >= 140 and r() < [0.08, 0.2, 0.35][difficulty]:
 			_pay(c, BUILD_COST.wonder)
 			c.wonder_started = true
 			log_event("%s begins the Great Work! Stop them before day %d." % [c.name, day + WONDER_DAYS], "tech", [c.id])
@@ -1106,3 +1128,101 @@ func _check_victory() -> void:
 		if me.allies.has(c.id): bound += 1
 	if others == 0 or (bound == others and conquered + bound >= civs.size() - 1 and bound >= 1):
 		_end_game(player, "domination" if bound == 0 else "concord")
+
+
+# ---- race specials (player, 1 action, 3-day recharge) ---------------------------------
+const SPECIALS := {
+	"elf": ["Verdant Bloom", "+80 food, +15 lore"],
+	"dwarf": ["Mother Lode", "+50 ore, +20 goods"],
+	"human": ["Grand Market", "+40 gold, +6 relations with every neighbour"],
+	"lizard": ["Mass Hatching", "up to 4 new citizens"],
+	"orc": ["War Cry", "+25% army strength for 2 days"],
+	"goblin": ["Salvage Run", "+40 goods, +25 wood"],
+	"skeleton": ["Raise Legion", "6 ore: 3 new skeleton soldiers"],
+	"ogre": ["Ale Feast", "40 food: +30 gold, +8 relations with neighbours"],
+	"imp": ["Sow Discord", "neighbours quarrel (-15 relations), +20 gold"],
+	"wizard": ["Arcane Surge", "+80 lore"],
+}
+
+func special_info(c: Civ) -> Array: return SPECIALS.get(c.race.id, ["-", ""])
+
+func act_special() -> Dictionary:
+	var c := pc()
+	if c == null: return _res(false, "Spectating.")
+	if ap <= 0: return _res(false, "No actions left today.")
+	if locked: return _res(false, "The jars are locked for the night.")
+	if c.special_cd > 0: return _res(false, "%s is recharging (%d day(s))." % [special_info(c)[0], c.special_cd])
+	var live_links: Array = c.links.filter(func(j): return civs[j].alive)
+	match c.race.id:
+		"elf": c.stock.food += 80.0; c.stock.lore += 15.0
+		"dwarf": c.stock.ore += 50.0; c.stock.goods += 20.0
+		"human":
+			c.stock.gold += 40.0
+			for j in live_links: c.rel[j] += 6.0; civs[j].rel[c.id] += 6.0
+		"lizard":
+			var room: int = mini(4, capacity(c) - c.citizens.size())
+			if room <= 0: return _res(false, "No room for hatchlings.")
+			for i in room: _spawn_citizen(c, {c.id: 1.0}, 2.0, -1)
+		"orc":
+			c.war_cry = 2
+			for x in c.citizens: x.xp = minf(2.0, x.xp + 0.5)
+		"goblin": c.stock.goods += 40.0; c.stock.wood += 25.0
+		"skeleton":
+			if c.stock.ore < 6.0: return _res(false, "Needs 6 ore.")
+			c.stock.ore -= 6.0
+			_raise_dead(c, 3)
+		"ogre":
+			if c.stock.food < 40.0: return _res(false, "Needs 40 food.")
+			c.stock.food -= 40.0; c.stock.gold += 30.0
+			for j in live_links: c.rel[j] += 8.0; civs[j].rel[c.id] += 8.0
+		"imp":
+			c.stock.gold += 20.0
+			var pool := live_links.duplicate()
+			for i in 3:
+				if pool.size() < 2: break
+				var a: int = pick(pool)
+				var b: int = pick(pool)
+				if a != b and civs[a].links.has(b):
+					civs[a].rel[b] -= 15.0; civs[b].rel[a] -= 15.0
+		"wizard": c.stock.lore += 80.0
+	_spend()
+	c.special_cd = 3
+	var info := special_info(c)
+	log_event("%s uses %s!" % [c.name, info[0]], "tech", [c.id])
+	c.flash = "trade"; c.flash_t = 2.5
+	return _res(true, "%s: %s." % [info[0], info[1]])
+
+func act_stance(stance: String) -> Dictionary:
+	var c := pc()
+	if c == null or not (stance in ["host", "hostage"]): return _res(false, "?")
+	c.guest_stance = stance
+	return _res(true, "Guests will be %s." % ("treated as guests" if stance == "host" else "held for ransom"))
+
+# ---- the Wall-keeper's whims ------------------------------------------------------------
+func _world_event() -> void:
+	if r() > 0.3: return
+	var live: Array = civs.filter(func(c): return c.alive)
+	if live.is_empty(): return
+	var c: Civ = pick(live)
+	var title := ""
+	var text := ""
+	match rng.randi() % 5:
+		0:
+			c.stock.food += 60.0
+			title = "Crumbs from above"; text = "A giant hand drops crumbs over %s: +60 food." % c.name
+		1:
+			var n: int = mini(2, maxi(0, c.citizens.size() - 4))
+			for i in n: remove_citizen(pick(c.citizens), "shaken")
+			c.flash = "battle"; c.flash_t = 3.0
+			title = "The jar is shaken"; text = "Something shakes %s. %d citizen(s) are lost." % [c.name, n]
+		2:
+			c.stock.lore += 35.0
+			title = "A beam of light"; text = "A sunbeam through the glass inspires %s: +35 lore." % c.name
+		3:
+			for o in live: o.stock.food *= 0.85
+			title = "Cold snap"; text = "The room goes cold. Every jar loses 15% of its food."
+		4:
+			c.stock.gold += 50.0
+			title = "Glittering debris"; text = "Something shiny falls into %s: +50 gold." % c.name
+	log_event("%s - %s" % [title, text], "sys", [c.id])
+	world_event.emit(title, text)

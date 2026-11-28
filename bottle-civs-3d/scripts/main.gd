@@ -24,6 +24,8 @@ var hover := -1
 var args := {}
 var clock_now := 0.0
 var menu: BCMenu
+var audio: BCAudio
+var prev_locked := false
 var battle_view: BCBattleView = null
 
 func _ready() -> void:
@@ -47,6 +49,8 @@ func _ready() -> void:
 	hud.overview_pressed.connect(func(): _select(-1))
 	hud.set_speed_ui(speed, paused)
 	hud.command.connect(_on_command)
+	audio = BCAudio.new()
+	add_child(audio)
 	menu = BCMenu.new()
 	add_child(menu)
 	menu.picked.connect(_on_picked)
@@ -55,6 +59,10 @@ func _ready() -> void:
 	menu.restart.connect(func(): get_tree().reload_current_scene())
 	menu.keep_watching.connect(func(): sim.game_over_flag = false; sim.player = -1; paused = false)
 	sim.tactical_battle.connect(_on_tactical)
+	sim.battle.connect(func(a, b, night): BCAudio.sfx("knifeSlice", -4.0); BCAudio.sfx("chop", -8.0, 0.8))
+	sim.event_logged.connect(func(ev):
+		if ev.kind == "trade" and (ev.civs.has(sim.player) or randf() < 0.2): BCAudio.sfx("handleCoins", -10.0))
+	sim.world_event.connect(func(t, tx): hud.show_banner(t, tx, Color(1.0, 0.85, 0.4)))
 	sim.game_over.connect(_on_game_over)
 	if args.has("shot"):
 		if args.has("player"): _on_picked(int(args.player))
@@ -213,6 +221,9 @@ func _process(dt: float) -> void:
 			sim.step(0.05); acc -= 0.05; n += 1
 		if n >= 300: acc = 0.0
 	_update_lighting(dt)
+	if sim.locked != prev_locked:
+		prev_locked = sim.locked
+		_on_lock_changed(sim.locked)
 	for j in jars:
 		j.update_visuals(dt, clock_now)
 	_update_tubes(dt)
@@ -222,6 +233,25 @@ func _process(dt: float) -> void:
 		ui_t = 0.0
 		hud.refresh()
 
+func _on_lock_changed(locked: bool) -> void:
+	if locked:
+		BCAudio.sfx("doorClose_1", -2.0)
+		BCAudio.sfx("metalLatch", -4.0)
+		var trapped_here := 0
+		var trapped_away := 0
+		for p in sim.parties:
+			if p.state == "guest":
+				if p.to == sim.player: trapped_here += p.members.size()
+				elif p.from == sim.player: trapped_away += p.members.size()
+		var sub := "Every lid seals until dawn."
+		if sim.player >= 0:
+			if trapped_here > 0: sub = "%d visitor(s) are locked in your jar overnight. Host or ransom them (your jar's panel)." % trapped_here
+			elif trapped_away > 0: sub = "%d of your people are locked in a neighbour's jar until dawn." % trapped_away
+		hud.show_banner("DUSK - JARS LOCKED", sub, Color(1.0, 0.5, 0.4))
+	else:
+		BCAudio.sfx("doorOpen_1", -2.0)
+		hud.show_banner("DAWN - JARS OPEN", "Day %d. You have %d actions." % [sim.day, sim.ap_max] if sim.player >= 0 else "Day %d." % sim.day, Color(0.6, 1.0, 0.7))
+
 func _update_lighting(dt: float) -> void:
 	var t := sim.t()
 	var day_f := 1.0
@@ -229,6 +259,7 @@ func _update_lighting(dt: float) -> void:
 	elif t < 0.05: day_f = clampf(0.2 + t / 0.05 * 0.8, 0.0, 1.0)
 	if sim.locked: day_f = minf(day_f, 0.12)
 	var f := lerpf(0.12, 1.0, day_f)
+	audio.set_day_factor(day_f, dt)
 	sun.light_energy = lerpf(sun.light_energy, 1.0 * f, minf(1.0, dt * 2.0))
 	sun.light_color = Color(0.55, 0.62, 1.0).lerp(Color(1.0, 0.96, 0.9), f)
 	env.ambient_light_energy = lerpf(env.ambient_light_energy, 0.2 + 0.4 * f, minf(1.0, dt * 2.0))
@@ -322,6 +353,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 		match ev.keycode:
 			KEY_ESCAPE:
 				if battle_view == null: _select(-1)
+			KEY_M: audio.toggle_mute()
 			KEY_SPACE: paused = not paused; hud.set_speed_ui(speed, paused)
 			KEY_1: speed = 1.0; paused = false; hud.set_speed_ui(speed, paused)
 			KEY_2: speed = 2.0; paused = false; hud.set_speed_ui(speed, paused)
@@ -373,12 +405,14 @@ func _run_shot() -> void:
 
 # ------------------------------------------------------------------ player layer
 func _on_picked(idx: int) -> void:
+	sim.set_difficulty(menu.difficulty)
 	sim.set_player(idx)
 	paused = false
 	hud.set_speed_ui(speed, paused)
 	if idx >= 0:
 		jars[idx].plaque.text = "* " + jars[idx].race.jar.to_upper() + " *"
 		_select(idx)
+		if not args.has("shot"): _run_hints()
 	hud.refresh()
 
 func _on_command(kind: String, arg) -> void:
@@ -386,7 +420,10 @@ func _on_command(kind: String, arg) -> void:
 	match kind:
 		"policy": res = sim.act_policy(arg)
 		"build": res = sim.act_build(arg)
+		"special": res = sim.act_special()
+		"stance": res = sim.act_stance(arg)
 		"diplo": res = sim.act_diplo(arg[0], arg[1])
+	BCAudio.sfx("metalClick" if res.ok else "creak1", -6.0)
 	hud.show_toast(res.msg, res.ok)
 	hud.last_actions_key = ""
 	hud.refresh()
@@ -426,3 +463,18 @@ func _on_game_over(w: int, kind: String) -> void:
 	text += "\n\nDay %d - battles %d - trades %d - hybrids %d" % [sim.day, sim.stats.battles, sim.stats.trades, sim.stats.hybrids]
 	if sim.player < 0: title = "THE WALL HAS A WINNER"
 	menu.show_game_over(title, text, good or sim.player < 0)
+
+
+func _run_hints() -> void:
+	var hints: Array = [
+		"Welcome! You rule %s. You get %d actions a day; they refresh at dawn." % [sim.civs[sim.player].name, sim.ap_max],
+		"Click your jar: set a policy, build, or use your civilization's special power.",
+		"Click a connected jar to trade, send envoys, ally, raid or go to war. Raids are fought on a hex grid.",
+		"At dusk every jar locks. Travellers still outside are trapped in the neighbour's jar until dawn.",
+		"Win by finishing the Great Work, allying with all, or annexing them all. M mutes sound.",
+	]
+	for h in hints:
+		hud.show_toast(h, true)
+		hud.toast_t = 5.5
+		await get_tree().create_timer(6.0).timeout
+		if sim.game_over_flag: return

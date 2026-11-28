@@ -218,6 +218,7 @@ func _do_attack(u: BCBattle.Unit, t: BCBattle.Unit) -> void:
 	if Vector2(d.x, d.z).length() > 0.01: a.rotation.y = atan2(d.x, d.z)
 	a.play_once("fight", 0.9)
 	await get_tree().create_timer(0.45).timeout
+	BCAudio.sfx("knifeSlice2" if u.side == 0 else "knifeSlice", -5.0)
 	var res := battle.attack(u, t)
 	_float_text(ta.position, "-%d" % ceili(res.dmg), Color(1.0, 0.45, 0.35))
 	ta.play_once("hit" if ta.is_inside_tree() else "idle", 0.5)
@@ -315,6 +316,7 @@ func _check_finish() -> bool:
 	done = true
 	busy = true
 	var won := (battle.attacker_wins and player_side == 0) or ((not battle.attacker_wins) and player_side == 1)
+	BCAudio.sfx("doorOpen_1" if won else "doorClose_1", -3.0)
 	banner.text = "VICTORY" if won else "DEFEAT"
 	banner.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5) if won else Color(1.0, 0.45, 0.4))
 	banner.visible = true

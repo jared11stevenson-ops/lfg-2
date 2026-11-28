@@ -57,6 +57,7 @@ func setup(p_race: Dictionary) -> void:
 	model.scale = Vector3(sc * sq.x, sc * sq.y, sc * sq.z)
 	skeleton = _find_skeleton(model)
 	_apply_tint()
+	_attach_props()
 	player = AnimationPlayer.new()
 	player.name = "Anim"
 	add_child(player)
@@ -99,6 +100,19 @@ func _model_height(m: Node3D) -> float:
 		var bb: AABB = t * n.get_aabb()
 		lo = minf(lo, bb.position.y); hi = maxf(hi, bb.end.y)
 	return (hi - lo) if hi > lo else 1.0
+
+func _attach_props() -> void:
+	if skeleton == null or not race.has("props"): return
+	for def in race.props:
+		var bone: String = def[1]
+		if skeleton.find_bone(bone) < 0: continue
+		var ba := BoneAttachment3D.new()
+		ba.bone_name = bone
+		skeleton.add_child(ba)
+		var prop: Node3D = (load("res://assets/props/%s.gltf" % def[0]) as PackedScene).instantiate()
+		ba.add_child(prop)
+		prop.rotation_degrees = def[2]
+		prop.scale = Vector3.ONE * float(def[3])
 
 func _apply_tint() -> void:
 	if not race.has("tint"): return

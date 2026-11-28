@@ -3,6 +3,7 @@ extends CanvasLayer
 ## Title / civilization select, battle prompt and game-over overlays.
 
 signal picked(idx: int)
+var difficulty := 1
 signal fight
 signal auto_resolve
 signal restart
@@ -50,6 +51,14 @@ func show_title() -> void:
 	how.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	how.add_theme_color_override("font_color", Color(0.65, 0.62, 0.55))
 	vb.add_child(how)
+	var dh := HBoxContainer.new(); dh.alignment = BoxContainer.ALIGNMENT_CENTER; dh.add_theme_constant_override("separation", 8); vb.add_child(dh)
+	var dl := Label.new(); dl.text = "Difficulty:"; dh.add_child(dl)
+	var group := ButtonGroup.new()
+	for d in 3:
+		var db := Button.new(); db.text = ["Easy (4 actions, gentler AI)", "Normal", "Hard (aggressive AI, faster rival wonders)"][d]
+		db.toggle_mode = true; db.button_group = group; db.button_pressed = (d == difficulty)
+		db.pressed.connect(func(): difficulty = d)
+		dh.add_child(db)
 	var grid := GridContainer.new()
 	grid.columns = 5
 	grid.add_theme_constant_override("h_separation", 8)

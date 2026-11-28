@@ -159,7 +159,7 @@ func refresh(force: bool = false) -> void:
 	phase_label.add_theme_color_override("font_color", Color("ff8a78") if sim.locked else Color("9ee6a8"))
 	if sim.player >= 0:
 		var me: BCSim.Civ = sim.civs[sim.player]
-		ap_label.text = "Actions %d/%d" % [sim.ap, BCSim.AP_MAX]
+		ap_label.text = "Actions %d/%d" % [sim.ap, sim.ap_max]
 		if me.wonder_started: ap_label.text += "   Great Work %d/%d" % [me.wonder, BCSim.WONDER_DAYS]
 	else:
 		ap_label.text = "Spectating"
@@ -253,7 +253,7 @@ func _build_actions() -> void:
 	if sim.player >= 0 and selected >= 0 and selected < sim.civs.size():
 		var me0: BCSim.Civ = sim.civs[sim.player]
 		var c0: BCSim.Civ = sim.civs[selected]
-		key += "|%d%d%d|%d" % [int(me0.war.has(selected)), int(me0.allies.has(selected)), int(c0.alive), me0.policy.hash()]
+		key += "|%d%d%d|%d" % [int(me0.war.has(selected)), int(me0.allies.has(selected)), int(c0.alive), me0.policy.hash() + me0.special_cd + me0.guest_stance.hash()]
 	if key == last_actions_key: return
 	last_actions_key = key
 	for ch in actions.get_children(): ch.queue_free()
@@ -271,6 +271,14 @@ func _build_actions() -> void:
 		var r3 := _row(actions)
 		_add_btn(r3, "Walls %d/5" % me.walls, "build", "walls", "25 ore, 15 goods: +12% defence")
 		_add_btn(r3, "Great Work", "build", "wonder", "220 gold, 140 goods, 140 lore, tech 5")
+		var info: Array = sim.special_info(me)
+		var r4 := _row(actions)
+		var cd := " (%dd)" % me.special_cd if me.special_cd > 0 else ""
+		_add_btn(r4, "* %s%s" % [info[0], cd], "special", null, "%s - 1 action, 3-day recharge" % info[1])
+		var r5 := _row(actions)
+		var lg := Label.new(); lg.text = "Night guests:"; r5.add_child(lg)
+		_add_btn(r5, "Host" + (" *" if me.guest_stance == "host" else ""), "stance", "host", "Trapped travellers are guests: friendly, may have hybrid children")
+		_add_btn(r5, "Ransom" + (" *" if me.guest_stance == "hostage" else ""), "stance", "hostage", "Hold them hostage for 10 gold each; costs relations")
 		return
 	var c: BCSim.Civ = sim.civs[selected]
 	if not c.alive: return
@@ -292,6 +300,37 @@ func _build_actions() -> void:
 	_add_btn(rc, "Annex", "diplo", ["annex", selected], "At war, target 14 pop or fewer, your army 1.5x stronger")
 	if me.race.get("spy", false): _add_btn(rc, "Spy", "diplo", ["spy", selected])
 
+var banner: Label
+var banner_sub: Label
+var banner_t := 0.0
+
+func show_banner(title: String, sub: String, col: Color) -> void:
+	if banner == null:
+		var box := VBoxContainer.new()
+		box.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		box.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		box.offset_top = 150
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(box)
+		banner = Label.new()
+		banner.add_theme_font_size_override("font_size", 56)
+		banner.add_theme_color_override("font_outline_color", Color.BLACK)
+		banner.add_theme_constant_override("outline_size", 14)
+		banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		box.add_child(banner)
+		banner_sub = Label.new()
+		banner_sub.add_theme_font_size_override("font_size", 20)
+		banner_sub.add_theme_color_override("font_outline_color", Color.BLACK)
+		banner_sub.add_theme_constant_override("outline_size", 8)
+		banner_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		box.add_child(banner_sub)
+	banner.text = title
+	banner.add_theme_color_override("font_color", col)
+	banner_sub.text = sub
+	banner.get_parent().modulate.a = 1.0
+	banner.get_parent().visible = true
+	banner_t = 3.2
+
 func show_toast(text: String, good: bool) -> void:
 	toast.text = text
 	toast.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6) if good else Color(1.0, 0.6, 0.5))
@@ -299,6 +338,10 @@ func show_toast(text: String, good: bool) -> void:
 	toast_t = 3.0
 
 func _process(dt: float) -> void:
+	if banner_t > 0.0:
+		banner_t -= dt
+		banner.get_parent().modulate.a = clampf(banner_t, 0.0, 1.0)
+		if banner_t <= 0.0: banner.get_parent().visible = false
 	if toast_t > 0.0:
 		toast_t -= dt
 		if toast_t <= 0.0: toast.visible = false

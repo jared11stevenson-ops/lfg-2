@@ -71,7 +71,7 @@ func _spawn(list: Array, side: int, militia_fill: bool = false) -> void:
 		var race: Dictionary = BCData.RACES[sim.dominant(m)]
 		u.race_idx = sim.dominant(m)
 		var civ: BCSim.Civ = attacker_civ if side == 0 else defender_civ
-		var tech_mul := 1.0 + civ.tech * 0.06 + civ.barracks * 0.12
+		var tech_mul := 1.0 + civ.tech * 0.06 + civ.barracks * 0.12 + (0.25 if civ.war_cry > 0 else 0.0)
 		var hpm := float(race.get("hp", 1.0))
 		u.max_hp = 14.0 * (0.6 + 0.4 * hpm)
 		u.hp = u.max_hp
