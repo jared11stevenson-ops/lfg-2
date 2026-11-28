@@ -74,6 +74,7 @@ func _tree(u: Ink.Batch, o: Ink.Batch, p: Vector2, r2: float, r3: float, moist: 
 		var c := p + Vector2(cos(a), sin(a)) * rad * 0.42
 		Ink.dome(o, c, rad * 0.55, rad * 0.5, a, base.lerp(Color.from_hsv(hue + 0.03, 0.6, 0.6), k % 3 * 0.18), 0.0, 14)
 	Ink.dome(o, p, rad * 0.62, rad * 0.6, 0.0, base.lightened(0.1), 0.0, 14)
+	o.flush(get_canvas_item())
 	for k in 9:
 		var q := p + Vector2(cos(k * 2.4 + r3 * 5.0), sin(k * 2.4 + r3 * 5.0)) * rad * (0.2 + 0.07 * k)
 		draw_circle(q, 2.2, Color(base.r + 0.25, base.g + 0.3, base.b + 0.05, 0.55))
@@ -87,6 +88,7 @@ func _rock(u: Ink.Batch, o: Ink.Batch, p: Vector2, r2: float, r3: float) -> void
 	var base := Color(0.5, 0.47, 0.5).lerp(Color(0.55, 0.5, 0.42), r3)
 	Ink.dome(u, p + Vector2(5, 7), rad * 1.1, rad * 0.8, 0.0, Color(0.05, 0.05, 0.12, 0.28), 0.0, 12)
 	Ink.dome(o, p, rad, rad * (0.7 + 0.2 * r3), r3 * 3.0, base, 0.0, 10)
+	o.flush(get_canvas_item())
 	Ink.dome_outline(self, p, rad, rad * (0.7 + 0.2 * r3), r3 * 3.0, Ink.ink_color(base), 2.0, 14)
 
 func _reeds(u: Ink.Batch, o: Ink.Batch, lines: Array, p: Vector2, r2: float, r3: float, moist: float) -> void:

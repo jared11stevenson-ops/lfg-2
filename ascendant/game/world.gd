@@ -86,16 +86,13 @@ func region_center(r: int) -> Vector2:
 	return Vector2((r % EcoSim.RW + 0.5) * TILE * TPR, (r / EcoSim.RW + 0.5) * TILE * TPR)
 
 func random_land_near(c: Vector2, rad: float, rng: RandomNumberGenerator, aquatic: bool = false) -> Vector2:
-	for k in 20:
-		var p := c + Vector2(rng.randf_range(-rad, rad), rng.randf_range(-rad, rad))
+	# expanding search so a lake-centred region still yields a valid position
+	for k in 80:
+		var r := rad * (1.0 + float(k) / 10.0)
+		var p := c + Vector2(rng.randf_range(-r, r), rng.randf_range(-r, r))
 		p = p.clamp(Vector2(40, 40), Vector2(world_px() - 40, world_px() - 40))
 		if is_water(p) == aquatic: return p
 	return c
-
-func fx_ring(p: Vector2, c: Color, r: float) -> void:
-	if fx: fx.ring(p, c, r)
-func fx_text(p: Vector2, s: String, c: Color) -> void:
-	if fx: fx.text(p, s, c)
 
 func civ_spot(civ_id: int, rng: RandomNumberGenerator) -> Vector2:
 	if civ_id < 0 or civ_id >= sim.civs.size(): return Vector2.ZERO
