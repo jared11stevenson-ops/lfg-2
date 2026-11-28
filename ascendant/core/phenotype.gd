@@ -41,7 +41,7 @@ static func build(g: PackedFloat32Array, bp: int) -> Dictionary:
 	ph["mass"] = mass
 	ph["speed"] = (60.0 + 140.0 * G.call("speed")) * pow(maxf(L, 10.0) / 50.0, 0.25) * (1.0 + 0.2 * G.call("limb"))
 	ph["strength"] = (0.4 + 1.6 * G.call("strength")) * pow(maxf(mass, 0.05), 0.5)
-	ph["hp"] = 10.0 + 40.0 * pow(maxf(mass, 0.05), 0.6) * lerpf(0.8, 1.5, G.call("stamina")) * (1.0 + G.call("armor"))
+	ph["hp"] = 8.0 + 18.0 * pow(maxf(mass, 0.05), 0.55) * lerpf(0.8, 1.5, G.call("stamina")) * (1.0 + G.call("armor"))
 	# metabolism: bigger bodies, faster metabolism, bigger brains cost more (the evolutionary trade-offs)
 	ph["upkeep"] = (0.4 + pow(maxf(mass, 0.02), 0.75)) * lerpf(0.7, 1.5, G.call("metab")) * (1.0 + 0.9 * Genome.brain_cost(g)) * (1.0 + 0.3 * G.call("armor"))
 	ph["lifespan"] = lerpf(0.6, 1.6, G.call("lifespan")) * (1.0 + 0.4 * (1.0 - G.call("metab")))

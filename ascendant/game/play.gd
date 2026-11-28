@@ -20,6 +20,7 @@ var deaths := 0
 var generation := 1
 var autoplay_input := true      # false => bots drive the player
 var sim_busy := false
+var props: PropLayer
 
 func start_new(seed_: int, arch_id: String, history_ticks: int = 120) -> void:
 	rng.seed = seed_ * 31 + 5
@@ -33,7 +34,9 @@ func start_new(seed_: int, arch_id: String, history_ticks: int = 120) -> void:
 	world.set_meta("carcasses", carcasses)
 	cam = Camera2D.new(); cam.position_smoothing_enabled = true; cam.position_smoothing_speed = 7.0
 	add_child(cam)
-	cam.make_current()
+	cam.enabled = true
+	props = PropLayer.new(); props.world = world; props.cam = cam; props.z_index = 1
+	world.add_child(props)
 	var layer := CanvasLayer.new(); layer.layer = 10
 	add_child(layer)
 	hud = Hud.new(); hud.play = self
@@ -228,8 +231,8 @@ func _spawn_around(initial: bool) -> void:
 					var c := _make_critter(g, bp, d["sp"], world.region_center(r), -1.0)
 					c.position = world.random_land_near(world.region_center(r), 120.0, rng, bp == Genome.BP.FISH)
 					cur += 1
-					if not initial and is_instance_valid(player) and c.position.distance_to(player.position) < 500.0:
-						c.position += (c.position - player.position).normalized() * 500.0
+					if is_instance_valid(player) and c.position.distance_to(player.position) < 260.0:
+						c.position += (c.position - player.position).normalized() * 260.0
 	# despawn far critters (their demes persist in the simulation)
 	if is_instance_valid(player):
 		for c in critters:
