@@ -7,15 +7,15 @@ const TOTAL_WAVES := 10
 const LEVELS := {
 	"mossgate": {
 		"name": "Mossgate Lane", "style": "meadow", "blurb": "A dusk meadow at the edge of the Green Hollow. A gentle first lesson.", "art": "res://art/maps/mossgate.png",
-		"rule": "Rain rolls in on later waves.", "lane_mode": "random", "hp_mult": 0.8, "coins": 320,
+		"rule": "Rain rolls in on later waves.", "lane_mode": "random", "hp_mult": 0.8, "coins": 350,
 		"colors": {"g1": "#274e63", "g2": "#3f8a6a", "accent": "#9fe8b8", "path": "#e2bd8a", "edge": "#4a2f55", "glow": "#ffe9a8", "moon": "#fff3c8"},
 		"weather": ["clear", "clear", "rain", "clear", "rain", "clear", "rain", "clear", "rain", "rain"],
 		"paths": [[[-40, 360], [300, 360], [300, 160], [700, 160], [700, 560], [1000, 560], [1000, 300], [1320, 300]]],
 		"stones": [[460, 250, "verdant"], [560, 470, "tide"], [880, 420, "ember"], [150, 230, "umbra"]],
 		"zones": [],
 		"roster": [["shuckit", 1, 10], ["shuckit_pup", 2, 6], ["shuckit_alpha", 4, 3]],
-		"boss": "", "boss_extra": {}, "early": [0.5, 0.6, 0.7, 0.74, 0.72, 0.74, 0.76, 0.78, 0.8, 0.88], "gift": "shuckit",
-		"steal": true, "finale": 1.0, "tower_cap": 8, "flank": {"path": [[1000, 740], [1000, 560], [1000, 300], [1320, 300]], "wave": 6, "share": 0.35}, "champion": "shuckit_alpha",
+		"boss": "", "boss_extra": {}, "early": [0.5, 0.6, 0.7, 0.74, 0.7, 0.72, 0.72, 0.7, 0.76, 0.86], "gift": "shuckit",
+		"steal": true, "finale": 1.0, "tower_cap": 8, "flank": {"path": [[1000, 740], [1000, 560], [1000, 300], [1320, 300]], "wave": 6, "share": 0.28}, "champion": "shuckit_alpha",
 		"goals": [["win", "Clear all 10 waves"], ["gold15", "Finish with 15+ gold"], ["perfect", "Lose no gold at all"], ["capture", "Capture a Shuckit"], ["rare", "Catch the rare Hutzin"]],
 		"rare": {"id": "hutzin", "chance": 0.14, "wave_min": 3, "wave_max": 8},
 		"story": {

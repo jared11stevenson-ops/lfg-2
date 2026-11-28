@@ -112,7 +112,8 @@ var gift_pending := false     # wave 2 of Level 1 carries a pre-weakened Shuckit
 var lane_count := 1          # real lanes; a flank path (late-wave second entrance) sits after them in paths[]
 var tier := 0                # replay tier of this level (0..5): each clear makes waves tougher, rares likelier, gold richer
 func tower_cap() -> int:
-	return int(lv.get("tower_cap", 12))
+	# every friend you capture makes room for one more defender (up to +4), so catching never wastes a catch
+	return int(lv.get("tower_cap", 12)) + mini(4, captures_run)
 
 func _ready() -> void:
 	Session.load_save()
@@ -387,6 +388,9 @@ func _start_wave() -> void:
 	if weather != "clear" and weather != prev_weather:
 		_announce_weather()
 	FxScript.text_at(self, Vector2(640, 250), "Wave %d" % wave, Color("ffffff"))
+	if wave == 5 and lv.has("champion"):
+		lures = mini(lures + 1, 6)
+		FxScript.text_at(self, Vector2(640, 340), "Alpha raid! A champion leads this wave. +1 Lure.", Color("ffb040"))
 	if lv.has("flank") and wave == int(lv.flank.wave) - 2:
 		FxScript.text_at(self, Vector2(640, 300), "Tip: from wave %d a second entrance opens at the bottom right." % int(lv.flank.wave), Color("ffb070"))
 	if lv.has("flank") and wave == int(lv.flank.wave):
